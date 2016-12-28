@@ -25,13 +25,11 @@ module.exports = function (config) {
 			'build/spray-wrtc.bundle.js',
 			'tests/fexceptionsTest.js',
 			'tests/fogletTest.js',
-			'tests/ndpTest.js',
 			'http://localhost:4000/socket.io/socket.io.js' //just only inject it
 		],
 		preprocessors:{
 				'tests/fexceptionsTest.js' : ['coverage','browserify'],
-				'tests/fogletTest.js' : ['coverage','browserify'],
-				'tests/ndpTest.js' : ['coverage','browserify']
+				'tests/fogletTest.js' : ['coverage','browserify']
 		},
 		// list of files to exclude
 		exclude: [
@@ -64,29 +62,23 @@ module.exports = function (config) {
 
 					io.on('connection', function(socket){
 						number++;
-						log.info('A user connected - Number of members : '+number);
 						socket.on("joinRoom",function(room){
 							socket.join(room);
 						});
 						socket.on("new",function(data){
 									let room = data.room;
 									let offer = data.offer;
-									log.info("**********BEGIN LUNCH EVENT*************");
-									//console.log(spray);
 									joinningPeer = socket;
 									socket.broadcast.in(room).emit("new_spray",offer);
-									log.info("**********END LUNCH EVENT*************");
 						});
 						socket.on("accept",function(data){
 							let room = data.room;
 							let offer = data.offer;
-							log.info("**********BEGIN ACCEPT EVENT*************");
 							log.info(offer);
 							if(joinningPeer != null){
 									joinningPeer.emit("accept_spray",offer);
 							}
 							joinningPeer = null;
-							log.info("**********END ACCEPT EVENT*************");
 						});
 						socket.on('disconnect', function(){
 							log.info('A user disconnected');

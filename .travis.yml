@@ -15,6 +15,6 @@ before_script:
 
 script:
   - npm run build:all
-  - ls -R ./build ./lib
+  - ls -R ./build ./src
   - npm test
   - npm run cover

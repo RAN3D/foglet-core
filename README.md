@@ -1,4 +1,4 @@
-# foglet-core
+# foglet-core [![Build Status](https://travis-ci.org/folkvir/foglet.svg?branch=master)](https://travis-ci.org/folkvir/foglet) [![Coverage Status](https://coveralls.io/repos/github/folkvir/foglet/badge.svg?branch=master)](https://coveralls.io/github/folkvir/foglet?branch=master) [![XirSys WebRTC Cloud Support](https://img.shields.io/badge/XirSys%20Cloud-used-blue.svg)](http://xirsys.com/)
 Core of the foglet library
 
 This project aims to provide a solid core infrastructure built with spray-wrtc (see references)
