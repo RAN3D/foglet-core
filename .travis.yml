@@ -1,0 +1,20 @@
+language: node_js
+node_js: node
+
+addons:
+  firefox: "49.0"
+
+install:
+  - npm install
+  - npm run install:all
+
+before_script:
+  - "export DISPLAY=:99.0" #Start a screen for Firefox...
+  - "sh -e /etc/init.d/xvfb start" #Start a screen for Firefox...
+  - sleep 3 # give xvfb some time to start
+
+script:
+  - npm run build:all
+  - ls -R ./build ./lib
+  - npm test
+  - npm run cover

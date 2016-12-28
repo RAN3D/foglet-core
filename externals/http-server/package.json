@@ -1,0 +1,30 @@
+{
+  "name": "http-server",
+  "version": "1.0.0",
+  "description": "It's a simple singaling server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/folkvir/foglet.git"
+  },
+  "keywords": [
+    "Signaling",
+    "Server",
+    "Spray"
+  ],
+  "author": "GRALL ARNAUD",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/folkvir/foglet/issues"
+  },
+  "homepage": "https://gitlab.com/folkvir/foglet#README",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.1.1",
+    "socket.io": "^1.5.0"
+  }
+}
