@@ -191,54 +191,78 @@ describe('[FOGLET:FREGISTER]', function () {
 			f.disconnect();
 		});
 		it('AntyEntropy test',function(){
-			var f = new Foglet({
-				spray: new Spray({
-					protocol:"test",
-			    webrtc:	{
-			      trickle: true,
-						iceServers: [{urls: ['stun:23.21.150.121:3478',
-							'stun:stun.l.google.com:19305',
-							'stun:stun2.l.google.com:19305',
-						 	'stun:stun3.l.google.com:19305',
-							'stun:stun4.l.google.com:19305',
-						]}]
-			    }
-				}),
-				protocol: 'test',
-				room: 'test'
-			});
-			var f2 = new Foglet({
-				spray: new Spray({
-					protocol:"test",
-			    webrtc:	{
-			      trickle: true,
-						iceServers: [{urls: ['stun:23.21.150.121:3478',
-							'stun:stun.l.google.com:19305',
-							'stun:stun2.l.google.com:19305',
-						 	'stun:stun3.l.google.com:19305',
-							'stun:stun4.l.google.com:19305',
-						]}]
-			    }
-				}),
-				protocol: 'test',
-				room: 'test'
-			});
-			f.init();
-			f2.init();
-			f.addRegister('test');
-			var register = f.getRegister("test");
-			register.setValue("toto");
-			f.connection();
-			f2.connection();
-			f2.addRegister('test');
-			var register2 = f2.getRegister("test");
-			//code before the pause
-			setTimeout(function(){
-			    var val = resgiter2.getValue();
-					assert(val,'toto','Should be the right value.');
-					f.disconnect();
-					f2.disconnect();
-			}, 2000);
-		})
+
+			$.ajax({
+			  url : "https://service.xirsys.com/ice",
+			  data : {
+			    ident: "folkvir",
+			    secret: "a0fe3e18-c9da-11e6-8f98-9ac41bd47f24",
+			    domain: "foglet-examples.herokuapp.com",
+			    application: "foglet-examples",
+			    room: "test",
+			    secure: 1
+			  }
+			  , success:function(response, status){
+			    console.log(status);
+			    console.log(response);
+			    /**
+			     * Create the foglet protocol.
+			     * @param {[type]} {protocol:"chat"} [description]
+			     */
+			    var iceServers = [];
+			     if(response.d.iceServers){
+			       iceServers = response.d.iceServers;
+			     }
+
+			    var f = new Foglet({
+			    	spray: new Spray({
+ 			       protocol:"sprayExample",
+ 			       webrtc:	{
+ 			         trickle: true,
+ 			         iceServers: iceServers
+ 			       }
+ 			     }),
+			    	protocol: 'sprayExample',
+			    	room: 'test'
+			    });
+
+					var f2 = new Foglet({
+			    	spray: new Spray({
+ 			       protocol:"sprayExample",
+ 			       webrtc:	{
+ 			         trickle: true,
+ 			         iceServers: iceServers
+ 			       }
+ 			     }),
+			    	protocol: 'sprayExample',
+			    	room: 'test'
+			    });
+
+					//INIT FOGLETS
+					f.init();
+					f2.init();
+
+					// ADD AND TEST THE FIRST REGISTER
+					f.addRegister('test');
+					var register = f.getRegister("test");
+					register.setValue("testValue");
+
+					f.connection();
+					f2.connection();
+
+					f2.addRegister('test');
+
+					//code before the pause
+					setTimeout(function(){
+							var register2 = f2.getRegister("test");
+					    var val = resgiter2.getValue();
+							assert(val,'testValue','Should be the right value.');
+							f.disconnect();
+							f2.disconnect();
+					}, 2000);
+
+				}
+			});//END AJAX
+		});//END IT
 	});
 });

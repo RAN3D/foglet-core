@@ -38,10 +38,6 @@ if(process.env.HOST){
 }
 
 
-/**
- * [Foglet description]
- * @param {[type]} options [description]
- */
 class Foglet extends EventEmitter {
 	constructor(options) {
 		super();
@@ -210,34 +206,6 @@ class Foglet extends EventEmitter {
 		}
 	}
 
-	/**
-	 * [getSpray description]
-	 * @return {[type]} [description]
-	 */
-	getSpray() {
-		return this.spray;
-	}
-	/**
-	 * [getCausalBroadcast description]
-	 * @return {[type]} [description]
-	 */
-	getCausalBroadcast() {
-		return this.broadcast;
-	}
-	/**
-	 * [getSignaling description]
-	 * @return {[type]} [description]
-	 */
-	getSignaling() {
-		return this.signaling;
-	}
-	/**
-	 * [getVector description]
-	 * @return {[type]} [description]
-	 */
-	getVector() {
-		return this.Vector;
-	}
 
 	/**
 	 ****************************************************

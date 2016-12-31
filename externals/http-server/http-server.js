@@ -2,13 +2,11 @@ var path = require('path');
 var express = require("express");
 var app = express();
 var http = require('http').Server(app);
-var cors = require('cors');
 var io = require("socket.io")(http);
 var port = process.env.PORT || 3000;
 
 var number = 0;
 var joinningPeer = null;
-app.use(cors());
 
 app.use('/static', express.static(__dirname + "/../../"));
 
