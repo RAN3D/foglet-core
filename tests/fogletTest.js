@@ -148,9 +148,6 @@ describe('[FOGLET:INIT]', function () {
 					f1.init();
 					// @Firefox: we are waiting for the initialization is well established.
 					f1.connection().then(function(statusConnected){
-						f.disconnect().then(function(statusDisconnected){
-							assert(statusDisconnected, 'disconnected', 'need to be disconnected !!');
-						});
 						f1.disconnect().then(function(statusDisconnected){
 							assert(statusDisconnected, 'disconnected', 'need to be disconnected !!');
 							done();
