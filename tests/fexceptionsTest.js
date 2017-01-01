@@ -1,3 +1,8 @@
+var Spray = require("spray-wrtc");
+
+var Foglet = require('../src/foglet.js');
+var FRegister = require('../src/fregister.js').FRegister;
+
 var InitConstructException = require('../src/fexceptions.js').InitConstructException;
 var ConstructException = require('../src/fexceptions.js').ConstructException;
 var FRegisterConstructException = require('../src/fexceptions.js').FRegisterConstructException;
@@ -34,6 +39,66 @@ describe('[FOGLET:EXCEPTION]', function () {
 		});
 		it('has property message', function () {
 			expect(new FRegisterConstructException()).to.have.property('message');
+		});
+	});
+
+
+	describe('#Throw well-formed exceptions', function () {
+		it('[Foglet] init throw InitConstructException when there is no option', function () {
+			var fn = function () {
+				(new Foglet())();
+			};
+			expect(fn).to.throw(InitConstructException);
+		});
+		it('[Foglet] init() throw a ConstructException when needed options are undefined', function () {
+			var fn = function () {
+				(new Foglet({
+					spray:null,
+					protocol: null,
+					room: null
+				}))();
+			};
+			expect(fn).to.throw(ConstructException);
+		});
+
+		it('[Register] should return a FRegisterConstructException when no option', function () {
+			var fn = function () {
+				(new FRegister())();
+			};
+			expect(fn).to.throw(FRegisterConstructException);
+		});
+		it('[Register] should return a FRegisterConstructException when options whit null value', function () {
+			var fn = function () {
+				(new FRegister({
+					name: null,
+					spray: null,
+					vector: null,
+					broadcast: null
+				}))();
+			};
+			expect(fn).to.throw(FRegisterConstructException);
+		});
+		it('[Register] A register should have a name', function () {
+			var fn = function () {
+				var f = new Foglet({
+					spray: new Spray({
+						protocol:"test",
+				    webrtc:	{
+				      trickle: true,
+							iceServers: [{urls: ['stun:23.21.150.121:3478',
+								'stun:stun.l.google.com:19305',
+								'stun:stun2.l.google.com:19305',
+							 	'stun:stun3.l.google.com:19305',
+								'stun:stun4.l.google.com:19305',
+							]}]
+				    }
+					}),
+					protocol: 'test',
+					room: 'test'
+				});
+				f.addRegister();
+			};
+			expect(fn).to.throw(FRegisterAddException);
 		});
 	});
 });

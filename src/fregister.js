@@ -56,16 +56,13 @@ class FRegister extends EventEmitter {
 			});
 
 			this.broadcast.on('antiEntropy', (id, rcvCausality, lclCausality) => {
-				// console.log("Receive antiEntropy request from @"+id);
-				// console.log(self.value);
 				const data = {
 					protocol: self.name,
 					id: {_e: self.vector.local.e, _c: self.vector.local.v},
 					payload: self.value
 				};
+				console.log(data);
 				self.broadcast.sendAntiEntropyResponse(id, lclCausality, [data]);
-				// console.log("Sent an antiEntropy response with ");
-				// console.log(data);
 			});
 
 			this.status = 'initialized';

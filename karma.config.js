@@ -62,7 +62,9 @@ module.exports = function (config) {
 
 					io.on('connection', function(socket){
 						number++;
+						//log.info('A user is connected');
 						socket.on("joinRoom",function(room){
+							//log.info('A user join the room : ' + room);
 							socket.join(room);
 						});
 						socket.on("new",function(data){
@@ -74,14 +76,14 @@ module.exports = function (config) {
 						socket.on("accept",function(data){
 							let room = data.room;
 							let offer = data.offer;
-							log.info(offer);
+							//log.info(offer);
 							if(joinningPeer != null){
 									joinningPeer.emit("accept_spray",offer);
 							}
 							joinningPeer = null;
 						});
 						socket.on('disconnect', function(){
-							log.info('A user disconnected');
+							//log.info('A user disconnected');
 							number--;
 						});
 					});

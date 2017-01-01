@@ -45,7 +45,7 @@ class Foglet extends EventEmitter {
 			throw (new InitConstructException());
 		}
 		this.options = options;
-		this.statusList = ['initialized', 'error', 'connected'];
+		this.statusList = ['initialized', 'error', 'connected', 'disconnected'];
 		this.status = this.statusList[0];
 		// Activation of the foglet protocol
 		if (this.options.spray !== undefined && this.options.spray !== null && this.options.protocol !== undefined && this.options.protocol !== null && this.options.room !== undefined && this.options.room !== null) {
@@ -80,17 +80,12 @@ class Foglet extends EventEmitter {
 		//	Connection to a specific room
 		this.signaling.emit('joinRoom', this.room);
 
-		this.callbacks = (resolve, reject, notify) => {
+		this.callbacks = () => {
 			return {
 				onInitiate: offer => {
 					self.signaling.emit('new', {offer, room: self.room});
 				},
 				onAccept: offer => {
-					self._flog('Accept Offer :');
-					console.log({
-						offer,
-						room: self.room
-					});
 					self.signaling.emit('accept', {
 						offer,
 						room: self.room
@@ -101,21 +96,19 @@ class Foglet extends EventEmitter {
 						self.sendMessage('New user connected ' + self.spray.toString());
 					} catch (err) {
 						console.log(err);
-						reject(err);
 					}
 					self.status = self.statusList[2];
 					self._flog('Connection established');
-					resolve(self.status);
 				}
 			};
 		};
 
 		this.signaling.on('new_spray', data => {
-			this._flog('@' + data.pid + ' send a request to you...');
+			//this._flog('@' + data.pid + ' send a request to you...');
 			self.spray.connection(self.callbacks(), data);
 		});
 		this.signaling.on('accept_spray', data => {
-			this._flog('@' + data.pid + ' accept your request...');
+			//this._flog('@' + data.pid + ' accept your request...');
 			self.spray.connection(data);
 		});
 		this.registerList = {};
@@ -180,7 +173,16 @@ class Foglet extends EventEmitter {
 		}
 		const self = this;
 		return Q.Promise(function(resolve, reject, notify) {
-			self.spray.connection(self.callbacks(resolve, reject,notify));
+			try {
+				self.spray.connection(self.callbacks());
+				//We are waiting for 2 seconds for a proper connection
+				setTimeout(function(){
+					self._flog('Status : '+self.status);
+					resolve(self.status);
+				}, 2000);
+			} catch (error) {
+				reject(error);
+			}
 		});
 	}
 
@@ -189,7 +191,22 @@ class Foglet extends EventEmitter {
 			this._flog(' Error : spray undefined.');
 			return null;
 		}
-		this.spray.leave();
+		const self = this;
+		return Q.Promise(function(resolve, reject, notify) {
+			try {
+				self.spray.leave();
+				self.status = self.statusList[3];
+				//We are waiting for 2 seconds for a proper disconnection
+				setTimeout(function(){
+					self._flog('Status : '+self.status);
+					resolve(self.status);
+				}, 2000);
+			} catch (error) {
+				reject(error);
+			}
+		});
+
+
 	}
 
 	/**
@@ -199,31 +216,13 @@ class Foglet extends EventEmitter {
 	 */
 	sendMessage(msg) {
 		if ((this.broadcast !== null) && (this.vector !== null)) {
-			this.broadcast.send(this._message(msg), this.vector.increment());
+			this.broadcast.send(msg, this.vector.increment());
 			this._flog(' message sent : ' + msg);
 		} else {
 			this._flog('Error : broadcast or vector undefined.');
 		}
 	}
 
-
-	/**
-	 ****************************************************
-	 ****************************************************
-	 ***************** PRIVATE FUNCTIONS ****************
-	 ****************************************************
-	 ****************************************************
-	 ****************************************************
-	 */
-
-	/**
- 	 * [message description]
- 	 * @param  {[type]} msg [description]
- 	 * @return {[type]}     [description]
- 	 */
-	_message(msg) {
-		return '<hr/><p> broadcast-message : <span style="color:red">' + msg + '</span></p>';
-	}
 
 	/**
 	 * [FRegisterKey description]
