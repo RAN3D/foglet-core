@@ -186,28 +186,26 @@ class Foglet extends EventEmitter {
 		});
 	}
 
-	disconnect() {
-		if (this.spray === null) {
-			this._flog(' Error : spray undefined.');
-			return null;
-		}
-		const self = this;
-		return Q.Promise(function(resolve, reject, notify) {
-			try {
-				self.spray.leave();
-				self.status = self.statusList[3];
-				//We are waiting for 2 seconds for a proper disconnection
-				setTimeout(function(){
-					self._flog('Status : '+self.status);
-					resolve(self.status);
-				}, 2000);
-			} catch (error) {
-				reject(error);
-			}
-		});
-
-
-	}
+	// disconnect() {
+	// 	if (this.spray === null) {
+	// 		this._flog(' Error : spray undefined.');
+	// 		return null;
+	// 	}
+	// 	const self = this;
+	// 	return Q.Promise(function(resolve, reject, notify) {
+	// 		try {
+	// 			self.spray.leave();
+	// 			self.status = self.statusList[3];
+	// 			//We are waiting for 2 seconds for a proper disconnection
+	// 			setTimeout(function(){
+	// 				self._flog('Status : '+self.status);
+	// 				resolve(self.status);
+	// 			}, 2000);
+	// 		} catch (error) {
+	// 			reject(error);
+	// 		}
+	// 	});
+	// }
 
 	/**
 	 * [sendMessage description]

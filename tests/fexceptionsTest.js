@@ -85,12 +85,7 @@ describe('[FOGLET:EXCEPTION]', function () {
 						protocol:"test",
 				    webrtc:	{
 				      trickle: true,
-							iceServers: [{urls: ['stun:23.21.150.121:3478',
-								'stun:stun.l.google.com:19305',
-								'stun:stun2.l.google.com:19305',
-							 	'stun:stun3.l.google.com:19305',
-								'stun:stun4.l.google.com:19305',
-							]}]
+							iceServers: []
 				    }
 					}),
 					protocol: 'test',

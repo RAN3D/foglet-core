@@ -20,19 +20,13 @@ describe('[FOGLET:INIT]', function () {
 					protocol:"test",
 			    webrtc:	{
 			      trickle: true,
-						iceServers: [{urls: ['stun:23.21.150.121:3478',
-							'stun:stun.l.google.com:19305',
-							'stun:stun2.l.google.com:19305',
-						 	'stun:stun3.l.google.com:19305',
-							'stun:stun4.l.google.com:19305',
-						]}]
+						iceServers: []
 			    }
 				}),
 				protocol: 'test',
 				room: 'test'
 			});
 			assert(f.status, 'initialized', 'Return a correct status after initialization');
-			f.disconnect();
 		});
 	});
 	describe('[FOGLET] Connection and Disconnection', function () {
@@ -98,67 +92,7 @@ describe('[FOGLET:INIT]', function () {
 
 
 		});//END IT
-		it('[FOGLET] disconnection return disconnected as status', function (done) {
-			$.ajax({
-				url : "https://service.xirsys.com/ice",
-				data : {
-					ident: "folkvir",
-					secret: "a0fe3e18-c9da-11e6-8f98-9ac41bd47f24",
-					domain: "foglet-examples.herokuapp.com",
-					application: "foglet-examples",
-					room: "test",
-					secure: 1
-				}}).then(function(response, status){
-					console.log(status);
-					console.log(response);
-					/**
-					 * Create the foglet protocol.
-					 * @param {[type]} {protocol:"chat"} [description]
-					 */
-					var iceServers = [];
-					 if(response.d.iceServers){
-						 iceServers = response.d.iceServers;
-					 }
 
-					var f = new Foglet({
-						spray: new Spray({
-						 protocol:"sprayExampleConnected",
-						 webrtc:	{
-							 trickle: true,
-							 iceServers: iceServers
-						 }
-					 }),
-						protocol: 'sprayExampleConnected',
-						room: 'test'
-					});
-
-					var f1 = new Foglet({
-						spray: new Spray({
-						 protocol:"sprayExampleConnected",
-						 webrtc:	{
-							 trickle: true,
-							 iceServers: iceServers
-						 }
-					 }),
-						protocol: 'sprayExampleConnected',
-						room: 'test'
-					});
-
-					f.init();
-					f1.init();
-					// @Firefox: we are waiting for the initialization is well established.
-					f1.connection().then(function(statusConnected){
-						f1.disconnect().then(function(statusDisconnected){
-							assert(statusDisconnected, 'disconnected', 'need to be disconnected !!');
-							done();
-						});
-					},function(error){
-						console.log(error);
-					});
-
-
-				}, function( jqXHR, textStatus, errorThrown ) {  });//END then ajax
-		});
 	});//END DESCRIBE
 });
 
@@ -170,12 +104,7 @@ describe('[FOGLET:FREGISTER]', function () {
 				protocol:"test",
 		    webrtc:	{
 		      trickle: true,
-					iceServers: [{urls: ['stun:23.21.150.121:3478',
-						'stun:stun.l.google.com:19305',
-						'stun:stun2.l.google.com:19305',
-					 	'stun:stun3.l.google.com:19305',
-						'stun:stun4.l.google.com:19305',
-					]}]
+					iceServers: []
 		    }
 			}),
 			protocol: 'test',
@@ -186,7 +115,6 @@ describe('[FOGLET:FREGISTER]', function () {
 		f.getRegister('test').setValue('a_value');
 		let result = f.getRegister('test').getValue();
 		assert.equal(result, 'a_value', 'Return the correct value');
-		f.disconnect();
 	});
 	it('AntyEntropy test', function () {
 		$.ajax({
@@ -249,8 +177,6 @@ describe('[FOGLET:FREGISTER]', function () {
 							//var register2 = f2.getRegister("test");
 					    //var val = resgiter2.getValue();
 							assert(f.getRegister("test").getValue(),'toto','Should be the right value.');
-							f.disconnect();
-							f2.disconnect();
 							done();
 					}, 3000);
 				});
