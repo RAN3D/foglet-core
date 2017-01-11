@@ -1,5 +1,6 @@
 #Perso
 build/*.js
+doc/
 
 # Logs
 logs

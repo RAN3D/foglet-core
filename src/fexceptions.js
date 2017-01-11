@@ -24,33 +24,43 @@
 
 'use strict';
 
+/**
+ * Exception class
+ * @class Exception
+ * @author Grall Arnaud (folkvir)
+ */
 class Exception {
-	constructor(name, message) {
+	/**
+	 * @constructs
+	 * @param {string} name - Exception name
+	 * @param {string} message - Exception message
+	 */
+	constructor (name, message) {
 		this.name = name;
 		this.message = message;
 	}
 }
 
 module.exports.ConstructException = class ConstructException extends Exception {
-	constructor() {
+	constructor () {
 		super('ConstructException', 'Error: options.protocol or options.room is undefined or null');
 	}
 };
 
 module.exports.InitConstructException = class InitConstructException extends Exception {
-	constructor() {
+	constructor () {
 		super('InitConstructException', 'Error: options is undefined');
 	}
 };
 
 module.exports.FRegisterConstructException = class FRegisterConstructException extends Exception {
-	constructor() {
+	constructor () {
 		super('FRegisterConstructException', 'Error: options is not well-formated');
 	}
 };
 
 module.exports.FRegisterAddException = class FRegisterAddException extends Exception {
-	constructor() {
+	constructor () {
 		super('FRegisterAddException', 'Error: addRegister need a name argument');
 	}
 };

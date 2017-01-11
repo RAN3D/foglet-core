@@ -28,11 +28,19 @@ const EventEmitter = require('events').EventEmitter;
 const FRegisterConstructException = require('./fexceptions').FRegisterConstructException;
 
 /**
- * Create a register
- * @param {[type]} options [description]
+ * Create a FRegister Class
+ * @class FRegister
+ * @author Grall Arnaud (folkvir)
  */
 class FRegister extends EventEmitter {
-	constructor(options) {
+	/**
+	 * Constructor of Foglet
+	 * @constructs Foglet
+	 * @param {object} options - it's an object representing options avalaible
+	 * @throws {FRegisterConstructException} If options is undefined and the name, spray, a broadcast and a vectore are not defined in options
+	 * @returns {void}
+	 */
+	constructor (options) {
 		super();
 		if (options !== undefined && options.name && options.name !== null && options.spray && options.spray !== null && options.vector && options.vector !== null && options.broadcast && options.broadcast !== null) {
 			this.name = options.name;
@@ -48,13 +56,13 @@ class FRegister extends EventEmitter {
 				console.log(self.value);
 				/**
 				 * Emit a message on the signal this.name+"-receive" with the data associated
-				 * @param  {[type]} self.name+"-receive" [description]
-				 * @param  {[type]} self.value           [description]
-				 * @return {[type]}                      [description]
 				 */
 				self.emit(self.name + '-receive', self.value);
 			});
 
+			/**
+			 * AntiEntropy part in order to retreive data after an antiEntropy emit
+			 */
 			this.broadcast.on('antiEntropy', (id, rcvCausality, lclCausality) => {
 				const data = {
 					protocol: self.name,
@@ -62,7 +70,7 @@ class FRegister extends EventEmitter {
 					payload: self.value
 				};
 				console.log(data);
-				self.broadcast.sendAntiEntropyResponse(id, lclCausality, [data]);
+				self.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
 			});
 
 			this.status = 'initialized';
@@ -72,28 +80,32 @@ class FRegister extends EventEmitter {
 	}
 
 	/**
-	 * [function description]
-	 * @return {[type]} [description]
+	 * Get the current value of the register
+	 * @function getValue
+	 * @return {void}
 	 */
-	getValue() {
+	getValue () {
 		return this.value;
 	}
 
 	/**
-	 * [function description]
-	 * @param  {[type]} data [description]
-	 * @return {[type]}      [description]
+	 * Set the value of the register and broadcast the value to all register with the same name
+	 * @function setValue
+	 * @param {object} data - new Value of the register
+	 * @return {void}
 	 */
-	setValue(data) {
+	setValue (data) {
 		this.value = data;
 		this.send();
 	}
 
 	/**
-	 * [function description]
-	 * @return {[type]} [description]
+	 * Set the value of the register and broadcast the value to all register with the same name
+	 * @function setValue
+	 * @param {object} data - new Value of the register
+	 * @return {void}
 	 */
-	send() {
+	send () {
 		this.broadcast.send(this.getValue(), this.vector.increment());
 	}
 }
