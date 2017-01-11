@@ -66,7 +66,7 @@ If you want to use our Register Protocol you can write this (after the previous 
     var reg = foglet.getRegister("[your-register-name]");
 
     // Listening on the signal [your-register-name]-receive where every data are sent when the register is updated.
-    reg.on("[your-register-name]-receive", function(data){
+    reg.onRegister("[your-register-name]-receive", function(data){
       console.log(data);
     });
 
