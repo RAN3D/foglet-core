@@ -6,6 +6,7 @@ addons:
 
 install:
   - npm install
+  - npm run install:all
 
 before_script:
   - "export DISPLAY=:99.0" #Start a screen for Firefox...
