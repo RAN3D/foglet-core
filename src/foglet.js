@@ -33,7 +33,9 @@ const FRegister = require('./fregister.js').FRegister;
 const ConstructException = require('./fexceptions.js').ConstructException;
 const InitConstructException = require('./fexceptions.js').InitConstructException;
 const FRegisterAddException = require('./fexceptions.js').FRegisterAddException;
+const GUID = require('./guid.js');
 
+const uid = new GUID();
 let SIGNALINGHOSTURL = 'http://localhost:3000/';
 if (process.env.HOST) {
 	SIGNALINGHOSTURL = process.env.HOST;
@@ -73,6 +75,8 @@ class Foglet extends EventEmitter {
 			this.protocol = this.options.protocol;
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
+			// This id is NOT the SAME as the id in the spray protocol
+			this.id = uid.guid();
 			this._flog('Constructed');
 		} else {
 			this.status = this.statusList[1];
@@ -114,7 +118,7 @@ class Foglet extends EventEmitter {
 				},
 				onReady: () => {
 					try {
-						self.sendMessage('New user connected ' + self.spray.toString());
+						self.sendMessage('New user connected @' + self.id);
 					} catch (err) {
 						console.log(err);
 					}
@@ -309,7 +313,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	_flog (msg) {
-		console.log('[FOGLET]:' + msg);
+		console.log('[FOGLET]:' + ' @' + this.id + msg);
 	}
 }
 
