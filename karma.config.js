@@ -22,7 +22,7 @@ module.exports = function (config) {
 		],
 		// list of files / patterns to load in the browser
 		files: [
-			'build/spray-wrtc.bundle.js',
+			'./node_modules/spray-wrtc/build/spray-wrtc.bundle.js',
 			'tests/fexceptionsTest.js',
 			'tests/fogletTest.js',
 			'http://localhost:4000/socket.io/socket.io.js' //just only inject it

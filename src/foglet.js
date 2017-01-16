@@ -23,6 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
+const Spray = require('spray-wrtc');
 const EventEmitter = require('events').EventEmitter;
 const VVwE = require('version-vector-with-exceptions');
 const CausalBroadcast = require('causal-broadcast-definition');

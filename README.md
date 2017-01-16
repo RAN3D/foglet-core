@@ -7,20 +7,20 @@ This project aims to provide a solid core infrastructure built with spray-wrtc (
 
 Run just one command :
 ```bash
-npm install foglet-core
+npm install spray-wrtc foglet-core
 ```
 
 ## How to use it and write your example ?
-
-Just insert the foglet.all.bundle.js in your html file.
+Before all, insert the spray-wrtc.bundle.js provided by the npm package spray-wrtc in : node_modules/spray-wrtc/build/ into your html file.
+Then insert the foglet.bundle.js in your html file.
 The bundle provided offers you to write those requires into your browser script :
-- ``` require("foglet") ```
 - ``` require("spray-wrtc") ```
+- ``` require("foglet") ```
 
 If you do not provide a list of ice servers your example will not work on the web but will work on your local network.
 Examples with iceServers are provided by us in our [list of examples](https://github.com/folkvir/foglet/tree/master/example).
 
-But to be begin here is a simple example, after building the bundle and import it in your html file you can write something like this :
+But to be begin here is a simple example, after building the bundles and import them in your html file you can write something like this :
 ```javascript
      // Require at least those two libraries
      var Spray = require('spray-wrtc');

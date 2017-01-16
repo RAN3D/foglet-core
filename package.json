@@ -4,19 +4,14 @@
   "description": "Core of the foglet library",
   "main": "src/foglet.js",
   "scripts": {
-    "postinstall": "npm run install:all",
+    "postinstall": "npm run install:http",
     "doc": "jsdoc -c .jsdoc.json README.md src/",
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
     "cover": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "install:all": "concurrently \"npm run install:spray\" \"npm run install:http\"",
-    "install:spray": "cd ./externals/spray-wrtc && npm install",
     "install:http": "cd ./externals/http-server/ && npm install",
-    "build:all": "concurrently \"npm run build:spray\" \"npm run build:foglet\" \"npm run build:debug\"",
-    "build:foglet": "browserify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015  -r ./externals/spray-wrtc/lib/spray.js:spray-wrtc -t babelify --presets es2015 > ./build/foglet.all.bundle.js",
-    "build:debug": "browserify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015  -r ./externals/spray-wrtc/lib/spray.js:spray-wrtc --debug -t babelify --presets es2015 > ./build/foglet.all.bundle.debug.js  ",
-    "build:watch": "watchify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015  -r ./externals/spray-wrtc/lib/spray.js:spray-wrtc -t babelify --presets es2015 -o ./build/foglet.all.bundle.js -v -d ",
-    "build:spray": "browserify -r ./externals/spray-wrtc/lib/spray.js:spray-wrtc -t babelify --presets es2015 > ./build/spray-wrtc.bundle.js ",
+    "build:foglet": "browserify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015   > ./build/foglet.bundle.js",
+    "build:watch": "watchify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015  -o ./build/foglet.bundle.js -v -d ",
     "server": "cd externals/http-server && node http-server.js",
     "dev-all": "concurrently \"npm run server\" \"npm run build:watch\""
   },
@@ -37,13 +32,15 @@
   "homepage": "https://github.com/folkvir/foglet-core#readme",
   "dependencies": {
     "causal-broadcast-definition": "^0.1.x",
-    "concurrently": "^3.1.0",
     "events": "^1.1.1",
     "q": "^1.4.1",
     "socket.io-client": "^1.4.8",
     "unicast-definition": "^0.1.0",
     "util": "^0.10.3",
     "version-vector-with-exceptions": "0.0.x"
+  },
+  "peerDependencies": {
+    "spray-wrtc": "^0.1.x"
   },
   "devDependencies": {
     "babel-core": "^6.18.0",
@@ -77,6 +74,7 @@
     "minifyjs": "^0.2.0",
     "mocha": "^3.1.2",
     "nyc": "^8.3.2",
+    "spray-wrtc": "^0.1.1",
     "uglifyjs": "^2.4.10",
     "watchify": "^3.7.0"
   },
