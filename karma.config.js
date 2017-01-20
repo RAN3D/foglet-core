@@ -7,7 +7,7 @@ module.exports = function (config) {
 		basePath: './',
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: ['browserify', 'source-map-support', 'mocha', 'chai','express-http-server'],
+		frameworks: ['browserify', 'mocha', 'chai','express-http-server'],
 		plugins: [
   		'karma-browserify',
 			'karma-mocha',
@@ -18,8 +18,7 @@ module.exports = function (config) {
 			'karma-firefox-launcher',
 			'karma-express-http-server',
 			'karma-edge-launcher',
-			'karma-safari-launcher',
-			'karma-source-map-support'
+			'karma-safari-launcher'
 		],
 		// list of files / patterns to load in the browser
 		files: [
