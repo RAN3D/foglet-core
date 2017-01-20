@@ -50,10 +50,9 @@ class FRegister extends EventEmitter {
 			this.value = {};
 			const self = this;
 			this.broadcast.on('receive', data => {
-				console.log('[FOGLET:' + self.name + '] Receive a new value');
-				console.log(data);
+				// console.log('[FOGLET:' + self.name + '] Receive a new value');
 				self.value = data;
-				console.log(self.value);
+				// console.log(self.value);
 				/**
 				 * Emit a message on the signal this.name+"-receive" with the data associated
 				 */
@@ -69,7 +68,6 @@ class FRegister extends EventEmitter {
 					id: {_e: self.vector.local.e, _c: self.vector.local.v},
 					payload: self.value
 				};
-				console.log(data);
 				self.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
 			});
 

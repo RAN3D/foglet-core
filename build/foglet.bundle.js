@@ -18617,11 +18617,16 @@ var Foglet = function (_EventEmitter) {
 			var self = this;
 			return Q.Promise(function (resolve, reject) {
 				try {
-					self.spray.connection(self.callbacks());
+					var status = self.spray.connection(self.callbacks());
+					console.log(status);
 					// We are waiting for 2 seconds for a proper connection
 					setTimeout(function () {
 						self._flog('Status : ' + self.status);
-						resolve(self.status);
+						if (self.status != 'connected') {
+							self.spray.connection(self.callbacks());
+						} else {
+							resolve(self.status);
+						}
 					}, 2000);
 				} catch (error) {
 					reject(error);
@@ -18794,7 +18799,7 @@ var Foglet = function (_EventEmitter) {
 	}, {
 		key: '_flog',
 		value: function _flog(msg) {
-			console.log('[FOGLET]:' + ' @' + this.id + msg);
+			console.log('[FOGLET]:' + ' @' + this.id + ': ' + msg);
 		}
 	}]);
 

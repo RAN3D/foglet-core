@@ -93,6 +93,71 @@ describe('[FOGLET:INIT]', function () {
 
 		});//END IT
 
+		it('[FOGLET] disconnect return 0 partialView', function (done) {
+				$.ajax({
+				  url : "https://service.xirsys.com/ice",
+				  data : {
+				    ident: "folkvir",
+				    secret: "a0fe3e18-c9da-11e6-8f98-9ac41bd47f24",
+				    domain: "foglet-examples.herokuapp.com",
+				    application: "foglet-examples",
+				    room: "test",
+				    secure: 1
+				  }}).then(function(response, status){
+				    console.log(status);
+				    console.log(response);
+				    /**
+				     * Create the foglet protocol.
+				     * @param {[type]} {protocol:"chat"} [description]
+				     */
+				    var iceServers = [];
+				     if(response.d.iceServers){
+				       iceServers = response.d.iceServers;
+				     }
+
+				    var f = new Foglet({
+				    	spray: new Spray({
+	 			       protocol:"sprayExampleDisconnect",
+	 			       webrtc:	{
+	 			         trickle: true,
+	 			         iceServers: iceServers
+	 			       }
+	 			     }),
+				    	protocol: 'sprayExampleDisconnect',
+				    	room: 'test'
+				    });
+
+						var f1 = new Foglet({
+				    	spray: new Spray({
+	 			       protocol:"sprayExampleDisconnect",
+	 			       webrtc:	{
+	 			         trickle: true,
+	 			         iceServers: iceServers
+	 			       }
+	 			     }),
+				    	protocol: 'sprayExampleDisconnect',
+				    	room: 'test'
+				    });
+
+						f.init();
+						f1.init();
+						// @Firefox: we are waiting for the initialization is well established.
+						return f1.connection().then(function(status){
+							//console.log(status);
+							return f1.disconnect().then(() => {
+								// assert that we have now 0 neighbour
+								assert(f1.spray.partialView.length, 0);
+								done();
+							});
+
+						}).catch(error => console.err);
+
+
+					}, function( jqXHR, textStatus, errorThrown ) {  });//END then ajax
+
+
+		});//END IT
+
 	});//END DESCRIBE
 });
 
@@ -116,7 +181,7 @@ describe('[FOGLET:FREGISTER]', function () {
 		let result = f.getRegister('test').getValue();
 		assert.equal(result, 'a_value', 'Return the correct value');
 	});
-	it('AntyEntropy test', function () {
+	it('AntyEntropy test', function (done) {
 		$.ajax({
 		  url : "https://service.xirsys.com/ice",
 		  data : {
@@ -151,6 +216,18 @@ describe('[FOGLET:FREGISTER]', function () {
 		    });
 
 				var f2 = new Foglet({
+		    	spray: new Spray({
+			       protocol:"sprayExampleAntiEntropy",
+			       webrtc:	{
+			         trickle: true,
+			         iceServers: iceServers
+			       }
+			     }),
+		    	protocol: 'sprayExampleAntiEntropy',
+		    	room: 'test'
+		    });
+
+				var f3 = new Foglet({
 		    	spray: new Spray({
 			       protocol:"sprayExampleAntiEntropy",
 			       webrtc:	{
@@ -165,20 +242,23 @@ describe('[FOGLET:FREGISTER]', function () {
 				//INIT FOGLETS
 				f.init();
 				f2.init();
-
-				f.connection().then(function(){
+				f3.init();
+				f.connection().then(status => {
 					// ADD AND TEST THE FIRST REGISTER
 					f.addRegister('test');
+					f2.addRegister('test');
 					f.getRegister("test").setValue("testValue");
 
 					//code before the pause
 					setTimeout(function(){
-							//f2.addRegister('test');
-							//var register2 = f2.getRegister("test");
-					    //var val = resgiter2.getValue();
-							assert(f.getRegister("test").getValue(),'toto','Should be the right value.');
-							done();
-					}, 3000);
+							f3.connection().then(status => {
+								f3.addRegister('test');
+								setTimeout(function(){
+									assert(f3.getRegister('test').getValue(), 'testValue');
+									done();
+								}, 2000);
+							});
+					}, 2000);
 				});
 			}, function(error){
 				console.log(error);
@@ -186,7 +266,7 @@ describe('[FOGLET:FREGISTER]', function () {
 			});//END THEN OF PROMISE
 	});//END IT
 
-	it('[FOGLET] onRegister()', function (done) {
+	it('onRegister()', function (done) {
 		$.ajax({
 		  url : "https://service.xirsys.com/ice",
 		  data : {
@@ -234,23 +314,15 @@ describe('[FOGLET:FREGISTER]', function () {
 
 				f.init();
 				f2.init();
+				f.addRegister("test");
+				f2.addRegister("test");
 
-				f.connection().then(function(){
-					f.addRegister("test");
-					f2.addRegister("test");
-
-					var test = 5 ;
-					f.onRegister("test",function(){
-						test = 10;
-						console.log("Value of the test : " + test);
-					});
-
+				f.connection().then( status => {
 					f.getRegister("test").setValue(5);
-
-					assert(test, 10, "onRegister callback need to set the value to 10");
-					done();
-				}, function(error){
-					console.log(error);
+					setTimeout(function(){
+						assert(f2.getRegister('test').getValue(), 5);
+						done();
+					}, 2000);
 				});
 		});
 

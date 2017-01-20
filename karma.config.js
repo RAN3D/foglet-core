@@ -7,7 +7,7 @@ module.exports = function (config) {
 		basePath: './',
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: ['browserify', 'mocha', 'chai','express-http-server'],
+		frameworks: ['browserify', 'source-map-support', 'mocha', 'chai','express-http-server'],
 		plugins: [
   		'karma-browserify',
 			'karma-mocha',
@@ -18,7 +18,8 @@ module.exports = function (config) {
 			'karma-firefox-launcher',
 			'karma-express-http-server',
 			'karma-edge-launcher',
-			'karma-safari-launcher'
+			'karma-safari-launcher',
+			'karma-source-map-support'
 		],
 		// list of files / patterns to load in the browser
 		files: [
@@ -113,8 +114,6 @@ module.exports = function (config) {
         istanbul: { noCompact: true }
       }
     },
-
-    logLevel: config.LOG_DISABLE,
 		// Continuous Integration mode
 		// if true, Karma captures browsers, runs the tests and exits
     autoWatch: true,
@@ -122,7 +121,7 @@ module.exports = function (config) {
 		colors: true,
 		// level of logging
 		// possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-		logLevel: config.LOG_INFO,
+		logLevel: config.DEBUG,
 		// start these browsers
 		// available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
 		browsers: ['Firefox'],

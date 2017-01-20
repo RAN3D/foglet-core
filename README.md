@@ -46,7 +46,7 @@ But to be begin here is a simple example, after building the bundles and import 
     foglet.init();
 
     // Retreive a message send by a broadcast foglet
-    foglet.on("receive",function(message){
+    foglet.onBroadcast("receive",function(message){
       console.log(message);
     });
 

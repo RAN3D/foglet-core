@@ -121,7 +121,7 @@ class Foglet extends EventEmitter {
 					try {
 						self.sendMessage('New user connected @' + self.id);
 					} catch (err) {
-						console.log(err);
+						console.err(err);
 					}
 					self.status = self.statusList[2];
 					self._flog('Connection established');
@@ -159,10 +159,46 @@ class Foglet extends EventEmitter {
 		return Q.Promise(function (resolve, reject) {
 			try {
 				self.spray.connection(self.callbacks());
-				// We are waiting for 2 seconds for a proper connection
-				setTimeout(function () {
-					self._flog('Status : '+self.status);
-					resolve(self.status);
+				self.spray.on('join', () => {
+					// We are waiting for 2 seconds for a proper connection
+					setTimeout(function () {
+						self._flog('Status : '+self.status);
+						if(self.status !== 'connected'){
+							self.spray.connection(self.callbacks());
+						}else{
+							resolve(self.status);
+						}
+					}, 2000);
+				});
+
+			} catch (error) {
+				reject(error);
+			}
+		});
+	}
+
+	/**
+	 * Disconnect the foglet, wait 2 seconds for a proper disconnection, if status !=== disconnected, we re-load the function
+	 * @return {promise} Return a promise with the status as
+	 */
+	disconnect() {
+		if (this.spray === null) {
+			this._flog(' Error : spray undefined.');
+			return null;
+		}
+		const self = this;
+		return Q.Promise(function(resolve, reject) {
+			try {
+				self.spray.leave();
+				self.status = self.statusList[3];
+				//We are waiting for 2 seconds for a proper disconnection
+				setTimeout(function(){
+					if(self.status === 'disconnected'){
+						self._flog('Status : '+self.status);
+						resolve(self.status);
+					}else{
+						self.disconnect();
+					}
 				}, 2000);
 			} catch (error) {
 				reject(error);
@@ -181,7 +217,7 @@ class Foglet extends EventEmitter {
 		if (name !== undefined && name !== '') {
 			const spray = this.spray;
 			const vector = new VVwE(Number.MAX_VALUE);
-			const broadcast = new CausalBroadcast(spray, vector, name, 5000);
+			const broadcast = new CausalBroadcast(spray, vector, name, 1000);
 			const options = {
 				name,
 				spray,
@@ -219,7 +255,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	onRegister (name, callback) {
-		this.getRegister(name).on('receive', callback);
+		this.getRegister(name).on(name + '-receive', callback);
 	}
 
 	/**
@@ -229,32 +265,10 @@ class Foglet extends EventEmitter {
 	 * @param {callback} callback - Callback function that handles the response
 	 * @returns {void}
 	**/
-	on (signal, callback) {
+	onBroadcast(signal, callback) {
 		this.broadcast.on(signal, callback);
 	}
 
-
-
-	// disconnect() {
-	// 	if (this.spray === null) {
-	// 		this._flog(' Error : spray undefined.');
-	// 		return null;
-	// 	}
-	// 	const self = this;
-	// 	return Q.Promise(function(resolve, reject, notify) {
-	// 		try {
-	// 			self.spray.leave();
-	// 			self.status = self.statusList[3];
-	// 			//We are waiting for 2 seconds for a proper disconnection
-	// 			setTimeout(function(){
-	// 				self._flog('Status : '+self.status);
-	// 				resolve(self.status);
-	// 			}, 2000);
-	// 		} catch (error) {
-	// 			reject(error);
-	// 		}
-	// 	});
-	// }
 
 	/**
 	 * Send a broadcast message to all connected clients.
@@ -314,7 +328,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	_flog (msg) {
-		console.log('[FOGLET]:' + ' @' + this.id + msg);
+		console.log('[FOGLET]:' + ' @' + this.id + ': ' + msg);
 	}
 }
 
