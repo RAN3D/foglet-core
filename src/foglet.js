@@ -76,8 +76,8 @@ class Foglet extends EventEmitter {
 			this.protocol = this.options.protocol;
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
-			// This id is NOT the SAME as the id in the spray protocol
-			this.id = uid.guid();
+			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
+			this.id = 'Tempory:'+uid.guid();
 			this._flog('Constructed');
 		} else {
 			this.status = this.statusList[1];
@@ -117,12 +117,13 @@ class Foglet extends EventEmitter {
 						room: self.room
 					});
 				},
-				onReady: () => {
+				onReady: (id) => {
 					try {
 						self.sendMessage('New user connected @' + self.id);
 					} catch (err) {
 						console.err(err);
 					}
+					self.id = id;
 					self.status = self.statusList[2];
 					self._flog('Connection established');
 				}

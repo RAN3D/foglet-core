@@ -18316,10 +18316,9 @@ var FRegister = function (_EventEmitter) {
 				_this.value = {};
 				var self = _this;
 				_this.broadcast.on('receive', function (data) {
-					console.log('[FOGLET:' + self.name + '] Receive a new value');
-					console.log(data);
+					// console.log('[FOGLET:' + self.name + '] Receive a new value');
 					self.value = data;
-					console.log(self.value);
+					// console.log(self.value);
 					/**
       * Emit a message on the signal this.name+"-receive" with the data associated
       */
@@ -18335,7 +18334,6 @@ var FRegister = function (_EventEmitter) {
 						id: { _e: self.vector.local.e, _c: self.vector.local.v },
 						payload: self.value
 					};
-					console.log(data);
 					self.broadcast.sendAntiEntropyResponse(id, lclCausality, [data]);
 				});
 
@@ -18527,8 +18525,8 @@ var Foglet = function (_EventEmitter) {
 			_this.protocol = _this.options.protocol;
 			_this.spray = _this.options.spray;
 			_this.status = _this.statusList[0];
-			// This id is NOT the SAME as the id in the spray protocol
-			_this.id = uid.guid();
+			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
+			_this.id = 'Tempory:' + uid.guid();
 			_this._flog('Constructed');
 		} else {
 			_this.status = _this.statusList[1];
@@ -18573,12 +18571,13 @@ var Foglet = function (_EventEmitter) {
 							room: self.room
 						});
 					},
-					onReady: function onReady() {
+					onReady: function onReady(id) {
 						try {
 							self.sendMessage('New user connected @' + self.id);
 						} catch (err) {
-							console.log(err);
+							console.err(err);
 						}
+						self.id = id;
 						self.status = self.statusList[2];
 						self._flog('Connection established');
 					}
@@ -18617,15 +18616,48 @@ var Foglet = function (_EventEmitter) {
 			var self = this;
 			return Q.Promise(function (resolve, reject) {
 				try {
-					var status = self.spray.connection(self.callbacks());
-					console.log(status);
-					// We are waiting for 2 seconds for a proper connection
+					self.spray.connection(self.callbacks());
+					self.spray.on('join', function () {
+						// We are waiting for 2 seconds for a proper connection
+						setTimeout(function () {
+							self._flog('Status : ' + self.status);
+							if (self.status !== 'connected') {
+								self.spray.connection(self.callbacks());
+							} else {
+								resolve(self.status);
+							}
+						}, 2000);
+					});
+				} catch (error) {
+					reject(error);
+				}
+			});
+		}
+
+		/**
+   * Disconnect the foglet, wait 2 seconds for a proper disconnection, if status !=== disconnected, we re-load the function
+   * @return {promise} Return a promise with the status as
+   */
+
+	}, {
+		key: 'disconnect',
+		value: function disconnect() {
+			if (this.spray === null) {
+				this._flog(' Error : spray undefined.');
+				return null;
+			}
+			var self = this;
+			return Q.Promise(function (resolve, reject) {
+				try {
+					self.spray.leave();
+					self.status = self.statusList[3];
+					//We are waiting for 2 seconds for a proper disconnection
 					setTimeout(function () {
-						self._flog('Status : ' + self.status);
-						if (self.status != 'connected') {
-							self.spray.connection(self.callbacks());
-						} else {
+						if (self.status === 'disconnected') {
+							self._flog('Status : ' + self.status);
 							resolve(self.status);
+						} else {
+							self.disconnect();
 						}
 					}, 2000);
 				} catch (error) {
@@ -18648,7 +18680,7 @@ var Foglet = function (_EventEmitter) {
 			if (name !== undefined && name !== '') {
 				var spray = this.spray;
 				var vector = new VVwE(Number.MAX_VALUE);
-				var broadcast = new CausalBroadcast(spray, vector, name, 5000);
+				var broadcast = new CausalBroadcast(spray, vector, name, 1000);
 				var options = {
 					name: name,
 					spray: spray,
@@ -18691,7 +18723,7 @@ var Foglet = function (_EventEmitter) {
 	}, {
 		key: 'onRegister',
 		value: function onRegister(name, callback) {
-			this.getRegister(name).on('receive', callback);
+			this.getRegister(name).on(name + '-receive', callback);
 		}
 
 		/**
@@ -18703,31 +18735,10 @@ var Foglet = function (_EventEmitter) {
   **/
 
 	}, {
-		key: 'on',
-		value: function on(signal, callback) {
+		key: 'onBroadcast',
+		value: function onBroadcast(signal, callback) {
 			this.broadcast.on(signal, callback);
 		}
-
-		// disconnect() {
-		// 	if (this.spray === null) {
-		// 		this._flog(' Error : spray undefined.');
-		// 		return null;
-		// 	}
-		// 	const self = this;
-		// 	return Q.Promise(function(resolve, reject, notify) {
-		// 		try {
-		// 			self.spray.leave();
-		// 			self.status = self.statusList[3];
-		// 			//We are waiting for 2 seconds for a proper disconnection
-		// 			setTimeout(function(){
-		// 				self._flog('Status : '+self.status);
-		// 				resolve(self.status);
-		// 			}, 2000);
-		// 		} catch (error) {
-		// 			reject(error);
-		// 		}
-		// 	});
-		// }
 
 		/**
    * Send a broadcast message to all connected clients.
