@@ -80,29 +80,22 @@ module.exports = function (config) {
 						socket.on("new",function(data){
 									let room = data.room;
 									let offer = data.offer;
-									joinningPeer = socket;
-									clients[socket.id] = socket ;
+									clients[data.offer.tid] = socket ;
 									//console.log("Emit the new offer on the room " + room + " for the socketId : " + socket.id);
-									socket.broadcast.in(room).emit("new_spray", offer, socket.id);
+									socket.broadcast.in(room).emit("new_spray", offer);
 						});
-						socket.on("accept", function(data, socketId){
+						socket.on("accept", function(data){
 							let room = data.room;
 							let offer = data.offer;
 
 							//console.log("Server received an accepted ticket for " + socketId);
-							if(clients[socketId] != null){
+							if(clients[data.offer.tid] != null){
 								//console.log(offer);
-								joinningPeer.emit("accept_spray", offer, socket.id);
+								clients[data.offer.tid].emit("accept_spray", offer);
 							}
+							clients[data.offer.tid] = null;
 						});
 
-						socket.on('connected', (id, socketId) => {
-							//console.log("Server received a connected emit !");
-							let joinningPeer = clients[socketId];
-							if(joinningPeer != null){
-									joinningPeer.emit( "connected", id);
-							}
-						});
 						socket.on('disconnect', function(room, socketId){
 							//log.info('A user disconnected');
 							socket.leave(room);

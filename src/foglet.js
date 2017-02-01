@@ -76,7 +76,7 @@ class Foglet extends EventEmitter {
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
 			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
-			this.id = 'Tempory:'+uid.guid();
+			this.id = uid.guid();
 			this._flog('Constructed');
 		} else {
 			this.status = this.statusList[1];
@@ -104,7 +104,7 @@ class Foglet extends EventEmitter {
 		//	Connection to the signaling server
 		this.signaling = io.connect(url);
 		//	Connection to a specific room
-		this.signaling.emit('joinRoom', this.room);
+		self.signaling.emit('joinRoom', self.room);
 
 		this.callbacks = () => {
 			return {
@@ -115,33 +115,28 @@ class Foglet extends EventEmitter {
 					self.signaling.emit('accept', {
 						offer,
 						room: self.room
-					}, self.socketId);
+					});
 				},
 				onReady: (id) => {
+					console.log('@' + id + ' is now connected');
 					try {
-						self.signaling.emit('connected', id, self.socketId);
+						self.status = self.statusList[2];
+						self._flog('Connection established');
+						//self.emitJoin(id);
 					} catch (err) {
-						console.err(err);
+						console.log(err);
 					}
 				}
 			};
 		};
 
-		this.signaling.on('new_spray', (data, socketId) => {
-			// this._flog('@' + data.pid + ' send a request to you...');
-			self.socketId = socketId;
+		this.signaling.on('new_spray', (data) => {
+			self._flog('@' + data.pid + ' send a request to you...');
 			self.spray.connection(self.callbacks(), data);
 		});
-		this.signaling.on('accept_spray', (data, socketId) => {
+		this.signaling.on('accept_spray', (data) => {
 			// this._flog('@' + data.pid + ' accept your request...');
-			self.socketId = socketId;
 			self.spray.connection(self.callbacks(), data);
-		});
-
-		this.signaling.on('connected', id => {
-			self.id = id;
-			self.status = self.statusList[2];
-			self._flog('Connection established');
 		});
 
 		this.registerList = {};

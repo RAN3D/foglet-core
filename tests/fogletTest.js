@@ -223,27 +223,38 @@ describe('[FOGLET:FREGISTER]', function () {
 			     }),
 		    	room: 'antyentropy'
 		    });
-
+				var f3 = new Foglet({
+					spray: new Spray({
+						 protocol:"antyentropy",
+						 webrtc:	{
+							 trickle: true,
+							 iceServers: iceServers
+						 },
+						 timeout: 10000,
+						 deltatime: 10000
+					 }),
+					room: 'antyentropy'
+				});
 
 
 				//INIT FOGLETS
 				f1.init();
 				f2.init();
-				setTimeout(function(){
-					//waiting for a proper init a connection to the server;
-				}, 2000);
-
 				return f1.connection().then( s => {
 					f1.addRegister('test');
 					f1.getRegister("test").setValue("testValue");
 					return f2.connection();
 				}).then(s => {
-					f2.addRegister("test");
+					f3.init();
+					return f3.connection();
+				}).then( s => {
+					f3.addRegister("test");
 					setTimeout(function(){
-						assert(f2.getRegister('test').getValue(), 'testValue');
+						assert(f3.getRegister('test').getValue(), 'testValue');
 						done();
 					}, 2000);
 				});
+
 				// f.connection().then(status => {
 				// 	// ADD AND TEST THE FIRST REGISTER
 				// 	f.addRegister('test');
@@ -343,123 +354,194 @@ describe('[FOGLET:FREGISTER]', function () {
 describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 	this.timeout(15000);
 	it('[FOGLET] sendBroadcast/onBroadcast', function (done) {
-		var f1 = new Foglet({
-			spray: new Spray({
-				protocol:"broadcast",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
-			room: 'test-broadcast'
-		});
-		var f2 = new Foglet({
-			spray: new Spray({
-				protocol:"",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
-			room: 'test-broadcast'
-		});
-		f1.init();
-		f2.init();
+		$.ajax({
+		  url : "https://service.xirsys.com/ice",
+		  data : {
+		    ident: "folkvir",
+		    secret: "a0fe3e18-c9da-11e6-8f98-9ac41bd47f24",
+		    domain: "foglet-examples.herokuapp.com",
+		    application: "foglet-examples",
+		    room: "test",
+		    secure: 1
+		  }}).then(function(response, status){
+		    console.log(status);
+		    console.log(response);
+		    /**
+		     * Create the foglet protocol.
+		     * @param {[type]} {protocol:"chat"} [description]
+		     */
+		    var iceServers = [];
+		     if(response.d.iceServers){
+		       iceServers = response.d.iceServers;
+		     }
+				 var f1 = new Foglet({
+		 			spray: new Spray({
+		 				protocol:"broadcast",
+		 				webrtc:	{
+		 					trickle: true,
+		 					iceServers: iceServers
+		 				}
+		 			}),
+		 			room: 'test-broadcast'
+		 		});
+		 		var f2 = new Foglet({
+		 			spray: new Spray({
+		 				protocol:"",
+		 				webrtc:	{
+		 					trickle: true,
+		 					iceServers: iceServers
+		 				}
+		 			}),
+		 			room: 'test-broadcast'
+		 		});
+		 		f1.init();
+		 		f2.init();
 
-		f2.onBroadcast('receive', (data) => {
-			console.log(data);
-			assert(data, 'hello');
-			done();
+		 		f2.onBroadcast('receive', (data) => {
+		 			console.log(data);
+		 			assert(data, 'hello');
+		 			done();
+		 		});
+
+		 		return f1.connection().then( s => {
+		 			setTimeout(function () {
+		 				f1.sendBroadcast('hello');
+		 			}, 2000);
+		 		});
 		});
 
-		f1.connection().then( s => {
-			setTimeout(function () {
-				f1.sendBroadcast('hello');
-			}, 2000);
-		});
 	});
 
 	it('[FOGLET] sendUnicast/onUnicast/getNeighbours', function (done) {
-		var f1 = new Foglet({
-			spray: new Spray({
-				protocol:"unicast",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
-			room: 'unicast'
+		$.ajax({
+		  url : "https://service.xirsys.com/ice",
+		  data : {
+		    ident: "folkvir",
+		    secret: "a0fe3e18-c9da-11e6-8f98-9ac41bd47f24",
+		    domain: "foglet-examples.herokuapp.com",
+		    application: "foglet-examples",
+		    room: "test",
+		    secure: 1
+		  }}).then(function(response, status){
+		    console.log(status);
+		    console.log(response);
+		    /**
+		     * Create the foglet protocol.
+		     * @param {[type]} {protocol:"chat"} [description]
+		     */
+		    var iceServers = [];
+		     if(response.d.iceServers){
+		       iceServers = response.d.iceServers;
+		     }
+
+				 var f1 = new Foglet({
+		 			spray: new Spray({
+		 				protocol:"unicast",
+		 				webrtc:	{
+		 					trickle: true,
+		 					iceServers: iceServers
+		 				}
+		 			}),
+		 			room: 'unicast'
+		 		});
+		 		var f2 = new Foglet({
+		 			spray: new Spray({
+		 				protocol:"unicast",
+		 				webrtc:	{
+		 					trickle: true,
+		 					iceServers: iceServers
+		 				}
+		 			}),
+		 			room: 'unicast'
+		 		});
+		 		f1.init();
+		 		f2.init();
+
+		 		f2.onUnicast((id, message) => {
+		 			console.log(id + " : " + message);
+		 			assert(message, 'hello');
+		 			done();
+		 		});
+
+
+
+		 		f1.connection().then( s => {
+		 			return f2.connection();
+		 		}).then( s => {
+		 			setTimeout(function () {
+		 				const peers = f1.getNeighbours();
+		 				console.log(peers);
+		 				for(let i = 0; i < peers.length; i++){
+		 						f1.sendUnicast('hello', peers[i]);
+		 				}
+		 			}, 2000);
+		 		}).catch(error => console.log(error));
 		});
-		var f2 = new Foglet({
-			spray: new Spray({
-				protocol:"unicast",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
-			room: 'unicast'
-		});
-		f1.init();
-		f2.init();
-
-		f2.onUnicast((id, message) => {
-			console.log(id + " : " + message);
-			assert(message, 'hello');
-			done();
-		});
 
 
-
-		f1.connection().then( s => {
-			return f2.connection();
-		}).then( s => {
-			setTimeout(function () {
-				const peers = f1.getNeighbours();
-				console.log(peers);
-				for(let i = 0; i < peers.length; i++){
-						f1.sendUnicast('hello', peers[i]);
-				}
-			}, 2000);
-		}).catch(error => console.log(error));
 	});
 
 	it('[FOGLET] getRandomNeighbourId is in getNeighbours', function (done) {
-		var f1 = new Foglet({
-			spray: new Spray({
-				protocol:"neighbours",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
-			room: 'neighbours'
+		$.ajax({
+		  url : "https://service.xirsys.com/ice",
+		  data : {
+		    ident: "folkvir",
+		    secret: "a0fe3e18-c9da-11e6-8f98-9ac41bd47f24",
+		    domain: "foglet-examples.herokuapp.com",
+		    application: "foglet-examples",
+		    room: "test",
+		    secure: 1
+		  }}).then(function(response, status){
+		    console.log(status);
+		    console.log(response);
+		    /**
+		     * Create the foglet protocol.
+		     * @param {[type]} {protocol:"chat"} [description]
+		     */
+		    var iceServers = [];
+		     if(response.d.iceServers){
+		       iceServers = response.d.iceServers;
+		     }
+
+				 var f1 = new Foglet({
+		 			spray: new Spray({
+		 				protocol:"neighbours",
+		 				webrtc:	{
+		 					trickle: true,
+		 					iceServers: iceServers
+		 				}
+		 			}),
+		 			room: 'neighbours'
+		 		});
+		 		var f2 = new Foglet({
+		 			spray: new Spray({
+		 				protocol:"neighbours",
+		 				webrtc:	{
+		 					trickle: true,
+		 					iceServers: iceServers
+		 				}
+		 			}),
+		 			room: 'neighbours'
+		 		});
+
+		 		f1.init();
+		 		f2.init();
+
+
+		 		f1.connection().then( s => {
+		 			return f2.connection();
+		 		}).then( s => {
+		 				const peers = f1.getNeighbours();
+		 				const randomPeer = f1.getRandomNeighbourId();
+		 				console.log(peers);
+		 				console.log(randomPeer);
+		 				assert(peers.includes(randomPeer));
+		 				done();
+		 		}).catch(error => console.log(error));
+
 		});
-		var f2 = new Foglet({
-			spray: new Spray({
-				protocol:"neighbours",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
-			room: 'neighbours'
-		});
-
-		f1.init();
-		f2.init();
 
 
-		f1.connection().then( s => {
-			return f2.connection();
-		}).then( s => {
-				const peers = f1.getNeighbours();
-				const randomPeer = f1.getRandomNeighbourId();
-				console.log(peers);
-				console.log(randomPeer);
-				assert(peers.includes(randomPeer));
-				done();
-		}).catch(error => console.log(error));
 	});
 });
 
