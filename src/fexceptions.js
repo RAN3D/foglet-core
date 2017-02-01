@@ -31,7 +31,7 @@
  */
 class Exception {
 	/**
-	 * @constructs
+	 * @construct
 	 * @param {string} name - Exception name
 	 * @param {string} message - Exception message
 	 */
@@ -43,7 +43,7 @@ class Exception {
 
 module.exports.ConstructException = class ConstructException extends Exception {
 	constructor () {
-		super('ConstructException', 'Error: options.protocol or options.room is undefined or null');
+		super('ConstructException', 'Error: options.spray or options.spray.protocol or options.room is undefined or null');
 	}
 };
 

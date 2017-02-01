@@ -23,10 +23,10 @@ SOFTWARE.
 */
 'use strict';
 
-const Spray = require('spray-wrtc');
 const EventEmitter = require('events').EventEmitter;
 const VVwE = require('version-vector-with-exceptions');
 const CausalBroadcast = require('causal-broadcast-definition');
+const Unicast = require('unicast-definition');
 const io = require('socket.io-client');
 const Q = require('q');
 
@@ -57,7 +57,6 @@ class Foglet extends EventEmitter {
 	 * @example
 	 * var f = new Foglet({
 	 * 	spray: new Spray()
-	 * 	protocol: "your-protocol-name"
 	 * 	room: "your-room-name"
 	 * })
 	 * @returns {void}
@@ -71,9 +70,9 @@ class Foglet extends EventEmitter {
 		this.statusList = [ 'initialized', 'error', 'connected', 'disconnected' ];
 		this.status = this.statusList[0];
 		// Activation of the foglet protocol
-		if (this.options.spray !== undefined && this.options.spray !== null && this.options.protocol !== undefined && this.options.protocol !== null && this.options.room !== undefined && this.options.room !== null) {
+		if (this.options.spray !== undefined && this.options.spray !== null && this.options.spray.protocol !== undefined && this.options.spray.protocol !== null && this.options.room !== undefined && this.options.room !== null) {
 			this.room = this.options.room;
-			this.protocol = this.options.protocol;
+			this.protocol = this.options.spray.protocol;
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
 			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
@@ -93,7 +92,8 @@ class Foglet extends EventEmitter {
 	init () {
 		const self = this;
 		this.vector = new VVwE(Number.MAX_VALUE);
-		this.broadcast = new CausalBroadcast(this.spray, this.vector, this.protocol);
+		this.broadcast = new CausalBroadcast(this.spray, this.vector);
+		this.unicast = new Unicast(this.spray, this.protocol + '-unicast');
 		//	SIGNALING PART
 		// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
 		let url = this._getParameterByName('server');
@@ -115,29 +115,35 @@ class Foglet extends EventEmitter {
 					self.signaling.emit('accept', {
 						offer,
 						room: self.room
-					});
+					}, self.socketId);
 				},
 				onReady: (id) => {
 					try {
-						self.sendMessage('New user connected @' + self.id);
+						self.signaling.emit('connected', id, self.socketId);
 					} catch (err) {
 						console.err(err);
 					}
-					self.id = id;
-					self.status = self.statusList[2];
-					self._flog('Connection established');
 				}
 			};
 		};
 
-		this.signaling.on('new_spray', data => {
+		this.signaling.on('new_spray', (data, socketId) => {
 			// this._flog('@' + data.pid + ' send a request to you...');
+			self.socketId = socketId;
 			self.spray.connection(self.callbacks(), data);
 		});
-		this.signaling.on('accept_spray', data => {
+		this.signaling.on('accept_spray', (data, socketId) => {
 			// this._flog('@' + data.pid + ' accept your request...');
-			self.spray.connection(data);
+			self.socketId = socketId;
+			self.spray.connection(self.callbacks(), data);
 		});
+
+		this.signaling.on('connected', id => {
+			self.id = id;
+			self.status = self.statusList[2];
+			self._flog('Connection established');
+		});
+
 		this.registerList = {};
 		this._flog('Initialized');
 	}
@@ -149,7 +155,6 @@ class Foglet extends EventEmitter {
 	 * @example
 	 * var f = new Foglet({...});
 	 * f.connection().then((response) => console.log).catch(error => console.err);
-	 * @returns {void}
 	 */
 	connection () {
 		if (this.spray === null) {
@@ -164,12 +169,12 @@ class Foglet extends EventEmitter {
 					// We are waiting for 2 seconds for a proper connection
 					setTimeout(function () {
 						self._flog('Status : '+self.status);
-						if(self.status !== 'connected'){
+						if(self.status !== 'connected') {
 							self.spray.connection(self.callbacks());
 						}else{
 							resolve(self.status);
 						}
-					}, 2000);
+					}, 1000);
 				});
 
 			} catch (error) {
@@ -182,30 +187,38 @@ class Foglet extends EventEmitter {
 	 * Disconnect the foglet, wait 2 seconds for a proper disconnection, if status !=== disconnected, we re-load the function
 	 * @return {promise} Return a promise with the status as
 	 */
-	disconnect() {
-		if (this.spray === null) {
-			this._flog(' Error : spray undefined.');
-			return null;
-		}
-		const self = this;
-		return Q.Promise(function(resolve, reject) {
-			try {
-				self.spray.leave();
-				self.status = self.statusList[3];
-				//We are waiting for 2 seconds for a proper disconnection
-				setTimeout(function(){
-					if(self.status === 'disconnected'){
-						self._flog('Status : '+self.status);
-						resolve(self.status);
-					}else{
-						self.disconnect();
-					}
-				}, 2000);
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
+	// disconnect() {
+	// 	if (this.spray === null) {
+	// 		this._flog(' Error : spray undefined.');
+	// 		return null;
+	// 	}
+	// 	const self = this;
+	// 	return Q.Promise(function(resolve, reject) {
+	// 		try {
+	// 			console.log("we are trying to disconnect the user...1");
+	// 			self.spray.leave();
+	// 			console.log("we are trying to disconnect the user...2");
+	// 			self.status = self.statusList[3];
+	// 			console.log("we are trying to disconnect the user...3");
+	// 			self.signaling.emit('disconnect', self.room, self.socketId);
+	// 			//We are waiting for 2 seconds for a proper disconnection
+	// 			setTimeout(function(){
+	// 				if(self.spray.getPeers().i.length === 0){
+	// 					self.status = self.statusList[3];
+	// 					self._flog('Status : '+self.status);
+	// 					console.log("we are trying to disconnect the user...4");
+	// 					resolve(self.status);
+	// 				}else{
+	// 					console.log("we are trying to disconnect the user...5");
+	// 					self.disconnect();
+	// 				}
+	// 			}, 2000);
+	// 		} catch (error) {
+	// 			console.log("we are trying to disconnect the user...6" );
+	// 			reject(error);
+	// 		}
+	// 	});
+	// }
 
 	/**
 	 * Add a register to the foglet, it will broadcast new values to connected clients.
@@ -261,28 +274,91 @@ class Foglet extends EventEmitter {
 
 	/**
 	 * Allow to listen on Foglet when a broadcasted message arrived
-	 * @function on
+	 * @function onBroadcast
 	 * @param {string} signal - The signal we will listen to.
 	 * @param {callback} callback - Callback function that handles the response
 	 * @returns {void}
 	**/
-	onBroadcast(signal, callback) {
+	onBroadcast (signal, callback) {
 		this.broadcast.on(signal, callback);
 	}
 
 
 	/**
 	 * Send a broadcast message to all connected clients.
-	 * @function sendMessage
+	 * @function sendBroadcast
 	 * @param {object} msg - Message to send.
 	 * @returns {void}
 	 */
-	sendMessage (msg) {
+	sendBroadcast (msg) {
 		if ((this.broadcast !== null) && (this.vector !== null)) {
 			this.broadcast.send(msg, this.vector.increment());
 			this._flog(' message sent : ' + msg);
 		} else {
 			this._flog('Error : broadcast or vector undefined.');
+		}
+	}
+
+	/**
+	 * This callback is a parameter of the onUnicast function.
+	 * @callback callback
+	 * @param {string} id - sender id
+	 * @param {object} message - the message received
+	 */
+	/**
+	 * onUnicast function allow you to listen on the Unicast Definition protocol, Use only when you want to receive a message from a neighbour
+	 * @function onUnicast
+	 * @param {callback} callback The callback for the listener
+	 * @return {void}
+	 */
+	onUnicast (callback) {
+		this.unicast.on('receive', callback);
+	}
+
+	/**
+	 * Send a message to a specific neighbour (id)
+	 * @function sendUnicast
+	 * @param {object} message - The message to send
+	 * @param {string} id - One of your neighbour's id
+	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
+	 */
+	sendUnicast (message, id) {
+		return this.unicast.send(message, id);
+	}
+
+	/**
+	 * Get a random id of my current neighbours
+	 * @function getRandomPeerId
+	 * @return {string} return an id or a null string otherwise
+	 */
+	getRandomNeighbourId () {
+		const peers = this.getNeighbours();
+		if(peers.length === 0) {
+			return '';
+		} else {
+			try {
+				const random = Math.floor(Math.random() * peers.length);
+				const result = peers[random];
+				console.log(result);
+				return result;
+			} catch (e) {
+				console.err(e);
+				return '';
+			}
+		}
+	}
+
+	/**
+	 * Get a full list of all available neighbours
+	 * @function getNeighbours
+	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
+	 */
+	getNeighbours () {
+		const peers = this.spray.getPeers();
+		if(peers.i.length === 0) {
+			return [];
+		} else {
+			return peers.i;
 		}
 	}
 

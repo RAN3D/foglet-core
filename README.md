@@ -38,7 +38,6 @@ But to be begin here is a simple example, after building the bundles and import 
     // Construction of our protocol
     var foglet = new Foglet({
     	spray: spray,
-    	protocol: '[your-protocol-name]',
     	room: '[your-example-name]'
     });
 
