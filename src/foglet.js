@@ -118,7 +118,6 @@ class Foglet extends EventEmitter {
 					});
 				},
 				onReady: (id) => {
-					console.log('@' + id + ' is now connected');
 					try {
 						self.status = self.statusList[2];
 						self._flog('Connection established');
@@ -131,11 +130,9 @@ class Foglet extends EventEmitter {
 		};
 
 		this.signaling.on('new_spray', (data) => {
-			self._flog('@' + data.pid + ' send a request to you...');
 			self.spray.connection(self.callbacks(), data);
 		});
 		this.signaling.on('accept_spray', (data) => {
-			// this._flog('@' + data.pid + ' accept your request...');
 			self.spray.connection(self.callbacks(), data);
 		});
 
