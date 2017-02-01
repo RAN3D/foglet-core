@@ -18,6 +18,7 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + "/index.html");
 });
 
+let clients = {};
 
 io.on('connection', function(socket){
   number++;
