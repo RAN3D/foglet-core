@@ -75,6 +75,7 @@ class Foglet extends EventEmitter {
 			this.protocol = this.options.spray.protocol;
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
+			this.signalingServer = SIGNALINGHOSTURL;
 			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
 			this.id = uid.guid();
 			this._flog('Constructed');
@@ -98,7 +99,7 @@ class Foglet extends EventEmitter {
 		// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
 		let url = this._getParameterByName('server');
 		if (url === null) {
-			url = SIGNALINGHOSTURL;
+			url = this.signalingServer;
 		}
 		this._flog('Signaling server used : ' + url);
 		//	Connection to the signaling server

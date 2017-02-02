@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Core of the foglet library",
   "main": "src/foglet.js",
   "scripts": {
@@ -51,7 +51,7 @@
     "eslint": "^3.13.1",
     "eslint-config-airbnb-base": "^11.0.1",
     "eslint-plugin-import": "^2.2.0",
-    "foglet-signaling-server": "0.0.2",
+    "foglet-signaling-server": "^0.x.x",
     "istanbul": "^0.4.5",
     "jquery": "^3.1.1",
     "jsdoc": "^3.4.3",
