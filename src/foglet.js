@@ -75,7 +75,7 @@ class Foglet extends EventEmitter {
 			this.protocol = this.options.spray.protocol;
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
-			this.signalingServer = SIGNALINGHOSTURL;
+			this.signalingServer = this.options.signalingServer || SIGNALINGHOSTURL;
 			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
 			this.id = uid.guid();
 			this._flog('Constructed');
