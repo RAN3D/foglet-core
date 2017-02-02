@@ -1,19 +1,15 @@
 {
   "name": "foglet-core",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Core of the foglet library",
   "main": "src/foglet.js",
   "scripts": {
-    "postinstall": "npm run install:http",
     "doc": "jsdoc -c .jsdoc.json README.md src/",
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
     "cover": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "install:http": "cd ./externals/http-server/ && npm install",
     "build:foglet": "browserify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015   > ./build/foglet.bundle.js",
-    "build:watch": "watchify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015  -o ./build/foglet.bundle.js -v -d ",
-    "server": "cd externals/http-server && node http-server.js",
-    "dev-all": "concurrently \"npm run server\" \"npm run build:watch\""
+    "build:watch": "watchify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015  -o ./build/foglet.bundle.js -v -d "
   },
   "repository": {
     "type": "git",
@@ -55,6 +51,7 @@
     "eslint": "^3.13.1",
     "eslint-config-airbnb-base": "^11.0.1",
     "eslint-plugin-import": "^2.2.0",
+    "foglet-signaling-server": "0.0.2",
     "istanbul": "^0.4.5",
     "jquery": "^3.1.1",
     "jsdoc": "^3.4.3",

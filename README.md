@@ -72,15 +72,11 @@ If you want to use our Register Protocol you can write this (after the previous 
     // Set its value, and send it by broadcast
     var value = [0,0]
     reg.setValue(value);
-
 ```
 
 ## Run
-In order to run the library, you have to provide an http and a signaling server.
 
-```bash
-npm run server
-```
+In order to run the library, you have to provide a signaling server compatible with foglet available [here](https://github.com/folkvir/foglet-signaling-server).
 
 Now open http://localhost:3000 or http://localhost:3000?server=[yourSignalServerAdress]
 
