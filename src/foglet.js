@@ -23,7 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
+const EventEmitter = require('events');
 const VVwE = require('version-vector-with-exceptions');
 const CausalBroadcast = require('causal-broadcast-definition');
 const Unicast = require('unicast-definition');

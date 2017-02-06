@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Core of the foglet library",
   "main": "src/foglet.js",
   "scripts": {
@@ -28,11 +28,9 @@
   "homepage": "https://github.com/folkvir/foglet-core#readme",
   "dependencies": {
     "causal-broadcast-definition": "^0.1.x",
-    "events": "^1.1.1",
     "q": "^1.4.1",
     "socket.io-client": "^1.4.8",
     "unicast-definition": "^0.1.0",
-    "util": "^0.10.3",
     "version-vector-with-exceptions": "0.0.x"
   },
   "peerDependencies": {
