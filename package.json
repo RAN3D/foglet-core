@@ -29,6 +29,7 @@
   "dependencies": {
     "causal-broadcast-definition": "^0.1.x",
     "q": "^1.4.1",
+    "serialize-javascript": "^1.3.0",
     "socket.io-client": "^1.4.8",
     "unicast-definition": "^0.1.0",
     "version-vector-with-exceptions": "0.0.x"

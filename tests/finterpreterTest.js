@@ -48,6 +48,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 			}),
 		 			room: 'interpreter-broadcast-unicast'
 		 		});
+
+
 				try {
 					f1.init();
 					f2.init();
@@ -56,26 +58,54 @@ describe('[FInterpreter] Finterpreter functions', function () {
 				}
 
         let cpt = 0;
-        f2.interpreter.on(f2.interpreter.signalBroadcast, data => {
-    			f2.interpreter._flog('A broadcast message has been emit for The Interpreter');
-          cpt++;
-					if(cpt === 2){
+				const totalResult = 3;
+
+
+				f1.interpreter.on(f1.interpreter.signalBroadcast+'-custom', (result, message) => {
+					console.log("f1----------------------------------------------");
+					console.log(message);
+					console.log(result);
+					console.log("f1----------------------------------------------");
+					cpt++;
+					console.log(cpt);
+					if(cpt === totalResult){
 						done();
 					}
     		});
 
-    		f2.interpreter.on(f2.interpreter.signalUnicast, data => {
-    			f2.interpreter._flog('A Unicast message has been emit for The Interpreter');
+
+        f2.interpreter.on(f2.interpreter.signalBroadcast, (result, message) => {
+    			f2.interpreter._flog('A broadcast Command : ' + message.name + '(' + message.args + ') has been emit for The Interpreter Result : ' + result);
           cpt++;
-          if(cpt === 2){
+					console.log(cpt);
+					if(cpt === totalResult){
 						done();
 					}
     		});
 
-		 		f1.connection().then( () => { return f2.connection() }).then( s => {
-		 				f1.interpreter.sendBroadcast('hello');
-            f1.interpreter.sendUnicast('hello', f1.getNeighbours()[0]);
-		 		});
+    		f2.interpreter.on(f2.interpreter.signalUnicast, (result, id, message) => {
+    			f2.interpreter._flog('A Unicast Command : ' + message.name + '(' + message.args + ') has been emit for The Interpreter Result : ' + result);
+          cpt++;
+					console.log(cpt);
+          if(cpt === totalResult){
+						done();
+					}
+    		});
+		 		f1.connection().then( () => {
+					return f2.connection()
+				}).then( s => {
+
+						let a = f1.interpreter.executeBroadcast("sendBroadcast", [ 'miaousssssss' ]);
+						let b = f1.interpreter.executeUnicast("sendUnicast", [ 'miaousssssss' , f2.getNeighbours()[0] ] , f1.getNeighbours()[0]);
+						let c = f1.interpreter.executeCustom('views', (foglet, val, emitter) => {
+							console.log(val);
+							emitter(val);
+						});
+
+		 		}).catch(error => {
+					console.log(error);
+					done();
+				});
 		});
 	});
 });

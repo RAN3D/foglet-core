@@ -27,7 +27,19 @@ const EventEmitter = require('events');
 const VVwE = require('version-vector-with-exceptions');
 const CausalBroadcast = require('causal-broadcast-definition');
 const Unicast = require('unicast-definition');
-const Q = require('q');
+const serialize = require('serialize-javascript');
+
+class Command {
+	constructor (options) {
+		// Instance a job on a peer
+		this.type = options.type || 'normal';
+		this.callback = serialize(options.callback) || serialize(d => console.log(d));
+		this.value = options.value;
+		// For querying internal functions
+		this.name = options.name;
+		this.args = options.args;
+	}
+}
 
 class FInterpreter extends EventEmitter {
 	/**
@@ -44,23 +56,65 @@ class FInterpreter extends EventEmitter {
 		this.signalBroadcast = this.protocol + '-broadcast';
 		this.signalUnicast = this.protocol + '-unicast';
 
+		this.properties = Object.getOwnPropertyNames(Object.getPrototypeOf(this.foglet));
+		// We delete constructor and init
+		this.properties = this.properties.slice(2, this.properties.length);
+
 		const self = this;
+
+		this.emitter =  (val) => {
+			self.foglet.interpreter.sendBroadcast(new Command({
+				type: 'customResponse',
+				value: val
+			}));
+		};
+
+		this.localStorage = {
+			views : function () {
+				return self.foglet.getNeighbours();
+			}
+		};
+
 		this.broadcast.on('receive', message => {
 			self.receiveBroadcast (message);
 		});
 
-		this.unicast.on('receive', message => {
-			self.receiveUnicast (message);
+		this.unicast.on('receive', (id, message) => {
+			self.receiveUnicast (id, message);
 		});
 
 	}
 
 	receiveBroadcast (message) {
-		this.emit(this.signalBroadcast, message);
+		let result = null;
+		if(message.type === 'custom') {
+			this.receiveCustomBroadcast(message);
+		}else if (message.type === 'customResponse') {
+			console.log('Receive a custom response : ' + message.value);
+			result = message.value;
+			this.emit(this.signalBroadcast+'-custom', result, message);
+		} else {
+			result = this.foglet[message.name](...message.args);
+			this.emit(this.signalBroadcast, result, message);
+		}
+	}
+
+	receiveCustomBroadcast (message) {
+		console.log(message);
+		const val = this.localStorage[message.value] && this.localStorage[message.value];
+		let callback = this._deserialize(message.callback);
+		this._flog('====================================');
+		if(typeof val === 'function') {
+			callback(this.foglet, val(), this.emitter); // add an emitter in order to send back results
+		} else {
+			callback(this.foglet, val, this.emitter); // add an emitter in order to send back results
+		}
+		this._flog('====================================');
 	}
 
 	receiveUnicast (id, message) {
-		this.emit(this.signalUnicast, message);
+		const result = this.foglet[message.name](...message.args);
+		this.emit(this.signalUnicast, result, id, message);
 	}
 
 	sendBroadcast (message) {
@@ -69,6 +123,73 @@ class FInterpreter extends EventEmitter {
 
 	sendUnicast (message, peerId) {
 		this.unicast.send(message, peerId);
+	}
+
+	executeCustom (value, callback) {
+		console.log(typeof callback);
+		let command = new Command({
+			type: 'custom',
+			value,
+			callback
+		});
+		console.log(command);
+		return this.sendBroadcast(command);
+	}
+
+	executeBroadcast (name, args) {
+		this._flog(typeof name);
+		this._flog(typeof args);
+		if(typeof name === 'string' && Array.isArray(args)) {
+			let command  = new Command({name, args});
+			let result;
+			try {
+				if(command && command.name && command.args) {
+					if (this.properties.includes(command.name) && this.foglet[command.name].length === command.args.length) {
+						return this.sendBroadcast(command);
+					} else {
+						result = false;
+					}
+				}else{
+					result = false;
+				}
+			} catch (e) {
+				result = e;
+			}
+
+			return result;
+		}else{
+			return false;
+		}
+	}
+
+	executeUnicast (name, args, id) {
+		this._flog(typeof name);
+		this._flog(typeof args);
+		if(typeof name === 'string' && Array.isArray(args)) {
+			let command  = new Command({name, args});
+			let result;
+			try {
+				if(command && command.name && command.args) {
+					if (this.properties.includes(command.name) && this.foglet[command.name].length === command.args.length) {
+						return this.sendUnicast(command, id);
+					} else {
+						result = false;
+					}
+				}else{
+					result = false;
+				}
+			} catch (e) {
+				result = e;
+			}
+
+			return result;
+		}else{
+			return false;
+		}
+	}
+
+	_deserialize (serializedJavascript) {
+		return eval('(' + serializedJavascript + ')');
 	}
 
 	_flog (message) {
