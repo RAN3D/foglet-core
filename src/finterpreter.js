@@ -29,6 +29,8 @@ const CausalBroadcast = require('causal-broadcast-definition');
 const Unicast = require('unicast-definition');
 const serialize = require('serialize-javascript');
 const FStore = require('./fstore.js').FStore;
+const Q = require('q');
+const GUID = require('./guid.js');
 
 class Command {
 	constructor (options) {
@@ -36,6 +38,7 @@ class Command {
 		this.type = options.type || 'normal';
 		this.callback = serialize(options.callback) || serialize(d => console.log(d));
 		this.value = options.value;
+		this.jobId = options.jobId;
 		// For querying internal functions
 		this.name = options.name;
 		this.args = options.args;
@@ -61,12 +64,17 @@ class FInterpreter extends EventEmitter {
 		// We delete constructor and init
 		this.properties = this.properties.slice(2, this.properties.length);
 
+		// Allow to generate uuid
+		this.uid = new GUID();
+
 		const self = this;
 
-		this.emitter =  (val) => {
+		this.emitter =  (jobId, key, val) => {
+			let newValue = { jobId };
+			newValue[key] = val;
 			self.foglet.interpreter.sendBroadcast(new Command({
 				type: 'customResponse',
-				value: val
+				value: newValue
 			}));
 		};
 
@@ -74,7 +82,8 @@ class FInterpreter extends EventEmitter {
 			map : {
 				views : function () {
 					return self.foglet.getNeighbours();
-				}
+				},
+				jobs : {}
 			}
 		});
 
@@ -102,12 +111,12 @@ class FInterpreter extends EventEmitter {
 	}
 
 	receiveCustomBroadcast (message) {
-		const val = this.store[message.value] && this.store[message.value];
+		const val = this.store.get(message.value) && this.store.get(message.value);
 		let callback = this._deserialize(message.callback);
 		if(typeof val === 'function') {
-			callback(this.foglet, val(), this.emitter); // add an emitter in order to send back results
+			callback(message.jobId, this.foglet, val(), this.emitter); // add an emitter in order to send back results
 		} else {
-			callback(this.foglet, val, this.emitter); // add an emitter in order to send back results
+			callback(message.jobId, this.foglet, val, this.emitter); // add an emitter in order to send back results
 		}
 	}
 
@@ -128,7 +137,8 @@ class FInterpreter extends EventEmitter {
 		let command = new Command({
 			type: 'custom',
 			value,
-			callback
+			callback,
+			jobId : this.uid.guid()
 		});
 		return this.sendBroadcast(command);
 	}
@@ -179,6 +189,11 @@ class FInterpreter extends EventEmitter {
 		}else{
 			return false;
 		}
+	}
+
+	mapReduce(key, mapper, reducer){
+		this.executeCustom(key, mapper);
+		this.on(this.signalBroadcast+'-custom', reducer);
 	}
 
 	_deserialize (serializedJavascript) {
