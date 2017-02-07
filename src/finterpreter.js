@@ -28,6 +28,7 @@ const VVwE = require('version-vector-with-exceptions');
 const CausalBroadcast = require('causal-broadcast-definition');
 const Unicast = require('unicast-definition');
 const serialize = require('serialize-javascript');
+const FStore = require('./fstore.js').FStore;
 
 class Command {
 	constructor (options) {
@@ -69,11 +70,13 @@ class FInterpreter extends EventEmitter {
 			}));
 		};
 
-		this.localStorage = {
-			views : function () {
-				return self.foglet.getNeighbours();
+		this.store = new FStore({
+			map : {
+				views : function () {
+					return self.foglet.getNeighbours();
+				}
 			}
-		};
+		});
 
 		this.broadcast.on('receive', message => {
 			self.receiveBroadcast (message);
@@ -99,7 +102,7 @@ class FInterpreter extends EventEmitter {
 	}
 
 	receiveCustomBroadcast (message) {
-		const val = this.localStorage[message.value] && this.localStorage[message.value];
+		const val = this.store[message.value] && this.store[message.value];
 		let callback = this._deserialize(message.callback);
 		if(typeof val === 'function') {
 			callback(this.foglet, val(), this.emitter); // add an emitter in order to send back results

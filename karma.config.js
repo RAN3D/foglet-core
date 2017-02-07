@@ -29,12 +29,14 @@ module.exports = function (config) {
 			'tests/fexceptionsTest.js',
 			'tests/fogletTest.js',
 			'tests/finterpreterTest.js',
+			'tests/fstoreTest.js',
 			'http://localhost:4000/socket.io/socket.io.js' //just only inject it
 		],
 		preprocessors:{
 				'tests/fexceptionsTest.js' : ['coverage','browserify'],
 				'tests/fogletTest.js' : ['coverage','browserify'],
-				'tests/finterpreterTest.js' : ['coverage', 'browserify']
+				'tests/finterpreterTest.js' : ['coverage', 'browserify'],
+				'tests/fstoreTest.js' : ['coverage', 'browserify']
 		},
 		// list of files to exclude
 		exclude: [
