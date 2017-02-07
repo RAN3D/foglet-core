@@ -90,7 +90,6 @@ class FInterpreter extends EventEmitter {
 		if(message.type === 'custom') {
 			this.receiveCustomBroadcast(message);
 		}else if (message.type === 'customResponse') {
-			console.log('Receive a custom response : ' + message.value);
 			result = message.value;
 			this.emit(this.signalBroadcast+'-custom', result, message);
 		} else {
@@ -100,16 +99,13 @@ class FInterpreter extends EventEmitter {
 	}
 
 	receiveCustomBroadcast (message) {
-		console.log(message);
 		const val = this.localStorage[message.value] && this.localStorage[message.value];
 		let callback = this._deserialize(message.callback);
-		this._flog('====================================');
 		if(typeof val === 'function') {
 			callback(this.foglet, val(), this.emitter); // add an emitter in order to send back results
 		} else {
 			callback(this.foglet, val, this.emitter); // add an emitter in order to send back results
 		}
-		this._flog('====================================');
 	}
 
 	receiveUnicast (id, message) {
@@ -126,19 +122,15 @@ class FInterpreter extends EventEmitter {
 	}
 
 	executeCustom (value, callback) {
-		console.log(typeof callback);
 		let command = new Command({
 			type: 'custom',
 			value,
 			callback
 		});
-		console.log(command);
 		return this.sendBroadcast(command);
 	}
 
 	executeBroadcast (name, args) {
-		this._flog(typeof name);
-		this._flog(typeof args);
 		if(typeof name === 'string' && Array.isArray(args)) {
 			let command  = new Command({name, args});
 			let result;
@@ -163,8 +155,6 @@ class FInterpreter extends EventEmitter {
 	}
 
 	executeUnicast (name, args, id) {
-		this._flog(typeof name);
-		this._flog(typeof args);
 		if(typeof name === 'string' && Array.isArray(args)) {
 			let command  = new Command({name, args});
 			let result;
