@@ -11673,6 +11673,119 @@ module.exports.FRegisterAddException = function (_Exception4) {
 
 },{}],66:[function(require,module,exports){
 /*
+MIT License
+
+Copyright (c) 2016 Grall Arnaud
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var EventEmitter = require('events');
+var VVwE = require('version-vector-with-exceptions');
+var CausalBroadcast = require('causal-broadcast-definition');
+var Unicast = require('unicast-definition');
+var Q = require('q');
+
+var FInterpreter = function (_EventEmitter) {
+	_inherits(FInterpreter, _EventEmitter);
+
+	/**
+  * @constructor
+  * @param {Foglet} foglet This is the parent object in order to get all foglet basics operations
+  */
+	function FInterpreter(foglet) {
+		_classCallCheck(this, FInterpreter);
+
+		var _this = _possibleConstructorReturn(this, (FInterpreter.__proto__ || Object.getPrototypeOf(FInterpreter)).call(this));
+
+		_this.foglet = foglet;
+		_this.protocol = 'interpreter';
+		_this.vector = new VVwE(Number.MAX_VALUE);
+		_this.broadcast = new CausalBroadcast(_this.foglet.spray, _this.vector, _this.protocol);
+		_this.unicast = new Unicast(_this.foglet.spray, _this.protocol + '-unicast');
+		_this.signalBroadcast = _this.protocol + '-broadcast';
+		_this.signalUnicast = _this.protocol + '-unicast';
+
+		var self = _this;
+		_this.broadcast.on('receive', function (message) {
+			self.receiveBroadcast(message);
+		});
+
+		_this.unicast.on('receive', function (message) {
+			self.receiveUnicast(message);
+		});
+
+		_this.on(_this.signalBroadcast, function (data) {
+			self._flog('A broadcast message has been emit for The Interpreter');
+		});
+
+		_this.on(_this.signalUnicast, function (data) {
+			self._flog('A Unicast message has been emit for The Interpreter');
+		});
+		return _this;
+	}
+
+	_createClass(FInterpreter, [{
+		key: 'receiveBroadcast',
+		value: function receiveBroadcast(message) {
+			this._flog(message);
+			this.emit(this.signalBroadcast, message);
+		}
+	}, {
+		key: 'receiveUnicast',
+		value: function receiveUnicast(message) {
+			this._flog(message);
+			this.emit(this.signalUnicast, message);
+		}
+	}, {
+		key: 'sendBroadcast',
+		value: function sendBroadcast(message) {
+			this.broadcast.send(message, this.vector.increment());
+		}
+	}, {
+		key: 'sendUnicast',
+		value: function sendUnicast(message, peerId) {
+			this.unicast.send(message, peerId);
+		}
+	}, {
+		key: '_flog',
+		value: function _flog(message) {
+			this.foglet._flog('[Interpreter]' + message);
+		}
+	}]);
+
+	return FInterpreter;
+}(EventEmitter);
+
+module.exports = { FInterpreter: FInterpreter };
+
+},{"causal-broadcast-definition":7,"events":29,"q":41,"unicast-definition":56,"version-vector-with-exceptions":59}],67:[function(require,module,exports){
+/*
 	MIT License
 
 	Copyright (c) 2016 Grall Arnaud
@@ -11706,7 +11819,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var EventEmitter = require('events').EventEmitter;
+var EventEmitter = require('events');
 var FRegisterConstructException = require('./fexceptions').FRegisterConstructException;
 
 /**
@@ -11814,7 +11927,7 @@ var FRegister = function (_EventEmitter) {
 
 module.exports.FRegister = FRegister;
 
-},{"./fexceptions":65,"events":29}],67:[function(require,module,exports){
+},{"./fexceptions":65,"events":29}],68:[function(require,module,exports){
 /**
  * Adaptation in ES6 of the guid function provided by justayak
  * @url https://github.com/justayak/yutils/blob/master/yutils.js
@@ -11889,7 +12002,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var EventEmitter = require('events').EventEmitter;
+var EventEmitter = require('events');
 var VVwE = require('version-vector-with-exceptions');
 var CausalBroadcast = require('causal-broadcast-definition');
 var Unicast = require('unicast-definition');
@@ -11897,6 +12010,7 @@ var io = require('socket.io-client');
 var Q = require('q');
 
 var FRegister = require('./fregister.js').FRegister;
+var FInterpreter = require('./finterpreter.js').FInterpreter;
 var ConstructException = require('./fexceptions.js').ConstructException;
 var InitConstructException = require('./fexceptions.js').InitConstructException;
 var FRegisterAddException = require('./fexceptions.js').FRegisterAddException;
@@ -11947,8 +12061,9 @@ var Foglet = function (_EventEmitter) {
 			_this.protocol = _this.options.spray.protocol;
 			_this.spray = _this.options.spray;
 			_this.status = _this.statusList[0];
+			_this.signalingServer = _this.options.signalingServer || SIGNALINGHOSTURL;
 			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
-			_this.id = 'Tempory:' + uid.guid();
+			_this.id = uid.guid();
 			_this._flog('Constructed');
 		} else {
 			_this.status = _this.statusList[1];
@@ -11971,17 +12086,18 @@ var Foglet = function (_EventEmitter) {
 			this.vector = new VVwE(Number.MAX_VALUE);
 			this.broadcast = new CausalBroadcast(this.spray, this.vector);
 			this.unicast = new Unicast(this.spray, this.protocol + '-unicast');
+			this.interpreter = new FInterpreter(this);
 			//	SIGNALING PART
 			// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
 			var url = this._getParameterByName('server');
 			if (url === null) {
-				url = SIGNALINGHOSTURL;
+				url = this.signalingServer;
 			}
 			this._flog('Signaling server used : ' + url);
 			//	Connection to the signaling server
 			this.signaling = io.connect(url);
 			//	Connection to a specific room
-			this.signaling.emit('joinRoom', this.room);
+			self.signaling.emit('joinRoom', self.room);
 
 			this.callbacks = function () {
 				return {
@@ -11992,33 +12108,25 @@ var Foglet = function (_EventEmitter) {
 						self.signaling.emit('accept', {
 							offer: offer,
 							room: self.room
-						}, self.socketId);
+						});
 					},
 					onReady: function onReady(id) {
 						try {
-							self.signaling.emit('connected', id, self.socketId);
+							self.status = self.statusList[2];
+							self._flog('Connection established');
+							//self.emitJoin(id);
 						} catch (err) {
-							console.err(err);
+							console.log(err);
 						}
 					}
 				};
 			};
 
-			this.signaling.on('new_spray', function (data, socketId) {
-				// this._flog('@' + data.pid + ' send a request to you...');
-				self.socketId = socketId;
+			this.signaling.on('new_spray', function (data) {
 				self.spray.connection(self.callbacks(), data);
 			});
-			this.signaling.on('accept_spray', function (data, socketId) {
-				// this._flog('@' + data.pid + ' accept your request...');
-				self.socketId = socketId;
+			this.signaling.on('accept_spray', function (data) {
 				self.spray.connection(self.callbacks(), data);
-			});
-
-			this.signaling.on('connected', function (id) {
-				self.id = id;
-				self.status = self.statusList[2];
-				self._flog('Connection established');
 			});
 
 			this.registerList = {};
@@ -12328,4 +12436,4 @@ var Foglet = function (_EventEmitter) {
 module.exports = Foglet;
 
 }).call(this,require('_process'))
-},{"./fexceptions.js":65,"./fregister.js":66,"./guid.js":67,"_process":40,"causal-broadcast-definition":7,"events":29,"q":41,"socket.io-client":42,"unicast-definition":56,"version-vector-with-exceptions":59}]},{},[]);
+},{"./fexceptions.js":65,"./finterpreter.js":66,"./fregister.js":67,"./guid.js":68,"_process":40,"causal-broadcast-definition":7,"events":29,"q":41,"socket.io-client":42,"unicast-definition":56,"version-vector-with-exceptions":59}]},{},[]);

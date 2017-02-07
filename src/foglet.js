@@ -31,6 +31,7 @@ const io = require('socket.io-client');
 const Q = require('q');
 
 const FRegister = require('./fregister.js').FRegister;
+const FInterpreter = require('./finterpreter.js').FInterpreter;
 const ConstructException = require('./fexceptions.js').ConstructException;
 const InitConstructException = require('./fexceptions.js').InitConstructException;
 const FRegisterAddException = require('./fexceptions.js').FRegisterAddException;
@@ -95,13 +96,14 @@ class Foglet extends EventEmitter {
 		this.vector = new VVwE(Number.MAX_VALUE);
 		this.broadcast = new CausalBroadcast(this.spray, this.vector);
 		this.unicast = new Unicast(this.spray, this.protocol + '-unicast');
+		this.interpreter = new FInterpreter(this);
 		//	SIGNALING PART
 		// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
 		let url = this._getParameterByName('server');
 		if (url === null) {
 			url = this.signalingServer;
 		}
-		this._flog('Signaling server used : ' + url);
+		this._flog('Signaling server used : ' + url + ' on the room : ' + this.room);
 		//	Connection to the signaling server
 		this.signaling = io.connect(url);
 		//	Connection to a specific room

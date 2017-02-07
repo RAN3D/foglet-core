@@ -28,11 +28,13 @@ module.exports = function (config) {
 			'./node_modules/spray-wrtc/build/spray-wrtc.bundle.js',
 			'tests/fexceptionsTest.js',
 			'tests/fogletTest.js',
+			'tests/finterpreterTest.js',
 			'http://localhost:4000/socket.io/socket.io.js' //just only inject it
 		],
 		preprocessors:{
 				'tests/fexceptionsTest.js' : ['coverage','browserify'],
-				'tests/fogletTest.js' : ['coverage','browserify']
+				'tests/fogletTest.js' : ['coverage','browserify'],
+				'tests/finterpreterTest.js' : ['coverage', 'browserify']
 		},
 		// list of files to exclude
 		exclude: [

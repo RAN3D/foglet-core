@@ -205,7 +205,7 @@ describe('[FOGLET:FREGISTER]', function () {
 			         trickle: true,
 			         iceServers: iceServers
 			       },
-						 timeout: 10000,
+						 timeout: 1000 * 60 * 2,
 						 deltatime: 10000
 			     }),
 		    	room: 'antyentropy'
@@ -218,7 +218,7 @@ describe('[FOGLET:FREGISTER]', function () {
 			         trickle: true,
 			         iceServers: iceServers
 			       },
-						 timeout: 10000,
+						 timeout: 1000 * 60 * 2,
 						 deltatime: 10000
 			     }),
 		    	room: 'antyentropy'
@@ -230,7 +230,7 @@ describe('[FOGLET:FREGISTER]', function () {
 							 trickle: true,
 							 iceServers: iceServers
 						 },
-						 timeout: 10000,
+						 timeout: 1000 * 60 * 2,
 						 deltatime: 10000
 					 }),
 					room: 'antyentropy'
@@ -246,7 +246,9 @@ describe('[FOGLET:FREGISTER]', function () {
 					return f2.connection();
 				}).then(s => {
 					f3.init();
-					return f3.connection();
+					setTimeout(function(){
+						return f3.connection();
+					}, 2000);
 				}).then( s => {
 					f3.addRegister("test");
 					setTimeout(function(){
@@ -376,7 +378,7 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		     }
 				 var f1 = new Foglet({
 		 			spray: new Spray({
-		 				protocol:"broadcast",
+		 				protocol:"test-broadcast",
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
@@ -386,7 +388,7 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		 		});
 		 		var f2 = new Foglet({
 		 			spray: new Spray({
-		 				protocol:"",
+		 				protocol:"test-broadcast",
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
@@ -436,23 +438,23 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 
 				 var f1 = new Foglet({
 		 			spray: new Spray({
-		 				protocol:"unicast",
+		 				protocol:"test-unicast",
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
 		 				}
 		 			}),
-		 			room: 'unicast'
+		 			room: 'test-unicast'
 		 		});
 		 		var f2 = new Foglet({
 		 			spray: new Spray({
-		 				protocol:"unicast",
+		 				protocol:"test-unicast",
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
 		 				}
 		 			}),
-		 			room: 'unicast'
+		 			room: 'test-unicast'
 		 		});
 		 		f1.init();
 		 		f2.init();
