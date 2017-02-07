@@ -244,9 +244,9 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					return f2.connection()
 				}).then( s => {
 
-						let c = f1.interpreter.executeCustom('views', (foglet, val, emitter) => {
+						let c = f1.interpreter.executeCustom('views', (jobId, foglet, val, emitter) => {
 							console.log(val);
-							emitter('myKeys', val);
+							emitter(jobId, 'myKeys', val);
 						});
 
 		 		}).catch(error => {
@@ -254,7 +254,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					done();
 				});
 		});
-	}); 
+	});
 
 	it('[FInterpreter] Map/Reduce', function (done) {
 		$.ajax({
