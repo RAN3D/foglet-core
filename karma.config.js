@@ -28,15 +28,16 @@ module.exports = function (config) {
 			'./node_modules/spray-wrtc/build/spray-wrtc.bundle.js',
 			'tests/fexceptionsTest.js',
 			'tests/fogletTest.js',
-			'tests/finterpreterTest.js',
 			'tests/fstoreTest.js',
-			'http://localhost:4000/socket.io/socket.io.js' //just only inject it
+			'tests/finterpreterTest.js',
+			'tests/fbroadcastTest.js'
 		],
 		preprocessors:{
 				'tests/fexceptionsTest.js' : ['coverage','browserify'],
 				'tests/fogletTest.js' : ['coverage','browserify'],
 				'tests/finterpreterTest.js' : ['coverage', 'browserify'],
-				'tests/fstoreTest.js' : ['coverage', 'browserify']
+				'tests/fstoreTest.js' : ['coverage', 'browserify'],
+				'tests/fbroadcastTest.js' : ['coverage', 'browserify']
 		},
 		// list of files to exclude
 		exclude: [
@@ -75,10 +76,10 @@ module.exports = function (config) {
         //{ type: 'lcov', subdir: 'report-lcov' },
         // reporters supporting the `file` property, use `subdir` to directly
         // output them in the `dir` directory
-        { type: 'cobertura', subdir: '.', file: 'cobertura.txt' },
+        //{ type: 'cobertura', subdir: '.', file: 'cobertura.txt' },
         { type: 'lcovonly', subdir: '.' },
         { type: 'text', subdir: '.', file: 'text.txt' },
-        { type: 'text-summary', subdir: '.'  },
+        { type: 'text-summary', subdir: '.'  }
       ],
 			instrumenterOptions: {
         istanbul: { noCompact: true }

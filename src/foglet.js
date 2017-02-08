@@ -32,6 +32,7 @@ const Q = require('q');
 
 const FRegister = require('./fregister.js').FRegister;
 const FInterpreter = require('./finterpreter.js').FInterpreter;
+
 const ConstructException = require('./fexceptions.js').ConstructException;
 const InitConstructException = require('./fexceptions.js').InitConstructException;
 const FRegisterAddException = require('./fexceptions.js').FRegisterAddException;
@@ -96,7 +97,9 @@ class Foglet extends EventEmitter {
 		this.vector = new VVwE(Number.MAX_VALUE);
 		this.broadcast = new CausalBroadcast(this.spray, this.vector);
 		this.unicast = new Unicast(this.spray, this.protocol + '-unicast');
+
 		this.interpreter = new FInterpreter(this);
+
 		//	SIGNALING PART
 		// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
 		let url = this._getParameterByName('server');
@@ -107,7 +110,7 @@ class Foglet extends EventEmitter {
 		//	Connection to the signaling server
 		this.signaling = io.connect(url);
 		//	Connection to a specific room
-		self.signaling.emit('joinRoom', self.room);
+		this.signaling.emit('joinRoom', self.room);
 
 		this.callbacks = () => {
 			return {
@@ -121,13 +124,7 @@ class Foglet extends EventEmitter {
 					});
 				},
 				onReady: (id) => {
-					try {
-						self.status = self.statusList[2];
-						self._flog('Connection established');
-						//self.emitJoin(id);
-					} catch (err) {
-						console.log(err);
-					}
+					// something....
 				}
 			};
 		};
@@ -159,15 +156,20 @@ class Foglet extends EventEmitter {
 		const self = this;
 		return Q.Promise(function (resolve, reject) {
 			try {
-				self.spray.connection(self.callbacks());
+				self._flog('Beginning of the connection');
+				self.spray.connection(self.callbacks( ));
 				self.spray.on('join', () => {
-					// We are waiting for 2 seconds for a proper connection
-					setTimeout(function () {
-						self._flog('Status : '+self.status);
-						if(self.status !== 'connected') {
-							self.spray.connection(self.callbacks());
-						}else{
-							resolve(self.status);
+					self.status = self.statusList[2];
+					self._flog('Connection established');
+					let interval = setInterval(function () {
+						if(self.status === 'connected') {
+							self._flog('Status : '+self.status);
+							//self.spray.connection(self.callbacks());
+							clearInterval(interval);
+							setTimeout(function(){
+								// We are waiting for 2 seconds for a proper connection
+								resolve(self.status);
+							}, 2000);
 						}
 					}, 1000);
 				});

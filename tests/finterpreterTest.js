@@ -7,7 +7,7 @@ var Q = require("q");
 
 describe('[FInterpreter] Finterpreter functions', function () {
 	this.timeout(15000);
-
+	/*
 	it('[FInterpreter] executeBroadcast', function (done) {
 		$.ajax({
 		  url : "https://service.xirsys.com/ice",
@@ -32,7 +32,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
-		 				}
+		 				},
+						deltatime : 1000
 		 			}),
 		 			room: 'interpreter-test-broadcast'
 		 		});
@@ -42,7 +43,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
-		 				}
+		 				},
+						deltatime : 1000
 		 			}),
 		 			room: 'interpreter-test-broadcast'
 		 		});
@@ -56,7 +58,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 				}
 
         let cpt = 0;
-				const totalResult = 2;
+				const totalResult = 1;
 
 
 				f1.onBroadcast('receive', (message) => {
@@ -70,25 +72,14 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					}
     		});
 
-
-        f2.interpreter.on(f2.interpreter.signalBroadcast, (result, message) => {
-    			f2.interpreter._flog('A broadcast Command : ' + message.name + '(' + message.args + ') has been emit for The Interpreter Result : ' + result);
-          cpt++;
-					console.log(cpt);
-					if(cpt === totalResult){
-						done();
-					}
-    		});
-
 		 		f1.connection().then( () => {
 					return f2.connection()
 				}).then( s => {
-
-						let a = f1.interpreter.executeBroadcast("sendBroadcast", [ 'miaousssssss' ]);
+						let a = f1.interpreter.remoteBroadcast("sendBroadcast", [ 'miaousssssss' ]);
 
 		 		}).catch(error => {
 					console.log(error);
-					done();
+					done(error);
 				});
 		});
 	});
@@ -117,7 +108,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
-		 				}
+		 				},
+						deltatime : 1000
 		 			}),
 		 			room: 'interpreter-test-unicast'
 		 		});
@@ -127,7 +119,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
-		 				}
+		 				},
+						deltatime : 1000
 		 			}),
 		 			room: 'interpreter-test-unicast'
 		 		});
@@ -167,12 +160,12 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					return f2.connection()
 				}).then( s => {
 
-						let b = f1.interpreter.executeUnicast("sendUnicast", [ 'miaousssssss' , f2.getNeighbours()[0] ] , f1.getNeighbours()[0]);
+						let b = f1.interpreter.remoteUnicast("sendUnicast", [ 'miaousssssss' , f2.getNeighbours()[0] ] , f1.getNeighbours()[0]);
 
 
 		 		}).catch(error => {
 					console.log(error);
-					done();
+					done(error);
 				});
 		});
 	});
@@ -201,7 +194,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
-		 				}
+		 				},
+						deltatime : 1000
 		 			}),
 		 			room: 'interpreter-map'
 		 		});
@@ -211,7 +205,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 				webrtc:	{
 		 					trickle: true,
 		 					iceServers: iceServers
-		 				}
+		 				},
+						deltatime : 1000
 		 			}),
 		 			room: 'interpreter-map'
 		 		});
@@ -228,10 +223,9 @@ describe('[FInterpreter] Finterpreter functions', function () {
 				const totalResult = 1;
 
 
-				f1.interpreter.on(f1.interpreter.signalBroadcast+'-custom', (result, message) => {
+				f1.interpreter.on(f1.interpreter.signalBroadcast+'-custom', (message) => {
 					console.log("f1----------------------------------------------");
 					console.log(message);
-					console.log(result);
 					console.log("f1----------------------------------------------");
 					cpt++;
 					console.log(cpt);
@@ -244,17 +238,16 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					return f2.connection()
 				}).then( s => {
 
-						let c = f1.interpreter.executeCustom('views', (jobId, foglet, val, emitter) => {
-							console.log(val);
+						let c = f1.interpreter.remoteCustom('views', (jobId, foglet, val, emitter) => {
 							emitter(jobId, 'myKeys', val);
 						});
 
 		 		}).catch(error => {
 					console.log(error);
-					done();
+					done(error);
 				});
 		});
-	});
+	});*/
 
 	it('[FInterpreter] Map/Reduce', function (done) {
 		$.ajax({
@@ -280,7 +273,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					webrtc:	{
 						trickle: true,
 						iceServers: iceServers
-					}
+					},
+					deltatime : 1000
 				}),
 				room: 'interpreter-mapreduce'
 			});
@@ -290,7 +284,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					webrtc:	{
 						trickle: true,
 						iceServers: iceServers
-					}
+					},
+					deltatime : 1000
 				}),
 				room: 'interpreter-mapreduce'
 			});
@@ -301,7 +296,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					webrtc:	{
 						trickle: true,
 						iceServers: iceServers
-					}
+					},
+					deltatime : 1000
 				}),
 				room: 'interpreter-mapreduce'
 			});
@@ -326,12 +322,17 @@ describe('[FInterpreter] Finterpreter functions', function () {
 
 
 					let c = f1.interpreter.mapReduce('views', (jobId, foglet, val, emitter) => {
+						console.log('-----------------------------------');
+						console.log(val);
+						console.log('-----------------------------------');
 						emitter(jobId, 'myKeys', val);
-					}, (result, message) => {
+					}, (message) => {
+						const val = message.value;
 						cpt++;
-						console.log('JobId: ' + result.jobId);
-						console.log('Result: ');
-						console.log(result);
+						console.log(cpt);
+						// console.log('JobId: ' + val.jobId);
+						// console.log('Result: ');
+						// console.log(val);
 						if(cpt === totalResult){
 							done();
 						}
