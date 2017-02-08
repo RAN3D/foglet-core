@@ -47,14 +47,31 @@ class FBroadcast extends EventEmitter {
 			this.size = options.size || 100;
 			this.cache = new LRU(this.size);
 
+			// Encryption method
+			this.encryption = options.encryption || false;
+			this.encrypt = options.encrypt || function (message) {
+				return message;
+			};
+			this.decrypt = options.decrypt || function (message) {
+				return message;
+			};
+
 			this.unicast = new Unicast(this.foglet.spray, this.protocol + '-unicast');
 
 			const self = this;
 			this.unicast.on('receive', (id, message) => {
-
-				if(!self._stopPropagation(message)) {
-					self.emit('receive', message.value);
-					self._resend(message);
+				let decryptMessage = message;
+				if(this.encryption) {
+					try {
+						decryptMessage = this._decrypt(decryptMessage);
+					} catch (e) {
+						console.log(e);
+						decryptMessage = message;
+					}
+				}
+				if(!self._stopPropagation(decryptMessage)) {
+					self.emit('receive', decryptMessage.value);
+					self._resend(decryptMessage);
 				}
 			});
 		}else{
@@ -72,7 +89,42 @@ class FBroadcast extends EventEmitter {
 			value : message,
 			id
 		});
-		this._resend(messageToSend);
+		if(this.encryption) {
+			try {
+				this._resend(this._encrypt(messageToSend));
+			} catch (e) {
+				console.log(e);
+				this._resend(messageToSend);
+			}
+		}else{
+			this._resend(messageToSend);
+		}
+	}
+
+	_encrypt (message) {
+		if(typeof this.encrypt === 'function') {
+			const encryptMessage = this.encrypt(message);
+			if(encryptMessage) {
+				return encryptMessage;
+			}else{
+				return message;
+			}
+		}else{
+			return message;
+		}
+	}
+
+	_decrypt (message) {
+		if(typeof this.decrypt === 'function') {
+			const decryptMessage = this.decrypt(message);
+			if(decryptMessage) {
+				return decryptMessage;
+			}else{
+				return message;
+			}
+		}else{
+			return message;
+		}
 	}
 
 	_resend (message) {
@@ -85,12 +137,9 @@ class FBroadcast extends EventEmitter {
 	}
 
 	_stopPropagation (message) {
-		if(message.id && this.cache.get(message.id) !== undefined) {
-			return true;
-		}else{
-			return false;
-		}
+		return message.id && this.cache.get(message.id) !== undefined;
 	}
+
 }
 
 module.exports = { FBroadcast };
