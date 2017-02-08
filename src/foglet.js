@@ -24,15 +24,14 @@ SOFTWARE.
 'use strict';
 
 const EventEmitter = require('events');
-const VVwE = require('version-vector-with-exceptions');
-const CausalBroadcast = require('causal-broadcast-definition');
 const Unicast = require('unicast-definition');
 const io = require('socket.io-client');
 const Q = require('q');
 
 const FRegister = require('./fregister.js').FRegister;
 const FInterpreter = require('./finterpreter.js').FInterpreter;
-
+const FBroadcast = require('./fbroadcast.js').FBroadcast;
+const FStore = require('./fstore.js').FStore;
 const ConstructException = require('./fexceptions.js').ConstructException;
 const InitConstructException = require('./fexceptions.js').InitConstructException;
 const FRegisterAddException = require('./fexceptions.js').FRegisterAddException;
@@ -73,13 +72,39 @@ class Foglet extends EventEmitter {
 		this.status = this.statusList[0];
 		// Activation of the foglet protocol
 		if (this.options.spray !== undefined && this.options.spray !== null && this.options.spray.protocol !== undefined && this.options.spray.protocol !== null && this.options.room !== undefined && this.options.room !== null) {
+
+			// VARIABLES
+			this.id = uid.guid();
 			this.room = this.options.room;
 			this.protocol = this.options.spray.protocol;
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
 			this.signalingServer = this.options.signalingServer || SIGNALINGHOSTURL;
-			// This id is NOT the SAME as the id in the spray protocol, it is tempory, id will be replaced by spray id
-			this.id = uid.guid();
+
+			// COMMUNICATION
+			this.broadcast = new FBroadcast({
+				foglet: this,
+				protocol: this.protocol,
+				size: 1000,
+				alsoMe: false
+			});
+			this.unicast = new Unicast(this.spray, this.protocol + '-unicast');
+
+			//INTERPRETER
+			this.interpreter = new FInterpreter(this);
+
+			// DATA STRUCTURES
+			this.registerList = {};
+			const self = this;
+			this.store = new FStore({
+				map : {
+					views : function () {
+						return self.getNeighbours();
+					},
+					jobs: {},
+				}
+			});
+
 			this._flog('Constructed');
 		} else {
 			this.status = this.statusList[1];
@@ -94,12 +119,6 @@ class Foglet extends EventEmitter {
 	 */
 	init () {
 		const self = this;
-		this.vector = new VVwE(Number.MAX_VALUE);
-		this.broadcast = new CausalBroadcast(this.spray, this.vector);
-		this.unicast = new Unicast(this.spray, this.protocol + '-unicast');
-
-		this.interpreter = new FInterpreter(this);
-
 		//	SIGNALING PART
 		// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
 		let url = this._getParameterByName('server');
@@ -136,7 +155,6 @@ class Foglet extends EventEmitter {
 			self.spray.connection(self.callbacks(), data);
 		});
 
-		this.registerList = {};
 		this._flog('Initialized');
 	}
 
@@ -227,13 +245,9 @@ class Foglet extends EventEmitter {
 	addRegister (name) {
 		if (name !== undefined && name !== '') {
 			const spray = this.spray;
-			const vector = new VVwE(Number.MAX_VALUE);
-			const broadcast = new CausalBroadcast(spray, vector, name, 1000);
 			const options = {
 				name,
-				spray,
-				vector,
-				broadcast
+				spray
 			};
 			const reg = new FRegister(options);
 			this.registerList[this._fRegisterKey(reg)] = reg;
@@ -288,12 +302,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	sendBroadcast (msg) {
-		if ((this.broadcast !== null) && (this.vector !== null)) {
-			this.broadcast.send(msg, this.vector.increment());
-			this._flog(' message sent : ' + msg);
-		} else {
-			this._flog('Error : broadcast or vector undefined.');
-		}
+		this.broadcast.send(msg);
 	}
 
 	/**

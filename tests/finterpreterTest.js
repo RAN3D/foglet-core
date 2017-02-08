@@ -7,7 +7,7 @@ var Q = require("q");
 
 describe('[FInterpreter] Finterpreter functions', function () {
 	this.timeout(15000);
-	/*
+
 	it('[FInterpreter] executeBroadcast', function (done) {
 		$.ajax({
 		  url : "https://service.xirsys.com/ice",
@@ -33,7 +33,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 					trickle: true,
 		 					iceServers: iceServers
 		 				},
-						deltatime : 1000
+						deltatime : 1000 * 60
 		 			}),
 		 			room: 'interpreter-test-broadcast'
 		 		});
@@ -44,7 +44,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 					trickle: true,
 		 					iceServers: iceServers
 		 				},
-						deltatime : 1000
+						deltatime : 1000 * 60
 		 			}),
 		 			room: 'interpreter-test-broadcast'
 		 		});
@@ -109,7 +109,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 					trickle: true,
 		 					iceServers: iceServers
 		 				},
-						deltatime : 1000
+						deltatime : 1000 * 60
 		 			}),
 		 			room: 'interpreter-test-unicast'
 		 		});
@@ -120,7 +120,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		 					trickle: true,
 		 					iceServers: iceServers
 		 				},
-						deltatime : 1000
+						deltatime : 1000 * 60
 		 			}),
 		 			room: 'interpreter-test-unicast'
 		 		});
@@ -247,7 +247,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					done(error);
 				});
 		});
-	});*/
+	});
 
 	it('[FInterpreter] Map/Reduce', function (done) {
 		$.ajax({
@@ -274,7 +274,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 						trickle: true,
 						iceServers: iceServers
 					},
-					deltatime : 1000
+					deltatime : 1000 * 60
 				}),
 				room: 'interpreter-mapreduce'
 			});
@@ -285,7 +285,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 						trickle: true,
 						iceServers: iceServers
 					},
-					deltatime : 1000
+					deltatime : 1000 * 60
 				}),
 				room: 'interpreter-mapreduce'
 			});
@@ -297,7 +297,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 						trickle: true,
 						iceServers: iceServers
 					},
-					deltatime : 1000
+					deltatime : 1000 * 60
 				}),
 				room: 'interpreter-mapreduce'
 			});

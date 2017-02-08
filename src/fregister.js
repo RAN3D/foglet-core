@@ -25,28 +25,30 @@
 'use strict';
 
 const EventEmitter = require('events');
+const VVwE = require('version-vector-with-exceptions');
+const CausalBroadcast = require('causal-broadcast-definition');
 const FRegisterConstructException = require('./fexceptions').FRegisterConstructException;
 
 /**
- * Create a FRegister Class
+ * Create a FRegister Class, this an eventually consitent data structure, using a CausalBroadcast and a version-vector-with-exceptions from Chat-Wane (github)
  * @class FRegister
  * @author Grall Arnaud (folkvir)
  */
 class FRegister extends EventEmitter {
 	/**
-	 * Constructor of Foglet
-	 * @constructs Foglet
+	 * Constructor of FRegister
+	 * @constructs
 	 * @param {object} options - it's an object representing options avalaible
 	 * @throws {FRegisterConstructException} If options is undefined and the name, spray, a broadcast and a vectore are not defined in options
 	 * @returns {void}
 	 */
 	constructor (options) {
 		super();
-		if (options !== undefined && options.name && options.name !== null && options.spray && options.spray !== null && options.vector && options.vector !== null && options.broadcast && options.broadcast !== null) {
+		if (options !== undefined && options.name && options.name !== null && options.spray && options.spray !== null) {
 			this.name = options.name;
 			this.spray = options.spray;
-			this.vector = options.vector;
-			this.broadcast = options.broadcast;
+			this.vector = new VVwE(Number.MAX_VALUE);
+			this.broadcast = new CausalBroadcast(this.spray, this.vector);
 			this.value = {};
 			const self = this;
 			this.broadcast.on('receive', data => {

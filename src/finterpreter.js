@@ -63,6 +63,7 @@ class FInterpreter extends EventEmitter {
 
 		this.unicast = new Unicast(this.foglet.spray, this.protocol + '-unicast');
 
+		this.signalCustomBroadcast = this.protocol + '-broadcast-custom';
 		this.signalBroadcast = this.protocol + '-broadcast';
 		this.signalUnicast = this.protocol + '-unicast';
 
@@ -83,15 +84,6 @@ class FInterpreter extends EventEmitter {
 				value: newValue
 			}));
 		};
-
-		this.store = new FStore({
-			map : {
-				views : function () {
-					return self.foglet.getNeighbours();
-				},
-				jobs : {}
-			}
-		});
 
 		this.broadcast.on('receive', message => {
 			console.log(message);
@@ -217,7 +209,7 @@ class FInterpreter extends EventEmitter {
 	 */
 	mapReduce (key, mapper, reducer) {
 		this.remoteCustom(key, mapper);
-		this.on(this.signalBroadcast+'-custom', reducer);
+		this.on(this.signalCustomBroadcast, reducer);
 	}
 
 	/**
@@ -253,7 +245,7 @@ class FInterpreter extends EventEmitter {
 	 * @return {void}
 	 */
 	_receiveCustomBroadcast (message) {
-		const val = this.store.get(message.value) && this.store.get(message.value);
+		const val = this.foglet.store.get(message.value) && this.foglet.store.get(message.value);
 		let callback = this._deserialize(message.callback);
 		if(typeof val === 'function') {
 			callback(message.jobId, this.foglet, val(), this.emitter); // add an emitter in order to send back results

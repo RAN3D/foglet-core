@@ -1,8 +1,7 @@
-var Spray = require("spray-wrtc");
+const Spray = require("spray-wrtc");
 
-var Foglet = require('../src/foglet.js');
+const Foglet = require('../src/foglet.js');
 const FInterpreter = require('../src/finterpreter.js').FInterpreter;
-var Q = require("q");
 
 describe('[FSTORE] FStore functions', function () {
 		it('[FStore] init', function () {
@@ -18,8 +17,8 @@ describe('[FSTORE] FStore functions', function () {
 	 		});
 
 			f.init();
-			console.log(f.interpreter.store.getStore());
-			f.interpreter.store.has('views').should.be.true;
+			console.log(f.store.getStore());
+			f.store.has('views').should.be.true;
 	});
 
 	it('[FStore] insert', function () {
@@ -35,11 +34,11 @@ describe('[FSTORE] FStore functions', function () {
 		});
 
 		f.init();
-		f.interpreter.store.insert('testingValue', { 'a' : 1 })
-		console.log(f.interpreter.store.getStore());
-		f.interpreter.store.has('testingValue').should.be.true;
-		f.interpreter.store.get('testingValue').should.be.an('object');
-		f.interpreter.store.get('testingValue').a.should.be.equal(1);
+		f.store.insert('testingValue', { 'a' : 1 })
+		console.log(f.store.getStore());
+		f.store.has('testingValue').should.be.true;
+		f.store.get('testingValue').should.be.an('object');
+		f.store.get('testingValue').a.should.be.equal(1);
 	});
 
 	it('[FStore] update', function () {
@@ -55,14 +54,14 @@ describe('[FSTORE] FStore functions', function () {
 		});
 
 		f.init();
-		f.interpreter.store.insert('testingValue', { 'a' : 1 })
-		console.log(f.interpreter.store.getStore());
-		f.interpreter.store.has('testingValue').should.be.true;
-		f.interpreter.store.get('testingValue').should.be.an('object');
-		f.interpreter.store.get('testingValue').a.should.be.equal(1);
-		f.interpreter.store.update('testingValue', { 'a' : 2 })
-		console.log(f.interpreter.store.getStore());
-		f.interpreter.store.get('testingValue').a.should.be.equal(2);
+		f.store.insert('testingValue', { 'a' : 1 })
+		console.log(f.store.getStore());
+		f.store.has('testingValue').should.be.true;
+		f.store.get('testingValue').should.be.an('object');
+		f.store.get('testingValue').a.should.be.equal(1);
+		f.store.update('testingValue', { 'a' : 2 })
+		console.log(f.store.getStore());
+		f.store.get('testingValue').a.should.be.equal(2);
 	});
 
 	it('[FStore] delete', function () {
@@ -78,9 +77,9 @@ describe('[FSTORE] FStore functions', function () {
 		});
 
 		f.init();
-		f.interpreter.store.insert('testingValue', { 'a' : 1 })
-		f.interpreter.store.has('testingValue').should.be.true;
-		f.interpreter.store.delete('testingValue');
-		f.interpreter.store.has('testingValue').should.be.false;
+		f.store.insert('testingValue', { 'a' : 1 })
+		f.store.has('testingValue').should.be.true;
+		f.store.delete('testingValue');
+		f.store.has('testingValue').should.be.false;
 	});
 });
