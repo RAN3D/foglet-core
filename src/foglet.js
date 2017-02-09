@@ -80,7 +80,7 @@ class Foglet extends EventEmitter {
 			this.spray = this.options.spray;
 			this.status = this.statusList[0];
 			this.signalingServer = this.options.signalingServer || SIGNALINGHOSTURL;
-
+			this.verbose = this.options.verbose || true;
 			// COMMUNICATION
 			this.broadcast = new FBroadcast({
 				foglet: this,
@@ -361,10 +361,10 @@ class Foglet extends EventEmitter {
 	 */
 	getNeighbours () {
 		const peers = this.spray.getPeers();
-		if(peers.i.length === 0) {
+		if(peers.o.length === 0) {
 			return [];
 		} else {
-			return peers.i;
+			return peers.o;
 		}
 	}
 
@@ -411,7 +411,9 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	_flog (msg) {
-		console.log('[FOGLET]:' + ' @' + this.id + ': ' + msg);
+		if(this.verbose){
+				console.log('[FOGLET]:' + ' @' + this.id + ': ' + msg);
+		}
 	}
 }
 

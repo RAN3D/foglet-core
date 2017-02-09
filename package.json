@@ -28,12 +28,14 @@
   "homepage": "https://github.com/folkvir/foglet-core#readme",
   "dependencies": {
     "causal-broadcast-definition": "^0.1.x",
+    "causaltrack": "^0.4.1",
     "immutable": "^3.8.1",
-    "lru_map": "^0.3.2",
+    "lru-cache": "^4.0.2",
     "q": "^1.4.1",
     "serialize-javascript": "^1.3.0",
     "socket.io-client": "^1.4.8",
     "unicast-definition": "^0.1.0",
+    "uuid": "^3.0.1",
     "version-vector-with-exceptions": "0.0.x"
   },
   "peerDependencies": {

@@ -26,12 +26,15 @@ SOFTWARE.
 const EventEmitter = require('events');
 const Unicast = require('unicast-definition');
 const GUID = require('./guid.js');
-const LRU = require('lru_map').LRUMap;
+const LRU = require('lru-cache');
+const CausalStruct = require('causaltrack');
 
 class FBroadcastMessage {
 	constructor (options) {
 		this.value = options.value || null;
 		this.id = options.id || null;
+		this.ec = options.ec || { _e: 0, _c: 0};
+		this.isReady = options.isReady || null;
 	}
 }
 
@@ -45,33 +48,30 @@ class FBroadcast extends EventEmitter {
 			this.alsoMe = options.me || false;
 			this.foglet = options.foglet;
 			this.size = options.size || 100;
-			this.cache = new LRU(this.size);
 
-			// Encryption method
-			this.encryption = options.encryption || false;
-			this.encrypt = options.encrypt || function (message) {
+			this.sniffer = options.sniffer || function (message) {
 				return message;
 			};
-			this.decrypt = options.decrypt || function (message) {
-				return message;
+
+			const lruOptions = {
+				max: this.size
 			};
+
+			this.cache = new LRU(lruOptions);
+			this.causality = new CausalStruct.VVwE(this.uid.guid(), lruOptions);
 
 			this.unicast = new Unicast(this.foglet.spray, this.protocol + '-unicast');
 
 			const self = this;
 			this.unicast.on('receive', (id, message) => {
-				let decryptMessage = message;
-				if(this.encryption) {
-					try {
-						decryptMessage = this._decrypt(decryptMessage);
-					} catch (e) {
-						console.log(e);
-						decryptMessage = message;
-					}
-				}
-				if(!self._stopPropagation(decryptMessage)) {
-					self.emit('receive', decryptMessage.value);
-					self._resend(decryptMessage);
+				if(!self._stopPropagation(message)) {
+					message = self.sniffer(message);
+
+					self.cache.set(message, message);
+
+					self._reviewCache(); // Emit all messages ready to emit and delete them from the cache
+
+					self._resend(message);
 				}
 			});
 		}else{
@@ -79,56 +79,32 @@ class FBroadcast extends EventEmitter {
 		}
 	}
 
-	send (message) {
+	send (message, isReady = null, delay = 0) {
+		//console.log('delay:'+delay);
 		if(this.alsoMe) {
 			this.emit('receive', message);
 		}
-		// Message is an object
 		const id = this.uid.guid();
 		const messageToSend = new FBroadcastMessage({
 			value : message,
-			id
+			id,
+			ec: this.causality.increment(),
+			isReady
 		});
-		if(this.encryption) {
-			try {
-				this._resend(this._encrypt(messageToSend));
-			} catch (e) {
-				console.log(e);
-				this._resend(messageToSend);
-			}
-		}else{
-			this._resend(messageToSend);
-		}
-	}
+		this.causality.incrementFrom(messageToSend.ec);
 
-	_encrypt (message) {
-		if(typeof this.encrypt === 'function') {
-			const encryptMessage = this.encrypt(message);
-			if(encryptMessage) {
-				return encryptMessage;
-			}else{
-				return message;
-			}
-		}else{
-			return message;
-		}
-	}
+		const self = this;
+		setTimeout(function () {
+			self._resend(messageToSend);
+		}, delay);
 
-	_decrypt (message) {
-		if(typeof this.decrypt === 'function') {
-			const decryptMessage = this.decrypt(message);
-			if(decryptMessage) {
-				return decryptMessage;
-			}else{
-				return message;
-			}
-		}else{
-			return message;
-		}
+		// Causal Id of the message
+		return messageToSend.ec;
 	}
 
 	_resend (message) {
-		this.cache.set(message.id, message.id);
+		this.foglet._flog('resend:');
+		//console.log(message);
 		const neighbours = this.foglet.getNeighbours();
 		const self = this;
 		neighbours.forEach((peer) => {
@@ -136,8 +112,34 @@ class FBroadcast extends EventEmitter {
 		});
 	}
 
+	_reviewCache () {
+		let ready = false;
+		const self = this;
+		this.cache.rforEach( (value, key, cache) => {
+			//console.log(value);
+			if(self.causality.isLower(value.ec)) {
+				self.foglet._flog("we delete");
+				self.cache.del(key);
+			}else{
+				// console.log('ec:' + JSON.stringify(value.ec));
+				// console.log('isready:' + JSON.stringify(value.isReady));
+				if(self.causality.isRdy(value.isReady)) {
+					self.foglet._flog("found && emit");
+					ready = true;
+					self.causality.incrementFrom(value.ec);
+					self.emit('receive', value.value);
+					self.cache.del(key);
+				}
+			}
+		});
+		// If we have found one element we
+		if(ready) {
+			this._reviewCache();
+		}
+	}
+
 	_stopPropagation (message) {
-		return message.id && this.cache.get(message.id) !== undefined;
+		return message.ec && ( this.causality.isLower(message.ec) || this.cache.get(message.ec) !== undefined);
 	}
 
 }

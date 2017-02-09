@@ -86,7 +86,7 @@ describe('[FBROADCAST] functions', function () {
 			}
 
 			let cpt = 0;
-			let totalResult = 2;
+			let totalResult = 4;
 
 			f1.connection().then(() => {
 				return f2.connection();
@@ -94,6 +94,14 @@ describe('[FBROADCAST] functions', function () {
 				f3.init();
 				return f3.connection();
 			}).then(() => {
+				f1Broadcast.on('receive', (message) => {
+					console.log('f1:' + message);
+					cpt++;
+					if (cpt === totalResult) {
+						done();
+					}
+				});
+
 				f2Broadcast.on('receive', (message) => {
 					console.log('f2:' + message);
 					cpt++;
@@ -110,14 +118,18 @@ describe('[FBROADCAST] functions', function () {
 					}
 				});
 
-				f1Broadcast.send('miaousssssss');
+				const ec1 = f1Broadcast.send('miaousssssss1', null, 2000);
+				f1Broadcast.send('miaousssssss2', ec1);
+
+				const ec2 = f1Broadcast.send('miaousssssss3', null, 4000);
+				f1Broadcast.send('miaousssssss4', ec2, 2000);
 			}).catch(error => {
 				console.log(error);
-				done();
+				done(error);
 			});
 		}).catch(error => {
 			console.log(error);
-			done();
+			done(error);
 		}); // end $
 	}); // end it
 });
