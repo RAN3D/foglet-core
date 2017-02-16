@@ -118,13 +118,11 @@ class FBroadcast extends EventEmitter {
 		this.cache.rforEach( (value, key) => {
 			// console.log(value);
 			if(self.causality.isLower(value.ec)) {
-				self.foglet._flog('we delete');
 				self.cache.del(key);
 			}else{
 				// console.log('ec:' + JSON.stringify(value.ec));
 				// console.log('isready:' + JSON.stringify(value.isReady));
 				if(self.causality.isReady(value.isReady)) {
-					self.foglet._flog('found && emit');
 					ready = true;
 					self.causality.incrementFrom(value.ec);
 					self.emit('receive', value.value);
