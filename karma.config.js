@@ -25,19 +25,19 @@ module.exports = function (config) {
 		files: [
 			'tests/fogletTest.js',
 			'tests/fstoreTest.js',
-			'tests/finterpreterTest.js',
+			//'tests/finterpreterTest.js',
 			'tests/fbroadcastTest.js'
 		],
 		preprocessors:{
 			'tests/fogletTest.js' : [ 'coverage', 'browserify' ],
-			'tests/finterpreterTest.js' : [ 'coverage', 'browserify' ],
+			//'tests/finterpreterTest.js' : [ 'coverage', 'browserify' ],
 			'tests/fstoreTest.js' : [ 'coverage', 'browserify' ],
 			'tests/fbroadcastTest.js' : [ 'coverage', 'browserify' ]
 		},
 		// list of files to exclude
 		exclude: [
-			'src/rps/*.js',
-			'src/utils/*.js'
+			'src/rps/**/*.js',
+			'src/utils/**/*.js'
 		],
 		// browserify with babelify
 		browserify: {
