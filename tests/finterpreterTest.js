@@ -5,11 +5,11 @@ let Foglet = require('../src/foglet.js');
 describe('[FInterpreter] Finterpreter functions', function () {
 	this.timeout(15000);
 
-	it('[FInterpreter] executeBroadcast', function (done) {
+	it('[FInterpreter] remoteBroadcast', function (done) {
 		let f1 = new Foglet({
 			protocol:'interpreter-test-broadcast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			deltatime : 1000 * 60,
@@ -18,7 +18,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		let f2 = new Foglet({
 			protocol:'interpreter-test-broadcast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			deltatime : 1000 * 60,
@@ -29,20 +29,22 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		const totalResult = 1;
 
 
+
 		f2.onBroadcast('receive', (message) => {
-			console.log('f1----------------------------------------------');
+			console.log('BROADCAST[F2]----------------------------------------------');
 			console.log(message);
-			console.log('f1----------------------------------------------');
+			console.log('BROADCAST[F2]----------------------------------------------');
 			cpt++;
 			console.log(cpt);
-			if(cpt === totalResult){
+			if(cpt === totalResult) {
 				done();
 			}
 		});
 
 		f1.connection().then( () => {
 			f2.connection().then( () => {
-					f2.interpreter.remoteBroadcast('sendBroadcast', [ 'miaousssssss' ]);
+				console.log(f1.getAllNeighbours(), f2.getAllNeighbours());
+				f2.interpreter.remoteBroadcast('sendBroadcast', [ 'miaousssssss' ]);
 			}).catch(error => {
 				console.log(error);
 				done(error);
@@ -50,11 +52,11 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		})
 	});
 
-	it('[FInterpreter] executeUnicast', function (done) {
+	it('[FInterpreter] remoteUnicast', function (done) {
 		let f1 = new Foglet({
 			protocol:'interpreter-test-unicast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			deltatime : 1000 * 60,
@@ -63,7 +65,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		let f2 = new Foglet({
 			protocol:'interpreter-test-unicast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			deltatime : 1000 * 60,
@@ -103,59 +105,11 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		})
 	});
 
-	it('[FInterpreter] Map', function (done) {
-		let f1 = new Foglet({
-			protocol:'interpreter-map',
-			webrtc:	{
-				trickle: false,
-				iceServers: []
-			},
-			deltatime : 1000 * 60,
-			room: 'interpreter-map'
-		});
-		let f2 = new Foglet({
-			protocol:'interpreter-map',
-			webrtc:	{
-				trickle: false,
-				iceServers: []
-			},
-			deltatime : 1000 * 60,
-			room: 'interpreter-map'
-		});
-		let cpt = 0;
-		const totalResult = 1;
-
-
-		f1.interpreter.on(f1.interpreter.signalBroadcast+'-custom', (message) => {
-			console.log('f1----------------------------------------------');
-			console.log(message);
-			console.log('f1----------------------------------------------');
-			cpt++;
-			console.log(cpt);
-			if(cpt === totalResult) {
-				done();
-			}
-		});
-
-		f1.connection().then( () => {
-			f2.connection().then( () => {
-
-					f1.interpreter.remoteCustom('views', (jobId, foglet, val, emitter) => {
-						emitter(jobId, 'myKeys', val);
-					});
-
-			}).catch(error => {
-				console.log(error);
-				done(error);
-			});
-		})
-	});
-
 	it('[FInterpreter] Map/Reduce', function (done) {
 		let f1 = new Foglet({
 			protocol:'interpreter-mapreduce',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			deltatime : 1000 * 60,
@@ -164,7 +118,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		let f2 = new Foglet({
 			protocol:'interpreter-mapreduce',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			deltatime : 1000 * 60,
@@ -174,7 +128,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		let f3 = new Foglet({
 			protocol:'interpreter-mapreduce',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			deltatime : 1000 * 60,
@@ -187,7 +141,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		f1.connection().then( () => {
 			f2.connection().then( () => {
 				f3.connection().then( () => {
-					f1.interpreter.mapReduce('views', (jobId, foglet, val, emitter) => {
+					f3.interpreter.mapReduce('views', (jobId, foglet, val, emitter) => {
 						console.log('-----------------------------------');
 						console.log(val);
 						console.log('-----------------------------------');
@@ -195,9 +149,6 @@ describe('[FInterpreter] Finterpreter functions', function () {
 					}, () => {
 						cpt++;
 						console.log(cpt);
-						// console.log('JobId: ' + val.jobId);
-						// console.log('Result: ');
-						// console.log(val);
 						if(cpt === totalResult) {
 							done();
 						}

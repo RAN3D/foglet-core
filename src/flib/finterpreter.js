@@ -24,11 +24,9 @@ SOFTWARE.
 'use strict';
 
 const EventEmitter = require('events');
-const VVwE = require('version-vector-with-exceptions');
 const FBroadcast = require('./fbroadcast.js').FBroadcast;
 const Unicast = require('unicast-definition');
 const serialize = require('serialize-javascript');
-const FStore = require('./fstore.js').FStore;
 const uuid = require('uuid/v4');
 
 class Command {
@@ -52,10 +50,10 @@ class FInterpreter extends EventEmitter {
 	constructor (foglet) {
 		super();
 		this.foglet = foglet;
-		this.protocol = 'interpreter';
+		this.protocol = this.foglet.options.protocol+'-interpreter';
 
 		this.broadcast = new FBroadcast({
-			protocol: this.protocol+ '-' + foglet.room,
+			protocol: this.protocol,
 			foglet: this.foglet,
 			size:1000
 		});
@@ -78,13 +76,14 @@ class FInterpreter extends EventEmitter {
 		this.emitter =  (jobId, key, val) => {
 			let newValue = { jobId };
 			newValue[key] = val;
-			self.foglet.interpreter._sendBroadcast(new Command({
+			this._sendBroadcast(new Command({
 				type: 'customResponse',
 				value: newValue
 			}));
 		};
 
 		this.broadcast.on('receive', message => {
+			console.log(message);
 			self._receiveBroadcast (message);
 		});
 
@@ -207,6 +206,7 @@ class FInterpreter extends EventEmitter {
 	 */
 	mapReduce (key, mapper, reducer) {
 		this.remoteCustom(key, mapper);
+		console.log(reducer);
 		this.on(this.signalCustomBroadcast, reducer);
 	}
 
@@ -217,30 +217,33 @@ class FInterpreter extends EventEmitter {
 	 */
 
 	/**
- 	 * @private
  	 * Function activate when a broadcast message is received
  	 * @function _receiveBroadcast
 	 * @param {object} message - The message received
  	 * @return {void}
+ 	 * @private
  	 */
 	_receiveBroadcast (message) {
 		let result = null;
 		if(message.type === 'custom') {
+			console.log('customBroadcast', message);
 			this._receiveCustomBroadcast(message);
 		}else if (message.type === 'customResponse') {
-			this.emit(this.signalBroadcast+'-custom', message);
+			console.log('customResponse', message);
+			this.emit(this.signalCustomBroadcast, message);
 		} else {
+			console.log('normalReceive', message);
 			result = this.foglet[message.name](...message.args);
 			this.emit(this.signalBroadcast, result, message);
 		}
 	}
 
 	/**
-	 * @private
 	 * Function activate when a custom broadcast message is received
 	 * @function _receiveCustomBroadcast
 	 * @param {object} message - The message received
 	 * @return {void}
+	 * @private
 	 */
 	_receiveCustomBroadcast (message) {
 		const val = this.foglet.store.get(message.value) && this.foglet.store.get(message.value);
@@ -253,12 +256,12 @@ class FInterpreter extends EventEmitter {
 	}
 
 	/**
-	 * @private
 	 * Function activate when a unicast message is received
 	 * @function _receiveUnicast
 	 * @param {string} id - Id of the received peer message
 	 * @param {object} message - The message received
 	 * @return {void}
+	 * @private
 	 */
 	_receiveUnicast (id, message) {
 		const result = this.foglet[message.name](...message.args);
@@ -266,30 +269,29 @@ class FInterpreter extends EventEmitter {
 	}
 
 	/**
-	 * @private
 	 * Send a broadcast message as foglet sendBroadcast method but on our protocol
 	 * @function _sendBroadcast
 	 * @param {object} message - The message to send
 	 * @return {void}
+	 * @private
 	 */
 	_sendBroadcast (message) {
 		return this.broadcast.send(message);
 	}
 
 	/**
-	 * @private
 	 * Send a unicast message to a specified peer as foglet sendUnicast method but on our protocol
 	 * @function _sendUnicast
 	 * @param {object} message - The message to send
 	 * @param {string} peerId - Id of the peer to send the message
 	 * @return {void}
+	 * @private
 	 */
 	_sendUnicast (message, peerId) {
 		return this.unicast.send(message, peerId);
 	}
 
 	/**
-	 * @private
 	 * Deserialize a javascript serialized string
 	 * @function _deserialize
 	 * @param {string} serializedJavascript - The string to deserialized
@@ -300,11 +302,11 @@ class FInterpreter extends EventEmitter {
 	}
 
 	/**
-	 * @private
 	 * Log the message provided
 	 * @function _flog
 	 * @param {object} message - The message to log
 	 * @return {void}
+	 * @private
 	 */
 	_flog (message) {
 		this.foglet._flog('[Interpreter]' + message);

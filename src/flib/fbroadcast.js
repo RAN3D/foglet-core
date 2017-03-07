@@ -105,8 +105,9 @@ class FBroadcast extends EventEmitter {
 	_resend (message) {
 		this.foglet._flog('resend:');
 		// console.log(message);
-		const neighbours = this.foglet.getNeighbours();
 		const self = this;
+		const neighbours = self.foglet.getAllNeighbours();
+		console.log(neighbours);
 		neighbours.forEach((peer) => {
 			self.unicast.send(message, peer);
 		});

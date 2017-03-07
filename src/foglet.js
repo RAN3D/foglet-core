@@ -69,7 +69,8 @@ class Foglet extends EventEmitter {
 			room: 'default-room',
 			protocol: 'foglet-protocol-default',
 			verbose: true,
-			spray: undefined
+			spray: undefined,
+			connected: false
 		};
 		this.options = _.merge(this.defaultOptions, options);
 		// RPS
@@ -82,7 +83,7 @@ class Foglet extends EventEmitter {
 		this.id = uuid();
 		this.inviewId = this.options.spray.inviewId;
 		this.outviewId = this.options.spray.outviewId;
-		
+
 		// COMMUNICATION
 		this.unicast = new Unicast(this.options.spray, this.options.protocol + '-unicast');
 		this.broadcast = new FBroadcast({
@@ -123,7 +124,12 @@ class Foglet extends EventEmitter {
 					this.signaling.emit('accept', { offer, room: this.options.room });
 				},
 				onReady: (id) => {
-					this.signaling.emit('connected',  { room: this.options.room });
+					if(!this.options.connected) {
+						this.connection();
+					} else {
+						this.signaling.emit('connected',  { room: this.options.room });
+					}
+					this.options.connected = true;
 					this._flog('Connected to the peer :', id);
 				}
 			};
@@ -138,7 +144,12 @@ class Foglet extends EventEmitter {
 					dest.connection(offer);
 				},
 				onReady: (id) => {
-					this.emit('connected');
+					if(!this.options.connected) {
+						src.connection(this.directCallback(src, dest));
+					}else {
+						this.emit('connected');
+					}
+					this.options.connected = true;
 					this._flog('Connected to the peer :', id);
 				}
 			};
@@ -308,7 +319,7 @@ class Foglet extends EventEmitter {
 	}
 
 	/**
-	 * Get a full list of all available neighbours
+	 * Get a list of all available neighbours in the outview
 	 * @function getNeighbours
 	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
 	 */
@@ -318,6 +329,20 @@ class Foglet extends EventEmitter {
 			return [];
 		} else {
 			return peers.o;
+		}
+	}
+
+	/**
+	 * Get a full list of all available neighbours
+	 * @function getNeighbours
+	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
+	 */
+	getAllNeighbours () {
+		const peers = this.options.spray.getPeers();
+		if(peers.o.length === 0) {
+			return [];
+		} else {
+			return _.concat(peers.o, peers.i);
 		}
 	}
 

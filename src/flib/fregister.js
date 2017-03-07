@@ -36,9 +36,7 @@ const CausalBroadcast = require('causal-broadcast-definition');
 class FRegister extends EventEmitter {
 	/**
 	 * Constructor of FRegister
-	 * @constructs
 	 * @param {object} options - it's an object representing options avalaible
-	 * @throws {FRegisterConstructException} If options is undefined and the name, spray, a broadcast and a vectore are not defined in options
 	 * @returns {void}
 	 */
 	constructor (options) {
