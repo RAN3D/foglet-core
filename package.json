@@ -9,8 +9,8 @@
     "karma": "karma start karma.config.js",
     "cover": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "server": "node node_modules/foglet-signaling-server/signaling-server.js",
-    "build:foglet": "browserify -r ./src/foglet.js:foglet -t babelify --presets es2015   > ./build/foglet.bundle.js",
-    "build:watch": "watchify -r ./src/foglet.js:foglet -t babelify --presets es2015  -o ./build/foglet.bundle.js -v -d "
+    "build:foglet": "browserify -r ./src/foglet.js:foglet -t babelify --presets es2015   > ./dist/foglet.bundle.js",
+    "build:watch": "watchify -r ./src/foglet.js:foglet -t babelify --presets es2015  -o ./dist/foglet.bundle.js -v -d "
   },
   "repository": {
     "type": "git",
