@@ -9,6 +9,7 @@ Run just one command :
 ```bash
 npm install foglet-core
 ```
+## Documentation available [here](https://folkvir.github.io/foglet-core/)
 
 ## How to use it and write your example ?
 Before all, insert the spray-wrtc.bundle.js provided by the npm package spray-wrtc in : node_modules/spray-wrtc/build/ into your html file.
