@@ -80,6 +80,9 @@ class Foglet extends EventEmitter {
 
 		// VARIABLES
 		this.id = uuid();
+		this.inviewId = this.options.spray.inviewId;
+		this.outviewId = this.options.spray.outviewId;
+		
 		// COMMUNICATION
 		this.unicast = new Unicast(this.options.spray, this.options.protocol + '-unicast');
 		this.broadcast = new FBroadcast({
@@ -129,7 +132,7 @@ class Foglet extends EventEmitter {
 		this.directCallback = (src, dest) => {
 			return {
 				onInitiate: (offer) => {
-					dest.connection(this.directCallbacks(src, dest), offer);
+					dest.connection(this.directCallback(dest, src), offer);
 				},
 				onAccept: offer => {
 					dest.connection(offer);
@@ -166,7 +169,9 @@ class Foglet extends EventEmitter {
 			try {
 				if(foglet) {
 					self.options.spray.connection(self.directCallback(self.options.spray, foglet.options.spray));
-					self.on('connected', resolve(true));
+					self.on('connected', () => {
+						resolve(true);
+					});
 				} else {
 					self.signaling.emit('joinRoom', { room: self.options.room });
 					self.signaling.on('joinedRoom', () => {
@@ -174,7 +179,6 @@ class Foglet extends EventEmitter {
 						self.options.spray.connection(self.signalingCallback());
 					});
 					self.signaling.on('connected', () => {
-						self._flog('Connected');
 						resolve(true);
 					});
 				}
@@ -336,7 +340,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	_flog (...args) {
-		if(this.verbose) {
+		if(this.options.verbose) {
 			console.log('[FOGLET]:' + ' @' + this.id + ': ', args);
 		}
 	}

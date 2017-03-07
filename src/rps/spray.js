@@ -25,7 +25,6 @@ class Spray extends EventEmitter {
 	 */
 	constructor (options) {
 		super();
-		console.log(options);
 		// #A constants
 		this.protocol = (options && options.protocol) || 'spray-wrtc';
 		this.DELTATIME = (options && options.deltatime) || 1000 * 60 * 2; // 2min

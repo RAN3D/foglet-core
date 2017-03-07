@@ -299,7 +299,6 @@ class Socket extends EventEmitter {
 	 * @return {boolean} True if the message has been sent, false otherwise
 	 */
 	send (id, message) {
-		console.log(id, message);
 		const socketId = this.socket.get(id);
 		if(socketId) {
 			this._log('Message sent to : '+ socketId, message);
@@ -560,7 +559,6 @@ class ExtendedNeighborhood extends Neighbour {
 		const self = this;
 		let opts = self.options;
 		opts.initiator = true;
-		console.log(opts);
 		let socket = new SimplePeer(opts);
 		let entry = {
 			id: uuid(),
