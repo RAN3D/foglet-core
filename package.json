@@ -57,7 +57,7 @@
     "eslint": "^3.13.1",
     "eslint-config-airbnb-base": "^11.0.1",
     "eslint-plugin-import": "^2.2.0",
-    "foglet-signaling-server": "^0.x.x",
+    "foglet-signaling-server": "^0.1.0",
     "istanbul": "^0.4.5",
     "jquery": "^3.1.1",
     "jsdoc": "^3.4.3",
