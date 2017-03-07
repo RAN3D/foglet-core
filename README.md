@@ -1,4 +1,4 @@
-# foglet-core [![Build Status](https://travis-ci.org/folkvir/foglet-core.svg?branch=master)](https://travis-ci.org/folkvir/foglet-core) [![Coverage Status](https://coveralls.io/repos/github/folkvir/foglet-core/badge.svg?branch=master)](https://coveralls.io/github/folkvir/foglet-core?branch=master) [![XirSys WebRTC Cloud Support](https://img.shields.io/badge/XirSys%20Cloud-used-blue.svg)](http://xirsys.com/)
+# foglet-core [![Build Status](https://travis-ci.org/folkvir/foglet-core.svg?branch=master)](https://travis-ci.org/folkvir/foglet-core)
 Core of the foglet library
 
 This project aims to provide a solid core infrastructure built with spray-wrtc (see references)
@@ -7,14 +7,13 @@ This project aims to provide a solid core infrastructure built with spray-wrtc (
 
 Run just one command :
 ```bash
-npm install spray-wrtc foglet-core
+npm install foglet-core
 ```
 
 ## How to use it and write your example ?
 Before all, insert the spray-wrtc.bundle.js provided by the npm package spray-wrtc in : node_modules/spray-wrtc/build/ into your html file.
 Then insert the foglet.bundle.js in your html file.
-The bundle provided offers you to write those requires into your browser script :
-- ``` require("spray-wrtc") ```
+The bundle provided offers you to write this require into your browser script :
 - ``` require("foglet") ```
 
 If you do not provide a list of ice servers your example will not work on the web but will work on your local network.
@@ -23,34 +22,25 @@ Examples with iceServers are provided by us in our [list of examples](https://gi
 But to be begin here is a simple example, after building the bundles and import them in your html file you can write something like this :
 ```javascript
      // Require at least those two libraries
-     var Spray = require('spray-wrtc');
      var Foglet = require('foglet');
 
      // Construction of the network
-     var spray = new Spray({
-       protocol: '[your-protocol-name]',
-       webrtc:	{
-         trickle: true,
-         iceServers: [] // Here is your list of ice servers you have to provide !
-       }
-    });
 
     // Construction of our protocol
     var foglet = new Foglet({
-    	spray: spray,
+			protocol: '[your-protocol-name]'
     	room: '[your-example-name]'
     });
 
-    // Foglet initialization
-    foglet.init();
-
     // Retreive a message send by a broadcast foglet
-    foglet.onBroadcast("receive",function(message){
+    foglet.onBroadcast( 'receive', function(message){
       console.log(message);
     });
 
     // Connect our Foglet to an example
-    foglet.connection();
+    foglet.connection().then(d => {
+			console.log('I\'m connected');
+		});
 
     //Now your example is connected !
 ```

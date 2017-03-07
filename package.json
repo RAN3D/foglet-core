@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Core of the foglet library",
   "main": "src/foglet.js",
   "scripts": {
@@ -8,8 +8,8 @@
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
     "cover": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "build:foglet": "browserify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015   > ./build/foglet.bundle.js",
-    "build:watch": "watchify -r ./src/foglet.js:foglet -t envify -t babelify --presets es2015  -o ./build/foglet.bundle.js -v -d "
+    "build:foglet": "browserify -r ./src/foglet.js:foglet -t babelify --presets es2015   > ./build/foglet.bundle.js",
+    "build:watch": "watchify -r ./src/foglet.js:foglet -t babelify --presets es2015  -o ./build/foglet.bundle.js -v -d "
   },
   "repository": {
     "type": "git",
@@ -29,17 +29,20 @@
   "dependencies": {
     "causal-broadcast-definition": "^0.1.x",
     "causaltrack": "^0.4.1",
+    "clone": "^2.1.0",
     "immutable": "^3.8.1",
+    "lodash": "^4.17.4",
     "lru-cache": "^4.0.2",
+    "n2n-overlay-wrtc": "0.0.x",
+    "neighborhood-wrtc": "0.0.1",
     "q": "^1.4.1",
     "serialize-javascript": "^1.3.0",
+    "simple-peer": "^7.0.0",
     "socket.io-client": "^1.4.8",
+    "sorted-cmp-array": "^2.0.1",
     "unicast-definition": "^0.1.0",
     "uuid": "^3.0.1",
     "version-vector-with-exceptions": "0.0.x"
-  },
-  "peerDependencies": {
-    "spray-wrtc": "^0.1.x"
   },
   "devDependencies": {
     "babel-core": "^6.18.0",

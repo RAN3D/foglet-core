@@ -27,7 +27,6 @@
 const EventEmitter = require('events');
 const VVwE = require('version-vector-with-exceptions');
 const CausalBroadcast = require('causal-broadcast-definition');
-const FRegisterConstructException = require('./fexceptions').FRegisterConstructException;
 
 /**
  * Create a FRegister Class, this an eventually consitent data structure, using a CausalBroadcast and a version-vector-with-exceptions from Chat-Wane (github)
@@ -44,39 +43,35 @@ class FRegister extends EventEmitter {
 	 */
 	constructor (options) {
 		super();
-		if (options !== undefined && options.name && options.name !== null && options.spray && options.spray !== null) {
-			this.name = options.name;
-			this.spray = options.spray;
-			this.vector = new VVwE(Number.MAX_VALUE);
-			this.broadcast = new CausalBroadcast(this.spray, this.vector);
-			this.value = {};
-			const self = this;
-			this.broadcast.on('receive', data => {
-				// console.log('[FOGLET:' + self.name + '] Receive a new value');
-				self.value = data;
-				// console.log(self.value);
-				/**
-				 * Emit a message on the signal this.name+"-receive" with the data associated
-				 */
-				self.emit(self.name + '-receive', self.value);
-			});
-
+		this.name = options.name;
+		this.spray = options.spray;
+		this.vector = new VVwE(Number.MAX_VALUE);
+		this.broadcast = new CausalBroadcast(this.spray, this.vector);
+		this.value = {};
+		const self = this;
+		this.broadcast.on('receive', data => {
+			// console.log('[FOGLET:' + self.name + '] Receive a new value');
+			self.value = data;
+			// console.log(self.value);
 			/**
-			 * AntiEntropy part in order to retreive data after an antiEntropy emit
+			 * Emit a message on the signal this.name+"-receive" with the data associated
 			 */
-			this.broadcast.on('antiEntropy', (id, rcvCausality, lclCausality) => {
-				const data = {
-					protocol: self.name,
-					id: {_e: self.vector.local.e, _c: self.vector.local.v},
-					payload: self.value
-				};
-				self.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
-			});
+			self.emit(self.name + '-receive', self.value);
+		});
 
-			this.status = 'initialized';
-		} else {
-			throw (new FRegisterConstructException());
-		}
+		/**
+		 * AntiEntropy part in order to retreive data after an antiEntropy emit
+		 */
+		this.broadcast.on('antiEntropy', (id, rcvCausality, lclCausality) => {
+			const data = {
+				protocol: self.name,
+				id: {_e: self.vector.local.e, _c: self.vector.local.v},
+				payload: self.value
+			};
+			self.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
+		});
+
+		this.status = 'initialized';
 	}
 
 	/**

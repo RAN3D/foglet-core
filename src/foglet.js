@@ -27,21 +27,17 @@ const EventEmitter = require('events');
 const Unicast = require('unicast-definition');
 const io = require('socket.io-client');
 const Q = require('q');
+const uuid = require('uuid/v4');
+const _ = require('lodash');
 
-const FRegister = require('./fregister.js').FRegister;
-const FInterpreter = require('./finterpreter.js').FInterpreter;
-const FBroadcast = require('./fbroadcast.js').FBroadcast;
-const FStore = require('./fstore.js').FStore;
-const ConstructException = require('./fexceptions.js').ConstructException;
-const InitConstructException = require('./fexceptions.js').InitConstructException;
-const FRegisterAddException = require('./fexceptions.js').FRegisterAddException;
-const GUID = require('./guid.js');
+// RPS
+const Spray = require('./rps/spray.js');
 
-const uid = new GUID();
-let SIGNALINGHOSTURL = 'http://localhost:3000/';
-if (process.env.HOST) {
-	SIGNALINGHOSTURL = process.env.HOST;
-}
+// FOGLET
+const FRegister = require('./flib/fregister.js').FRegister;
+const FInterpreter = require('./flib/finterpreter.js').FInterpreter;
+const FBroadcast = require('./flib/fbroadcast.js').FBroadcast;
+const FStore = require('./flib/fstore.js').FStore;
 
 /**
  * Create a Foglet Class in order to use Spray with ease
@@ -62,178 +58,135 @@ class Foglet extends EventEmitter {
 	 * })
 	 * @returns {void}
 	 */
-	constructor (options) {
+	constructor (options = {}) {
 		super();
-		if (options === undefined) {
-			throw (new InitConstructException());
-		}
-		this.options = options;
-		this.statusList = [ 'initialized', 'error', 'connected', 'disconnected' ];
-		this.status = this.statusList[0];
-		// Activation of the foglet protocol
-		if (this.options.spray !== undefined && this.options.spray !== null && this.options.spray.protocol !== undefined && this.options.spray.protocol !== null && this.options.room !== undefined && this.options.room !== null) {
+		this.defaultOptions = {
+			webrtc: {
+				trickle: false,
+				iceServers: []
+			},
+			signalingAdress: 'http://localhost:3000',
+			room: 'default-room',
+			protocol: 'foglet-protocol-default',
+			verbose: true,
+			spray: undefined
+		};
+		this.options = _.merge(this.defaultOptions, options);
+		// RPS
+		this.options.spray = new Spray({
+			protocol: this.options.protocol,
+			webrtc: this.options.webrtc
+		});
 
-			// VARIABLES
-			this.id = uid.guid();
-			this.room = this.options.room;
-			this.protocol = this.options.spray.protocol;
-			this.spray = this.options.spray;
-			this.status = this.statusList[0];
-			this.signalingServer = this.options.signalingServer || SIGNALINGHOSTURL;
-			this.verbose = this.options.verbose || true;
-			// COMMUNICATION
-			this.broadcast = new FBroadcast({
-				foglet: this,
-				protocol: this.protocol,
-				size: 1000,
-				alsoMe: false
-			});
-			this.unicast = new Unicast(this.spray, this.protocol + '-unicast');
+		// VARIABLES
+		this.id = uuid();
+		// COMMUNICATION
+		this.unicast = new Unicast(this.options.spray, this.options.protocol + '-unicast');
+		this.broadcast = new FBroadcast({
+			foglet: this,
+			protocol: this.options.protocol,
+			size: 1000,
+			alsoMe: false
+		});
+		// INTERPRETER
+		this.interpreter = new FInterpreter(this);
 
-			//INTERPRETER
-			this.interpreter = new FInterpreter(this);
 
-			// DATA STRUCTURES
-			this.registerList = {};
-			const self = this;
-			this.store = new FStore({
-				map : {
-					views : function () {
-						return self.getNeighbours();
-					},
-					jobs: {},
-				}
-			});
-
-			this._flog('Constructed');
-		} else {
-			this.status = this.statusList[1];
-			throw (new ConstructException());
-		}
-	}
-
-	/**
-	 * Initialization method for Foglet
-	 * @function init
-	 * @returns {void}
-	 */
-	init () {
+		// DATA STRUCTURES
+		this.registerList = {};
 		const self = this;
+		this.store = new FStore({
+			map : {
+				views : function () {
+					return self.getNeighbours();
+				},
+				jobs: {},
+			}
+		});
+
 		//	SIGNALING PART
 		// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
-		let url = this._getParameterByName('server');
-		if (url === null) {
-			url = this.signalingServer;
-		}
-		this._flog('Signaling server used : ' + url + ' on the room : ' + this.room);
-		//	Connection to the signaling server
-		this.signaling = io.connect(url);
-		//	Connection to a specific room
-		this.signaling.emit('joinRoom', self.room);
 
-		this.callbacks = () => {
+		this._flog('Signaling server used : ' + this.options.signalingAdress + ' on the room : ' + this.options.room);
+		//	Connection to the signaling server
+		this.signaling = io.connect(this.options.signalingAdress);
+
+		this.signalingCallback = () => {
 			return {
 				onInitiate: offer => {
-					self.signaling.emit('new', {offer, room: self.room});
+					this.signaling.emit('new', {offer, room: this.options.room});
 				},
 				onAccept: offer => {
-					self.signaling.emit('accept', {
-						offer,
-						room: self.room
-					});
+					this.signaling.emit('accept', { offer, room: this.options.room });
 				},
 				onReady: (id) => {
-					// something....
+					this.signaling.emit('connected',  { room: this.options.room });
+					this._flog('Connected to the peer :', id);
+				}
+			};
+		};
+
+		this.directCallback = (src, dest) => {
+			return {
+				onInitiate: (offer) => {
+					dest.connection(this.directCallbacks(src, dest), offer);
+				},
+				onAccept: offer => {
+					dest.connection(offer);
+				},
+				onReady: (id) => {
+					this.emit('connected');
+					this._flog('Connected to the peer :', id);
 				}
 			};
 		};
 
 		this.signaling.on('new_spray', (data) => {
-			self.spray.connection(self.callbacks(), data);
+			this.options.spray.connection(self.signalingCallback(), data);
 		});
 		this.signaling.on('accept_spray', (data) => {
-			self.spray.connection(self.callbacks(), data);
+			this.options.spray.connection(data);
 		});
-
-		this._flog('Initialized');
 	}
+
 
 	/**
 	 * Connection method for Foglet to the network specified by protocol and room options
+	 * @param {Foglet} foglet Foglet to connect, none by default and the connection is by signaling. Otherwise it uses a direct callback
+	 * @param {number} timeout Time before rejecting the promise.
 	 * @function connection
 	 * @return {Promise} Return a Q.Promise
 	 * @example
 	 * var f = new Foglet({...});
 	 * f.connection().then((response) => console.log).catch(error => console.err);
 	 */
-	connection () {
-		if (this.spray === null) {
-			this._flog(' Error : spray undefined.');
-			return null;
-		}
+	connection (foglet = undefined, timeout = 60000) {
 		const self = this;
 		return Q.Promise(function (resolve, reject) {
 			try {
-				self._flog('Beginning of the connection');
-				self.spray.connection(self.callbacks( ));
-				self.spray.on('join', () => {
-					self.status = self.statusList[2];
-					self._flog('Connection established');
-					let interval = setInterval(function () {
-						if(self.status === 'connected') {
-							self._flog('Status : '+self.status);
-							//self.spray.connection(self.callbacks());
-							clearInterval(interval);
-							setTimeout(function(){
-								// We are waiting for 2 seconds for a proper connection
-								resolve(self.status);
-							}, 2000);
-						}
-					}, 1000);
-				});
+				if(foglet) {
+					self.options.spray.connection(self.directCallback(self.options.spray, foglet.options.spray));
+					self.on('connected', resolve(true));
+				} else {
+					self.signaling.emit('joinRoom', { room: self.options.room });
+					self.signaling.on('joinedRoom', () => {
+						self._flog(' Joined the room', self.options.room);
+						self.options.spray.connection(self.signalingCallback());
+					});
+					self.signaling.on('connected', () => {
+						self._flog('Connected');
+						resolve(true);
+					});
+				}
 
+				setTimeout(() => {
+					reject();
+				}, timeout);
 			} catch (error) {
 				reject(error);
 			}
 		});
 	}
-
-	/**
-	 * Disconnect the foglet, wait 2 seconds for a proper disconnection, if status !=== disconnected, we re-load the function
-	 * @return {promise} Return a promise with the status as
-	 */
-	// disconnect() {
-	// 	if (this.spray === null) {
-	// 		this._flog(' Error : spray undefined.');
-	// 		return null;
-	// 	}
-	// 	const self = this;
-	// 	return Q.Promise(function(resolve, reject) {
-	// 		try {
-	// 			console.log("we are trying to disconnect the user...1");
-	// 			self.spray.leave();
-	// 			console.log("we are trying to disconnect the user...2");
-	// 			self.status = self.statusList[3];
-	// 			console.log("we are trying to disconnect the user...3");
-	// 			self.signaling.emit('disconnect', self.room, self.socketId);
-	// 			//We are waiting for 2 seconds for a proper disconnection
-	// 			setTimeout(function(){
-	// 				if(self.spray.getPeers().i.length === 0){
-	// 					self.status = self.statusList[3];
-	// 					self._flog('Status : '+self.status);
-	// 					console.log("we are trying to disconnect the user...4");
-	// 					resolve(self.status);
-	// 				}else{
-	// 					console.log("we are trying to disconnect the user...5");
-	// 					self.disconnect();
-	// 				}
-	// 			}, 2000);
-	// 		} catch (error) {
-	// 			console.log("we are trying to disconnect the user...6" );
-	// 			reject(error);
-	// 		}
-	// 	});
-	// }
 
 	/**
 	 * Add a register to the foglet, it will broadcast new values to connected clients.
@@ -243,17 +196,13 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	addRegister (name) {
-		if (name !== undefined && name !== '') {
-			const spray = this.spray;
-			const options = {
-				name,
-				spray
-			};
-			const reg = new FRegister(options);
-			this.registerList[this._fRegisterKey(reg)] = reg;
-		} else {
-			throw (new FRegisterAddException());
-		}
+		const spray = this.options.spray;
+		const options = {
+			name,
+			spray
+		};
+		const reg = new FRegister(options);
+		this.registerList[this._fRegisterKey(reg)] = reg;
 	}
 
 	/**
@@ -360,7 +309,7 @@ class Foglet extends EventEmitter {
 	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
 	 */
 	getNeighbours () {
-		const peers = this.spray.getPeers();
+		const peers = this.options.spray.getPeers();
 		if(peers.o.length === 0) {
 			return [];
 		} else {
@@ -380,39 +329,15 @@ class Foglet extends EventEmitter {
 	}
 
 	/**
-	 * Return url parameters from an url and a name, if no url we use the url browser.
-	 * @function _getParameterByName
-	 * @private
-	 * @param {string} name - Name of the parameter
-	 * @param {string} url - Url we want go parse
-	 * @returns {array} Return the value of the specified url or of the url provided by window.location.href
-	 */
-	_getParameterByName (name, url) {
-		if (!url) {
-			url = window.location.href;
-		}
-		name = name.replace(/[\[\]]/g, '\\$&');
-		const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-		const results = regex.exec(url);
-		if (!results) {
-			return null;
-		}
-		if (!results[2]) {
-			return '';
-		}
-		return decodeURIComponent(results[2].replace(/\+/g, ' '));
-	}
-
-	/**
 	 * Log by prefixing the message;
 	 * @function _flog
 	 * @private
 	 * @param {string} msg Message to log
 	 * @returns {void}
 	 */
-	_flog (msg) {
-		if(this.verbose){
-				console.log('[FOGLET]:' + ' @' + this.id + ': ' + msg);
+	_flog (...args) {
+		if(this.verbose) {
+			console.log('[FOGLET]:' + ' @' + this.id + ': ', args);
 		}
 	}
 }

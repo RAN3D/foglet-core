@@ -4,7 +4,7 @@ MIT License
 Copyright (c) 2016 Grall Arnaud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
+of this software and associated documentation files (the 'Software'), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
@@ -13,7 +13,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -25,9 +25,9 @@ SOFTWARE.
 
 const EventEmitter = require('events');
 const Unicast = require('unicast-definition');
-const GUID = require('./guid.js');
+const uuid = require('uuid/v4');
 const LRU = require('lru-cache');
-const CausalStruct = require('causaltrack');
+const VVwE = require('version-vector-with-exceptions');
 
 class FBroadcastMessage {
 	constructor (options) {
@@ -43,7 +43,7 @@ class FBroadcast extends EventEmitter {
 	constructor (options) {
 		super();
 		if(options.foglet && options.protocol && options.size) {
-			this.uid = new GUID();
+			this.uid = uuid();
 			this.protocol = 'fbroadcast-'+options.protocol;
 			this.alsoMe = options.me || false;
 			this.foglet = options.foglet;
@@ -58,9 +58,9 @@ class FBroadcast extends EventEmitter {
 			};
 
 			this.cache = new LRU(lruOptions);
-			this.causality = new CausalStruct.VVwE(this.uid.guid(), lruOptions);
+			this.causality = new VVwE(uuid(), lruOptions);
 
-			this.unicast = new Unicast(this.foglet.spray, this.protocol + '-unicast');
+			this.unicast = new Unicast(this.foglet.options.spray, this.protocol + '-unicast');
 
 			const self = this;
 			this.unicast.on('receive', (id, message) => {
@@ -80,11 +80,11 @@ class FBroadcast extends EventEmitter {
 	}
 
 	send (message, isReady = null, delay = 0) {
-		//console.log('delay:'+delay);
+		// console.log('delay:'+delay);
 		if(this.alsoMe) {
 			this.emit('receive', message);
 		}
-		const id = this.uid.guid();
+		const id = uuid();
 		const messageToSend = new FBroadcastMessage({
 			value : message,
 			id,
@@ -104,7 +104,7 @@ class FBroadcast extends EventEmitter {
 
 	_resend (message) {
 		this.foglet._flog('resend:');
-		//console.log(message);
+		// console.log(message);
 		const neighbours = this.foglet.getNeighbours();
 		const self = this;
 		neighbours.forEach((peer) => {
@@ -115,16 +115,16 @@ class FBroadcast extends EventEmitter {
 	_reviewCache () {
 		let ready = false;
 		const self = this;
-		this.cache.rforEach( (value, key, cache) => {
-			//console.log(value);
+		this.cache.rforEach( (value, key) => {
+			// console.log(value);
 			if(self.causality.isLower(value.ec)) {
-				self.foglet._flog("we delete");
+				self.foglet._flog('we delete');
 				self.cache.del(key);
 			}else{
 				// console.log('ec:' + JSON.stringify(value.ec));
 				// console.log('isready:' + JSON.stringify(value.isReady));
-				if(self.causality.isRdy(value.isReady)) {
-					self.foglet._flog("found && emit");
+				if(self.causality.isReady(value.isReady)) {
+					self.foglet._flog('found && emit');
 					ready = true;
 					self.causality.incrementFrom(value.ec);
 					self.emit('receive', value.value);

@@ -24,9 +24,11 @@ SOFTWARE.
 'use strict';
 
 const Immutable = require('immutable');
+const uuid = require('uuid/v4');
 
 class FStore {
 	constructor (options) {
+		this.id = uuid();
 		this.store = null;
 		if(options.map){
 			this.store = Immutable.Map(options.map);

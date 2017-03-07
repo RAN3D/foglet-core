@@ -29,8 +29,7 @@ const FBroadcast = require('./fbroadcast.js').FBroadcast;
 const Unicast = require('unicast-definition');
 const serialize = require('serialize-javascript');
 const FStore = require('./fstore.js').FStore;
-// const Q = require('q');
-const GUID = require('./guid.js');
+const uuid = require('uuid/v4');
 
 class Command {
 	constructor (options) {
@@ -61,7 +60,7 @@ class FInterpreter extends EventEmitter {
 			size:1000
 		});
 
-		this.unicast = new Unicast(this.foglet.spray, this.protocol + '-unicast');
+		this.unicast = new Unicast(this.foglet.options.spray, this.protocol + '-unicast');
 
 		this.signalCustomBroadcast = this.protocol + '-broadcast-custom';
 		this.signalBroadcast = this.protocol + '-broadcast';
@@ -72,7 +71,7 @@ class FInterpreter extends EventEmitter {
 		this.properties = this.properties.slice(2, this.properties.length);
 
 		// Allow to generate uuid
-		this.uid = new GUID();
+		this.uid = uuid();
 
 		const self = this;
 
@@ -86,7 +85,6 @@ class FInterpreter extends EventEmitter {
 		};
 
 		this.broadcast.on('receive', message => {
-			console.log(message);
 			self._receiveBroadcast (message);
 		});
 
@@ -110,7 +108,7 @@ class FInterpreter extends EventEmitter {
 			type: 'custom',
 			value,
 			callback,
-			jobId : this.uid.guid()
+			jobId : uuid()
 		});
 		return this._sendBroadcast(command);
 	}

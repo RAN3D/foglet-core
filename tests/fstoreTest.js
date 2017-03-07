@@ -1,40 +1,32 @@
-const Spray = require("spray-wrtc");
+'use strict';
 
 const Foglet = require('../src/foglet.js');
-const FInterpreter = require('../src/finterpreter.js').FInterpreter;
 
 describe('[FSTORE] FStore functions', function () {
-		it('[FStore] init', function () {
-	 		var f = new Foglet({
-	 			spray: new Spray({
-	 				protocol:"fstore-test-init",
-	 				webrtc:	{
-	 					trickle: true,
-	 					iceServers: []
-	 				}
-	 			}),
-	 			room: 'fstore-test-init'
-	 		});
-
-			f.init();
-			console.log(f.store.getStore());
-			f.store.has('views').should.be.true;
+	it('[FStore] init', function () {
+		let f = new Foglet({
+			protocol: 'fstore-test-init',
+			webrtc:	{
+				trickle: false,
+				iceServers: []
+			},
+			room: 'fstore-test-init'
+		});
+		console.log(f.store.getStore());
+		f.store.has('views').should.be.true;
 	});
 
 	it('[FStore] insert', function () {
-		var f = new Foglet({
-			spray: new Spray({
-				protocol:"fstore-test-insert",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
+		let f = new Foglet({
+			protocol: 'fstore-test-insert',
+			webrtc:	{
+				trickle: false,
+				iceServers: []
+			},
 			room: 'fstore-test-insert'
 		});
 
-		f.init();
-		f.store.insert('testingValue', { 'a' : 1 })
+		f.store.insert('testingValue', { 'a' : 1 });
 		console.log(f.store.getStore());
 		f.store.has('testingValue').should.be.true;
 		f.store.get('testingValue').should.be.an('object');
@@ -42,42 +34,36 @@ describe('[FSTORE] FStore functions', function () {
 	});
 
 	it('[FStore] update', function () {
-		var f = new Foglet({
-			spray: new Spray({
-				protocol:"fstore-test-update",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
+		let f = new Foglet({
+			protocol: 'fstore-test-update',
+			webrtc:	{
+				trickle: false,
+				iceServers: []
+			},
 			room: 'fstore-test-update'
 		});
 
-		f.init();
 		f.store.insert('testingValue', { 'a' : 1 })
 		console.log(f.store.getStore());
 		f.store.has('testingValue').should.be.true;
 		f.store.get('testingValue').should.be.an('object');
 		f.store.get('testingValue').a.should.be.equal(1);
-		f.store.update('testingValue', { 'a' : 2 })
+		f.store.update('testingValue', { 'a' : 2 });
 		console.log(f.store.getStore());
 		f.store.get('testingValue').a.should.be.equal(2);
 	});
 
 	it('[FStore] delete', function () {
-		var f = new Foglet({
-			spray: new Spray({
-				protocol:"fstore-test-update",
-				webrtc:	{
-					trickle: true,
-					iceServers: []
-				}
-			}),
-			room: 'fstore-test-update'
+		let f = new Foglet({
+			protocol: 'fstore-test-delete',
+			webrtc:	{
+				trickle: false,
+				iceServers: []
+			},
+			room: 'fstore-test-delete'
 		});
 
-		f.init();
-		f.store.insert('testingValue', { 'a' : 1 })
+		f.store.insert('testingValue', { 'a' : 1 });
 		f.store.has('testingValue').should.be.true;
 		f.store.delete('testingValue');
 		f.store.has('testingValue').should.be.false;
