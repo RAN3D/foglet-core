@@ -10,7 +10,7 @@ before_script:
   - sleep 3
 script:
   - 'npm run build:foglet'
-  - ls -R ./build ./src
+  - ls -R ./dist ./src
   - npm test
   - npm run cover
   - npm run doc
