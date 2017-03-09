@@ -340,12 +340,7 @@ class Foglet extends EventEmitter {
 	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
 	 */
 	getAllNeighbours () {
-		const peers = this.options.spray.getPeers();
-		if(peers.o.length === 0) {
-			return [];
-		} else {
-			return _.concat(peers.o, peers.i);
-		}
+		return this.options.spray.getPeers();
 	}
 
 	/**

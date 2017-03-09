@@ -18,7 +18,7 @@ let callbacks = function (src, dest) {
 	};
 };
 
-const max = 10;
+const max = 3;
 
 
 for(let i = 0; i < max; ++i) {
@@ -40,15 +40,13 @@ const logs = (string) => {
 
 
 const directConnection = (time2wait = 500) => {
-	o.forEach(p => {
-		o.forEach(f => {
-			if( p.id !== f.id ) {
-				f.connection(p).then(d =>{
-					logs(`=> Foglet ${f.id} has been connected with a direct connection to Foglet ${p.id}`);
-				}).catch(error => logs(error.toString()));
-			}
+	let f = o[0];
+	for(let i = 1; i < max; ++i) {
+		let p = o[i];
+		f.connection(p).then(d =>{
+			logs(`=> Foglet ${f.id} has been connected with a direct connection to Foglet ${p.id}`);
 		});
-	});
+	}
 };
 
 
