@@ -30,7 +30,6 @@
   "dependencies": {
     "causal-broadcast-definition": "^0.1.x",
     "causaltrack": "^0.4.1",
-    "clone": "^2.1.0",
     "immutable": "^3.8.1",
     "lodash": "^4.17.4",
     "lru-cache": "^4.0.2",

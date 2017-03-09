@@ -2,7 +2,6 @@
 
 const  EventEmitter = require('events');
 const  NO = require('n2n-overlay-wrtc');
-const  clone = require('clone');
 const  PartialView = require('./partialview.js');
 const  MExchange = require('./messages.js');
 const  _ = require('lodash');
@@ -23,38 +22,46 @@ class Spray extends EventEmitter {
 	 * @param {integer} options.profile your profile
 	 * @param {integer} options.k k profile saved
 	 */
-	constructor (options) {
+	constructor (options = {}) {
 		super();
-		// #A constants
-		this.protocol = (options && options.protocol) || 'spray-wrtc';
-		this.DELTATIME = (options && options.deltatime) || 1000 * 60 * 2; // 2min
-		this.RETRY = (options && options.retry) || 10; // retry 10x to send messages
 
-		// at each suffling the profile is sent to all neighbours
-		this.k = (options && options.k) || 10;
-		this.profile = (options && options.profile) || {};
-		this.views = new LRU(this.k);
-		let opts = (options && clone(options)) || {};
-		opts.protocol = `${this.protocol}-n2n`;
-		// #B protocol variables
-		this.partialView = new PartialView( {
-			usedCoef : options.usedCoef || 0.5
-		});
-
-		// update of the neighborhoods package;
-		opts = _.merge({
-			protocol: `${opts.protocol}-rps`,
+		// merge of options with default options
+		this.opts = _.merge({
+			protocol: 'spray-wrtc',
 			encoding: (message) => {
 				return JSON.stringify(message);
 				// return new Buffer('message');
 			},
 			decoding: (message) => {
 				return JSON.parse(message);
-			}
-		}, opts);
-		opts.inview = new ExtendedNeighborhood(opts);
-		opts.outview = new ExtendedNeighborhood(opts);
-		this.neighborhoods = new NO(opts);
+			},
+			deltatime: 1000 * 60 * 2,
+			retry: 10,
+			k: 10,
+			profile: {},
+			usedCoef: 0.5
+		}, options);
+
+
+		// #A constants
+		this.protocol = this.opts.protocol;
+		this.DELTATIME = this.opts.protocol.deltatime; // 2min
+		this.RETRY = this.opts.retry; // retry 10x to send messages
+
+		// at each suffling the profile is sent to all neighbours
+		this.k = this.opts.k;
+		this.profile = this.opts.profile;
+		this.views = new LRU(this.k);
+
+		// #B protocol variables
+		this.partialView = new PartialView( {
+			usedCoef : this.opts.usedCoef
+		});
+
+		// update of the neighborhoods package;
+		this.opts.inview = new ExtendedNeighborhood(this.opts);
+		this.opts.outview = new ExtendedNeighborhood(this.opts);
+		this.neighborhoods = new NO(this.opts);
 
 		// update the profile with some identifiers
 		this.profile.inviewId = this.neighborhoods.i.ID;
