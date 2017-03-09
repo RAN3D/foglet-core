@@ -124,11 +124,12 @@ class Foglet extends EventEmitter {
 					this.signaling.emit('accept', { offer, room: this.options.room });
 				},
 				onReady: (id) => {
-					if(!this.options.connected) {
-						this.connection();
-					} else {
-						this.signaling.emit('connected',  { room: this.options.room });
-					}
+					// if(!this.options.connected) {
+					// 	this.connection();
+					// } else {
+					//
+					// }
+					this.signaling.emit('connected',  { room: this.options.room });
 					this.options.connected = true;
 					this._flog('Connected to the peer :', id);
 				}
@@ -144,11 +145,12 @@ class Foglet extends EventEmitter {
 					dest.connection(offer);
 				},
 				onReady: (id) => {
-					if(!this.options.connected) {
-						src.connection(this.directCallback(src, dest));
-					}else {
-						this.emit('connected');
-					}
+					// if(!this.options.connected) {
+					// 	src.connection(this.directCallback(src, dest));
+					// }else {
+					// 	this.emit('connected');
+					// }
+					this.emit('connected');
 					this.options.connected = true;
 					this._flog('Connected to the peer :', id);
 				}
