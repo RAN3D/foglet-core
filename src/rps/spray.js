@@ -295,8 +295,8 @@ class Spray extends EventEmitter {
 		const self = this;
 
 		// send the profile to each neighbours (inview, outview)
-		// this.neighborhoods.get('inview').forEach(p => self.send(p.id, MExchange(null, null, self.profile)));
-		// this.neighborhoods.get('outview').forEach(p => self.send(p.id, MExchange(null, null, self.profile)));
+		this.neighborhoods.get('inview').forEach(p => self.send(p.id, new MExchange(null, null, self.profile)));
+		this.neighborhoods.get('outview').forEach(p => self.send(p.id, new MExchange(null, null, self.profile)));
 
 		let oldest = null;
 		let sent = false;
