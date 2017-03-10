@@ -45,7 +45,7 @@ class Spray extends EventEmitter {
 
 		// #A constants
 		this.protocol = this.opts.protocol;
-		this.DELTATIME = this.opts.protocol.deltatime; // 2min
+		this.DELTATIME = this.opts.deltatime; // 2min
 		this.RETRY = this.opts.retry; // retry 10x to send messages
 
 		// at each suffling the profile is sent to all neighbours
@@ -295,8 +295,8 @@ class Spray extends EventEmitter {
 		const self = this;
 
 		// send the profile to each neighbours (inview, outview)
-		this.neighborhoods.get('inview').forEach(p => self.send(p.id, MExchange(null, null, self.profile)));
-		this.neighborhoods.get('outview').forEach(p => self.send(p.id, MExchange(null, null, self.profile)));
+		// this.neighborhoods.get('inview').forEach(p => self.send(p.id, MExchange(null, null, self.profile)));
+		// this.neighborhoods.get('outview').forEach(p => self.send(p.id, MExchange(null, null, self.profile)));
 
 		let oldest = null;
 		let sent = false;
