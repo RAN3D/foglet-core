@@ -74,10 +74,7 @@ class Foglet extends EventEmitter {
 		};
 		this.options = _.merge(this.defaultOptions, options);
 		// RPS
-		this.options.spray = new Spray({
-			protocol: this.options.protocol,
-			webrtc: this.options.webrtc
-		});
+		this.options.spray = new Spray(this.defaultOptions);
 
 		// VARIABLES
 		this.id = uuid();
