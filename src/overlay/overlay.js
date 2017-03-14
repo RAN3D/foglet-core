@@ -23,53 +23,59 @@ SOFTWARE.
 */
 'use strict';
 
-const Immutable = require('immutable');
-const uuid = require('uuid/v4');
+const TManSpray = require('./tman.js').TManSpray;
+const _ = require('lodash');
+const EventEmitter = require('events');
 
-class FStore {
-	constructor (options) {
-		this.id = uuid();
-		this.store = null;
-		if(options.map){
-			this.store = Immutable.Map(options.map);
-		} else {
-			this.store = Immutable.Map();
+class Overlay extends EventEmitter {
+	constructor (rps, options) {
+		super();
+
+		if(!rps) {
+			throw new Error('Need a rps...');
 		}
-	}
 
-	getStore () {
-		return this.store.toJS();
-	}
+		this.defaultOptions = {
+			overlayOptions: {
+				rpsObject: rps
+			}
+		};
+		this.defaultOptions = _.merge(this.defaultOptions, options || {});
+		this.defaultOptions.rps = rps;
 
-	get ( key ) {
-		return this.store.get(key);
-	}
+		this.overlay = this.defaultOptions.overlay || new TManSpray(this.defaultOptions);
 
-	has (key) {
-		return this.store.has(key);
-	}
-
-	insert (key, value) {
-		this.store = this.store.set(key, value);
-	}
-
-	update (key, value) {
-		this.store = this.store.update(store => {
-			return store.set(key, value);
+		this.overlay.on('receive', (signal, data) => {
+			this.emit('receive', signal, data);
 		});
 	}
 
-	delete (key) {
-		this.store = this.store.delete(key);
+	init (limit = 0) {
+		this.overlay.init(limit);
 	}
 
-	clear () {
-		this.store = this.store.clear();
+
+	getNeighbours () {
+		return this.overlay.socket.getNeighbours();
 	}
 
-	constructFromJS (map) {
-		this.store = Immutable.Map(map);
+	send (id, message) {
+		return this.overlay.send(id, message);
+	}
+
+	getViews () {
+		return this.overlay.views;
+	}
+
+	getUniqViews () {
+		return _.uniqBy(this.getViews(), 'id');
+	}
+
+
+
+	getCycles () {
+		return this.overlay.cycles;
 	}
 }
 
-module.exports = { FStore };
+module.exports = Overlay;

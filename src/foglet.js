@@ -38,6 +38,7 @@ const FRegister = require('./flib/fregister.js').FRegister;
 const FInterpreter = require('./flib/finterpreter.js').FInterpreter;
 const FBroadcast = require('./flib/fbroadcast.js').FBroadcast;
 const FStore = require('./flib/fstore.js').FStore;
+const Overlay = require('./overlay/overlay.js');
 
 /**
  * Create a Foglet Class in order to use Spray with ease
@@ -70,12 +71,15 @@ class Foglet extends EventEmitter {
 			protocol: 'foglet-protocol-default',
 			verbose: true,
 			spray: undefined,
-			connected: false
+			connected: false,
+			enableOverlay: false
 		};
 		this.options = _.merge(this.defaultOptions, options);
 		// RPS
 		this.options.spray = new Spray(this.defaultOptions);
-
+		if(this.defaultOptions.enableOverlay){
+				this.options.overlay = new Overlay(this.options.spray, this.defaultOptions);
+		}
 		// VARIABLES
 		this.id = uuid();
 		this.inviewId = this.options.spray.inviewId;

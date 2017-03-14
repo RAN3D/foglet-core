@@ -8,7 +8,7 @@
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
     "cover": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "server": "node node_modules/foglet-signaling-server/signaling-server.js",
+    "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
     "build:foglet": "browserify -r ./src/foglet.js:foglet -t babelify --presets es2015   > ./dist/foglet.bundle.js",
     "build:watch": "watchify -r ./src/foglet.js:foglet -t babelify --presets es2015  -o ./dist/foglet.bundle.js -v -d "
   },
@@ -42,7 +42,8 @@
     "sorted-cmp-array": "^2.0.1",
     "unicast-definition": "^0.1.0",
     "uuid": "^3.0.1",
-    "version-vector-with-exceptions": "0.0.x"
+    "version-vector-with-exceptions": "0.0.x",
+    "vivaldi-coordinates": "^1.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.18.0",
