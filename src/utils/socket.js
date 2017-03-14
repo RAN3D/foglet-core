@@ -287,6 +287,7 @@ class Socket extends EventEmitter {
 	 * @return {boolean} Return true if the disconnection is ok otherwise false;
 	 */
 	disconnect (outviewId = undefined) {
+		console.log('DISCONNECTION OF: ' + outviewId);
 		return this.socket.disconnect(outviewId);
 	}
 

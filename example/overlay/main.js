@@ -123,7 +123,7 @@ const constructOverlayGraph = ()  => {
 		let sock = over.options.overlay.overlay.socket;
 		userColorOverlay[sock.outviewId+'$'+sock.inviewId] = {
 			color: colorOverlay(i),
-			description: `ID:${over.options.overlay.overlay.descriptor.id} PING: ${over.options.overlay.overlay.profile.ping.value}, Cycles:${over.options.overlay.overlay.cycles}`,
+			description: `ID:${over.options.overlay.overlay.descriptor.id} Cycles:${over.options.overlay.overlay.cycles} (o:${over.options.overlay.getNeighbours().outview.length}, i:${over.options.overlay.getNeighbours().inview.length})`,
 			views: over.options.overlay.getViews(),
 			profile: over.options.overlay.overlay.descriptor
 		};

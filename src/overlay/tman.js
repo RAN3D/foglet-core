@@ -488,6 +488,24 @@ class TManSpray extends EventEmitter {
 		return views;
 	}
 
+	replaceViews (overlay, views) {
+		let o = 0, v = 0;
+		let results = [];
+		while ( views.length !== v && o < overlay.views.length) {
+			if(!overlay.views[o].used) {
+				// we replace the connection so we have to remove the webrtc connection too
+				console.log(views[v]);
+				results.push(views[v]);
+				overlay.socket.disconnect(views[v].outviewId);
+				v++;
+			} else {
+				results.push(overlay.views[o]);
+			}
+			o++;
+		}
+		return results;
+	}
+
 	/*
 	 * Default implementation of active and passive thread
 	 */
@@ -545,10 +563,12 @@ class TManSpray extends EventEmitter {
 			// we remove our view from the ranked list
 			_.remove(rankedViews, (data) => data.id === overlay.id);
 
-			overlay.views = overlay.selectPeers(
+			// now we replace views if only the view is not used.
+			overlay.views = overlay.replaceViews(overlay, overlay.selectPeers(
 				overlay.maxPeers,
 				rankedViews
-			);
+			));
+
 			console.log('VIEWS SELECTED : ', overlay.views);
 
 			// check if there is only just #views connections

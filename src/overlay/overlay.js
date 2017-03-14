@@ -54,7 +54,6 @@ class Overlay extends EventEmitter {
 		this.overlay.init(limit);
 	}
 
-
 	getNeighbours () {
 		return this.overlay.socket.getNeighbours();
 	}
