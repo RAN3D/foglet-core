@@ -218,7 +218,7 @@ class TManSpray extends EventEmitter {
 
 				console.log(id, message.descriptor);
 
-				console.log(from, to);
+				console.log('BRIDGE CONNECTION:', from, to);
 
 			}
 		});
@@ -307,12 +307,14 @@ class TManSpray extends EventEmitter {
 		let i = 0;
 		while(i < views.length && i < this.maxPeers) {
 			// is not in our views
-			this.socket.send(from, {
+			const msg = {
 				type: 'connect-to-view',
 				socketId: this.id,
 				descriptor: this.getDescriptor(),
 				pingStart: new Date().getTime()
-			});
+			};
+			const res = this.socket.send(from, msg);
+			this._log('Connection from: ', from, 'to: ', this.id, ' Message sent:', msg, ' Status', res);
 			i++;
 		}
 	}
@@ -491,12 +493,13 @@ class TManSpray extends EventEmitter {
 	replaceViews (overlay, views) {
 		let o = 0, v = 0;
 		let results = [];
-		while ( views.length !== v && o < overlay.views.length) {
+		console.log(overlay.views, views);
+		while ( v < views.length && o < overlay.views.length) {
 			if(!overlay.views[o].used) {
 				// we replace the connection so we have to remove the webrtc connection too
 				console.log(views[v]);
 				results.push(views[v]);
-				overlay.socket.disconnect(views[v].outviewId);
+				overlay.socket.disconnect(overlay.views[o].profile.outviewId);
 				v++;
 			} else {
 				results.push(overlay.views[o]);
@@ -573,7 +576,7 @@ class TManSpray extends EventEmitter {
 
 			// check if there is only just #views connections
 			this._connect(id, overlay.views);
-			// overlay._checkConnections();
+			overlay._checkConnections();
 
 
 			// emit to a message that we finish the passive thread
