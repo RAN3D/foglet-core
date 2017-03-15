@@ -28,6 +28,9 @@
   },
   "homepage": "https://github.com/folkvir/foglet-core#readme",
   "dependencies": {
+    "babel-core": "^6.24.0",
+    "babel-preset-es2015": "^6.24.0",
+    "babel-register": "^6.24.0",
     "causal-broadcast-definition": "^0.1.x",
     "causaltrack": "^0.4.1",
     "immutable": "^3.8.1",
