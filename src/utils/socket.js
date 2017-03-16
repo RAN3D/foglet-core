@@ -598,6 +598,8 @@ class ExtendedNeighborhood extends Neighbour {
 	 */
 	accept (message, callbacks) {
 		// #1 if already exists, use it
+
+
 		let prior = this.pending.get(message.tid);
 		if (prior) {
 			return prior;
@@ -658,6 +660,13 @@ class ExtendedNeighborhood extends Neighbour {
 			}
 		});
 		socket.on('error', err => {
+			if(this.living.get(message.pid)) {
+				console.log('[ENB] There is already a connection !!!!!');
+			}
+			if(this.pending.get(message.tid)) {
+				console.log('[ENB] There is already a pending connection !!!!!');
+			}
+			console.log(message);
 			console.log('[ERROR:ACCEPT]', new Error(err));
 		});
 

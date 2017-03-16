@@ -211,22 +211,30 @@ class TManSpray extends EventEmitter {
 					this.randomSampleViews[index] = desc;
 				}
 
-			} else if (message.type && message.type === 'connect-to-view') {
-				// now we can established by bridge the connection between the sender and the owner of the view (not us but a neighbor)
-				const from = this.source.neighborhoods.get(id);
-				const to = this.source.neighborhoods.get(message.descriptor.profile.rps.outviewId);
-
-				console.log(id, message.descriptor);
-
-				console.log('BRIDGE CONNECTION:', from, to);
-
 			}
 		});
 
 
 		// Passive Thread
 		this.socket.on('receive', message => {
-			this._passive(this, message.id, message.message);
+			if (message.message.type && message.message.type === 'connect-to-view') {
+				const out = this.socket.socket.get('outview');
+				console.log(out);
+				const indexOfFrom = _.findIndex(out, d => d.id === message.message.fromConnect.profile.outviewId),
+					indexOfTo = _.findIndex(out, d => d.id === message.message.toConnect.profile.outviewId);
+				// now we can established by bridge the connection between the sender and the owner of the view (not us but a neighbor)
+				if(indexOfTo !== -1 && indexOfFrom !== -1) {
+					const from = out[indexOfFrom];
+					const to = out[indexOfTo];
+
+
+					const res = this.socket.socket.connect(from.id, to.id);
+					console.log(`BRIDGE CONNECTION By OVERLAY: ${from && to}`, from, to, ` Status: ${res}`);
+					console.log(this.socket.getNeighbours());
+				}
+			} else {
+				this._passive(this, message.id, message.message);
+			}
 		});
 
 		// Active thread listening on the event shuffling of the rps
@@ -309,12 +317,12 @@ class TManSpray extends EventEmitter {
 			// is not in our views
 			const msg = {
 				type: 'connect-to-view',
-				socketId: this.id,
-				descriptor: this.getDescriptor(),
+				toConnect: views[i],
+				fromConnect: this.getDescriptor(),
 				pingStart: new Date().getTime()
 			};
 			const res = this.socket.send(from, msg);
-			this._log('Connection from: ', from, 'to: ', this.id, ' Message sent:', msg, ' Status', res);
+			console.log('Connection from: ', from, 'to: ', this.id, ' Message sent:', msg, ' Status', res);
 			i++;
 		}
 	}
@@ -518,6 +526,7 @@ class TManSpray extends EventEmitter {
 
 		// we rank our views (plus some randomViews) compared to our descriptor a
 		const rankedViews = overlay.rankingFunction(descriptor, overlay._merge(overlay.views, overlay.randomSampleViews), false);
+
 		// we select a
 		const p = overlay.selectPeers(overlay.maxPeers, rankedViews);
 
@@ -576,7 +585,7 @@ class TManSpray extends EventEmitter {
 
 			// check if there is only just #views connections
 			this._connect(id, overlay.views);
-			overlay._checkConnections();
+			//overlay._checkConnections();
 
 
 			// emit to a message that we finish the passive thread

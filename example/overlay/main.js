@@ -6,18 +6,68 @@ let o = [];
 
 const max = 10;
 
-for(let i = 0; i < max; ++i) {
-	o[i] = new Foglet({
-		webrtc:	{
-			trickle: false,
-			iceServers : []
-		},
-		p: 1,
-		m: 10,
-		enableOverlay: true,
-		signalingAdress: 'http://localhost:3000'
-	});
-}
+$.ajax({
+	url : 'https://service.xirsys.com/ice',
+	data : {
+		ident: 'folkvir',
+		secret: 'a0fe3e18-c9da-11e6-8f98-9ac41bd47f24',
+		domain: 'foglet-examples.herokuapp.com',
+		application: 'foglet-examples',
+		room: 'sparqldistribution',
+		secure: 1
+	},
+	success: function (response, status) {
+		let iceServers;
+		if (response.d.iceServers) {
+			iceServers = response.d.iceServers;
+		}
+
+		console.log(iceServers, status);
+		const ices = [];
+		iceServers.forEach(ice => {
+			console.log(ice);
+			if(ice.credential && ice.username) {
+				ices.push({ urls: ice.url, credential: ice.credential, username: ice.username });
+			} else {
+				ices.push({ urls: ice.url });
+			}
+		});
+		console.log(ices);
+
+
+
+		for(let i = 0; i < max; ++i) {
+			o[i] = new Foglet({
+				webrtc:	{
+					trickle: false,
+					iceServers : []
+				},
+				p: 3,
+				m: 10,
+				enableOverlay: false,
+				room:'foglet-overlay',
+				signalingAdress: 'http://localhost:3000',
+				verbose:true
+			});
+		}
+
+		o.forEach(p => {
+			console.log(p.options.spray);
+			p.options.spray.on('shuffling', (reason) => {
+				console.log('Shuffle: ', reason);
+				setTimeout(function () {
+					if(p.options.enableOverlay) {
+						drawBoth();
+					} else {
+						drawRps();
+					}
+				}, 2000);
+			});
+		});
+	}
+});
+
+
 
 const connection = (time2wait = 1000) => {
 	for (let i = 0; i < max; ++i) {
@@ -38,8 +88,17 @@ const run = () => {
 	o.forEach(p => p.options.overlay.run());
 };
 
-const exchange = () => {
-	o.forEach(p => console.log(p.options.spray.exchange()));
+const exchange = (time2wait = 1000) => {
+	let i = 0;
+	o.forEach(p => {
+		(function (ind) {
+			setTimeout(function () {
+				console.log('Shuffle:', (time2wait * ind));
+				p.options.spray.exchange();
+			}, (time2wait * ind));
+		})(i);
+		++i;
+	});
 };
 
 const init = (limit = -1) => {
@@ -48,7 +107,7 @@ const init = (limit = -1) => {
 
 const getViews = () => {
 	o.forEach(p => console.log(p.options.overlay.getViews()));
-}
+};
 
 const peers = () => {
 	o.forEach(p => console.log(p.options.spray.getPeers()));
@@ -56,7 +115,7 @@ const peers = () => {
 
 const neigh = () => {
 	o.forEach(p => console.log(p.options.overlay.getNeighbours()));
-}
+};
 
 // ======================================================================================================================
 // ================================================== GRAPH CONSTRUCTION ================================================
@@ -83,7 +142,7 @@ const constructRpsGraph = ()  => {
 	});
 
 	o.forEach(over => {
-		if(over.options.spray.getPeers().o.length === 0){
+		if(over.options.spray.getPeers().o.length === 0) {
 			result.push({
 				source: over.options.spray.neighborhoods.o.ID+'$'+over.options.spray.neighborhoods.i.ID,
 				target: over.options.spray.neighborhoods.o.ID+'$'+over.options.spray.neighborhoods.i.ID,
@@ -291,15 +350,6 @@ const drawOverlayGraph = () => {
 			return userColorOverlay[d.name].description;
 		});
 };
-
-
-o.forEach(p => {
-	p.options.spray.on('shuffling', () => {
-		setTimeout(function () {
-			drawBoth();
-		}, 2000);
-	});
-});
 
 const drawRps = () => {
 	if(svgRps) svgRps.remove();

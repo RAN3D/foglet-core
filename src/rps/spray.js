@@ -309,6 +309,7 @@ class Spray extends EventEmitter {
 			sent = this.send(oldest.id, message, 0);
 		}
 		if (this.partialView.length() === 0) {
+			console.log('Partial view is 0 length');
 			return;
 		}
 		// #2 get a sample from our partial view

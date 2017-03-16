@@ -9,7 +9,7 @@ Run just one command :
 ```bash
 npm install foglet-core
 ```
-## Documentation available [here](https://folkvir.github.io/foglet-core/)
+## Documentation available [here](https://ran3d.github.io/foglet-core/)
 
 ## How to use it and write your example ?
 Before all, insert the spray-wrtc.bundle.js provided by the npm package spray-wrtc in : node_modules/spray-wrtc/build/ into your html file.
@@ -18,9 +18,8 @@ The bundle provided offers you to write this require into your browser script :
 - ``` require("foglet") ```
 
 If you do not provide a list of ice servers your example will not work on the web but will work on your local network.
-Examples with iceServers are provided by us in our [list of examples](https://github.com/folkvir/foglet/tree/master/example).
 
-But to be begin here is a simple example, after building the bundles and import them in your html file you can write something like this :
+But to be begin here is a simple example, after building the bundle and import it in your html file you can write something like this :
 ```javascript
      // Require at least those two libraries
      var Foglet = require('foglet');
@@ -33,7 +32,7 @@ But to be begin here is a simple example, after building the bundles and import 
     	room: '[your-example-name]'
     });
 
-    // Retreive a message send by a broadcast foglet
+    // Retreive a message sent by a broadcast
     foglet.onBroadcast( 'receive', function(message){
       console.log(message);
     });
@@ -69,21 +68,19 @@ If you want to use our Register Protocol you can write this (after the previous 
 
 In order to run the library, you have to provide a signaling server compatible with foglet available [here](https://github.com/folkvir/foglet-signaling-server).
 
-Now open http://localhost:3000 or http://localhost:3000?server=[yourSignalServerAdress]
+Now open http://localhost:3000/
 
 
 ## References
 
 **T. Minier** alias [Callidon](https://github.com/Callidon) :  for contributions on ES6 references and testing tools.
 
-**Chat-Wane** :
+**[Chat-Wane](https://github.com/Chat-Wane/)**:
 Keywords: Random peer sampling, adaptive, browser-to-browser communication, WebRTC
 
 This project aims to provide a WebRTC implementation of Spray.
 
 Spray is a random peer sampling protocol [1] inspired by both Cyclon [2] and Scamp [3]. It adapts the partial view of each member to the network size using local knowledge only. Therefore, without any configurations, each peer automatically adjust itself to the need of the network.
-
-https://github.com/Chat-Wane/spray-wrtc/
 
 [1] M. Jelasity, S. Voulgaris, R. Guerraoui, A.-M. Kermarrec, and M. Van Steen. Gossip-based peer sampling. ACM Transactions on Computer Systems (TOCS), 25(3):8, 2007.
 
