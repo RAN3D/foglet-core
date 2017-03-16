@@ -521,14 +521,19 @@ class ExtendedNeighborhood extends Neighbour {
 	* @return {string} the id of the socket
 	*/
 	connection (callbacks, message, protocol) {
+
 		let msg = (callbacks && callbacks.type && callbacks) || message;
 		let result;
 
 		if (!msg) {
 			result = this.initiate(callbacks, protocol);
 		} else if (msg.type==='MRequest') {
-			result = this.accept(msg, callbacks);
-			result = this.alreadyExists(msg, callbacks) || result;
+			if(message && message.pid && this.ID !== message.pid){
+				// console.log('**** Connection to myself !!! ****');
+				result = this.accept(msg, callbacks);
+				result = this.alreadyExists(msg, callbacks) || result;
+			}
+
 		} else if (msg.type==='MResponse') {
 			result = this.finalize(msg);
 			result = this.alreadyExists(msg) || result;
