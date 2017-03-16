@@ -213,6 +213,8 @@ class Socket extends EventEmitter {
 			inview: new ExtendedNeighborhood(this.defaultOptions.neighborhood),
 			outview: new ExtendedNeighborhood(this.defaultOptions.neighborhood)
 		});
+		this.inview.on('fail', (reason) => self.emit('failed', 'i', 'inview', reason));
+		this.outview.on('fail', (reason) => self.emit('failed', 'o', 'outview', reason));
 
 		this.socket.on('receive', (id, message) => this._onReceive(id, message));
 		this.socket.on('stream', (id, message) => this._onStream(id, message));
@@ -303,10 +305,16 @@ class Socket extends EventEmitter {
 		const socketId = this.socket.get(id);
 		if(socketId) {
 			this._log('Message sent to : '+ socketId, message);
-			return this.socket.send(socketId, message);
+			try {
+				this.socket.send(socketId, message);
+			} catch (e) {
+				console.log(e);
+				return false;
+			}
 		} else {
 			return false;
 		}
+		return true;
 	}
 
 	toString () {
@@ -428,6 +436,7 @@ class Socket extends EventEmitter {
 /** =========================================================================
  *	=========================================================================
  * 	========================================================================= */
+
 
 /**
  * Extended class of neighborhood-wrtc with [en/de]coding features
@@ -581,7 +590,8 @@ class ExtendedNeighborhood extends Neighbour {
 		entry.timeout = setTimeout(() => {
 			let e = self.pending.get(entry.id);
 			if (e && !e.successful) {
-				self.emit('fail', '[FAIL:ACCEPT] an error occured during removing the entry');
+				console.log('[FAIL:INITIATE] an error occured during removing the entry');
+				self.emit('fail', '[FAIL:INITIATE] an error occured during removing the entry');
 			}
 			self.pending.remove(entry) && socket.destroy();
 		}, this.TIMEOUT);
@@ -666,7 +676,8 @@ class ExtendedNeighborhood extends Neighbour {
 			if(this.pending.get(message.tid)) {
 				console.log('[ENB] There is already a pending connection !!!!!');
 			}
-			console.log(message);
+			console.log(message, this.ID);
+
 			console.log('[ERROR:ACCEPT]', new Error(err));
 		});
 
@@ -675,6 +686,7 @@ class ExtendedNeighborhood extends Neighbour {
 		entry.timeout = setTimeout(function () {
 			let e = self.pending.get(entry.id);
 			if (e && !e.successful) {
+				console.log('[FAIL:ACCEPT] an error occured during removing the entry');
 				self.emit('fail', '[FAIL:ACCEPT] an error occured during removing the entry');
 			}
 			self.pending.remove(entry.id) && socket.destroy();

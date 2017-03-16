@@ -110,7 +110,8 @@ class Spray extends EventEmitter {
 			self.updateState();
 		});
 
-		this.neighborhoods.on('fail', (id, view) => {
+		this.neighborhoods.on('failed', (id, view, reason) => {
+			console.log('Spray:onFail:', id, view, reason);
 			(view === 'outview') && self.onArcDown();
 		});
 
@@ -137,7 +138,12 @@ class Spray extends EventEmitter {
 				if (self.partialView.length() > 0) {
 					// #A signal the arrival of a new peer to its outview
 					self.partialView.get().forEach(n => {
-						self.neighborhoods.connect(n, id);
+
+						if(n.id !== id) {
+							self.neighborhoods.connect(n, id);
+						}else {
+							console.log('n:', n, '| id:', id);
+						}
 					});
 				} else {
 					// #B adds it to its own outview (for only 2-peers network)

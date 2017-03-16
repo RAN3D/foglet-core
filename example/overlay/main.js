@@ -44,6 +44,7 @@ $.ajax({
 				},
 				p: 3,
 				m: 10,
+				timeout: 5000 * 100,
 				enableOverlay: false,
 				room:'foglet-overlay',
 				signalingAdress: 'http://localhost:3000',
@@ -88,7 +89,7 @@ const run = () => {
 	o.forEach(p => p.options.overlay.run());
 };
 
-const exchange = (time2wait = 1000) => {
+const exchange = (time2wait = 500) => {
 	let i = 0;
 	o.forEach(p => {
 		(function (ind) {
