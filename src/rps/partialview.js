@@ -70,9 +70,19 @@ class PartialView {
 		}
 		// #2 process the size of the sample
 		const sampleSize = Math.ceil(this.array.arr.length * this.usedCoef);
-		if (isInitiator) {
+    if (isInitiator) {
+//        console.log('neighbor ', neighbor);
+        var found = false;
+        var i = 0;
+        while(!found && i<clone.arr.length){
+            if (clone.arr[i].id===neighbor.id){
+                found = true;
+            } else {
+                ++i;
+            };
+        };
 			// #A remove an occurrence of the chosen neighbor
-			clone.remove(neighbor);
+	    clone.arr.splice(i,1);
 			sample.push(neighbor);
 		}
 
