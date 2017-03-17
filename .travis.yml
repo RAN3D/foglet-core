@@ -12,7 +12,6 @@ script:
   - 'npm run build:foglet'
   - ls -R ./dist ./src
   - npm test
-  - npm run cover
   - npm run doc
 after_success:
   - bash deploy_doc.sh
