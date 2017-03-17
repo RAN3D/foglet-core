@@ -39,10 +39,11 @@ class Spray extends EventEmitter {
 			retry: 10,
 			k: 10,
 			profile: {},
-			usedCoef: 0.5
+			usedCoef: 0.5,
+			verbose: false
 		}, options);
 
-
+		this.verbose = this.opts.verbose;
 		// #A constants
 		this.protocol = this.opts.protocol;
 		this.DELTATIME = this.opts.deltatime; // 2min
@@ -85,7 +86,7 @@ class Spray extends EventEmitter {
 				if(!message.view) {
 					self.onExchange(message);
 				} else {
-					// console.log(message.view.outviewId, message.view);
+					// this.log(message.view.outviewId, message.view);
 					self.views.set(message.view.outviewId, message.view);
 				}
 
@@ -111,7 +112,7 @@ class Spray extends EventEmitter {
 		});
 
 		this.neighborhoods.on('failed', (id, view, reason) => {
-			console.log('Spray:onFail:', id, view, reason);
+			this.log('Spray:on:Failed:', id, view, reason);
 			(view === 'outview') && self.onArcDown();
 		});
 
@@ -119,6 +120,12 @@ class Spray extends EventEmitter {
 			self.updateState();
 		});
 
+	}
+
+	log (...args) {
+		if(this.verbose) {
+			console.log('[SPRAY-WRTC]', args);
+		}
 	}
 
 	/**
@@ -142,7 +149,7 @@ class Spray extends EventEmitter {
 						if(n.id !== id) {
 							self.neighborhoods.connect(n, id);
 						}else {
-							console.log('n:', n, '| id:', id);
+							this.log('n:', n, '| id:', id);
 						}
 					});
 				} else {
@@ -315,7 +322,7 @@ class Spray extends EventEmitter {
 			sent = this.send(oldest.id, message, 0);
 		}
 		if (this.partialView.length() === 0) {
-			console.log('Partial view is 0 length');
+			this.log('Partial view is 0 length');
 			return;
 		}
 		// #2 get a sample from our partial view
@@ -400,7 +407,7 @@ class Spray extends EventEmitter {
 	 * @return {void}
 	 */
 	onPeerDown (id) {
-		console.log(`@spray: The peer ${JSON.stringify(id)} seems down.`);
+		this.log(`@spray: The peer ${JSON.stringify(id)} seems down.`);
 		// #A remove all occurrences of the peer in the partial view
 		const occ = this.partialView.removeAll(id);
 		// #B probabilistically recreate an arc to a known peer
@@ -420,7 +427,7 @@ class Spray extends EventEmitter {
 	 * @return {void}
 	 */
 	onArcDown () {
-		console.log('@spray: An arc failed to establish.');
+		this.log('@spray: An arc failed to establish.');
 		if (this.partialView.length() > 0) {
 			const rn = Math.floor(Math.random() * this.partialView.length());
 			this.neighborhoods.connect(null, this.partialView.array.arr[rn]);

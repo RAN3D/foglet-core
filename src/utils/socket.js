@@ -50,16 +50,16 @@ const SimplePeer = require('simple-peer');
  * let c = new Socket();
  * let d = new Socket();
  * c.on('onReady', (data) => {
- *	console.log('Connected : ', data);
+ *	this.log('Connected : ', data);
  * });
  * d.on('onReady', (data) => {
- *	console.log('Connected : ', data);
+ *	this.log('Connected : ', data);
  * });
  * c.on('joinedRoom', () => {
- *	console.log(d.connection());
+ *	this.log(d.connection());
  * });
  * d.on('joinedRoom', () => {
- *	console.log(c.connection());
+ *	this.log(c.connection());
  * });
  * c.join('mywonderfulroom');
  * d.join('mywonderfulroom');
@@ -213,6 +213,7 @@ class Socket extends EventEmitter {
 			inview: new ExtendedNeighborhood(this.defaultOptions.neighborhood),
 			outview: new ExtendedNeighborhood(this.defaultOptions.neighborhood)
 		});
+		this.socket.on('error', (location, error) => self.emit('error', location, error));
 		this.inview.on('fail', (reason) => self.emit('failed', 'i', 'inview', reason));
 		this.outview.on('fail', (reason) => self.emit('failed', 'o', 'outview', reason));
 
@@ -289,7 +290,7 @@ class Socket extends EventEmitter {
 	 * @return {boolean} Return true if the disconnection is ok otherwise false;
 	 */
 	disconnect (outviewId = undefined) {
-		console.log('DISCONNECTION OF: ' + outviewId);
+		this.log('DISCONNECTION OF: ' + outviewId);
 		return this.socket.disconnect(outviewId);
 	}
 
@@ -308,7 +309,7 @@ class Socket extends EventEmitter {
 			try {
 				this.socket.send(socketId, message);
 			} catch (e) {
-				console.log(e);
+				this.log(e);
 				return false;
 			}
 		} else {
@@ -371,7 +372,7 @@ class Socket extends EventEmitter {
 	 */
 	_log (...args) {
 		if(this.defaultOptions.verbose) {
-			console.log('[Socket:' + this.defaultOptions.neighborhood.protocol + ']', args);
+			this.log('[Socket:' + this.defaultOptions.neighborhood.protocol + ']', args);
 		}
 	}
 
@@ -451,6 +452,10 @@ class ExtendedNeighborhood extends Neighbour {
 		if(this.options.config.wrtc) {
 			this.options.wrtc = this.options.config.wrtc;
 		}
+
+		if(options && options.verbose) {
+			this.verbose = options.verbose;
+		}
 	}
 
 	MResponse (tid, pid, offer, protocol) {
@@ -470,6 +475,12 @@ class ExtendedNeighborhood extends Neighbour {
 			type: 'MRequest',
 			offer: offer
 		};
+	}
+
+	log (...args) {
+		if(this.verbose) {
+			console.log('[NEIGHBORHOOD] ', args);
+		}
 	}
 
 	/**
@@ -507,7 +518,14 @@ class ExtendedNeighborhood extends Neighbour {
 		let socket = entry && entry.socket;
 		// #3 send
 		let result = msg && socket && socket.connected && socket._channel && (socket._channel.readyState === 'open');
-		result && socket.send(msg);
+		// result && socket.send(msg);
+		try {
+			result && socket.send(msg);
+			// DONT SET RESULT TO TRUE !
+		} catch (e) {
+			this.log('[NEIGHBORHOOD:SEND:ERROR] ', new Error(e));
+			result = false;
+		}
 		return result;
 	}
 
@@ -528,8 +546,8 @@ class ExtendedNeighborhood extends Neighbour {
 		if (!msg) {
 			result = this.initiate(callbacks, protocol);
 		} else if (msg.type==='MRequest') {
-			if(message && message.pid && this.ID !== message.pid){
-				// console.log('**** Connection to myself !!! ****');
+
+			if(message && message.pid && this.ID !== message.pid) {
 				result = this.accept(msg, callbacks);
 				result = this.alreadyExists(msg, callbacks) || result;
 			}
@@ -556,10 +574,6 @@ class ExtendedNeighborhood extends Neighbour {
 		});
 		socket.on('stream', (stream) => {
 			self.emit('stream', entry.pid, stream);
-		});
-		socket.on('error', (err) => {
-			console.log('[ERROR:COMMON]', new Error(err));
-			console.log('[Socket] :', socket);
 		});
 	}
 
@@ -588,14 +602,16 @@ class ExtendedNeighborhood extends Neighbour {
 		socket.on('signal', (offer) => {
 			entry.onOffer && entry.onOffer(self.MRequest(entry.id, self.ID, offer, protocol));
 		});
+		// socket.once('error', err => {
+		//	this.log('[ERROR:INITIATE]', new Error(err));
+		// });
 		socket.on('error', err => {
-			console.log('[ERROR:INITIATE]', new Error(err));
+			this.emit('error', 'initiate', err);
 		});
 
 		entry.timeout = setTimeout(() => {
 			let e = self.pending.get(entry.id);
 			if (e && !e.successful) {
-				console.log('[FAIL:INITIATE] an error occured during removing the entry');
 				self.emit('fail', '[FAIL:INITIATE] an error occured during removing the entry');
 			}
 			self.pending.remove(entry) && socket.destroy();
@@ -675,15 +691,7 @@ class ExtendedNeighborhood extends Neighbour {
 			}
 		});
 		socket.on('error', err => {
-			if(this.living.get(message.pid)) {
-				console.log('[ENB] There is already a connection !!!!!');
-			}
-			if(this.pending.get(message.tid)) {
-				console.log('[ENB] There is already a pending connection !!!!!');
-			}
-			console.log(message, this.ID);
-
-			console.log('[ERROR:ACCEPT]', new Error(err));
+			this.emit('error', 'accept', err);
 		});
 
 		this.common(entry);
@@ -691,7 +699,6 @@ class ExtendedNeighborhood extends Neighbour {
 		entry.timeout = setTimeout(function () {
 			let e = self.pending.get(entry.id);
 			if (e && !e.successful) {
-				console.log('[FAIL:ACCEPT] an error occured during removing the entry');
 				self.emit('fail', '[FAIL:ACCEPT] an error occured during removing the entry');
 			}
 			self.pending.remove(entry.id) && socket.destroy();
@@ -753,7 +760,7 @@ class ExtendedNeighborhood extends Neighbour {
 			}
 		});
 		socket.on('error', err => {
-			console.log('[ERROR:FINALIZE]', new Error(err));
+			this.emit('error', 'finalize', err);
 		});
 
 		this.common(prior);

@@ -47,7 +47,7 @@ class SocketPing extends EventEmitter {
 					m.type = 'socket-ping-protocol-end';
 					this.socket.send(peer, m);
 				} else if (m) {
-					this.emit('receive-ping', m);
+					this.emit('receive-ping'+m.pingId, m);
 				}
 			});
 		} else {
@@ -72,7 +72,7 @@ class SocketPing extends EventEmitter {
 				timeStart: new Date().getTime()
 			};
 			if(this.socket.send(idToPing, message)) {
-				this.on('receive-ping', (ping) => {
+				this.once('receive-ping'+message.pingId, (ping) => {
 					if(ping.pingId === message.pingId) {
 						resolve(ping.timeEnd - ping.timeStart);
 					}

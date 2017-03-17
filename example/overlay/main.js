@@ -44,7 +44,7 @@ $.ajax({
 				},
 				p: 3,
 				m: 10,
-				timeout: 5000 * 100,
+				timeout: 100 * 1000,
 				enableOverlay: false,
 				room:'foglet-overlay',
 				signalingAdress: 'http://localhost:3000',
@@ -241,7 +241,7 @@ const drawRpsGraph = () => {
 		.nodes(d3.values(nodes))
 		.links(links)
 		.size([ width, height ])
-		.linkDistance(100)
+		.linkDistance(200)
 		.charge(-500)
 		.on('tick', tickRps)
 		.start();
