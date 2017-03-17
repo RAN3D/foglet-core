@@ -309,6 +309,9 @@ class TManSpray extends EventEmitter {
 
 	/**
 	 * Connect us to another view by passing through id
+	 * @param {string} from id to send the  node on which is a node between fromConnect to toConnect
+	 * @param {array} views Views to connect to
+	 * @return {void}
 	 */
 	_connect (from, views) {
 		console.log('==========: CONNECT PART :==========');
@@ -352,6 +355,7 @@ class TManSpray extends EventEmitter {
 
 	/**
 	 * Remove all connections not in views
+	 * @return {void}
 	 */
 	_checkConnections () {
 		const neigh = this.socket.getNeighbours();
@@ -413,6 +417,8 @@ class TManSpray extends EventEmitter {
 	* ranking function, used to order view as we want, injected parameter : this.views
 	* @param {object} obj an object {....}
 	* @param {array} array an array of objects [{...},{...},...]
+	* @param {boolean} withObj Add obj to array if true to the results
+	* @return {array} ranked array
 	*/
 	rankingFunction (obj, array, withObj = false) {
 		if(withObj) array.push(obj);
@@ -475,7 +481,9 @@ class TManSpray extends EventEmitter {
 
 	/**
 	 * Transform and/or compute any calculs
-	 * @param {array} views Views to transforms
+	 * @param {message} message message sent to us
+	 * @param {array} views Views to transforms with the message sent to us as second parameter
+	 * @return {array} Transformed views
 	 */
 	_transform (message, views) {
 		const pingEnd = new Date().getTime();
@@ -485,15 +493,14 @@ class TManSpray extends EventEmitter {
 			view.profile.ping.end = pingEnd;
 			view.profile.ping.value = (pingEnd - message.pingStart) + view.profile.randomNumber;
 
-			/*
+
 			const x = view.profile.vivaldiPos.x, y = view.profile.vivaldiPos.y, h = view.profile.vivaldiPos.h;
 			let v = Vivaldi.create(new HeightCoordinates(x, y, h));
 			// update our location
-			Vivaldi.update(view.profile.ping.value, overlay.vivaldi, v);
+			Vivaldi.update(view.profile.ping.value, this.vivaldi, v);
 			// update its location
-			Vivaldi.update(view.profile.ping.value, v, new HeightCoordinates(overlay.descriptor.profile.vivaldiPos.x, overlay.descriptor.profile.vivaldiPos.y, overlay.descriptor.profile.vivaldiPos.h));
+			Vivaldi.update(view.profile.ping.value, v, new HeightCoordinates(this.descriptor.profile.vivaldiPos.x, this.descriptor.profile.vivaldiPos.y, this.descriptor.profile.vivaldiPos.h));
 			view.profile.vivaldiPos =  { x: v.getCoordinates().x, y: v.getCoordinates().y, h: v.getCoordinates().h };
-			*/
 		});
 		return views;
 	}
@@ -585,7 +592,7 @@ class TManSpray extends EventEmitter {
 
 			// check if there is only just #views connections
 			this._connect(id, overlay.views);
-			//overlay._checkConnections();
+			// overlay._checkConnections();
 
 
 			// emit to a message that we finish the passive thread

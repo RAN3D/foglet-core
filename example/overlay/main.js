@@ -45,7 +45,7 @@ $.ajax({
 				p: 3,
 				m: 10,
 				timeout: 100 * 1000,
-				enableOverlay: false,
+				enableOverlay: true,
 				room:'foglet-overlay',
 				signalingAdress: 'http://localhost:3000',
 				verbose:true
@@ -183,7 +183,7 @@ const constructOverlayGraph = ()  => {
 		let sock = over.options.overlay.overlay.socket;
 		userColorOverlay[sock.outviewId+'$'+sock.inviewId] = {
 			color: colorOverlay(i),
-			description: `ID:${over.options.overlay.overlay.descriptor.id} Cycles:${over.options.overlay.overlay.cycles} (o:${over.options.overlay.getNeighbours().outview.length}, i:${over.options.overlay.getNeighbours().inview.length})`,
+			description: `Cycles:${over.options.overlay.overlay.cycles} (Out:${over.options.overlay.getNeighbours().outview.length})`,
 			views: over.options.overlay.getViews(),
 			profile: over.options.overlay.overlay.descriptor
 		};
@@ -309,7 +309,7 @@ const drawOverlayGraph = () => {
 		.nodes(d3.values(nodes))
 		.links(links)
 		.size([ width, height ])
-		.linkDistance(100)
+		.linkDistance(200)
 		.charge(-500)
 		.on('tick', tickOverlay)
 		.start();

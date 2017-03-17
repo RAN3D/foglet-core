@@ -213,9 +213,9 @@ class Socket extends EventEmitter {
 			inview: new ExtendedNeighborhood(this.defaultOptions.neighborhood),
 			outview: new ExtendedNeighborhood(this.defaultOptions.neighborhood)
 		});
-		this.socket.on('error', (location, error) => self.emit('error', location, error));
-		this.inview.on('fail', (reason) => self.emit('failed', 'i', 'inview', reason));
-		this.outview.on('fail', (reason) => self.emit('failed', 'o', 'outview', reason));
+		this.socket.on('error', (error) => this.emit('error', error));
+		this.socket.inview.on('fail', (reason) => this.emit('failed', 'i', 'inview', reason));
+		this.socket.outview.on('fail', (reason) => this.emit('failed', 'o', 'outview', reason));
 
 		this.socket.on('receive', (id, message) => this._onReceive(id, message));
 		this.socket.on('stream', (id, message) => this._onStream(id, message));
@@ -290,7 +290,7 @@ class Socket extends EventEmitter {
 	 * @return {boolean} Return true if the disconnection is ok otherwise false;
 	 */
 	disconnect (outviewId = undefined) {
-		this.log('DISCONNECTION OF: ' + outviewId);
+		this._log('DISCONNECTION OF: ' + outviewId);
 		return this.socket.disconnect(outviewId);
 	}
 
@@ -372,7 +372,7 @@ class Socket extends EventEmitter {
 	 */
 	_log (...args) {
 		if(this.defaultOptions.verbose) {
-			this.log('[Socket:' + this.defaultOptions.neighborhood.protocol + ']', args);
+			console.log('[Socket:' + this.defaultOptions.neighborhood.protocol + ']', args);
 		}
 	}
 
@@ -575,6 +575,10 @@ class ExtendedNeighborhood extends Neighbour {
 		socket.on('stream', (stream) => {
 			self.emit('stream', entry.pid, stream);
 		});
+
+		socket.on('error', err => {
+			self.emit('error', new Error(err));
+		});
 	}
 
 	/**
@@ -601,12 +605,6 @@ class ExtendedNeighborhood extends Neighbour {
 		this.pending.insert(entry);
 		socket.on('signal', (offer) => {
 			entry.onOffer && entry.onOffer(self.MRequest(entry.id, self.ID, offer, protocol));
-		});
-		// socket.once('error', err => {
-		//	this.log('[ERROR:INITIATE]', new Error(err));
-		// });
-		socket.on('error', err => {
-			this.emit('error', 'initiate', err);
 		});
 
 		entry.timeout = setTimeout(() => {
@@ -690,9 +688,6 @@ class ExtendedNeighborhood extends Neighbour {
 				self.dying.remove(entry.pid);
 			}
 		});
-		socket.on('error', err => {
-			this.emit('error', 'accept', err);
-		});
 
 		this.common(entry);
 
@@ -758,9 +753,6 @@ class ExtendedNeighborhood extends Neighbour {
 				}
 				self.dying.remove(prior.pid);
 			}
-		});
-		socket.on('error', err => {
-			this.emit('error', 'finalize', err);
 		});
 
 		this.common(prior);
