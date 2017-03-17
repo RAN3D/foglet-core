@@ -95,7 +95,7 @@ class TManSpray extends EventEmitter {
 		// please don't send Class or object that cant be (se/dese)rialized properly
 		this.profile = {
 			randomNumber: _.random(0, 100),
-			vivaldiPos: this.vivaldi.getCoordinates(),
+			vivaldiPos: this.getVivaldiPos,
 			vivaldiDistance: 0,
 			used: false,
 			rps: {
@@ -148,7 +148,14 @@ class TManSpray extends EventEmitter {
 					this.unicast.send(offer, offer.data.data.id);
 				},
 				onReady : (id) => {
-					console.log('[OVERFOG:OVERLAY] New peer connected to : ', id);
+					// compute the ping
+					// console.log('Ready:'+id, this.socket.socket.get(id));
+					this.ping.ping(id).then( res => {
+						console.log('PING TO '+ id + ': ', res);
+						this.profile.ping.value = res;
+					}).catch(err => {
+						console.log('PING:ERROR: ', err);
+					});
 				}
 			};
 		};
@@ -178,11 +185,11 @@ class TManSpray extends EventEmitter {
 				// this._connect(this.views);
 
 				this.views.forEach(v => {
-					console.log(this.socket.connection(null, {
+					this.socket.connection(null, {
 						type: 'init-system-overfog-offer',
 						id: v.profile.rps.outviewId,
 						socketId: message.socketId,
-					}, this.customCallback, 'initiate'));
+					}, this.customCallback, 'initiate');
 				});
 
 			} else if (message.type && message.data && message.data.type && message.data.type === 'init-system-overfog-offer' && message.type === 'MRequest') {
@@ -192,6 +199,7 @@ class TManSpray extends EventEmitter {
 				this.socket.connection(null, message, this.customCallback, 'accept');
 
 			} else if (message.type && message.data && message.data.data && message.data.data.type && message.data.data.type === 'init-system-overfog-accept' && message.type === 'MResponse') {
+
 				this.socket.connection(null, message, this.customCallback, 'finalize');
 
 			} else if(message.type && message.type === 'get-random-sample-views') {
@@ -219,7 +227,7 @@ class TManSpray extends EventEmitter {
 		this.socket.on('receive', message => {
 			if (message.message.type && message.message.type === 'connect-to-view') {
 				const out = this.socket.socket.get('outview');
-				console.log(out);
+				// console.log(out);
 				const indexOfFrom = _.findIndex(out, d => d.id === message.message.fromConnect.profile.outviewId),
 					indexOfTo = _.findIndex(out, d => d.id === message.message.toConnect.profile.outviewId);
 				// now we can established by bridge the connection between the sender and the owner of the view (not us but a neighbor)
@@ -229,8 +237,8 @@ class TManSpray extends EventEmitter {
 
 
 					const res = this.socket.socket.connect(from.id, to.id);
-					console.log(`BRIDGE CONNECTION By OVERLAY: ${from && to}`, from, to, ` Status: ${res}`);
-					console.log(this.socket.getNeighbours());
+					// console.log(`BRIDGE CONNECTION By OVERLAY: ${from && to}`, from, to, ` Status: ${res}`);
+					// console.log(this.socket.getNeighbours());
 				}
 			} else {
 				this._passive(this, message.id, message.message);
@@ -243,6 +251,11 @@ class TManSpray extends EventEmitter {
 			// we get another random sample of our RPS network
 			this.sendRandomSample();
 		});
+	}
+
+
+	get getVivaldiPos () {
+		return this.vivaldi.getCoordinates();
 	}
 
 	/**
@@ -424,8 +437,8 @@ class TManSpray extends EventEmitter {
 		if(withObj) array.push(obj);
 		let result = array;
 		if(array.length > 1) {
-			result = this.sortByPing(obj, array);
-			// result = this.sortByVivaldiDistance(obj, array);
+			// result = this.sortByPing(obj, array);
+			result = this.sortByVivaldiDistance(obj, array);
 			// result = this.sortSimple(obj, array);
 		}
 		return result;

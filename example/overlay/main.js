@@ -42,9 +42,10 @@ $.ajax({
 					trickle: false,
 					iceServers : []
 				},
-				p: 3,
+				p: 100,
 				m: 10,
-				timeout: 100 * 1000,
+				deltatime: (i+1) * 2 * 1000 + 60 * 1000, // 20s min + (i+1)*2secondes 
+				timeout: 30 * 1000,
 				enableOverlay: true,
 				room:'foglet-overlay',
 				signalingAdress: 'http://localhost:3000',

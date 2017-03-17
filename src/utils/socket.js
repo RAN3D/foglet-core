@@ -244,8 +244,6 @@ class Socket extends EventEmitter {
 			return this.socket.connection(this._signalingCallback());
 		} else if(customCallback) {
 			if(!socket && customCallback && data && state === 'initiate') {
-				// initiate
-				this._log('Custom callback initiate.', data);
 				return this.socket.connection(customCallback(data));
 			} else if(!socket && customCallback && data && state === 'accept') {
 				return this.socket.connection(customCallback(data), data);
@@ -304,12 +302,13 @@ class Socket extends EventEmitter {
 	 */
 	send (id, message) {
 		const socketId = this.socket.get(id);
+		this._log(id, message, socketId);
 		if(socketId) {
 			this._log('Message sent to : '+ socketId, message);
 			try {
 				this.socket.send(socketId, message);
 			} catch (e) {
-				this.log(e);
+				this._log('Send:', e);
 				return false;
 			}
 		} else {

@@ -62,7 +62,7 @@ class SocketPing extends EventEmitter {
 	 * @return {Promise} Return a Q Promise
 	 */
 	ping (idToPing, timeout = 60000) {
-		return Q.Promise(function (resolve, reject) {
+		return Q.Promise((resolve, reject) => {
 			setTimeout(() => {
 				reject(new Error('[SocketPing] Timeout !'));
 			}, timeout);
@@ -73,6 +73,7 @@ class SocketPing extends EventEmitter {
 			};
 			if(this.socket.send(idToPing, message)) {
 				this.once('receive-ping'+message.pingId, (ping) => {
+					// second check
 					if(ping.pingId === message.pingId) {
 						resolve(ping.timeEnd - ping.timeStart);
 					}
