@@ -4,32 +4,30 @@ let Foglet = require('../src/foglet.js');
 
 describe('[FOGLET:INIT]', function () {
 	describe('[FOGLET] Connection and Disconnection', function () {
-		this.timeout(15000);
+		this.timeout(30000);
 		it('[FOGLET] connection return true when connected', function (done) {
 				let f = new Foglet({
+					verbose:true,
 					protocol:'sprayExampleConnected',
 					webrtc:	{
-						trickle: false,
+						trickle: true,
 						iceServers: []
 					},
 					room: 'sprayExampleConnected'
 				});
 
 				let f1 = new Foglet({
+					verbose:true,
 					protocol:'sprayExampleConnected',
 					webrtc:	{
-						trickle: false,
+						trickle: true,
 						iceServers: []
 					},
 					room: 'sprayExampleConnected'
 				});
-				f.connection().then( () => {
-					f1.connection().then(function (status) {
+				f.connection(f1).then( (status) => {
 						assert(true, status, 'Status Must be true.');
 						done();
-					},function (error) {
-						console.log(error);
-					});
 				});
 		});// END IT
 	});// END of second describe
@@ -37,12 +35,12 @@ describe('[FOGLET:INIT]', function () {
 
 
 describe('[FOGLET:FREGISTER]', function () {
-	this.timeout(15000);
+	this.timeout(30000);
 	it('set a value and return the correct value', function () {
 		let f = new Foglet({
 			protocol:'fregister',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: 'fregister'
@@ -53,20 +51,10 @@ describe('[FOGLET:FREGISTER]', function () {
 		assert.equal(result, 'a_value', 'Return the correct value');
 	});
 	it('AntyEntropy test', function (done) {
-		let f = new Foglet({
-			protocol:'antyentropy',
-			webrtc:	{
-				trickle: false,
-				iceServers: []
-			},
-			timeout: 1000 * 60 * 2,
-			deltatime: 10000,
-			room: 'antyentropy'
-		});
 		let f1 = new Foglet({
 			protocol:'antyentropy',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			timeout: 1000 * 60 * 2,
@@ -77,7 +65,7 @@ describe('[FOGLET:FREGISTER]', function () {
 		let f2 = new Foglet({
 			protocol:'antyentropy',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			timeout: 1000 * 60 * 2,
@@ -87,7 +75,7 @@ describe('[FOGLET:FREGISTER]', function () {
 		let f3 = new Foglet({
 			protocol:'antyentropy',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			timeout: 1000 * 60 * 2,
@@ -96,18 +84,14 @@ describe('[FOGLET:FREGISTER]', function () {
 		});
 
 		// INIT FOGLETS
-		f1.connection().then( () => {
-			f1.addRegister('test');
-			f1.getRegister('test').setValue('testValue');
-			f2.connection().then( () => {
-				setTimeout( () => {
-					f3.connection().then( () => {
-						f3.addRegister('test');
-						setTimeout(() => {
-							assert(f3.getRegister('test').getValue(), 'testValue');
-							done();
-						}, 2000);
-					});
+		f1.addRegister('test');
+		f1.getRegister('test').setValue('testValue');
+		f1.connection(f2).then( () => {
+			f3.connection(f2).then( () => {
+				f3.addRegister('test');
+				setTimeout(() => {
+					assert(f3.getRegister('test').getValue(), 'testValue');
+					done();
 				}, 2000);
 			});
 		});
@@ -117,7 +101,7 @@ describe('[FOGLET:FREGISTER]', function () {
 		let f = new Foglet({
 			protocol:'sprayOnregister',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: 'sprayOnregister'
@@ -126,7 +110,7 @@ describe('[FOGLET:FREGISTER]', function () {
 		let f2 = new Foglet({
 			protocol:'sprayOnregister',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: 'sprayOnregister'
@@ -139,23 +123,21 @@ describe('[FOGLET:FREGISTER]', function () {
 			done();
 		});
 
-		f.connection().then( () => {
-			f2.connection().then(() => {
-				setTimeout(() => {
-					f.getRegister('test').setValue(5);
-				}, 2000);
-			});
+		f.connection(f2).then( () => {
+			setTimeout(() => {
+				f.getRegister('test').setValue(5);
+			}, 2000);
 		});
 	});
 });
 
 describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
-	this.timeout(15000);
+	this.timeout(30000);
 	it('[FOGLET] sendBroadcast/onBroadcast', function (done) {
 		let f1 = new Foglet({
 			protocol:'test-broadcast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: 'test-broadcast'
@@ -163,7 +145,7 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		let f2 = new Foglet({
 			protocol:'test-broadcast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: 'test-broadcast'
@@ -175,12 +157,10 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 			done();
 		});
 
-		f1.connection().then( () => {
-			f2.connection().then( () => {
-				setTimeout(function () {
-					f1.sendBroadcast('hello');
-				}, 2000);
-			});
+		f1.connection(f2).then( () => {
+			setTimeout(function () {
+				f1.sendBroadcast('hello');
+			}, 2000);
 		});
 	});
 
@@ -188,19 +168,19 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		let f1 = new Foglet({
 			protocol:'test-unicast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
-			room: 'test-unicast'
+			room: 'test-unicastroom'
 		});
 
 		let f2 = new Foglet({
 			protocol:'test-unicast',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
-			room: 'test-unicast'
+			room: 'test-unicastroom'
 		});
 
 		f2.onUnicast((id, message) => {
@@ -209,16 +189,14 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 			done();
 		});
 
-		f1.connection().then( () => {
-			f2.connection().then( () => {
-				setTimeout(function () {
-					const peers = f1.getNeighbours();
-					console.log(peers);
-					for(let i = 0; i < peers.length; i++) {
-						f1.sendUnicast('hello', peers[i]);
-					}
-				}, 2000);
-			});
+		f1.connection(f2).then( () => {
+			setTimeout(function () {
+				const peers = f1.getNeighbours();
+				console.log(peers);
+				for(let i = 0; i < peers.length; i++) {
+					f1.sendUnicast('hello', peers[i]);
+				}
+			}, 2000);
 		});
 	});
 
@@ -226,7 +204,7 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		let f1 = new Foglet({
 			protocol:'neighbours',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: 'neighbours'
@@ -234,35 +212,30 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		let f2 = new Foglet({
 			protocol:'neighbours',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: 'neighbours'
 		});
 
-		f1.connection().then( () => {
-			f2.connection().then( () => {
-				const peers = f2.getNeighbours();
-				const randomPeer = f2.getRandomNeighbourId();
-				console.log(peers);
-				console.log(randomPeer);
-				assert(peers.includes(randomPeer));
-				done();
-			}).catch(error => {
-				console.log(error);
-				done(error);
-			});
-		})
+		f1.connection(f2).then( () => {
+			console.log('Get peers: ', f1.options.spray.getPeers(), f2.options.spray.getPeers());
+			console.log('All neighbours: ', f1.getAllNeighbours(), f2.getAllNeighbours());
+			console.log('Peers: ', f1.getNeighbours(), f2.getNeighbours());
+			console.log('Random:', f1.getRandomNeighbourId(), f2.getRandomNeighbourId());
+			assert(f1.getNeighbours().includes(f1.getRandomNeighbourId()));
+			done();
+		});
 	});
 });
 
 describe('[FOGLET] Other functions tests', function () {
-	this.timeout(15000);
+	this.timeout(30000);
 	it('[FOGLET] _fRegisterKey()', function (done) {
 		let fog = new Foglet({
 			protocol:'_fRegisterKey',
 			webrtc:	{
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			room: '_fRegisterKey'

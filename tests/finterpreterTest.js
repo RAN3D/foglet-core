@@ -3,7 +3,7 @@
 let Foglet = require('../src/foglet.js');
 
 describe('[FInterpreter] Finterpreter functions', function () {
-	this.timeout(15000);
+	this.timeout(30000);
 
 	it('[FInterpreter] remoteBroadcast', function (done) {
 		let f1 = new Foglet({
@@ -41,8 +41,8 @@ describe('[FInterpreter] Finterpreter functions', function () {
 			}
 		});
 
-		f1.connection().then( () => {
-			f2.connection().then( () => {
+		f1.connection(f2).then( () => {
+			f2.connection(f1).then( () => {
 				console.log(f1.getAllNeighbours(), f2.getAllNeighbours());
 				f2.interpreter.remoteBroadcast('sendBroadcast', [ 'miaousssssss' ]);
 			}).catch(error => {
@@ -73,7 +73,7 @@ describe('[FInterpreter] Finterpreter functions', function () {
 		});
 
 		let cpt = 0;
-		const totalResult = 2;
+		const totalResult = 1;
 
 
 		f1.onUnicast((id, message) => {
@@ -89,22 +89,14 @@ describe('[FInterpreter] Finterpreter functions', function () {
 
 		f2.interpreter.on(f2.interpreter.signalUnicast, (result, id, message) => {
 			f2.interpreter._flog('A Unicast Command : ' + message.name + '(' + message.args + ') has been emit for The Interpreter Result : ' + result);
-			cpt++;
-			console.log(cpt);
-			if(cpt === totalResult) {
-				done();
-			}
 		});
-		f1.connection().then( () => {
-			f2.connection().then( () => {
-					f1.interpreter.remoteUnicast('sendUnicast', [ 'miaousssssss' , f2.getNeighbours()[0] ] , f1.getNeighbours()[0]);
-			}).catch(error => {
-				console.log(error);
-				done(error);
-			});
+		f1.connection(f2).then( () => {
+			//f2.connection(f1).then( () => {
+				console.log(f1.getNeighbours(), f2.getNeighbours());
+				f1.interpreter.remoteUnicast('sendUnicast', [ 'unicastMessageTest', f2.getNeighbours()[0] ], f1.getNeighbours()[0]);
+			//});
 		})
 	});
-
 	it('[FInterpreter] Map/Reduce', function (done) {
 		let f1 = new Foglet({
 			protocol:'interpreter-mapreduce',
@@ -161,4 +153,5 @@ describe('[FInterpreter] Finterpreter functions', function () {
 			});
 		})
 	}); //end it
+
 });//end describe
