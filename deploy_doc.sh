@@ -10,13 +10,13 @@ fi
 
 rev=$(git rev-parse --short HEAD)
 
-cd doc
+cd docs
 
 git init
 git config user.name "Grall Arnaud"
 git config user.email "dev.arnaudgrall@gmail.com"
 
-git remote add upstream "https://$GH_TOKEN@github.com/folkvir/foglet-core.git"
+git remote add upstream "https://$GH_TOKEN@github.com/RAN3D/foglet-core.git"
 git fetch upstream
 git reset upstream/gh-pages
 

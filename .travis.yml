@@ -1,15 +1,20 @@
 language: node_js
 node_js: node
+
 addons:
   firefox: '49.0'
+
 install:
   - npm install
+
 before_script:
   - 'export DISPLAY=:99.0'
   - sh -e /etc/init.d/xvfb start
   - sleep 3
+
 script:
   - npm run all
+
 after_success:
   - bash deploy_doc.sh
 deploy:
@@ -18,8 +23,8 @@ deploy:
   api_key:
   secure: TY3Y9fcDdD/ltb22pB41aT8OX/qt9Q1NyGv+wYkjitIcDhqrAr4a4RETXZOYY09Kp/LqKMqrgfgsYjHK8v1dSQpxmfxf9JGuR7Q08SJ6UTdQLgAsafS/WoIZsbjGq825RfNaoao9w1qVW/x2fEi4PffXzzRFr7JrI6pfKFKwf6J8xVXUSV3oGBi4kZ2L9t2iygs5gePwEHU+2+/2Hi3a8rnnNObpszpWN+mmMAj952IwZtG0goBZnqLrLeH9Ute/dlBrea1eQHkQhfz+XYwYzsW8DEGKIaWjnucuOrIhOQyq9ZNArQ1QP2a8zN/nUpeHGDNrKF9BQ92BuL/jMSj386XeSwcRuPdbr+Fa0aG/iZH5p/iSknEdXP9bbik99hVrvwZJ1AzM0zs7MUCzMpe4vPLNE83u5nMsrajhNtdsSvHYJb1ltOYUGpdsgGAzu/KETVwh6Ffd3NnStMBHw1hgUVih3rSm4iVo7de85yhySr/j8GDHF3u3GxeAN6YnRvcA9iA9jHjSQetMp6TW2v3zh4bTxHkICx8w1q3Bv+qjfEig4fNYLcsNTNiU1ZmIfVnCLV99DG+fEvZtNcXMLW0XkEDcRtuXjf03yQYjUs50QlUDDdFHB/lVSWVn73TghY7FjdsLlAoIvI8iFufz4y2Zb9mHZduBM3RhlYOsFB3P3fQ=
   on:
-  tags: true
-  repo: folkvir/foglet-core
+    tags: true
+    repo: RAN3D/foglet-core
 env:
   global:
   - secure: b4Cz9+R6jGLXTbVko/JAgqru2TnMvJRAbYdIuOZK+3co0VDpty/qYKnywoWHLqfgieRHyCyLep66G5psaHY/CmRUQS3Rufw5khLiGrztp1euU670BVrqezXxotxQ/yFMlIlLgm8DokCt2DYyZ6qRd80+khqO8IytinGzqFe1g0j7RnEww1EbahqiiwSXlLia7gb6PSXQrNe3ti4WH0VuHMynIOelH1CfE/KxkG9JIYHaUBa6Noe++nsfIuukV6MR0Nixe5Gi0JUP1sTSv8awv6K2St5OVrlRSAyx8yBVfwEk7Qh77XTH+mnPtk4d8c0kmYEHZv6HnkV5mGHxXvUp2fKj9Tng07X9jXxySH5yG9dyN8/gk2MqY6KoamzpnYsgq7oyMfUUffwFsJc2bhfCakBqq710oDBk2/wtXoLVSm2IX/VOXov4Pn6ntHyAohNGQcPd81ZKin+BuYf9jcl6PjBgapR7MnDeh42Eh6ZSVOogsbBgGxoEZWwpvDZ2PFgbfQn3v2AHNaL/Is6a49/hdlP7qfeGjXhqBnGHb63WMylUoelHSFCFYbfERDxRIVMe72nNPjSDaR6k7K2bZfxFjle+2+2t3Sk8ujTUdSJh8wKGtXFQAnamXnbfmr3r1yWm6t6ydnMk5+a0XsCbAEx8L3jukKND+k3Hj2D+yS6axx8=
