@@ -54,8 +54,7 @@ class FInterpreter extends EventEmitter {
 
 		this.broadcast = new FBroadcast({
 			protocol: this.protocol,
-			foglet: this.foglet,
-			size:1000
+			foglet: this.foglet
 		});
 
 		this.unicast = new Unicast(this.foglet.options.spray, this.protocol + '-unicast');

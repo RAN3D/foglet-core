@@ -24,123 +24,38 @@ SOFTWARE.
 'use strict';
 
 const EventEmitter = require('events');
-const Unicast = require('unicast-definition');
+const Broadcast = require('causal-broadcast-definition');
 const uuid = require('uuid/v4');
-const LRU = require('lru-cache');
 const VVwE = require('version-vector-with-exceptions');
-
-class FBroadcastMessage {
-	constructor (options) {
-		this.value = options.value || null;
-		this.id = options.id || null;
-		this.ec = options.ec || { _e: 0, _c: 0};
-		this.isReady = options.isReady || null;
-	}
-}
-
 
 class FBroadcast extends EventEmitter {
 	constructor (options) {
 		super();
-		if(options.foglet && options.protocol && options.size) {
+		if(options.foglet && options.protocol) {
 			this.uid = uuid();
 			this.protocol = 'fbroadcast-'+options.protocol;
-			this.alsoMe = options.me || false;
-			this.foglet = options.foglet;
-			this.size = options.size || 100;
+			this.vector = new VVwE(this.uid);
+			this.broadcast = new Broadcast(options.foglet.options.spray, this.vector, this.protocol);
 
 			this.sniffer = options.sniffer || function (message) {
 				return message;
 			};
 
-			const lruOptions = {
-				max: this.size
-			};
-
-			this.cache = new LRU(lruOptions);
-			this.causality = new VVwE(uuid(), lruOptions);
-
-			this.unicast = new Unicast(this.foglet.options.spray, this.protocol + '-unicast');
-
-			const self = this;
-			this.unicast.on('receive', (id, message) => {
-				if(!self._stopPropagation(message)) {
-					message = self.sniffer(message);
-
-					self.cache.set(message, message);
-
-					self._reviewCache(); // Emit all messages ready to emit and delete them from the cache
-
-					self._resend(message);
-				}
-			});
+			this.broadcast.on('receive', (message) => this._onReceive(message));
 		}else{
 			return new Error('Not enough parameters', 'fbroadcast.js');
 		}
 	}
 
-	send (message, isReady = null, delay = 0) {
-		// console.log('delay:'+delay);
-		if(this.alsoMe) {
-			this.emit('receive', message);
-		}
-		const id = uuid();
-		const messageToSend = new FBroadcastMessage({
-			value : message,
-			id,
-			ec: this.causality.increment(),
-			isReady
-		});
-		this.causality.incrementFrom(messageToSend.ec);
-
-		const self = this;
-		setTimeout(function () {
-			self._resend(messageToSend);
-		}, delay);
-
-		// Causal Id of the message
-		return messageToSend.ec;
+	send (message, after = null) {
+		const v = this.vector.increment();
+		this.broadcast.send(message, v, after);
+		return v;
 	}
 
-	_resend (message) {
-		this.foglet._flog('resend:');
-		// console.log(message);
-		const self = this;
-		const neighbours = self.foglet.getAllNeighbours();
-		console.log(neighbours);
-		neighbours.forEach((peer) => {
-			self.unicast.send(message, peer);
-		});
+	_onReceive (message) {
+		this.emit('receive', message);
 	}
-
-	_reviewCache () {
-		let ready = false;
-		const self = this;
-		this.cache.rforEach( (value, key) => {
-			// console.log(value);
-			if(self.causality.isLower(value.ec)) {
-				self.cache.del(key);
-			}else{
-				// console.log('ec:' + JSON.stringify(value.ec));
-				// console.log('isready:' + JSON.stringify(value.isReady));
-				if(self.causality.isReady(value.isReady)) {
-					ready = true;
-					self.causality.incrementFrom(value.ec);
-					self.emit('receive', value.value);
-					self.cache.del(key);
-				}
-			}
-		});
-		// If we have found one element we
-		if(ready) {
-			this._reviewCache();
-		}
-	}
-
-	_stopPropagation (message) {
-		return message.ec && ( this.causality.isLower(message.ec) || this.cache.get(message.ec) !== undefined);
-	}
-
 }
 
 module.exports = { FBroadcast };

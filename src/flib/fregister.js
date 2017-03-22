@@ -27,6 +27,7 @@
 const EventEmitter = require('events');
 const VVwE = require('version-vector-with-exceptions');
 const CausalBroadcast = require('causal-broadcast-definition');
+const uuid = require('uuid/v4');
 
 /**
  * Create a FRegister Class, this an eventually consitent data structure, using a CausalBroadcast and a version-vector-with-exceptions from Chat-Wane (github)
@@ -41,10 +42,12 @@ class FRegister extends EventEmitter {
 	 */
 	constructor (options) {
 		super();
+		this.uid = uuid();
 		this.name = options.name;
 		this.spray = options.spray;
-		this.vector = new VVwE(Number.MAX_VALUE);
-		this.broadcast = new CausalBroadcast(this.spray, this.vector);
+		this.vector = new VVwE(this.uid);
+		this.protocol = 'fregister-'+options.protocol;
+		this.broadcast = new CausalBroadcast(this.spray, this.vector, this.protocol);
 		this.value = {};
 		const self = this;
 		this.broadcast.on('receive', data => {
