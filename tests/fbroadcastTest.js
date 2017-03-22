@@ -1,7 +1,7 @@
 'use strict';
 
-const Foglet = require('../src/foglet.js');
-const FBroadcast = require('../src/flib/fbroadcast.js').FBroadcast;
+const Foglet = require('../src/foglet.js').Foglet;
+const FBroadcast = require('../src/flib/fbroadcast.js');
 
 describe('[FBROADCAST] functions', function () {
 	this.timeout(30000);

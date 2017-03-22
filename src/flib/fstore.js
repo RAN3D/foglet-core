@@ -72,4 +72,4 @@ class FStore {
 	}
 }
 
-module.exports = { FStore };
+module.exports = FStore;

@@ -237,7 +237,7 @@ class TManSpray extends EventEmitter {
 
 
 					const res = this.socket.socket.connect(from.id, to.id);
-					// console.log(`BRIDGE CONNECTION By OVERLAY: ${from && to}`, from, to, ` Status: ${res}`);
+					console.log(`BRIDGE CONNECTION By OVERLAY: ${from && to}`, from, to, ` Status: ${res}`);
 					// console.log(this.socket.getNeighbours());
 				}
 			} else {

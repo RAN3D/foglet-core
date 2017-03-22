@@ -31,13 +31,13 @@ const uuid = require('uuid/v4');
 const _ = require('lodash');
 
 // RPS
-const Spray = require('./rps/spray.js');
+const Spray = require('spray-wrtc');
 
 // FOGLET
-const FRegister = require('./flib/fregister.js').FRegister;
-const FInterpreter = require('./flib/finterpreter.js').FInterpreter;
-const FBroadcast = require('./flib/fbroadcast.js').FBroadcast;
-const FStore = require('./flib/fstore.js').FStore;
+const FRegister = require('./flib/fregister.js');
+const FInterpreter = require('./flib/finterpreter.js');
+const FBroadcast = require('./flib/fbroadcast.js');
+const FStore = require('./flib/fstore.js');
 const Overlay = require('./overlay/overlay.js');
 
 /**
@@ -63,7 +63,7 @@ class Foglet extends EventEmitter {
 		super();
 		this.defaultOptions = {
 			webrtc: {
-				trickle: false,
+				trickle: true,
 				iceServers: []
 			},
 			signalingAdress: 'http://localhost:3000',
@@ -77,8 +77,8 @@ class Foglet extends EventEmitter {
 		this.options = _.merge(this.defaultOptions, options);
 		// RPS
 		this.options.spray = new Spray(this.defaultOptions);
-		if(this.defaultOptions.enableOverlay){
-				this.options.overlay = new Overlay(this.options.spray, this.defaultOptions);
+		if(this.defaultOptions.enableOverlay) {
+			this.options.overlay = new Overlay(this.options.spray, this.defaultOptions);
 		}
 		// VARIABLES
 		this.id = uuid();
@@ -119,17 +119,14 @@ class Foglet extends EventEmitter {
 		this.signalingCallback = () => {
 			return {
 				onInitiate: offer => {
+					this._flog('Emit the new offer:', offer);
 					this.signaling.emit('new', {offer, room: this.options.room});
 				},
 				onAccept: offer => {
+					this._flog('Emit the accpeted offer:', offer);
 					this.signaling.emit('accept', { offer, room: this.options.room });
 				},
 				onReady: (id) => {
-					// if(!this.options.connected) {
-					// 	this.connection();
-					// } else {
-					//
-					// }
 					this.signaling.emit('connected',  { room: this.options.room });
 					this.options.connected = true;
 					this._flog('Connected to the peer :', id);
@@ -146,12 +143,7 @@ class Foglet extends EventEmitter {
 					dest.connection(offer);
 				},
 				onReady: (id) => {
-					// if(!this.options.connected) {
-					// 	src.connection(this.directCallback(src, dest));
-					// }else {
-					// 	this.emit('connected');
-					// }
-					this.emit('connected');
+					this.emit('connected', { room: this.options.room });
 					this.options.connected = true;
 					this._flog('Connected to the peer :', id);
 				}
@@ -159,9 +151,11 @@ class Foglet extends EventEmitter {
 		};
 
 		this.signaling.on('new_spray', (data) => {
-			this.options.spray.connection(self.signalingCallback(), data);
+			this._flog('Receive a new offer:', data);
+			this.options.spray.connection(this.signalingCallback(), data);
 		});
 		this.signaling.on('accept_spray', (data) => {
+			this._flog('Receive an accepted offer:', data);
 			this.options.spray.connection(data);
 		});
 	}
@@ -183,9 +177,6 @@ class Foglet extends EventEmitter {
 			try {
 				if(foglet) {
 					self.options.spray.connection(self.directCallback(self.options.spray, foglet.options.spray));
-					self.on('connected', () => {
-						resolve(true);
-					});
 				} else {
 					self.signaling.emit('joinRoom', { room: self.options.room });
 					self.signaling.on('joinedRoom', () => {
@@ -196,6 +187,9 @@ class Foglet extends EventEmitter {
 						resolve(true);
 					});
 				}
+				self.on('connected', () => {
+					resolve(true);
+				});
 
 				setTimeout(() => {
 					reject();
@@ -217,7 +211,8 @@ class Foglet extends EventEmitter {
 		const spray = this.options.spray;
 		const options = {
 			name,
-			spray
+			spray,
+			protocol: name+'-'+this.options.protocol,
 		};
 		const reg = new FRegister(options);
 		this.registerList[this._fRegisterKey(reg)] = reg;
@@ -370,4 +365,4 @@ class Foglet extends EventEmitter {
 	}
 }
 
-module.exports = Foglet;
+module.exports = { Foglet, uuid };

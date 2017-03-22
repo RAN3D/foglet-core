@@ -1,6 +1,6 @@
 'use strict';
 
-let Foglet = require('../src/foglet.js');
+let Foglet = require('../src/foglet.js').Foglet;
 
 describe('[FOGLET:INIT]', function () {
 	describe('[FOGLET] Connection and Disconnection', function () {

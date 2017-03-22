@@ -1,6 +1,6 @@
 'use strict';
 
-const Foglet = require('../src/foglet.js');
+const Foglet = require('../src/foglet.js').Foglet;
 
 describe('[FSTORE] FStore functions', function () {
 	it('[FStore] init', function () {

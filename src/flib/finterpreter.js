@@ -24,7 +24,7 @@ SOFTWARE.
 'use strict';
 
 const EventEmitter = require('events');
-const FBroadcast = require('./fbroadcast.js').FBroadcast;
+const FBroadcast = require('./fbroadcast.js');
 const Unicast = require('unicast-definition');
 const serialize = require('serialize-javascript');
 const uuid = require('uuid/v4');
@@ -313,4 +313,4 @@ class FInterpreter extends EventEmitter {
 
 }
 
-module.exports = { FInterpreter };
+module.exports = FInterpreter;

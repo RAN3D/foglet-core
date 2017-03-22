@@ -24,15 +24,15 @@ module.exports = function (config) {
 		// list of files / patterns to load in the browser
 		files: [
 			'tests/fogletTest.js',
-			'tests/fstoreTest.js',
-			//'tests/finterpreterTest.js',
-			'tests/fbroadcastTest.js'
+			'tests/fbroadcastTest.js',
+			// 'tests/finterpreterTest.js',
+			'tests/fstoreTest.js'
 		],
 		preprocessors:{
 			'tests/fogletTest.js' : [ 'coverage', 'browserify' ],
-			//'tests/finterpreterTest.js' : [ 'coverage', 'browserify' ],
-			'tests/fstoreTest.js' : [ 'coverage', 'browserify' ],
-			'tests/fbroadcastTest.js' : [ 'coverage', 'browserify' ]
+			'tests/fbroadcastTest.js' : [ 'coverage', 'browserify' ],
+			// 'tests/finterpreterTest.js' : [ 'coverage', 'browserify' ],
+			'tests/fstoreTest.js' : [ 'coverage', 'browserify' ]
 		},
 		// list of files to exclude
 		exclude: [
@@ -78,11 +78,11 @@ module.exports = function (config) {
 		// Continuous Integration mode
 		// if true, Karma captures browsers, runs the tests and exits
 		autoWatch: true,
-		browserNoActivityTimeout:20000,
+		browserNoActivityTimeout:50000,
 		colors: true,
 		// level of logging
 		// possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-		logLevel: config.LOG_DEBUG,
+		logLevel: config.LOG_INFO,
 		// start these browsers
 		// available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
 		browsers: [ 'Firefox' ],

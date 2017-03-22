@@ -58,4 +58,4 @@ class FBroadcast extends EventEmitter {
 	}
 }
 
-module.exports = { FBroadcast };
+module.exports = FBroadcast;

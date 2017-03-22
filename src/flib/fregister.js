@@ -86,7 +86,6 @@ class FRegister extends EventEmitter {
 
 	/**
 	 * Set the value of the register and broadcast the value to all register with the same name
-	 * @function setValue
 	 * @param {object} data - new Value of the register
 	 * @return {void}
 	 */
@@ -96,9 +95,7 @@ class FRegister extends EventEmitter {
 	}
 
 	/**
-	 * Set the value of the register and broadcast the value to all register with the same name
-	 * @function setValue
-	 * @param {object} data - new Value of the register
+	 * Send the  set value of the register
 	 * @return {void}
 	 */
 	send () {
@@ -106,4 +103,4 @@ class FRegister extends EventEmitter {
 	}
 }
 
-module.exports.FRegister = FRegister;
+module.exports = FRegister;

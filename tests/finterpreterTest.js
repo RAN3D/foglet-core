@@ -1,6 +1,6 @@
 'use strict';
 
-let Foglet = require('../src/foglet.js');
+let Foglet = require('../src/foglet.js').Foglet;
 
 describe('[FInterpreter] Finterpreter functions', function () {
 	this.timeout(30000);

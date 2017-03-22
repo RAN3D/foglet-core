@@ -1,10 +1,13 @@
 'use strict';
 
-const Foglet = require('foglet');
+const Foglet = require('foglet').Foglet;
+const uuid = require('foglet').uuid;
+
+const id = uuid();
 
 let o = [];
 
-const max = 10;
+const max = 20;
 
 $.ajax({
 	url : 'https://service.xirsys.com/ice',
@@ -25,32 +28,29 @@ $.ajax({
 		console.log(iceServers, status);
 		const ices = [];
 		iceServers.forEach(ice => {
-			console.log(ice);
 			if(ice.credential && ice.username) {
 				ices.push({ urls: ice.url, credential: ice.credential, username: ice.username });
 			} else {
 				ices.push({ urls: ice.url });
 			}
 		});
-		console.log(ices);
-
-
 
 		for(let i = 0; i < max; ++i) {
 			o[i] = new Foglet({
 				webrtc:	{
-					trickle: false,
-					iceServers : []
+					trickle: true,
+					iceServers : ices
 				},
 				p: 100,
 				m: 10,
-				deltatime: (i+1) * 2 * 1000 + 60 * 1000, // 20s min + (i+1)*2secondes 
+				deltatime: (i+1) * 2 * 1000 + 5* 60 * 1000, // 20s min + (i+1)*2secondes
 				timeout: 30 * 1000,
 				enableOverlay: true,
-				room:'foglet-overlay',
-				signalingAdress: 'http://localhost:3000',
+				room:'foglet-overlay-example-'+id,
+				signalingAdress: 'https://signaling.herokuapp.com/',
 				verbose:true
 			});
+			console.log('Room:' + 'foglet-overlay-example-'+id);
 		}
 
 		o.forEach(p => {
@@ -69,7 +69,17 @@ $.ajax({
 	}
 });
 
-
+const direct = (time2wait = 1000) => {
+	for (let i = 0; i < max; ++i) {
+		(function (ind) {
+			setTimeout(function () {
+				o[0].connection(o[ind]).then(d =>{
+					console.log(d);
+				});
+			}, (time2wait * ind));
+		})(i);
+	}
+};
 
 const connection = (time2wait = 1000) => {
 	for (let i = 0; i < max; ++i) {
@@ -90,7 +100,7 @@ const run = () => {
 	o.forEach(p => p.options.overlay.run());
 };
 
-const exchange = (time2wait = 500) => {
+const exchange = (time2wait = 3000) => {
 	let i = 0;
 	o.forEach(p => {
 		(function (ind) {
