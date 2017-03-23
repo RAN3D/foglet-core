@@ -1,13 +1,13 @@
 'use strict';
-const EventEmitter = require ('events');
 const _ = require('lodash');
 const Spray = require('spray-wrtc');
 const io = require('socket.io-client');
 const Q = require('q');
+const AbstractAdapter = require('./AbstractAdapter.js');
 const FBroadcast = require('../fbroadcast.js');
 const Unicast = require('unicast-definition');
 
-class sprayAdapter extends EventEmitter {
+class sprayAdapter extends AbstractAdapter {
 	constructor (options) {
 		super();
 		this.options = _.merge({

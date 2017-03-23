@@ -1,13 +1,14 @@
 'use strict';
-const EventEmitter = require ('events');
+
 const _ = require('lodash');
 const Fcn = require('fcn-wrtc').Fcn;
 const Q = require('q');
 
+const AbstractAdapter = require('./AbstractAdapter.js');
 const FBroadcast = require('../fbroadcast.js');
 const Unicast = require('unicast-definition');
 
-class fcnAdapter extends EventEmitter {
+class fcnAdapter extends AbstractAdapter {
 	constructor (options) {
 		super();
 		this.options = _.merge({

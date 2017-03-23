@@ -298,11 +298,12 @@ class Socket extends EventEmitter {
 	 * @return {boolean} True if the message has been sent, false otherwise
 	 */
 	send (id, message) {
-		const socketId = this.socket.get(id);
-		this._log(id, message, socketId);
-		if(socketId) {
+		const socket = this.socket.get(id);
+		this._log(id, message, socket);
+		let res = true;
+		if(socket && socket.id) {
 			try {
-				this.socket.send(socketId, message);
+				res = this.socket.send(socket.id, message);
 			} catch (e) {
 				this._log('Send:error: ', e);
 				return false;
@@ -310,7 +311,7 @@ class Socket extends EventEmitter {
 		} else {
 			return false;
 		}
-		return true;
+		return res;
 	}
 
 	toString () {

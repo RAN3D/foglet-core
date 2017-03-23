@@ -143,7 +143,7 @@ class TManSpray extends EventEmitter {
 				},
 				onReady : (id) => {
 					// compute the ping
-					// this.log('Ready:'+id, this.socket.socket.get(id));
+					this.log('OverlayInit Connected to:'+id, this.socket.socket.get(id));
 					this.ping.ping(id).then( res => {
 						this.profile.ping.value = res;
 					});
