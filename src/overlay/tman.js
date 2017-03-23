@@ -33,8 +33,6 @@ const SocketPing = require('./../utils/socketping.js');
 const Vivaldi = require('vivaldi-coordinates');
 const HeightCoordinates = require('vivaldi-coordinates').HeightCoordinates;
 
-const Unicast = require('unicast-definition');
-
 /**
  * Implementation of an overlay based a T-man
  * You can change the implementation, of the two threads (ie, active and passive) but there is an implementation
@@ -50,23 +48,19 @@ class TManSpray extends EventEmitter {
 			p: 5, // max number of peers choosen after ranking
 			m: 10, // max number of message sent
 			maxBound: 3,
-			defaultDescriptor: {
-				randomNumber: 0
-			}
-		};
-		this.defaultOptions = _.merge(this.defaultOptions, options || {});
-		// ========== PARAMETERS ==========
-		// get the RPS
-
-		this.source = this.defaultOptions.overlayOptions.rpsObject ||  console.log(new Error('Need a source as parameter : { source : ... , [, key:val]} '));
-		// get unicast protocol, must provide a method send(message, peer)
-		this.unicast = new Unicast (this.source, 'tmanspray');// console.log(new Error('Need a unicast protocol as parameter in order to send messages : { unicast : ..., [, key:val] } unicast protocol will listen on the signal "receive"'));
-
-		const optionsN2N = _.merge({
+			profile: {
+				randomNumber: _.random(0, 100),
+				used: false,
+				ping: {
+					start: 0,
+					end: 0,
+					value: 0
+				}
+			},
 			neighborhood: {
 				webrtc: {
 					trickle: false,
-					iceServers: this.defaultOptions.rps.iceServers
+					iceServers: []
 				},
 				protocol: 'overlay-overfog'
 			},
@@ -80,9 +74,16 @@ class TManSpray extends EventEmitter {
 			signalOnRoom: 'joinedOverfog',
 			signalLeave: 'leaveOverfog',
 			verbose: true
-		}, this.defaultOptions);
+		};
+		this.options = _.merge(this.defaultOptions, options || {});
+		this.options.neighborhood.webrtc.iceServers = this.options.rps.iceServers;
 
-		this.socket = new Socket(optionsN2N);
+		this.source = this.options.overlayOptions.rpsObject ||  this.log(new Error('Need a source as parameter : { source : ... , [, key:val]} '));
+		// get unicast protocol, must provide a method send(message, peer)
+
+		// this.log(new Error('Need a unicast protocol as parameter in order to send messages : { unicast : ..., [, key:val] } unicast protocol will listen on the signal "receive"'));
+		console.log(this.unicast);
+		this.socket = new Socket(this.defaultOptions);
 		this.outviewId = this.socket.outviewId;
 		this.inviewId = this.socket.inviewId;
 
@@ -94,21 +95,14 @@ class TManSpray extends EventEmitter {
 
 		// please don't send Class or object that cant be (se/dese)rialized properly
 		this.profile = {
-			randomNumber: _.random(0, 100),
 			vivaldiPos: this.getVivaldiPos,
 			vivaldiDistance: 0,
-			used: false,
 			rps: {
-				inviewId: this.source.profile.inviewId,
-				outviewId: this.source.profile.outviewId,
+				inviewId: this.source.inviewId,
+				outviewId: this.source.outviewId,
 			},
 			inviewId: this.inviewId,
-			outviewId: this.outviewId,
-			ping: {
-				start: 0,
-				end: 0,
-				value: 0
-			}
+			outviewId: this.outviewId
 		};
 		this.profile = _.merge(this.profile, this.defaultOptions.profile);
 
@@ -141,35 +135,29 @@ class TManSpray extends EventEmitter {
 			return {
 				onInitiate: (offer) => {
 					offer.data =  data;
-					this.unicast.send(offer, offer.data.id);
+					this.source.sendUnicast(offer, offer.data.id);
 				},
 				onAccept: (offer) => {
 					offer.data =  data;
-					this.unicast.send(offer, offer.data.data.id);
+					this.source.sendUnicast(offer, offer.data.data.id);
 				},
 				onReady : (id) => {
 					// compute the ping
-					// console.log('Ready:'+id, this.socket.socket.get(id));
+					// this.log('Ready:'+id, this.socket.socket.get(id));
 					this.ping.ping(id).then( res => {
-						console.log('PING TO '+ id + ': ', res);
 						this.profile.ping.value = res;
-					}).catch(err => {
-						console.log('PING:ERROR: ', err);
 					});
 				}
 			};
 		};
 
-		this.unicast.on('receive', (id, message) => {
+		this.source.unicast.on('receive', (id, message) => {
 			// we init only if the no initialize
 			if(message.type && message.type === 'init-system-overfog' && this.views.length <= this.maxPeers) {
 				// add the view into our list of views
 				let desc = message.descriptor;
-
 				const view = this._transform(message, [ desc ]);
 				desc = view[0];
-
-
 				// we maintain the random sample views
 				const index = _.findIndex(this.randomSampleViews, (o) => o.id === desc.id);
 				if( index === -1 ) {
@@ -179,11 +167,10 @@ class TManSpray extends EventEmitter {
 					// or update
 					this.randomSampleViews[index] = desc;
 				}
-
 				// we set the first set of views and we connect to them
 				this.views = this.selectPeers(this.maxPeers, this.rankingFunction(this.descriptor, this.randomSampleViews));
+				console.log('@'+this.id, ': ', this.views);
 				// this._connect(this.views);
-
 				this.views.forEach(v => {
 					this.socket.connection(null, {
 						type: 'init-system-overfog-offer',
@@ -193,22 +180,17 @@ class TManSpray extends EventEmitter {
 				});
 
 			} else if (message.type && message.data && message.data.type && message.data.type === 'init-system-overfog-offer' && message.type === 'MRequest') {
-
 				message.data.id = id;
 				message.data.type = 'init-system-overfog-accept';
 				this.socket.connection(null, message, this.customCallback, 'accept');
-
 			} else if (message.type && message.data && message.data.data && message.data.data.type && message.data.data.type === 'init-system-overfog-accept' && message.type === 'MResponse') {
-
 				this.socket.connection(null, message, this.customCallback, 'finalize');
 
 			} else if(message.type && message.type === 'get-random-sample-views') {
 				// add the view into our list of views
 				let desc = message.descriptor;
-
 				const view = this._transform(message, [ desc ]);
 				desc = view[0];
-
 				// we maintain the random sample views
 				const index = _.findIndex(this.randomSampleViews, (o) => o.id === desc.id);
 				if( index === -1 ) {
@@ -218,7 +200,6 @@ class TManSpray extends EventEmitter {
 					// or update
 					this.randomSampleViews[index] = desc;
 				}
-
 			}
 		});
 
@@ -227,18 +208,16 @@ class TManSpray extends EventEmitter {
 		this.socket.on('receive', message => {
 			if (message.message.type && message.message.type === 'connect-to-view') {
 				const out = this.socket.socket.get('outview');
-				// console.log(out);
+				// this.log(out);
 				const indexOfFrom = _.findIndex(out, d => d.id === message.message.fromConnect.profile.outviewId),
 					indexOfTo = _.findIndex(out, d => d.id === message.message.toConnect.profile.outviewId);
 				// now we can established by bridge the connection between the sender and the owner of the view (not us but a neighbor)
 				if(indexOfTo !== -1 && indexOfFrom !== -1) {
 					const from = out[indexOfFrom];
 					const to = out[indexOfTo];
-
-
 					const res = this.socket.socket.connect(from.id, to.id);
-					console.log(`BRIDGE CONNECTION By OVERLAY: ${from && to}`, from, to, ` Status: ${res}`);
-					// console.log(this.socket.getNeighbours());
+					this.log(`BRIDGE CONNECTION By OVERLAY: ${from && to}`, from, to, ` Status: ${res}`);
+					// this.log(this.socket.getNeighbours());
 				}
 			} else {
 				this._passive(this, message.id, message.message);
@@ -267,6 +246,13 @@ class TManSpray extends EventEmitter {
 	}
 
 	/**
+	 *
+	 */
+	log (...args) {
+		if(this.options.verbose) console.log('[OVERLAY] ', args);
+	}
+
+	/**
 	 * We get a random sample of the network and we put views received into our randomSampleViews list
 	 * @return {void}
 	 */
@@ -275,7 +261,8 @@ class TManSpray extends EventEmitter {
 		let i = 0;
 		const peers = this._selectRandomSample();
 		while(i < peers.length) {
-			this.unicast.send({
+			this.log('Send: init-system-overfog order to :' + peers[i]);
+			this.source.sendUnicast({
 				type: 'init-system-overfog',
 				socketId: this.id,
 				descriptor: desc,
@@ -294,7 +281,7 @@ class TManSpray extends EventEmitter {
 		let i = 0;
 		const peers = this._selectRandomSample();
 		while(i < peers.length) {
-			this.unicast.send({
+			this.source.sendUnicast({
 				type: 'get-random-sample-views',
 				socketId: this.id,
 				descriptor: desc,
@@ -311,7 +298,7 @@ class TManSpray extends EventEmitter {
 	 * @return {void}
 	 */
 	send (id, message) {
-		console.log('Message sent : ', message);
+		this.log('Message sent : ', message);
 		return this.socket.send(id, message);
 	}
 
@@ -327,7 +314,7 @@ class TManSpray extends EventEmitter {
 	 * @return {void}
 	 */
 	_connect (from, views) {
-		console.log('==========: CONNECT PART :==========');
+		this.log('==========: CONNECT PART :==========');
 		let i = 0;
 		while(i < views.length && i < this.maxPeers) {
 			// is not in our views
@@ -338,7 +325,7 @@ class TManSpray extends EventEmitter {
 				pingStart: new Date().getTime()
 			};
 			const res = this.socket.send(from, msg);
-			console.log('Connection from: ', from, 'to: ', this.id, ' Message sent:', msg, ' Status', res);
+			this.log('Connection from: ', from, 'to: ', this.id, ' Message sent:', msg, ' Status', res);
 			i++;
 		}
 	}
@@ -521,11 +508,11 @@ class TManSpray extends EventEmitter {
 	replaceViews (overlay, views) {
 		let o = 0, v = 0;
 		let results = [];
-		console.log(overlay.views, views);
+		this.log(overlay.views, views);
 		while ( v < views.length && o < overlay.views.length) {
 			if(!overlay.views[o].used) {
 				// we replace the connection so we have to remove the webrtc connection too
-				console.log(views[v]);
+				this.log(views[v]);
 				results.push(views[v]);
 				overlay.socket.disconnect(overlay.views[o].profile.outviewId);
 				v++;
@@ -553,7 +540,7 @@ class TManSpray extends EventEmitter {
 		const buffer = overlay.restrictBufferSize(p, overlay.maxMessage);
 
 		p.forEach(p => {
-			console.log(overlay.send(p.profile.outviewId, {
+			this.log(overlay.send(p.profile.outviewId, {
 				type: 'onActive',
 				buffer,
 				pingStart: new Date().getTime()
@@ -562,7 +549,7 @@ class TManSpray extends EventEmitter {
 	}
 
 	_passive (overlay, id, message) {
-		// console.log('=====: passiv callback :=====');
+		// this.log('=====: passiv callback :=====');
 		if (message && message.type && message.buffer) {
 			let buffer = [];
 
@@ -583,7 +570,7 @@ class TManSpray extends EventEmitter {
 				// });
 				buffer = overlay.restrictBufferSize(buffer, overlay.maxMessage);
 
-				console.log(overlay.send( id, {
+				this.log(overlay.send( id, {
 					type: 'onPassive',
 					buffer,
 					pingStart: new Date().getTime()
@@ -601,7 +588,7 @@ class TManSpray extends EventEmitter {
 				rankedViews
 			));
 
-			console.log('VIEWS SELECTED : ', overlay.views);
+			this.log('VIEWS SELECTED : ', overlay.views);
 
 			// check if there is only just #views connections
 			this._connect(id, overlay.views);

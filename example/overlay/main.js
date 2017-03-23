@@ -7,7 +7,7 @@ const id = uuid();
 
 let o = [];
 
-const max = 10;
+const max = 5;
 
 $.ajax({
 	url : 'https://service.xirsys.com/ice',
@@ -46,7 +46,7 @@ $.ajax({
 				m: 10,
 				deltatime: (i+1) * 2 * 1000 + 5* 60 * 1000, // 20s min + (i+1)*2secondes
 				timeout: 30 * 1000,
-				enableOverlay: false,
+				enableOverlay: true,
 				room:'foglet-overlay-example-'+id,
 				signalingAdress: 'https://signaling.herokuapp.com/',
 				verbose:true
@@ -195,7 +195,7 @@ const constructOverlayGraph = ()  => {
 		let sock = over.options.overlay.overlay.socket;
 		userColorOverlay[sock.outviewId+'$'+sock.inviewId] = {
 			color: colorOverlay(i),
-			description: `Cycles:${over.options.overlay.overlay.cycles} (Out:${over.options.overlay.getNeighbours().outview.length})`,
+			description: `Cycles:${over.options.overlay.overlay.cycles} (In:${over.options.overlay.getNeighbours().inview.length} Out:${over.options.overlay.getNeighbours().outview.length})`,
 			views: over.options.overlay.getViews(),
 			profile: over.options.overlay.overlay.descriptor
 		};

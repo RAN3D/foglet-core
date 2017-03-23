@@ -24,21 +24,17 @@ SOFTWARE.
 'use strict';
 
 const EventEmitter = require('events');
-const Unicast = require('unicast-definition');
-const Q = require('q');
 const uuid = require('uuid/v4');
 const _ = require('lodash');
-
-// Networks
-const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
-const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 
 // FOGLET
 const FRegister = require('./flib/fregister.js');
 const FInterpreter = require('./flib/finterpreter.js');
-const FBroadcast = require('./flib/fbroadcast.js');
 const FStore = require('./flib/fstore.js');
 const Overlay = require('./overlay/overlay.js');
+// Networks
+const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
+const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 
 /**
  * Create a Foglet Class in order to use Spray with ease
@@ -83,14 +79,7 @@ class Foglet extends EventEmitter {
 		}
 		// VARIABLES
 		this.id = uuid();
-		// COMMUNICATION
-		this.unicast = new Unicast(this.options.rps, this.options.protocol + '-unicast');
-		this.broadcast = new FBroadcast({
-			foglet: this,
-			protocol: this.options.protocol,
-			size: 1000,
-			alsoMe: false
-		});
+
 		// INTERPRETER
 		this.interpreter = new FInterpreter(this);
 		// DATA STRUCTURES
@@ -136,8 +125,8 @@ class Foglet extends EventEmitter {
 	 * f.connection().then((response) => console.log).catch(error => console.err);
 	 */
 	connection (foglet = undefined, timeout = 60000) {
-		if(foglet) return Q(this.options.rps.connection(foglet.options.rps, timeout));
-		return Q(this.options.rps.connection(undefined, timeout));
+		if(foglet) return this.options.rps.connection(foglet.options.rps, timeout);
+		return this.options.rps.connection(undefined, timeout);
 	}
 
 	/**
@@ -148,7 +137,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	addRegister (name) {
-		const spray = this.options.spray;
+		const spray = this.options.rps;
 		const options = {
 			name,
 			spray,
@@ -193,7 +182,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	**/
 	onBroadcast (signal, callback) {
-		this.broadcast.on(signal, callback);
+		this.options.rps.onBroadcast(signal, callback);
 	}
 
 
@@ -204,7 +193,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	sendBroadcast (msg) {
-		this.broadcast.send(msg);
+		this.options.rps.sendBroadcast(msg);
 	}
 
 	/**
@@ -220,7 +209,7 @@ class Foglet extends EventEmitter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.unicast.on('receive', callback);
+		this.options.rps.onUnicast(callback);
 	}
 
 	/**
@@ -231,7 +220,7 @@ class Foglet extends EventEmitter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		return this.unicast.send(message, id);
+		this.options.rps.sendUnicast(message, id);
 	}
 
 	/**

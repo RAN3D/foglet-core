@@ -248,6 +248,10 @@ class Socket extends EventEmitter {
 		return false;
 	}
 
+	connect2 (from = null, to = null) {
+		this.socket.connect(from, to);
+	}
+
 	/**
 	 * Emit the room to join to the signaling server
 	 * @param {string} room The room to join
@@ -297,11 +301,10 @@ class Socket extends EventEmitter {
 		const socketId = this.socket.get(id);
 		this._log(id, message, socketId);
 		if(socketId) {
-			this._log('Message sent to : '+ socketId, message);
 			try {
 				this.socket.send(socketId, message);
 			} catch (e) {
-				this._log('Send:', e);
+				this._log('Send:error: ', e);
 				return false;
 			}
 		} else {
@@ -341,7 +344,6 @@ class Socket extends EventEmitter {
 	 */
 	_onReceive (id, message) {
 		const response = { id, message };
-		this._log('[Socket:receive]', response);
 		this.emit('receive', response);
 	}
 
