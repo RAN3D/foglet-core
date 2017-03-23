@@ -35,6 +35,7 @@
     "babel-register": "^6.24.0",
     "causal-broadcast-definition": "^0.1.x",
     "causaltrack": "^0.4.1",
+    "fcn-wrtc": "^1.0.0",
     "immutable": "^3.8.1",
     "lodash": "^4.17.4",
     "lru-cache": "^4.0.2",

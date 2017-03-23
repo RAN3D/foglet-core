@@ -25,13 +25,13 @@ SOFTWARE.
 
 const EventEmitter = require('events');
 const Unicast = require('unicast-definition');
-const io = require('socket.io-client');
 const Q = require('q');
 const uuid = require('uuid/v4');
 const _ = require('lodash');
 
-// RPS
-const Spray = require('spray-wrtc');
+// Networks
+const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
+const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 
 // FOGLET
 const FRegister = require('./flib/fregister.js');
@@ -70,23 +70,21 @@ class Foglet extends EventEmitter {
 			room: 'default-room',
 			protocol: 'foglet-protocol-default',
 			verbose: true,
-			spray: undefined,
-			connected: false,
 			enableOverlay: false
 		};
 		this.options = _.merge(this.defaultOptions, options);
 		// RPS
-		this.options.spray = new Spray(this.defaultOptions);
+		this.options.rps = new (this._chooseRps(this.options.rpsType))(this.options);
+		this.inviewId = this.options.rps.inviewId;
+		this.outviewId = this.options.rps.outviewId;
+		// OVERLAY
 		if(this.defaultOptions.enableOverlay) {
-			this.options.overlay = new Overlay(this.options.spray, this.defaultOptions);
+			this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
 		}
 		// VARIABLES
 		this.id = uuid();
-		this.inviewId = this.options.spray.inviewId;
-		this.outviewId = this.options.spray.outviewId;
-
 		// COMMUNICATION
-		this.unicast = new Unicast(this.options.spray, this.options.protocol + '-unicast');
+		this.unicast = new Unicast(this.options.rps, this.options.protocol + '-unicast');
 		this.broadcast = new FBroadcast({
 			foglet: this,
 			protocol: this.options.protocol,
@@ -95,8 +93,6 @@ class Foglet extends EventEmitter {
 		});
 		// INTERPRETER
 		this.interpreter = new FInterpreter(this);
-
-
 		// DATA STRUCTURES
 		this.registerList = {};
 		const self = this;
@@ -108,59 +104,27 @@ class Foglet extends EventEmitter {
 				jobs: {},
 			}
 		});
-
-		//	SIGNALING PART
-		// 	THERE IS AN AVAILABLE SERVER ON ?server=http://signaling.herokuapp.com:4000/
-
 		this._flog('Signaling server used : ' + this.options.signalingAdress + ' on the room : ' + this.options.room);
-		//	Connection to the signaling server
-		this.signaling = io.connect(this.options.signalingAdress);
-
-		this.signalingCallback = () => {
-			return {
-				onInitiate: offer => {
-					this._flog('Emit the new offer:', offer);
-					this.signaling.emit('new', {offer, room: this.options.room});
-				},
-				onAccept: offer => {
-					this._flog('Emit the accpeted offer:', offer);
-					this.signaling.emit('accept', { offer, room: this.options.room });
-				},
-				onReady: (id) => {
-					this.signaling.emit('connected',  { room: this.options.room });
-					this.options.connected = true;
-					this._flog('Connected to the peer :', id);
-				}
-			};
-		};
-
-		this.directCallback = (src, dest) => {
-			return {
-				onInitiate: (offer) => {
-					dest.connection(this.directCallback(dest, src), offer);
-				},
-				onAccept: offer => {
-					dest.connection(offer);
-				},
-				onReady: (id) => {
-					this.emit('connected', { room: this.options.room });
-					this.options.connected = true;
-					this._flog('Connected to the peer :', id);
-				}
-			};
-		};
-
-		this.signaling.on('new_spray', (data) => {
-			this._flog('Receive a new offer:', data);
-			this.options.spray.connection(this.signalingCallback(), data);
-		});
-		this.signaling.on('accept_spray', (data) => {
-			this._flog('Receive an accepted offer:', data);
-			this.options.spray.connection(data);
-		});
 	}
 
-
+	/**
+	 * @private
+	 */
+	_chooseRps (rpsType) {
+		let rps = null;
+		switch(rpsType) {
+		case 'fcn-wrtc':
+			rps = AdapterFcn;
+			break;
+		case 'spray-wrtc':
+			rps = AdapterSpray;
+			break;
+		default:
+			rps = AdapterFcn;
+			break;
+		}
+		return rps;
+	}
 	/**
 	 * Connection method for Foglet to the network specified by protocol and room options
 	 * @param {Foglet} foglet Foglet to connect, none by default and the connection is by signaling. Otherwise it uses a direct callback
@@ -172,32 +136,8 @@ class Foglet extends EventEmitter {
 	 * f.connection().then((response) => console.log).catch(error => console.err);
 	 */
 	connection (foglet = undefined, timeout = 60000) {
-		const self = this;
-		return Q.Promise(function (resolve, reject) {
-			try {
-				if(foglet) {
-					self.options.spray.connection(self.directCallback(self.options.spray, foglet.options.spray));
-				} else {
-					self.signaling.emit('joinRoom', { room: self.options.room });
-					self.signaling.on('joinedRoom', () => {
-						self._flog(' Joined the room', self.options.room);
-						self.options.spray.connection(self.signalingCallback());
-					});
-					self.signaling.on('connected', () => {
-						resolve(true);
-					});
-				}
-				self.on('connected', () => {
-					resolve(true);
-				});
-
-				setTimeout(() => {
-					reject();
-				}, timeout);
-			} catch (error) {
-				reject(error);
-			}
-		});
+		if(foglet) return Q(this.options.rps.connection(foglet.options.rps, timeout));
+		return Q(this.options.rps.connection(undefined, timeout));
 	}
 
 	/**
@@ -300,7 +240,7 @@ class Foglet extends EventEmitter {
 	 * @return {string} return an id or a null string otherwise
 	 */
 	getRandomNeighbourId () {
-		const peers = this.getNeighbours();
+		const peers = this.options.rps.getNeighbours();
 		if(peers.length === 0) {
 			return '';
 		} else {
@@ -322,7 +262,7 @@ class Foglet extends EventEmitter {
 	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
 	 */
 	getNeighbours () {
-		const peers = this.options.spray.getPeers();
+		const peers = this.options.rps.getPeers();
 		if(peers.o.length === 0) {
 			return [];
 		} else {
@@ -336,7 +276,7 @@ class Foglet extends EventEmitter {
 	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
 	 */
 	getAllNeighbours () {
-		const neigh = this.options.spray.getPeers();
+		const neigh = this.options.rps.getPeers();
 		return _.concat(neigh.i, neigh.o);
 	}
 

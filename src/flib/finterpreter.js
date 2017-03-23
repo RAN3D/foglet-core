@@ -57,7 +57,7 @@ class FInterpreter extends EventEmitter {
 			foglet: this.foglet
 		});
 
-		this.unicast = new Unicast(this.foglet.options.spray, this.protocol + '-unicast');
+		this.unicast = new Unicast(this.foglet.options.rps, this.protocol + '-unicast');
 
 		this.signalCustomBroadcast = this.protocol + '-broadcast-custom';
 		this.signalBroadcast = this.protocol + '-broadcast';

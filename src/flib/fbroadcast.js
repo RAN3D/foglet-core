@@ -35,7 +35,7 @@ class FBroadcast extends EventEmitter {
 			this.uid = uuid();
 			this.protocol = 'fbroadcast-'+options.protocol;
 			this.vector = new VVwE(this.uid);
-			this.broadcast = new Broadcast(options.foglet.options.spray, this.vector, this.protocol);
+			this.broadcast = new Broadcast(options.foglet.options.rps, this.vector, this.protocol);
 
 			this.sniffer = options.sniffer || function (message) {
 				return message;

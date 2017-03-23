@@ -54,7 +54,7 @@
 				"after": true
 			}
 		],
-		"valid-jsdoc": 1,
+		"valid-jsdoc": 0,
 		"no-console": 0
 	}
 }

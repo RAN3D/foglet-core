@@ -7,7 +7,7 @@ const id = uuid();
 
 let o = [];
 
-const max = 20;
+const max = 10;
 
 $.ajax({
 	url : 'https://service.xirsys.com/ice',
@@ -41,11 +41,12 @@ $.ajax({
 					trickle: true,
 					iceServers : ices
 				},
+				rpsType: 'fcn-wrtc',
 				p: 100,
 				m: 10,
 				deltatime: (i+1) * 2 * 1000 + 5* 60 * 1000, // 20s min + (i+1)*2secondes
 				timeout: 30 * 1000,
-				enableOverlay: true,
+				enableOverlay: false,
 				room:'foglet-overlay-example-'+id,
 				signalingAdress: 'https://signaling.herokuapp.com/',
 				verbose:true
@@ -54,8 +55,8 @@ $.ajax({
 		}
 
 		o.forEach(p => {
-			console.log(p.options.spray);
-			p.options.spray.on('shuffling', (reason) => {
+			console.log(p.options.rps);
+			p.options.rps.on('shuffling', (reason) => {
 				console.log('Shuffle: ', reason);
 				setTimeout(function () {
 					if(p.options.enableOverlay) {
@@ -106,7 +107,7 @@ const exchange = (time2wait = 3000) => {
 		(function (ind) {
 			setTimeout(function () {
 				console.log('Shuffle:', (time2wait * ind));
-				p.options.spray.exchange();
+				p.options.rps.exchange();
 			}, (time2wait * ind));
 		})(i);
 		++i;
@@ -144,29 +145,29 @@ const constructRpsGraph = ()  => {
 	let result = [];
 	let i = 0;
 	o.forEach(over => {
-		userColorRps[over.options.spray.neighborhoods.o.ID+'$'+over.options.spray.neighborhoods.i.ID] = {
+		userColorRps[over.options.rps.outviewId+'$'+over.options.rps.inviewId] = {
 			color: colorRps(i),
-			description: `#i:${over.options.spray.getPeers().i.length} | #o:${over.options.spray.getPeers().o.length}`
+			description: `#i:${over.options.rps.getPeers().i.length} | #o:${over.options.rps.getPeers().o.length}`
 		};
-		userColorRps[over.options.spray.neighborhoods.o.ID] = over.options.spray.neighborhoods.i.ID;
-		userColorRps[over.options.spray.neighborhoods.i.ID] = over.options.spray.neighborhoods.o.ID;
+		userColorRps[over.options.rps.outviewId] = over.options.rps.inviewId;
+		userColorRps[over.options.rps.inviewId] = over.options.rps.outviewId;
 		i++;
 	});
 
 	o.forEach(over => {
-		if(over.options.spray.getPeers().o.length === 0) {
+		if(over.options.rps.getPeers().o.length === 0) {
 			result.push({
-				source: over.options.spray.neighborhoods.o.ID+'$'+over.options.spray.neighborhoods.i.ID,
-				target: over.options.spray.neighborhoods.o.ID+'$'+over.options.spray.neighborhoods.i.ID,
+				source: over.options.rps.outviewId+'$'+over.options.rps.inviewId,
+				target: over.options.rps.outviewId+'$'+over.options.rps.inviewId,
 				data: {
 					colorLink: '#FF3737'
 				}
 			});
 		}
 
-		over.options.spray.getPeers().o.forEach(p => {
+		over.options.rps.getPeers().o.forEach(p => {
 			result.push({
-				source: over.options.spray.neighborhoods.o.ID+'$'+over.options.spray.neighborhoods.i.ID,
+				source: over.options.rps.outviewId+'$'+over.options.rps.inviewId,
 				target: userColorRps[p]+'$'+p,
 				data: {
 					colorLink: '#FF3737'
