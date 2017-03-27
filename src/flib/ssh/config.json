@@ -1,0 +1,10 @@
+{
+	"sshAddress": "http://localhost:6000",
+	"commands" : [
+		{
+			"timeout": 1000,
+			"command": "connection",
+			"args": []
+		}
+	]
+}

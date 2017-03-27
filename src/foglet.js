@@ -35,6 +35,8 @@ const Overlay = require('./overlay/overlay.js');
 // Networks
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
 const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
+// SSH COntrol
+const SshControl = require('./flib/ssh/SshControl.js');
 
 /**
  * Create a Foglet Class in order to use Spray with ease
@@ -69,6 +71,9 @@ class Foglet extends EventEmitter {
 			enableOverlay: false
 		};
 		this.options = _.merge(this.defaultOptions, options);
+
+		// VARIABLES
+		this.id = uuid();
 		// RPS
 		this.options.rps = new (this._chooseRps(this.options.rpsType))(this.options);
 		this.inviewId = this.options.rps.inviewId;
@@ -77,11 +82,16 @@ class Foglet extends EventEmitter {
 		if(this.defaultOptions.enableOverlay) {
 			this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
 		}
-		// VARIABLES
-		this.id = uuid();
-
 		// INTERPRETER
 		this.interpreter = new FInterpreter(this);
+		// SSH COntrol
+		if (this.options.ssh) {
+			this.ssh = new SshControl({
+				foglet: this,
+				room: this.options.room
+			});
+		}
+
 		// DATA STRUCTURES
 		this.registerList = {};
 		const self = this;

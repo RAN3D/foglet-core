@@ -49,7 +49,8 @@ $.ajax({
 				enableOverlay: true,
 				room:'foglet-overlay-example-'+id,
 				signalingAdress: 'https://signaling.herokuapp.com/',
-				verbose:true
+				verbose:true,
+				ssh: true,
 			});
 			console.log('Room:' + 'foglet-overlay-example-'+id);
 		}
