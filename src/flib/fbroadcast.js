@@ -37,6 +37,7 @@ class FBroadcast extends EventEmitter {
 			this.vector = new VVwE(this.uid);
 			this.broadcast = new Broadcast(options.foglet.options.rps, this.vector, this.protocol);
 
+			// The sniffer is working before message is sent and after result is received
 			this.sniffer = options.sniffer || function (message) {
 				return message;
 			};
@@ -48,12 +49,20 @@ class FBroadcast extends EventEmitter {
 	}
 
 	send (message, after = null) {
+		const sniffed = this.sniffer(message);
+		if(sniffed) {
+			message = sniffed;
+		}
 		const v = this.vector.increment();
 		this.broadcast.send(message, v, after);
 		return v;
 	}
 
 	_onReceive (message) {
+		const sniffed = this.sniffer(message);
+		if(sniffed) {
+			message = sniffed;
+		}
 		this.emit('receive', message);
 	}
 }

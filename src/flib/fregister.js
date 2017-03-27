@@ -44,14 +44,14 @@ class FRegister extends EventEmitter {
 		super();
 		this.uid = uuid();
 		this.name = options.name;
-		this.spray = options.spray;
+		this.source = options.source.rps;
 		this.vector = new VVwE(this.uid);
 		this.protocol = 'fregister-'+options.protocol;
-		this.broadcast = new CausalBroadcast(this.spray, this.vector, this.protocol);
+		this.broadcast = new CausalBroadcast(this.source, this.vector, this.protocol);
 		this.value = {};
 		const self = this;
 		this.broadcast.on('receive', data => {
-			// console.log('[FOGLET:' + self.name + '] Receive a new value');
+			console.log('[FOGLET:' + self.name + '] Receive a new value');
 			self.value = data;
 			// console.log(self.value);
 			/**

@@ -137,10 +137,10 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	addRegister (name) {
-		const spray = this.options.rps;
+		const source = this.options.rps;
 		const options = {
 			name,
-			spray,
+			source,
 			protocol: name+'-'+this.options.protocol,
 		};
 		const reg = new FRegister(options);
@@ -171,7 +171,7 @@ class Foglet extends EventEmitter {
 	 * @returns {void}
 	 */
 	onRegister (name, callback) {
-		this.getRegister(name).on(name + '-receive', callback);
+		this.getRegister(name).on(name+'-receive', callback);
 	}
 
 	/**

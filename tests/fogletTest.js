@@ -8,22 +8,22 @@ describe('[FOGLET:INIT]', function () {
 		it('[FOGLET] connection return true when connected', function (done) {
 				let f = new Foglet({
 					verbose:true,
-					protocol:'sprayExampleConnected',
+					protocol:'rpsExampleConnected',
 					webrtc:	{
 						trickle: true,
 						iceServers: []
 					},
-					room: 'sprayExampleConnected'
+					room: 'rpsExampleConnected'
 				});
 
 				let f1 = new Foglet({
 					verbose:true,
-					protocol:'sprayExampleConnected',
+					protocol:'rpsExampleConnected',
 					webrtc:	{
 						trickle: true,
 						iceServers: []
 					},
-					room: 'sprayExampleConnected'
+					room: 'rpsExampleConnected'
 				});
 				f.connection(f1).then( (status) => {
 						assert(true, status, 'Status Must be true.');
@@ -99,21 +99,21 @@ describe('[FOGLET:FREGISTER]', function () {
 
 	it('onRegister()', function (done) {
 		let f = new Foglet({
-			protocol:'sprayOnregister',
+			protocol:'rpsOnregister',
 			webrtc:	{
 				trickle: true,
 				iceServers: []
 			},
-			room: 'sprayOnregister'
+			room: 'rpsOnregister'
 		});
 
 		let f2 = new Foglet({
-			protocol:'sprayOnregister',
+			protocol:'rpsOnregister',
 			webrtc:	{
 				trickle: true,
 				iceServers: []
 			},
-			room: 'sprayOnregister'
+			room: 'rpsOnregister'
 		});
 
 		f.addRegister('test');
@@ -219,7 +219,7 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		});
 
 		f1.connection(f2).then( () => {
-			console.log('Get peers: ', f1.options.spray.getPeers(), f2.options.spray.getPeers());
+			console.log('Get peers: ', f1.options.rps.getPeers(), f2.options.rps.getPeers());
 			console.log('All neighbours: ', f1.getAllNeighbours(), f2.getAllNeighbours());
 			console.log('Peers: ', f1.getNeighbours(), f2.getNeighbours());
 			console.log('Random:', f1.getRandomNeighbourId(), f2.getRandomNeighbourId());

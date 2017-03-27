@@ -33,55 +33,53 @@ describe('[FBROADCAST] functions', function () {
 			room: 'test-fbroadcast'
 		});
 
-		let f1Broadcast = new FBroadcast({
-			protocol: 'test-fbroadcast',
-			foglet: f1
-		});
-
-		let f2Broadcast = new FBroadcast({
-			protocol: 'test-fbroadcast',
-			foglet: f2
-		});
-
-		let f3Broadcast = new FBroadcast({
-			protocol: 'test-fbroadcast',
-			foglet: f3
-		});
-
 		let cpt = 0;
 		let totalResult = 4;
+		let results = [];
+		const expectedResults = [ '1', '2', '3', '4', '1', '2', '3', '4' ];
+		const receiveResult = (peer, message) => {
+			console.log('Peer: ', peer, ' |  Message received:' + message);
+			results.push(message);
+			cpt++;
+			if (checkResult(peer, message) && cpt === totalResult) {
+				done();
+			}
+		};
+
+		const checkResult = (peer, message) => {
+			console.log('Peer: ', peer, ' |  Message received:' + message);
+			let check = true;
+			let i = 0;
+			while( check && i < results.length ) {
+				const indexResult = results.indexOf(message);
+				const indexExpectedResult = expectedResults.indexOf(message);
+				if(indexResult !== indexExpectedResult) {
+					check = false;
+				}
+				i++;
+			}
+			return check;
+		};
 
 		f1.connection(f2).then(() => {
 			f2.connection(f3).then(() => {
-				f1Broadcast.on('receive', (message) => {
-					console.log('f1:' + message);
-					cpt++;
-					if (cpt === totalResult) {
-						done();
-					}
+				f1.onBroadcast('receive', (message) => {
+					receiveResult(1, message);
 				});
 
-				f2Broadcast.on('receive', (message) => {
-					console.log('f2:' + message);
-					cpt++;
-					if (cpt === totalResult) {
-						done();
-					}
+				f2.onBroadcast('receive', (message) => {
+					receiveResult(2, message);
 				});
 
-				f3Broadcast.on('receive', (message) => {
-					console.log('f3:' + message);
-					cpt++;
-					if (cpt === totalResult) {
-						done();
-					}
+				f3.onBroadcast('receive', (message) => {
+					receiveResult(3, message);
 				});
 
-				const ec1 = f1Broadcast.send('miaousssssss1');
-				f1Broadcast.send('miaousssssss2', ec1);
+				const ec1 = f1.sendBroadcast('1');
+				f1.sendBroadcast('2', ec1);
 
-				const ec2 = f1Broadcast.send('miaousssssss3');
-				f1Broadcast.send('miaousssssss4', ec2);
+				const ec2 = f1.sendBroadcast('3');
+				f1.sendBroadcast('4', ec2);
 			}).catch(error => {
 				console.log(error);
 				done(error);
