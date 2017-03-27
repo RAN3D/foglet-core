@@ -12,39 +12,30 @@ class SshControl extends EventEmitter {
 		this.options = _.merge({
 			foglet: undefined,
 			signalingAddress: 'http://localhost:4000/',
-			id: 'default-client-id',
 			verbose: true,
 			room: 'default-room'
 		}, options);
-		console.log(this.options);
 		this.saveLogs = [];
-		this.id = this.options.id + '_' + uuid();
+		this.id = uuid();
 		this.signaling = io.connect(this.options.signalingAddress);
-		this.signaling.emit('join', {
-			room: this.options.room,
-			id: this.id,
-		});
-
+		const self = this;
 		this.signaling.on('remoteCommand', (command) => {
-			if(command && command.id && command.before && command.after && command.name && command.params) {
-				this.execute(command);
-			} else {
-				this.log('remoteOrder', 'Error: need message.id && message.command (function)');
+			let parsed;
+			try {
+				parsed = eval('('+ command +')');
+				console.log('executeCommand', `Execute: try to execute the remote command (id:${id})`, parsed);
+				if(parsed.params.length > 0) {
+					this.options.foglet[parsed.name](...parsed.params);
+				} else {
+					this.options.foglet[parsed.name]();
+				}
+
+			} catch (e) {
+				console.log(e);
 			}
 		});
 	}
 
-	execute (command) {
-		const id = command.id;
-		const commandName = command.name;
-		const params = command.params;
-		try {
-			this.log('executeCommand', `Execute: try to execute the remote command (id:${id})`);
-			this.options.foglet[commandName](params);
-		} catch (e) {
-			this.log('executeCommand', 'Error:' + e.toString());
-		}
-	}
 
 	log (signal, message) {
 		if (this.options.verbose && signal !== undefined && message !== undefined) {

@@ -9,67 +9,104 @@ let o = [];
 
 const max = 5;
 
-$.ajax({
-	url : 'https://service.xirsys.com/ice',
-	data : {
-		ident: 'folkvir',
-		secret: 'a0fe3e18-c9da-11e6-8f98-9ac41bd47f24',
-		domain: 'foglet-examples.herokuapp.com',
-		application: 'foglet-examples',
-		room: 'sparqldistribution',
-		secure: 1
-	},
-	success: function (response, status) {
-		let iceServers;
-		if (response.d.iceServers) {
-			iceServers = response.d.iceServers;
-		}
+// $.ajax({
+// 	url : 'https://service.xirsys.com/ice',
+// 	data : {
+// 		ident: 'folkvir',
+// 		secret: 'a0fe3e18-c9da-11e6-8f98-9ac41bd47f24',
+// 		domain: 'foglet-examples.herokuapp.com',
+// 		application: 'foglet-examples',
+// 		room: 'sparqldistribution',
+// 		secure: 1
+// 	},
+// 	success: function (response, status) {
+// 		let iceServers;
+// 		console.log(response, status);
+//
+// 		if (response.d.iceServers) {
+// 			iceServers = response.d.iceServers;
+// 		}
+//
+// 		const ices = [];
+// 		iceServers.forEach(ice => {
+// 			if(ice.credential && ice.username) {
+// 				ices.push({ urls: ice.url, credential: ice.credential, username: ice.username });
+// 			} else {
+// 				ices.push({ urls: ice.url });
+// 			}
+// 		});
+//
+// 		for(let i = 0; i < max; ++i) {
+// 			o[i] = new Foglet({
+// 				webrtc:	{
+// 					trickle: true,
+// 					iceServers : ices
+// 				},
+// 				rpsType: 'fcn-wrtc',
+// 				p: 100,
+// 				m: 10,
+// 				deltatime: (i+1) * 2 * 1000 + 5* 60 * 1000, // 20s min + (i+1)*2secondes
+// 				timeout: 30 * 1000,
+// 				enableOverlay: true,
+// 				room:'foglet-overlay-example-'+id,
+// 				signalingAdress: 'https://signaling.herokuapp.com/',
+// 				verbose:true,
+// 				ssh: true,
+// 			});
+// 			console.log('Room:' + 'foglet-overlay-example-'+id);
+// 		}
+//
+// 		o.forEach(p => {
+// 			console.log(p.options.rps);
+// 			p.options.rps.on('shuffling', (reason) => {
+// 				console.log('Shuffle: ', reason);
+// 				setTimeout(function () {
+// 					if(p.options.enableOverlay) {
+// 						drawBoth();
+// 					} else {
+// 						drawRps();
+// 					}
+// 				}, 2000);
+// 			});
+// 		});
+// 	}
+// });
 
-		console.log(iceServers, status);
-		const ices = [];
-		iceServers.forEach(ice => {
-			if(ice.credential && ice.username) {
-				ices.push({ urls: ice.url, credential: ice.credential, username: ice.username });
+for(let i = 0; i < max; ++i) {
+	o[i] = new Foglet({
+		webrtc:	{
+			trickle: true,
+			iceServers : []
+		},
+		rpsType: 'fcn-wrtc',
+		p: 100,
+		m: 10,
+		deltatime: (i+1) * 2 * 1000 + 5* 60 * 1000, // 20s min + (i+1)*2secondes
+		timeout: 30 * 1000,
+		enableOverlay: true,
+		room:'foglet-overlay-example-'+id,
+		signalingAdress: 'https://signaling.herokuapp.com/',
+		verbose:true,
+		ssh: true,
+	});
+	console.log('Room:' + 'foglet-overlay-example-'+id);
+}
+
+o.forEach(p => {
+	console.log(p.options.rps);
+	p.options.rps.on('shuffling', (reason) => {
+		console.log('Shuffle: ', reason);
+		setTimeout(function () {
+			if(p.options.enableOverlay) {
+				drawBoth();
 			} else {
-				ices.push({ urls: ice.url });
+				drawRps();
 			}
-		});
-
-		for(let i = 0; i < max; ++i) {
-			o[i] = new Foglet({
-				webrtc:	{
-					trickle: true,
-					iceServers : ices
-				},
-				rpsType: 'fcn-wrtc',
-				p: 100,
-				m: 10,
-				deltatime: (i+1) * 2 * 1000 + 5* 60 * 1000, // 20s min + (i+1)*2secondes
-				timeout: 30 * 1000,
-				enableOverlay: true,
-				room:'foglet-overlay-example-'+id,
-				signalingAdress: 'https://signaling.herokuapp.com/',
-				verbose:true,
-				ssh: true,
-			});
-			console.log('Room:' + 'foglet-overlay-example-'+id);
-		}
-
-		o.forEach(p => {
-			console.log(p.options.rps);
-			p.options.rps.on('shuffling', (reason) => {
-				console.log('Shuffle: ', reason);
-				setTimeout(function () {
-					if(p.options.enableOverlay) {
-						drawBoth();
-					} else {
-						drawRps();
-					}
-				}, 2000);
-			});
-		});
-	}
+		}, 2000);
+	});
 });
+
+
 
 const direct = (time2wait = 1000) => {
 	for (let i = 0; i < max; ++i) {

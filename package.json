@@ -11,8 +11,8 @@
     "karma": "karma start karma.config.js",
     "cover": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
-    "sshServer": "node ./src/flib/ssh/SshMaster.js runServer '{\"port\": 4000, \"verbose\": true}'",
-    "sshLoad": "node ./src/flib/ssh/SshMaster.js sendCommands ./config.json",
+    "sshServer": "node ./src/flib/ssh/SshMaster.js runServer ./src/flib/ssh/config/serverConfig.json",
+    "sshLoad": "node ./src/flib/ssh/SshMaster.js sendCommands ./src/flib/ssh/config/clientConfig.json",
     "build:foglet": "browserify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]   > ./dist/foglet.bundle.js",
     "build:watch": "watchify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]  -o ./dist/foglet.bundle.js -v -d "
   },

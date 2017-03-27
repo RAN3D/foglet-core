@@ -30,7 +30,8 @@ class fcnAdapter extends AbstractAdapter {
 	}
 
 	connection (rps, timeout) {
-		return Q(this.rps.connection(rps.rps, timeout));
+		if(rps) return Q(this.rps.connection(rps.rps, timeout));
+		return Q(this.rps.connection(undefined, timeout));
 	}
 
 	getNeighbours () {
