@@ -11,34 +11,68 @@ class SshControl extends EventEmitter {
 		super();
 		this.options = _.merge({
 			foglet: undefined,
-			signalingAddress: 'http://localhost:4000/',
+			address: 'http://localhost:4000/',
 			verbose: true,
-			room: 'default-room'
 		}, options);
 		this.saveLogs = [];
-		this.id = uuid();
-		this.signaling = io.connect(this.options.signalingAddress);
-		const self = this;
+		this.signaling = io.connect(this.options.address);
 		this.signaling.on('remoteCommand', (command) => {
 			let parsed;
+			console.log(command);
 			try {
 				parsed = eval('('+ command +')');
-				console.log('executeCommand', `Execute: try to execute the remote command (id:${id})`, parsed);
-				if(parsed.params.length > 0) {
-					this.options.foglet[parsed.name](...parsed.params);
-				} else {
-					this.options.foglet[parsed.name]();
-				}
+				console.log(parsed);
 
+
+				if(parsed.timeout && parsed.timeout > 0) {
+					setTimeout(() => {
+						this.log('TimeoutExecuteCommand', {
+							message: 'Execute: try to execute the remote command: ' + parsed.name,
+							data: parsed
+						});
+						let result;
+						if(parsed.params.length > 0) {
+							result = this.options.foglet[parsed.name](...parsed.params);
+						} else {
+							result = this.options.foglet[parsed.name]();
+						}
+						this.log('TimeoutExecuteCommand', {
+							message: 'Result for:' + parsed.name,
+							data: result
+						});
+
+						if(parsed.finally) this.deserialize(parsed.finally)(this.options.foglet);
+					}, parsed.timeout);
+				} else {
+					this.log('DirectExecuteCommand', {
+						message: 'Execute: try to execute the remote command.',
+						data: parsed
+					});
+					let result;
+					if(parsed.params.length > 0) {
+						result = this.options.foglet[parsed.name](...parsed.params);
+					} else {
+						result = this.options.foglet[parsed.name]();
+					}
+					this.log('DirectExecuteCommand', {
+						message: 'Result for:' + parsed.name,
+						data: result
+					});
+					if(parsed.finally) this.deserialize(parsed.finally)();
+				}
 			} catch (e) {
 				console.log(e);
 			}
 		});
 	}
 
+	deserialize (message) {
+		return eval('(' + message + ')')
+	}
 
 	log (signal, message) {
 		if (this.options.verbose && signal !== undefined && message !== undefined) {
+			console.log(signal, message);
 			this.saveLogs.push({ signal, message });
 			this.emit(signal, message);
 		}

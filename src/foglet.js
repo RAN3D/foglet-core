@@ -85,10 +85,10 @@ class Foglet extends EventEmitter {
 		// INTERPRETER
 		this.interpreter = new FInterpreter(this);
 		// SSH COntrol
-		if (this.options.ssh) {
+		if (this.options.ssh && this.options.ssh.address) {
 			this.ssh = new SshControl({
 				foglet: this,
-				room: this.options.room
+				address: this.options.ssh.address
 			});
 		}
 

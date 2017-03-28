@@ -19,6 +19,8 @@ function init (options) {
 	let port = options.port;
 	let number = 0;
 	let clients = {};
+	let savedLogs = [];
+
 
 	function log (message, verbose) {
 		if(verbose) {
@@ -28,20 +30,26 @@ function init (options) {
 
 	ioServer.on('connection', function (socket) {
 		number++;
-		console.log('People: #=' + number);
+		log('Someone enter: People: #=' + number, true);
 		socket.on('remoteOrder', (data) => {
 			socket.broadcast.emit('remoteCommand', data);
 		});
 
+		socket.on('logs', (data) => {
+			this.log(data, true);
+			savedLogs.push(data);
+		});
+
 		socket.on('disconnect', () => {
 			number--;
+			log('Someone quit: People #=' + number, true);
 		});
 	});
 
 
 
 	httpServer.listen(port, function () {
-		log('HTTP Server listening on port ' + port);
+		log('HTTP Server listening on port ' + port, true);
 	});
 }
 

@@ -4,7 +4,14 @@
 		{
 			"timeout": 1000,
 			"command": "connection",
-			"args": []
+			"args": [],
+			"finally": "function(data){console.log(data);}"
+		},
+		{
+			"timeout": 5000,
+			"command": "getNeighbours",
+			"args": [],
+			"finally": "function(data){console.log(data);}"
 		}
 	]
 }

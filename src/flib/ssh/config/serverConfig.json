@@ -1,4 +1,3 @@
 {
-	"port": 4000,
-	"room": "default-room"
+	"port": 4000
 }
