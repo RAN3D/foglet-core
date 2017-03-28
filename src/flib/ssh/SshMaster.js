@@ -7,26 +7,11 @@ let ioClient = require('socket.io-client');
 const fs = require('fs');
 const _ = require('lodash');
 const uuid = require('uuid/v4');
-console.log(process.argv);
+
+
 if(process.argv.length === 4) {
 	if(process.argv[2] === 'runServer') {
-		console.log('Dirname: ' + __dirname);
-		console.log('Config location: '+ process.argv[3]);
-		fs.readFile(process.argv[3], 'utf8', (err, data) => {
-			if (err) throw err;
-			let parsed;
-			console.log(data);
-			try {
-				parsed = JSON.parse(data);
-			} catch (e) {
-				console.log(e);
-			}
-			let options = _.merge({
-				port: 4000,
-				room: 'default-ssh-room'
-			}, parsed);
-			const S = require('./server.js').init(options);
-		});
+		runServer(process.argv[4]);
 	} else if(process.argv[2] === 'sendCommands') {
 		try {
 			sendCommands(process.argv[3]);
@@ -34,6 +19,26 @@ if(process.argv.length === 4) {
 			console.log(e);
 		}
 	}
+}
+
+function runServer (options){ 
+	console.log('Dirname: ' + __dirname);
+	console.log('Config location: '+ options);
+	fs.readFile(options, 'utf8', (err, data) => {
+		if (err) throw err;
+		let parsed;
+		console.log(data);
+		try {
+			parsed = JSON.parse(data);
+		} catch (e) {
+			console.log(e);
+		}
+		let options = _.merge({
+			port: 4000,
+			room: 'default-ssh-room'
+		}, parsed);
+		const S = require('./server.js').init(options);
+	});
 }
 
 function sendCommands (configFileLocation) {
