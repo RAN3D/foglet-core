@@ -13,9 +13,9 @@ npm install foglet-core
 
 The documentation is avalaible [here](https://ran3d.github.io/foglet-core/)
 
-## [Foglet Live Example](https://ran3d.github.io/spray-wrtc/example/foglet/foglet.html)
+## [Foglet Live Example](https://ran3d.github.io/foglet-core/example/foglet/foglet.html)
 
-## [Overlay Live Example](https://ran3d.github.io/spray-wrtc/example/overlay/overfog.html)
+## [Overlay Live Example](https://ran3d.github.io/foglet-core/example/overlay/overfog.html)
 
 ## How to use it and write your example ?
 Before all, insert the spray-wrtc.bundle.js provided by the npm package spray-wrtc in : node_modules/spray-wrtc/build/ into your html file.
