@@ -4,14 +4,9 @@
 		{
 			"timeout": 1000,
 			"command": "connection",
+			"promise": "function(response,foglet){foglet.ssh.signaling.emit('logs', 'I am connected');}",
 			"args": [],
-			"finally": "function(data){console.log(data);}"
-		},
-		{
-			"timeout": 5000,
-			"command": "getNeighbours",
-			"args": [],
-			"finally": "function(data){console.log(data);}"
+			"finally": "function(foglet){console.log(foglet);}"
 		}
 	]
 }

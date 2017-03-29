@@ -18,38 +18,41 @@ function init (options) {
 	let ioServer = io(httpServer);
 	let port = options.port;
 	let number = 0;
-	let clients = {};
 	let savedLogs = [];
 
 
-	function log (message, verbose) {
-		if(verbose) {
-			console.log('[SSH-SERVER]', message);
-		}
+	function log (...args) {
+		console.log('[SSH-SERVER]', args);
 	}
 
 	ioServer.on('connection', function (socket) {
 		number++;
-		log('Someone enter: People: #=' + number, true);
+		log('Someone enter: People: #=' + number);
+
+		socket.on('join', (data) => {
+			socket.idFoglet = data.id;
+		});
+
 		socket.on('remoteOrder', (data) => {
 			socket.broadcast.emit('remoteCommand', data);
 		});
 
 		socket.on('logs', (data) => {
-			this.log(data, true);
+			log('ID:'+ socket.idFoglet, data);
 			savedLogs.push(data);
 		});
 
 		socket.on('disconnect', () => {
 			number--;
-			log('Someone quit: People #=' + number, true);
+			log('Someone quit: People #=' + number);
+
 		});
 	});
 
 
 
 	httpServer.listen(port, function () {
-		log('HTTP Server listening on port ' + port, true);
+		log('HTTP Server listening on port ' + port);
 	});
 }
 

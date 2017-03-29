@@ -71,25 +71,32 @@ class Foglet extends EventEmitter {
 			enableOverlay: false
 		};
 		this.options = _.merge(this.defaultOptions, options);
+		// LOGS
+		this.savedLogs = [];
 
 		// VARIABLES
 		this.id = uuid();
 		// RPS
 		this.options.rps = new (this._chooseRps(this.options.rpsType))(this.options);
+		this.options.rps.on('logs', (message, data) => this._flog(data));
+
 		this.inviewId = this.options.rps.inviewId;
 		this.outviewId = this.options.rps.outviewId;
 		// OVERLAY
 		if(this.defaultOptions.enableOverlay) {
 			this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
+			this.options.overlay.on('logs', (message, data) => this._flog(data));
 		}
 		// INTERPRETER
 		this.interpreter = new FInterpreter(this);
+		this.interpreter.on('logs', (message, data) => this._flog(data));
 		// SSH COntrol
 		if (this.options.ssh && this.options.ssh.address) {
 			this.ssh = new SshControl({
 				foglet: this,
 				address: this.options.ssh.address
 			});
+			this.ssh.on('logs', (message, data) => this._flog(data));
 		}
 
 		// DATA STRUCTURES
@@ -103,6 +110,7 @@ class Foglet extends EventEmitter {
 				jobs: {},
 			}
 		});
+
 		this._flog('Signaling server used : ' + this.options.signalingAdress + ' on the room : ' + this.options.room);
 	}
 
@@ -299,7 +307,13 @@ class Foglet extends EventEmitter {
 	 */
 	_flog (...args) {
 		if(this.options.verbose) {
-			console.log('[FOGLET]:' + ' @' + this.id + ': ', args);
+			const msg = {
+				time: new Date(),
+				message: '[FOGLET]:' + ' @' + this.id + ': ',
+				data: args
+			};
+			this.savedLogs.push(msg);
+			console.log(msg);
 		}
 	}
 }

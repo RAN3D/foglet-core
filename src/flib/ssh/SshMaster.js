@@ -52,6 +52,9 @@ function sendCommands (configFileLocation) {
 						id: uuid(),
 						name: obj.command,
 						timeout: obj.timeout,
+						promise: obj.promise || function (d) {
+							console.log(d);
+						},
 						params: obj.args,
 						finally: obj.finally || function (d) {
 							console.log(d);
