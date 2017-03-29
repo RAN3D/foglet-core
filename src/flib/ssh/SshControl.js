@@ -3,8 +3,6 @@
 const EventEmitter = require ('events');
 const _ = require('lodash');
 const io = require('socket.io-client');
-const uuid = require('uuid/v4');
-
 
 class SshControl extends EventEmitter {
 	constructor (options = {}) {

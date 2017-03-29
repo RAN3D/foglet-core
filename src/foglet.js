@@ -78,25 +78,25 @@ class Foglet extends EventEmitter {
 		this.id = uuid();
 		// RPS
 		this.options.rps = new (this._chooseRps(this.options.rpsType))(this.options);
-		this.options.rps.on('logs', (message, data) => this._flog(data));
+		this.options.rps.on('logs', (message, data) => this._log(data));
 
 		this.inviewId = this.options.rps.inviewId;
 		this.outviewId = this.options.rps.outviewId;
 		// OVERLAY
 		if(this.defaultOptions.enableOverlay) {
 			this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
-			this.options.overlay.on('logs', (message, data) => this._flog(data));
+			this.options.overlay.on('logs', (message, data) => this._log(data));
 		}
 		// INTERPRETER
 		this.interpreter = new FInterpreter(this);
-		this.interpreter.on('logs', (message, data) => this._flog(data));
+		this.interpreter.on('logs', (message, data) => this._log(data));
 		// SSH COntrol
 		if (this.options.ssh && this.options.ssh.address) {
 			this.ssh = new SshControl({
 				foglet: this,
 				address: this.options.ssh.address
 			});
-			this.ssh.on('logs', (message, data) => this._flog(data));
+			this.ssh.on('logs', (message, data) => this._log(data));
 		}
 
 		// DATA STRUCTURES
@@ -111,7 +111,7 @@ class Foglet extends EventEmitter {
 			}
 		});
 
-		this._flog('Signaling server used : ' + this.options.signalingAdress + ' on the room : ' + this.options.room);
+		this._log('Signaling server used : ' + this.options.signalingAdress + ' on the room : ' + this.options.room);
 	}
 
 	/**
@@ -300,12 +300,12 @@ class Foglet extends EventEmitter {
 
 	/**
 	 * Log by prefixing the message;
-	 * @function _flog
+	 * @function _log
 	 * @private
 	 * @param {string} msg Message to log
 	 * @returns {void}
 	 */
-	_flog (...args) {
+	_log (...args) {
 		if(this.options.verbose) {
 			const msg = {
 				time: new Date(),
