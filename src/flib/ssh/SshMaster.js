@@ -48,20 +48,23 @@ function sendCommands (configFileLocation) {
 			console.log('SSH Server adress: ' + parsed.sshAddress);
 			if(parsed.commands.length > 0) {
 				parsed.commands.forEach( obj => {
-					const data = serialize({
-						id: uuid(),
-						name: obj.command,
-						timeout: obj.timeout,
-						promise: obj.promise || function (d) {
-							console.log(d);
-						},
-						params: obj.args,
-						finally: obj.finally || function (d) {
-							console.log(d);
-						}
-					});
-					console.log(data);
-					signaling.emit('remoteOrder', data);
+					if(obj.timeout) {
+						setTimeout(() => {
+							const sent = serialize({
+								command: obj.command,
+								timeout: obj.timeoutBeforeEach
+							});
+							console.log(sent);
+							signaling.emit('remoteOrder', sent);
+						}, obj.timeout);
+					} else {
+						const sent = serialize({
+							command: obj.command,
+							timeout: obj.timeoutBeforeEach
+						});
+						console.log(sent);
+						signaling.emit('remoteOrder', sent);
+					}
 				});
 				console.log('finished');
 			}

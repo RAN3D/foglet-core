@@ -31,21 +31,35 @@ function init (options) {
 
 		socket.on('join', (data) => {
 			socket.idFoglet = data.id;
+			socket.join('clients');
 		});
 
 		socket.on('remoteOrder', (data) => {
-			socket.broadcast.emit('remoteCommand', data);
+			log('Command received: ', data);
+			let parsed;
+			try {
+				parsed = JSON.parse(data);
+			} catch (e) {
+				console.log(e)
+			}
+			let browsers = ioServer.sockets.adapter.rooms[ 'clients' ] && ioServer.sockets.adapter.rooms[ 'clients' ].sockets;
+			let cpt = 0;
+			for (let b in browsers) {
+				cpt++;
+				setTimeout(() => {
+					ioServer.sockets.connected[b].emit('remoteCommand', data);
+				}, cpt * parsed.timeout);
+			}
 		});
 
 		socket.on('logs', (data) => {
-			log('ID:'+ socket.idFoglet, data);
+			log('Logs received from ID:'+ socket.idFoglet, data);
 			savedLogs.push(data);
 		});
 
 		socket.on('disconnect', () => {
 			number--;
 			log('Someone quit: People #=' + number);
-
 		});
 	});
 

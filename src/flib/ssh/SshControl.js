@@ -25,60 +25,7 @@ class SshControl extends EventEmitter {
 			try {
 				parsed = eval('('+ command +')');
 				console.log(parsed);
-
-				if(parsed.promise) {
-					if(parsed.timeout && parsed.timeout >= 0) {
-						setTimeout(() => {
-							this.log('TimeoutExecuteCommand', {
-								message: 'Promise: try to execute the remote promise: ' + parsed.name,
-								data: parsed
-							});
-							let result;
-							if(parsed.params.length > 0) {
-								console.log(parsed.promise);
-								result = this.options.foglet[parsed.name](...parsed.params).then((data) => {
-									this.deserialize(parsed.promise)(data, this.options.foglet);
-									this.log('TimeoutExecuteCommand', {
-										message: 'Result for:' + parsed.name,
-										data: result
-									});
-								});
-							} else {
-								result = this.options.foglet[parsed.name]().then((data) => {
-									this.deserialize(parsed.promise)(data, this.options.foglet);
-									this.log('TimeoutExecuteCommand', {
-										message: 'Result for:' + parsed.name,
-										data: result
-									});
-								});
-							}
-
-
-							if(parsed.finally) this.deserialize(parsed.finally)(this.options.foglet);
-						}, parsed.timeout);
-					}
-				} else {
-					if(parsed.timeout && parsed.timeout >= 0) {
-						setTimeout(() => {
-							this.log('TimeoutExecuteCommand', {
-								message: 'Execute: try to execute the remote command: ' + parsed.name,
-								data: parsed
-							});
-							let result;
-							if(parsed.params.length > 0) {
-								result = this.options.foglet[parsed.name](...parsed.params);
-							} else {
-								result = this.options.foglet[parsed.name]();
-							}
-							this.log('TimeoutExecuteCommand', {
-								message: 'Result for:' + parsed.name,
-								data: result
-							});
-
-							if(parsed.finally) this.deserialize(parsed.finally)(this.options.foglet);
-						}, parsed.timeout);
-					}
-				}
+				this.deserialize(parsed.command)(this.options.foglet);
 			} catch (e) {
 				console.log(e);
 			}
