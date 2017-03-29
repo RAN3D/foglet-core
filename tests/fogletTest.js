@@ -245,7 +245,6 @@ describe('[FOGLET] Other functions tests', function () {
 			name : 'test'
 		};
 		try {
-			fog._flog('test of the function _fRegisterKey');
 			assert(fog._fRegisterKey(test), 'test');
 			done();
 		} catch (error) {
