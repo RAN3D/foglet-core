@@ -8,7 +8,7 @@ let foglet = new Foglet({
 		trickle: true,
 		iceServers : []
 	},
-	rpsType: 'fcn-wrtc',
+	rpsType: 'spray-wrtc',
 	p: 100,
 	m: 10,
 	deltatime: 5 * 60 * 1000, // 20s min + (i+1)*2secondes

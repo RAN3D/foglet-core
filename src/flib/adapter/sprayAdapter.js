@@ -15,6 +15,8 @@ class sprayAdapter extends AbstractAdapter {
 		}, options);
 
 		this.rps = new Spray(this.options);
+		this.options.rps = this.rps;
+		
 		this.inviewId = this.rps.profile.inviewId;
 		this.outviewId = this.rps.profile.outviewId;
 		// COMMUNICATION
