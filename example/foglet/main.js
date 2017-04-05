@@ -1,6 +1,8 @@
 'use strict';
 
-const Foglet = require('foglet');
+localStorage.debug = 'foglet-core:*';
+
+const Foglet = require('foglet').Foglet;
 const $ = window.$;
 let o = [];
 

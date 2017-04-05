@@ -26,7 +26,7 @@ SOFTWARE.
 const EventEmitter = require('events');
 const uuid = require('uuid/v4');
 const _ = require('lodash');
-
+const debug = require('debug');
 // FOGLET
 const FRegister = require('./flib/fregister.js');
 const FInterpreter = require('./flib/finterpreter.js');
@@ -36,7 +36,7 @@ const Overlay = require('./overlay/overlay.js');
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
 const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 // SSH COntrol
-const SshControl = require('./flib/ssh/SshControl.js');
+const SSH = require('./flib/ssh/ssh.js');
 
 /**
  * Create a Foglet Class in order to use Spray with ease
@@ -70,6 +70,8 @@ class Foglet extends EventEmitter {
 			verbose: true,
 			enableOverlay: false
 		};
+		this.logger = debug('foglet-core:main');
+
 		this.options = _.merge(this.defaultOptions, options);
 		// LOGS
 		this.savedLogs = [];
@@ -92,7 +94,7 @@ class Foglet extends EventEmitter {
 		this.interpreter.on('logs', (message, data) => this._log(data));
 		// SSH COntrol
 		if (this.options.ssh && this.options.ssh.address) {
-			this.ssh = new SshControl({
+			this.ssh = new SSH({
 				foglet: this,
 				address: this.options.ssh.address
 			});
@@ -313,7 +315,7 @@ class Foglet extends EventEmitter {
 				data: args
 			};
 			this.savedLogs.push(msg);
-			console.log(msg);
+			this.logger('%O', ...args);
 		}
 	}
 }

@@ -27,6 +27,7 @@ const _ = require('lodash');
 const EventEmitter = require('events');
 const N2N = require('n2n-overlay-wrtc');
 const io = require('socket.io-client');
+const debug = require('debug');
 
 /**
  * Socket class, we provide a high level api to use the packages n2n-overlay-wrtc and neighborhood-wrtc,
@@ -133,6 +134,7 @@ class Socket extends EventEmitter {
 		};
 		this.defaultOptions = _.merge(this.defaultOptions, options);
 		this.defaultOptions.neighborhood.protocol = this.defaultOptions.neighborhood.protocol + '-socket-wrtc';
+		this.logger = debug('foglet-core:socket');
 		this._log('Options', this.defaultOptions);
 
 		// =======================================================================================
@@ -367,7 +369,7 @@ class Socket extends EventEmitter {
 	 */
 	_log (...args) {
 		if(this.defaultOptions.verbose) {
-			console.log('[Socket:' + this.defaultOptions.neighborhood.protocol + ']', args);
+			this.logger(...args);
 		}
 	}
 

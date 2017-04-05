@@ -26,6 +26,7 @@ SOFTWARE.
 const  EventEmitter = require('events');
 const uuid = require('uuid/v4');
 const _ = require('lodash');
+const debug = require('debug');
 
 const Socket = require('./../utils/socket.js').Socket;
 const SocketPing = require('./../utils/socketping.js');
@@ -75,6 +76,7 @@ class TManSpray extends EventEmitter {
 			signalLeave: 'leaveOverfog',
 			verbose: true
 		};
+		this.logger = debug('foglet-core:overlay');
 		this.options = _.merge(this.defaultOptions, options || {});
 		this.options.neighborhood.webrtc.iceServers = this.options.rps.iceServers;
 
@@ -82,7 +84,6 @@ class TManSpray extends EventEmitter {
 		// get unicast protocol, must provide a method send(message, peer)
 
 		// this.log(new Error('Need a unicast protocol as parameter in order to send messages : { unicast : ..., [, key:val] } unicast protocol will listen on the signal "receive"'));
-		console.log(this.unicast);
 		this.socket = new Socket(this.defaultOptions);
 		this.outviewId = this.socket.outviewId;
 		this.inviewId = this.socket.inviewId;
@@ -249,7 +250,7 @@ class TManSpray extends EventEmitter {
 	 *
 	 */
 	log (...args) {
-		if(this.options.verbose) console.log('[OVERLAY] ', args);
+		if(this.options.verbose) this.logger(...args);
 	}
 
 	/**

@@ -37,6 +37,7 @@
     "babel-register": "^6.24.0",
     "causal-broadcast-definition": "^0.1.x",
     "causaltrack": "^0.4.1",
+    "debug": "^2.6.3",
     "express": "^4.14.0",
     "fcn-wrtc": "^1.2.0",
     "immutable": "^3.8.1",

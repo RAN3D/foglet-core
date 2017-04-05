@@ -1,7 +1,8 @@
 'use strict';
 
+localStorage.debug = 'foglet-core:*';
+
 const Foglet = require('foglet').Foglet;
-const uuid = require('foglet').uuid;
 
 let foglet = new Foglet({
 	webrtc:	{

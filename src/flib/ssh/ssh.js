@@ -19,13 +19,13 @@ class SshControl extends EventEmitter {
 
 		this.signaling.on('remoteCommand', (command) => {
 			let parsed;
-			console.log(command);
+			this.log(command);
 			try {
 				parsed = eval('('+ command +')');
-				console.log(parsed);
+				this.log(parsed);
 				this.deserialize(parsed.command)(this.options.foglet);
 			} catch (e) {
-				console.log(e);
+				this.log(e);
 			}
 		});
 	}
@@ -36,7 +36,6 @@ class SshControl extends EventEmitter {
 
 	log (signal, message) {
 		if (this.options.verbose && signal !== undefined && message !== undefined) {
-			console.log(signal, message);
 			this.emit('logs', signal, message);
 		}
 	}
