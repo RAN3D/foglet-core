@@ -30,8 +30,10 @@ for(let i = 0; i < max; ++i) {
 			trickle: false,
 			iceServers : []
 		},
+		enableOverlay:false,
 		room: 'best-room-for-foglet',
-		verbose: true
+		verbose: true,
+		rpsType: 'spray-wrtc-merging'
 	});
 }
 

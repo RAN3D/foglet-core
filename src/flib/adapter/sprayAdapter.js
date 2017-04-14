@@ -16,7 +16,7 @@ class sprayAdapter extends AbstractAdapter {
 
 		this.rps = new Spray(this.options);
 		this.options.rps = this.rps;
-		
+
 		this.inviewId = this.rps.profile.inviewId;
 		this.outviewId = this.rps.profile.outviewId;
 		// COMMUNICATION
@@ -26,7 +26,7 @@ class sprayAdapter extends AbstractAdapter {
 			protocol: this.options.protocol
 		});
 		//	Connection to the signaling server
-		this.signaling = io.connect(this.options.signalingAdress);
+		this.signaling = io.connect(this.options.signalingAdress, {origins: '*:*'});
 
 		this.signalingCallback = () => {
 			return {

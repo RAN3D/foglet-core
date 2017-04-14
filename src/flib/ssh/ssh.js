@@ -19,7 +19,7 @@ class SshControl extends EventEmitter {
 
 		this.signaling.on('remoteCommand', (command) => {
 			let parsed;
-			this.log(command);
+			this.log('remoteCommand', command);
 			try {
 				parsed = eval('('+ command +')');
 				this.log(parsed);

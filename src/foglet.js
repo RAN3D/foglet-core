@@ -35,6 +35,7 @@ const Overlay = require('./overlay/overlay.js');
 // Networks
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
 const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
+const AdapterSprayMerging = require('./flib/adapter/sprayMergingAdapter.js');
 // SSH COntrol
 const SSH = require('./flib/ssh/ssh.js');
 
@@ -127,6 +128,9 @@ class Foglet extends EventEmitter {
 			break;
 		case 'spray-wrtc':
 			rps = AdapterSpray;
+			break;
+		case 'spray-wrtc-merging':
+			rps = AdapterSprayMerging;
 			break;
 		default:
 			rps = AdapterFcn;
