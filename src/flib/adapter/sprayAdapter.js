@@ -11,7 +11,7 @@ class sprayAdapter extends AbstractAdapter {
 	constructor (options) {
 		super();
 		this.options = _.merge({
-
+			origins:'*'
 		}, options);
 
 		this.rps = new Spray(this.options);
@@ -26,7 +26,7 @@ class sprayAdapter extends AbstractAdapter {
 			protocol: this.options.protocol
 		});
 		//	Connection to the signaling server
-		this.signaling = io.connect(this.options.signalingAdress, {origins: '*:*'});
+		this.signaling = io.connect(this.options.signalingAdress, {origins: options.origins});
 
 		this.signalingCallback = () => {
 			return {

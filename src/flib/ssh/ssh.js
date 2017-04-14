@@ -11,8 +11,9 @@ class SshControl extends EventEmitter {
 			foglet: undefined,
 			address: 'http://localhost:4000/',
 			verbose: true,
+			origins:'*'
 		}, options);
-		this.signaling = io.connect(this.options.address, {origins: '*:*'});
+		this.signaling = io.connect(this.options.address, {origins: options.origins});
 		this.signaling.emit('join', {
 			id: this.options.foglet.id
 		});
