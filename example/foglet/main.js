@@ -6,20 +6,6 @@ const Foglet = require('foglet').Foglet;
 const $ = window.$;
 let o = [];
 
-let callbacks = function (src, dest) {
-	return {
-		onInitiate: function (offer) {
-			dest.connection(callbacks(dest, src), offer);
-		},
-		onAccept: function (offer) {
-			dest.connection(offer);
-		},
-		onReady: function (id) {
-			console.log('[DIRECT:CALLBACK] Connected to : ', id);
-		}
-	};
-};
-
 const max = 3;
 
 

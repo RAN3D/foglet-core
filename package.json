@@ -9,16 +9,13 @@
     "all": "npm run build:foglet && npm test && npm run esdoc",
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
-    "cover": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
-    "sshServer": "node ./src/flib/ssh/SshMaster.js runServer ./src/flib/ssh/config/serverConfig.json",
-    "sshLoad": "node ./src/flib/ssh/SshMaster.js sendCommands ./src/flib/ssh/config/clientConfig.json",
     "build:foglet": "browserify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]   > ./dist/foglet.bundle.js",
     "build:watch": "watchify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]  -o ./dist/foglet.bundle.js -v -d "
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/folkvir/foglet-core.git"
+    "url": "git+https://github.com/RAN3D/foglet-core.git"
   },
   "keywords": [
     "spray-wrtc",
@@ -28,9 +25,9 @@
   "author": "Folkvir",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/folkvir/foglet-core/issues"
+    "url": "https://github.com/RAN3D/foglet-core/issues"
   },
-  "homepage": "https://github.com/folkvir/foglet-core#readme",
+  "homepage": "https://github.com/RAN3D/foglet-core#readme",
   "dependencies": {
     "babel-core": "^6.24.0",
     "babel-preset-es2015": "^6.24.0",
@@ -50,7 +47,7 @@
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.4.8",
     "sorted-cmp-array": "^2.0.1",
-    "spray-wrtc": "~1.x.x",
+    "spray-wrtc": "git://github.com/RAN3D/spray-wrtc.git#merging",
     "unicast-definition": "^0.1.0",
     "uuid": "^3.0.1",
     "version-vector-with-exceptions": "0.0.x",
