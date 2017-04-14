@@ -16,7 +16,7 @@ for(let i = 0; i < max; ++i) {
 			trickle: false,
 			iceServers : []
 		},
-		enableOverlay:false,
+		signalingAdress:'http://localhost:3000/',
 		room: 'best-room-for-foglet',
 		verbose: true,
 		rpsType: 'spray-wrtc-merging'
@@ -51,3 +51,9 @@ const signalingConnection = (time2wait = 500) => {
 		})(i);
 	}
 };
+
+const peers = () => {
+	o.forEach(f => {
+		console.log('Peers: ', f.getNeighbours());
+	});
+}

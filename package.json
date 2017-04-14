@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RAN3D/foglet-core.git"
+    "url": "git+https://github.com/ran3d/foglet-core.git"
   },
   "keywords": [
     "spray-wrtc",
@@ -25,13 +25,10 @@
   "author": "Folkvir",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/RAN3D/foglet-core/issues"
+    "url": "https://github.com/ran3d/foglet-core/issues"
   },
-  "homepage": "https://github.com/RAN3D/foglet-core#readme",
+  "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
-    "babel-core": "^6.24.0",
-    "babel-preset-es2015": "^6.24.0",
-    "babel-register": "^6.24.0",
     "causal-broadcast-definition": "^0.1.x",
     "causaltrack": "^0.4.1",
     "debug": "^2.6.3",
@@ -47,16 +44,16 @@
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.4.8",
     "sorted-cmp-array": "^2.0.1",
-    "spray-wrtc": "git://github.com/RAN3D/spray-wrtc.git#merging",
+    "spray-wrtc": "git://github.com/ran3d/spray-wrtc.git#merging",
     "unicast-definition": "^0.1.0",
     "uuid": "^3.0.1",
     "version-vector-with-exceptions": "0.0.x",
     "vivaldi-coordinates": "^1.0.0"
   },
   "devDependencies": {
-    "babel-core": "^6.18.0",
-    "babel-preset-es2015": "^6.18.0",
-    "babel-register": "^6.18.0",
+    "babel-core": "^6.24.0",
+    "babel-preset-es2015": "^6.24.0",
+    "babel-register": "^6.24.0",
     "babelify": "^7.3.0",
     "browserify": "^13.1.0",
     "browserify-istanbul": "^2.0.0",

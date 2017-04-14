@@ -6,7 +6,7 @@ const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
 // const FBroadcast = require('../fbroadcast.js');
 // const Unicast = require('unicast-definition');
-const log = require('debug')('spray-wrtc-merge');
+const log = require('debug')('foglet-core:spray-wrtc-merge');
 class SprayAdapter extends AbstractAdapter {
 	constructor (options) {
 		super();
@@ -16,13 +16,12 @@ class SprayAdapter extends AbstractAdapter {
 		}, options);
 
 		this.rps = new Spray(this.options);
-		log(this.rps);
-		this.options.rps = this.rps;
 
-		this.peer = this.rps.register(this.options.protocol);
+		// this.peer = this.rps.register(this.options.protocol);
 
 		this.inviewId = this.rps.getInviewId();
 		this.outviewId = this.rps.getOutviewId();
+		this.id = this.inviewId+'_'+this.outviewId;
 		// COMMUNICATION
 		// this.unicast = new Unicast(this.rps, this.options.protocol + '-unicast');
 		// this.broadcast = new FBroadcast({
@@ -31,67 +30,72 @@ class SprayAdapter extends AbstractAdapter {
 		// });
 		//	Connection to the signaling server
 		this.signaling = io.connect(this.options.signalingAdress, {origins: options.origins});
+		this.sign = new Map();
 
 		this.signalingInit = () => {
 			return (offer) => {
-				log('Emit the new offer:', offer);
+				log(`@${this.id}: Emit the new offer: `, offer);
 				this.signaling.emit('new', {offer, room: this.options.room});
-			};
-		};
-		this.signalingAccept = () => {
-			return (offer) => {
-				log('Emit the accpeted offer:', offer);
-				this.signaling.emit('accept', { offer, room: this.options.room });
-			};
-		};
-		this.signalingReady = (data) => {
-			return (id) => {
-				this.rps.connect(data);
-				this.signaling.emit('connected',  { room: this.options.room });
-				log('Connected to the peer :', id);
 			};
 		};
 
 		this.directCallback = (src, dest) => {
 			return (offer) => {
-				src.connect( (answer) => {
-					dest.connect(answer);
+				dest.connect( (answer) => {
+					src.connect(answer);
 				}, offer);
 			};
 		};
 
 		this.signaling.on('new_spray', (data) => {
-			log('Receive a new offer:', data);
-			this.rps.connect(this.signalingAccept(), data);
+			const signalingAccept = (offer) => {
+				log(`@${this.id}: Emit the accepted offer: `, offer);
+				this.signaling.emit('accept', { offer, room: this.options.room });
+			};
+			log(`@${this.id}: Receive a new offer: `, data);
+			this.rps.connect(signalingAccept, data);
 		});
 		this.signaling.on('accept_spray', (data) => {
-			log('Receive an accepted offer:', data);
-			this.rps.connect(this.signalingReady(data));
+			log('Receive an accepted offer: ', data);
+			this.rps.connect(data);
 		});
+
 	}
 
 	connection (rps, timeout) {
 		log('Pending connection...');
+		const self = this;
 		return Q.Promise(function (resolve, reject) {
 			try {
 				if(rps) {
-					this.rps.join(this.directCallback(this.rps, rps.rps)).then(() => {
-						this.emit('connected', { room: this.options.room });
-					});
-					self.once('connected', () => {
-						resolve(true);
+					self.rps.join(self.directCallback(self.rps, rps.rps)).then(() => {
+						self.emit('connected', { room: self.options.room });
+					}).catch(error => {
+						if(error === 'connected')
+							resolve(true);
+						else
+							reject(error);
 					});
 				} else {
 					self.signaling.emit('joinRoom', { room: self.options.room });
 					self.signaling.once('joinedRoom', () => {
 						log(' Joined the room', self.options.room);
-						self.rps.join(self.signalingCallback());
+						self.rps.join(self.signalingInit()).then(() => {
+							self.emit('connected', { room: self.options.room });
+						}).catch(error => {
+							log(error);
+							if(error === 'connected')
+								resolve(true);
+							else
+								reject(error);
+						});
 					});
-					self.signaling.once('connected', () => {
-						resolve(true);
-					});
-				}
 
+				}
+				self.once('connected', () => {
+					log(`@${self.id} is now connected`);
+					resolve(true);
+				});
 
 				setTimeout(() => {
 					reject();
@@ -100,38 +104,6 @@ class SprayAdapter extends AbstractAdapter {
 				reject(error);
 			}
 		});
-
-		// const self = this;
-		// return Q.Promise(function (resolve, reject) {
-		// 	try {
-		// 		if(rps) {
-		// 			self.rps.connection(self.directCallback(self.rps, rps.rps));
-		// 			self.once('connected', () => {
-		// 				resolve(true);
-		// 			});
-		// 		} else {
-		// 			self.signaling.emit('joinRoom', { room: self.options.room });
-		// 			self.signaling.once('joinedRoom', () => {
-		// 				self.rps.log(' Joined the room', self.options.room);
-		// 				self.rps.connection(self.signalingCallback());
-		// 			});
-		// 			self.signaling.once('connected', () => {
-		// 				resolve(true);
-		// 			});
-		// 		}
-		//
-		//
-		// 		setTimeout(() => {
-		// 			reject();
-		// 		}, timeout);
-		// 	} catch (error) {
-		// 		reject(error);
-		// 	}
-		// });
-	}
-
-	send (id, message, retry = 10) {
-		return this.rps.send(id, message, retry);
 	}
 
 	/**
@@ -142,7 +114,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @returns {void}
 	**/
 	onBroadcast (signal, callback) {
-		this.broadcast.on(signal, callback);
+		log('Broadcast not implemented');
 	}
 
 
@@ -153,7 +125,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @returns {void}
 	 */
 	sendBroadcast (msg) {
-		this.broadcast.send(msg);
+		log('Broadcast not implemented');
 	}
 
 	/**
@@ -169,7 +141,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.unicast.on('receive', callback);
+		this.rps.on(this.options.protocol, callback);
 	}
 
 	/**
@@ -180,14 +152,11 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		return this.unicast.send(message, id);
+		this.rps.emit(this.options.protocol, id, message);
 	}
 
-	getNeighbours () {
-		let res = [];
-		let peers = this.getPeers().o;
-		if(peers.o.length > 0) peers.forEach(p => res.push(p));
-		return res;
+	getNeighbours (k = undefined) {
+		return this.getPeers(k);
 	}
 
 	getPeers () {
