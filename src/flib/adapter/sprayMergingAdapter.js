@@ -71,10 +71,12 @@ class SprayAdapter extends AbstractAdapter {
 					self.rps.join(self.directCallback(self.rps, rps.rps)).then(() => {
 						self.emit('connected', { room: self.options.room });
 					}).catch(error => {
-						if(error === 'connected')
+						log(error);
+						if(error === 'connected') {
 							resolve(true);
-						else
+						} else {
 							reject(error);
+						}
 					});
 				} else {
 					self.signaling.emit('joinRoom', { room: self.options.room });
@@ -84,19 +86,18 @@ class SprayAdapter extends AbstractAdapter {
 							self.emit('connected', { room: self.options.room });
 						}).catch(error => {
 							log(error);
-							if(error === 'connected')
+							if(error === 'connected') {
 								resolve(true);
-							else
+							} else {
 								reject(error);
+							}
 						});
 					});
-
 				}
 				self.once('connected', () => {
 					log(`@${self.id} is now connected`);
 					resolve(true);
 				});
-
 				setTimeout(() => {
 					reject();
 				}, timeout);
@@ -141,7 +142,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.rps.on(this.options.protocol, callback);
+		this.receive(this.options.protocol, callback);
 	}
 
 	/**
@@ -152,7 +153,15 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		this.rps.emit(this.options.protocol, id, message);
+		this.send(this.options.protocol, id, message);
+	}
+
+	send (protocol, id, message) {
+		this.rps.emit(protocol, id, message);
+	}
+
+	receive (protocol, callback) {
+		this.rps.on(protocol, callback);
 	}
 
 	getNeighbours (k = undefined) {

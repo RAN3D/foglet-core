@@ -34,7 +34,7 @@ const directConnection = (time2wait = 500) => {
 	for(let i = 1; i < max; ++i) {
 		let p = o[i];
 		f.connection(p).then(d =>{
-			logs(`=> Foglet ${f.id} has been connected with a direct connection to Foglet ${p.id}`);
+			logs(`=> Foglet ${f.options.rps.inviewId} has been connected with a direct connection to Foglet ${p.options.rps.inviewId}`);
 		});
 	}
 };
@@ -52,8 +52,24 @@ const signalingConnection = (time2wait = 500) => {
 	}
 };
 
-const peers = () => {
+const peers = (k = Infinity) => {
 	o.forEach(f => {
-		console.log('Peers: ', f.getNeighbours());
+		logs('@' + f.options.rps.inviewId + ' Peers: ' + f.getNeighbours(k).toString());
 	});
-}
+};
+
+const message = () => {
+	o.forEach(f => {
+		f.onUnicast((id, message) => {
+			console.log(id, message);
+			logs(`@${f.options.rps.inviewId} Receive a message from ${id}: ` + JSON.stringify(message));
+		});
+	});
+
+	o.forEach(f => {
+		const id = f.getNeighbours(1);
+		const message = 'Hello world !';
+		logs(`@${f.options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
+		f.sendUnicast(message, id);
+	});
+};
