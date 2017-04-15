@@ -68,8 +68,19 @@ const message = () => {
 
 	o.forEach(f => {
 		const id = f.getNeighbours(1);
-		const message = 'Hello world !';
+		const message = 'UNICAST, Hello world !';
 		logs(`@${f.options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
 		f.sendUnicast(message, id);
 	});
+};
+
+const broadcast = () => {
+	o.forEach(f => {
+		f.onBroadcast((id, message) => {
+			console.log(id, message);
+			logs(`@${f.options.rps.inviewId} Receive a broadcast message from ${id}: ` + JSON.stringify(message));
+		});
+	});
+
+	o[0].sendBroadcast('BROADCAST, Hello world !');
 };

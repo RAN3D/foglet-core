@@ -4,9 +4,9 @@ const Spray = require('spray-wrtc');
 const io = require('socket.io-client');
 const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
-// const FBroadcast = require('../fbroadcast.js');
-// const Unicast = require('unicast-definition');
+const FBroadcast = require('../fbroadcast.js');
 const log = require('debug')('foglet-core:spray-wrtc-merge');
+
 class SprayAdapter extends AbstractAdapter {
 	constructor (options) {
 		super();
@@ -22,12 +22,12 @@ class SprayAdapter extends AbstractAdapter {
 		this.inviewId = this.rps.getInviewId();
 		this.outviewId = this.rps.getOutviewId();
 		this.id = this.inviewId+'_'+this.outviewId;
-		// COMMUNICATION
-		// this.unicast = new Unicast(this.rps, this.options.protocol + '-unicast');
-		// this.broadcast = new FBroadcast({
-		// 	foglet: this,
-		// 	protocol: this.options.protocol
-		// });
+
+		this.broadcast = new FBroadcast({
+			rps: this,
+			protocol: this.options.protocol
+		});
+
 		//	Connection to the signaling server
 		this.signaling = io.connect(this.options.signalingAdress, {origins: options.origins});
 		this.sign = new Map();
@@ -110,23 +110,23 @@ class SprayAdapter extends AbstractAdapter {
 	/**
 	 * Allow to listen on Foglet when a broadcasted message arrived
 	 * @function onBroadcast
-	 * @param {string} signal - The signal we will listen to.
 	 * @param {callback} callback - Callback function that handles the response
 	 * @returns {void}
 	**/
-	onBroadcast (signal, callback) {
-		log('Broadcast not implemented');
+	onBroadcast (callback) {
+		this.broadcast.on(this.protocol+'-receive', callback);
 	}
 
 
 	/**
 	 * Send a broadcast message to all connected clients.
 	 * @function sendBroadcast
-	 * @param {object} msg - Message to send.
+	 * @param {object} msg - Message to send,
+	 * @param {string} id - Message to send.
 	 * @returns {void}
 	 */
-	sendBroadcast (msg) {
-		log('Broadcast not implemented');
+	sendBroadcast (msg, id) {
+		this.broadcast.send(msg, id);
 	}
 
 	/**
@@ -157,7 +157,13 @@ class SprayAdapter extends AbstractAdapter {
 	}
 
 	send (protocol, id, message) {
-		this.rps.emit(protocol, id, message);
+		log('Send a message: ', protocol, id, message);
+		if(message && id) {
+			this.rps.emit(this.options.protocol, id, message);
+		} else if(message && !id) {
+			const neighbours = this.getNeighbours();
+			this.rps.emit(protocol, neighbours, message);
+		}
 	}
 
 	receive (protocol, callback) {
