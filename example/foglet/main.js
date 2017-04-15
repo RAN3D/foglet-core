@@ -76,11 +76,11 @@ const message = () => {
 
 const broadcast = () => {
 	o.forEach(f => {
-		f.onBroadcast((id, message) => {
-			console.log(id, message);
-			logs(`@${f.options.rps.inviewId} Receive a broadcast message from ${id}: ` + JSON.stringify(message));
+		f.onBroadcast((message) => {
+			console.log(message);
+			logs(`@${f.options.rps.inviewId} Receive a broadcast message : ` + JSON.stringify(message));
 		});
 	});
 
-	o[0].sendBroadcast('BROADCAST, Hello world !');
+	o.forEach(f => f.sendBroadcast('BROADCAST, Hello world ! from '+f.options.rps.inviewId));
 };

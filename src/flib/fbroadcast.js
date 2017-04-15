@@ -95,15 +95,14 @@ class FBroadcast extends EventEmitter {
 		}
 	}
 
-	send (message, id, isReady) {
+	send (message, id = {_e:0, _c:0}, isReady) {
 		const sniffed = this.sniffer(message);
 		if(sniffed) {
 			message = sniffed;
 		}
-		const v = this.causality.increment();
-		let mBroadcast = new MBroadcast(this.protocol, id || v, isReady, message);
-		// #2 register the message in the structure
 		this.causality.incrementFrom(id);
+		let mBroadcast = new MBroadcast(this.protocol, id, isReady, message);
+		// #2 register the message in the structure
 
 		// #3 send the message to the neighborhood
 		debug('Send a broadcast message.');
@@ -117,7 +116,7 @@ class FBroadcast extends EventEmitter {
 		if(sniffed) {
 			message = sniffed;
 		}
-		this.emit(this.protocol+'-receive', message);
+		this.emit(this.options.protocol+'-receive', message);
 	}
 
 	sendAntiEntropyResponse (origin, causalityAtReceipt, messages) {
@@ -133,8 +132,10 @@ class FBroadcast extends EventEmitter {
 	}
 
 	_receiveBroadcast (message) {
-		debug('ReceiveBroadcast.');
+		debug('ReceiveBroadcast:one', message);
+		console.log(this.causality, message.id);
 		if (!this._stopPropagation(message)) {
+			debug('ReceiveBroadcast:two');
 			// #1 register the operation
 			this.buffer.push(message);
 			// #2 deliver
@@ -171,6 +172,7 @@ class FBroadcast extends EventEmitter {
 					// #2 only check if the message has not been received yet
 					if (!this._stopPropagation(element)) {
 						this.causality.incrementFrom(element.id);
+						debug('Deliver the message');
 						this._onReceive(element.payload);
 					}
 				}
@@ -182,8 +184,10 @@ class FBroadcast extends EventEmitter {
 	}
 
 	_stopPropagation (message) {
-		debug('Stoppropagation');
-		return this.causality.isLower(message.id) ||  this._bufferIndexOf( message.id )>=0;
+		const a = this.causality.isLower(message.id);
+		const b = this._bufferIndexOf( message.id )>=0;
+		debug('Stoppropagation', a, b);
+		return  a||b;
 	}
 
 	_bufferIndexOf (id) {
@@ -213,6 +217,7 @@ class FBroadcast extends EventEmitter {
 					found = true;
 					this.causality.incrementFrom(message.id);
 					this.buffer.splice(i, 1);
+					debug('Deliver the message');
 					this._onReceive(message.payload);
 				}
 			}
