@@ -5,6 +5,7 @@ const io = require('socket.io-client');
 const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
 const FBroadcast = require('../fbroadcast.js');
+const FUnicast = require('../funicast.js');
 const log = require('debug')('foglet-core:spray-wrtc-merge');
 
 class SprayAdapter extends AbstractAdapter {
@@ -23,18 +24,21 @@ class SprayAdapter extends AbstractAdapter {
 		this.outviewId = this.rps.getOutviewId();
 		this.id = this.inviewId+'_'+this.outviewId;
 
+		this.unicast = new FUnicast({
+			source: this,
+			protocol: this.options.protocol
+		});
 		this.broadcast = new FBroadcast({
 			rps: this,
 			protocol: this.options.protocol
 		});
-
+		log(this.unicast, this.broadcast);
 		//	Connection to the signaling server
 		this.signaling = io.connect(this.options.signalingAdress, {origins: options.origins});
-		this.sign = new Map();
 
 		this.signalingInit = () => {
 			return (offer) => {
-				log(`@${this.id}: Emit the new offer: `, offer);
+				log(`@${this.inviewId}: Emit the new offer: `, offer);
 				this.signaling.emit('new', {offer, room: this.options.room});
 			};
 		};
@@ -49,10 +53,10 @@ class SprayAdapter extends AbstractAdapter {
 
 		this.signaling.on('new_spray', (data) => {
 			const signalingAccept = (offer) => {
-				log(`@${this.id}: Emit the accepted offer: `, offer);
+				log(`@${this.inviewId}: Emit the accepted offer: `, offer);
 				this.signaling.emit('accept', { offer, room: this.options.room });
 			};
-			log(`@${this.id}: Receive a new offer: `, data);
+			log(`@${this.inviewId}: Receive a new offer: `, data);
 			this.rps.connect(signalingAccept, data);
 		});
 		this.signaling.on('accept_spray', (data) => {
@@ -122,7 +126,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * Send a broadcast message to all connected clients.
 	 * @function sendBroadcast
 	 * @param {object} msg - Message to send,
-	 * @param {string} id - Message to send.
+	 * @param {string} id - Id of the message to send (see VVwE: github.com/chat-wane/version-vector-with-exceptions).
 	 * @returns {void}
 	 */
 	sendBroadcast (msg, id) {
@@ -142,7 +146,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.receive(this.options.protocol, callback);
+		this.unicast.on('receive', callback);
 	}
 
 	/**
@@ -153,15 +157,16 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		this.send(this.options.protocol, id, message);
+		this.unicast.send(id, message);
 	}
 
 	send (protocol, id, message) {
-		log('Send a message: ', protocol, id, message);
 		if(message && id) {
-			this.rps.emit(this.options.protocol, id, message);
+			log('Send a message to one client: ', protocol, id, message);
+			this.rps.emit(protocol, id, message);
 		} else if(message && !id) {
 			const neighbours = this.getNeighbours();
+			log('Send a message to multiple clients: ', protocol, neighbours, message);
 			this.rps.emit(protocol, neighbours, message);
 		}
 	}

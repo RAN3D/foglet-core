@@ -82,7 +82,6 @@ class FInterpreter extends EventEmitter {
 		};
 
 		this.broadcast.on('receive', message => {
-			console.log(message);
 			self._receiveBroadcast (message);
 		});
 

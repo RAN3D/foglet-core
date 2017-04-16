@@ -69,7 +69,8 @@ class Foglet extends EventEmitter {
 			room: 'default-room',
 			protocol: 'foglet-protocol-default',
 			verbose: true,
-			enableOverlay: false
+			enableOverlay: false,
+			enableInterpreter: false
 		};
 		this.logger = debug('foglet-core:main');
 
@@ -91,8 +92,10 @@ class Foglet extends EventEmitter {
 			this.options.overlay.on('logs', (message, data) => this._log(data));
 		}
 		// INTERPRETER
-		this.interpreter = new FInterpreter(this);
-		this.interpreter.on('logs', (message, data) => this._log(data));
+		if(this.options.enableInterpreter) {
+			this.interpreter = new FInterpreter(this);
+			this.interpreter.on('logs', (message, data) => this._log(data));
+		}
 		// SSH COntrol
 		if (this.options.ssh && this.options.ssh.address) {
 			this.ssh = new SSH({
