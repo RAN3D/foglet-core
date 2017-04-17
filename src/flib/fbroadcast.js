@@ -27,7 +27,6 @@ const EventEmitter = require('events');
 const uuid = require('uuid/v4');
 const VVwE = require('version-vector-with-exceptions');
 const _ = require('lodash');
-const FUnicast = require('./funicast.js');
 const debug = require('debug')('foglet-core:broadcast');
 
 function MBroadcast (name, id, isReady, payload) {
@@ -70,7 +69,6 @@ class FBroadcast extends EventEmitter {
 				return message;
 			};
 
-			this.unicast = new FUnicast({protocol: this.protocol, source: this.source});
 
 			// buffer of operations
 			this.buffer = [];
@@ -78,18 +76,18 @@ class FBroadcast extends EventEmitter {
 			this.bufferAntiEntropy = new MAntiEntropyResponse('init');
 
 
-			this.unicast.on('receive', (id, message) => {
+			this.source.receive(this.protocol, (id, message) => {
 				this._receiveMessage(id, message);
 			});
 
 
 			setTimeout(() => {
 				// let 2 seconds for the socket to open properly
-				this.unicast.send(null, new MAntiEntropyRequest(this.causality));
+				this.source.send(this.protocol, null, new MAntiEntropyRequest(this.causality));
 			}, this.options.timeBeforeStart);
 
 			setInterval(() =>{
-				this.unicast.send(null, new MAntiEntropyRequest(this.causality));
+				this.source.send(this.protocol, null, new MAntiEntropyRequest(this.causality));
 			}, this.options.delta);
 		}else{
 			return new Error('Not enough parameters', 'fbroadcast.js');
@@ -101,13 +99,13 @@ class FBroadcast extends EventEmitter {
 		if(sniffed) {
 			message = sniffed;
 		}
-		this.causality.incrementFrom(id);
 		let mBroadcast = new MBroadcast(this.protocol, id, isReady, message);
 		// #2 register the message in the structure
+		this.causality.incrementFrom(id);
 
 		// #3 send the message to the neighborhood
 		debug(`@${this.source.inviewId}: Send a broadcast message.`);
-		this.unicast.send(null, mBroadcast);
+		this.source.send(this.protocol, null, mBroadcast);
 		return mBroadcast.id;
 	}
 
@@ -124,20 +122,16 @@ class FBroadcast extends EventEmitter {
 		debug(`@${this.source.inviewId}: sendAntiEntropyResponse..`);
 		let id = uuid();
 		// #1 metadata of the antientropy response
-		let sent = this.unicast.send(origin, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
+		let sent = this.source.send(this.protocol, origin, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
 		let i = 0;
 		while (sent && i < messages.length) {
-			sent = this.unicast.send(origin, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
+			sent = this.source.send(this.protocol, origin, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
 			++i;
 		}
 	}
 
-	_receiveBroadcast (message) {
-
-	}
-
 	_receiveMessage (id, message) {
-		debug(`@${this.source.inviewId}: ReceiveMessage`);
+		debug(`@${this.source.inviewId}: ReceiveMessage`, id, message);
 		switch (message.type) {
 		case 'MAntiEntropyRequest':
 			this.emit('antiEntropy', id, message.causality, this.causality.clone());
@@ -163,7 +157,7 @@ class FBroadcast extends EventEmitter {
 					// #2 only check if the message has not been received yet
 					if (!this._stopPropagation(element)) {
 						this.causality.incrementFrom(element.id);
-						this._onReceive(element.payload);
+						this.emit('receive', element.payload);
 					}
 				}
 				// #3 merge causality structures
@@ -180,7 +174,7 @@ class FBroadcast extends EventEmitter {
 				// #2 deliver
 				this._reviewBuffer();
 				// #3 rebroadcast
-				this.unicast.send(this.protocol, null, message);
+				this.source.send(this.protocol, null, message);
 			}
 			break;
 		}
@@ -220,7 +214,7 @@ class FBroadcast extends EventEmitter {
 					found = true;
 					this.causality.incrementFrom(message.id);
 					this.buffer.splice(i, 1);
-					this._onReceive(message.payload);
+					this.emit('receive', message.payload);
 				}
 			}
 			--i;

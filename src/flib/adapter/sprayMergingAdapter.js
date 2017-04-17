@@ -5,7 +5,6 @@ const io = require('socket.io-client');
 const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
 const FBroadcast = require('../fbroadcast.js');
-const FUnicast = require('../funicast.js');
 const log = require('debug')('foglet-core:spray-wrtc-merge');
 
 class SprayAdapter extends AbstractAdapter {
@@ -17,17 +16,13 @@ class SprayAdapter extends AbstractAdapter {
 		}, options);
 
 		this.rps = new Spray(this.options);
-
+		// this.rps.register('1');
 		// this.peer = this.rps.register(this.options.protocol);
 
 		this.inviewId = this.rps.getInviewId();
 		this.outviewId = this.rps.getOutviewId();
 		this.id = this.inviewId+'_'+this.outviewId;
 
-		this.unicast = new FUnicast({
-			source: this,
-			protocol: this.options.protocol
-		});
 		this.broadcast = new FBroadcast({
 			rps: this,
 			protocol: this.options.protocol
@@ -118,7 +113,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @returns {void}
 	**/
 	onBroadcast (callback) {
-		this.broadcast.on(this.protocol+'-receive', callback);
+		this.broadcast.on('receive', callback);
 	}
 
 
@@ -133,38 +128,11 @@ class SprayAdapter extends AbstractAdapter {
 		this.broadcast.send(msg, id);
 	}
 
-	/**
-	 * This callback is a parameter of the onUnicast function.
-	 * @callback callback
-	 * @param {string} id - sender id
-	 * @param {object} message - the message received
-	 */
-	/**
-	 * onUnicast function allow you to listen on the Unicast Definition protocol, Use only when you want to receive a message from a neighbour
-	 * @function onUnicast
-	 * @param {callback} callback The callback for the listener
-	 * @return {void}
-	 */
-	onUnicast (callback) {
-		this.unicast.on('receive', callback);
-	}
-
-	/**
-	 * Send a message to a specific neighbour (id)
-	 * @function sendUnicast
-	 * @param {object} message - The message to send
-	 * @param {string} id - One of your neighbour's id
-	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
-	 */
-	sendUnicast (message, id) {
-		this.unicast.send(id, message);
-	}
-
 	send (protocol, id, message) {
-		if(message && id) {
+		if(protocol && message && id) {
 			log('Send a message to one client: ', protocol, id, message);
 			this.rps.emit(protocol, id, message);
-		} else if(message && !id) {
+		} else if(protocol && message && !id) {
 			const neighbours = this.getNeighbours();
 			log('Send a message to multiple clients: ', protocol, neighbours, message);
 			this.rps.emit(protocol, neighbours, message);

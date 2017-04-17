@@ -1,6 +1,6 @@
 'use strict';
 
-localStorage.debug = 'foglet-core:*';
+localStorage.debug = 'foglet-core:*,spray-wrtc';
 
 const Foglet = require('foglet').Foglet;
 const $ = window.$;
@@ -60,18 +60,16 @@ const peers = (k = Infinity) => {
 
 const message = () => {
 	o.forEach(f => {
-		f.onUnicast((id, message) => {
+		f.options.rps.rps.on('spray-wrtc', (id, message) => {
 			console.log(id, message);
 			logs(`@${f.options.rps.inviewId} Receive a message from ${id}: ` + JSON.stringify(message));
 		});
 	});
 
-	o.forEach(f => {
-		const id = f.getNeighbours(1);
-		const message = 'UNICAST, Hello world !';
-		logs(`@${f.options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
-		f.sendUnicast(message, id);
-	});
+	const id = o[0].getNeighbours(1);
+	const message = 'UNICAST, Hello world !';
+	logs(`@${o[0].options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
+	o[0].options.rps.rps.emit('spray-wrtc', id, message);
 };
 
 const broadcast = () => {
