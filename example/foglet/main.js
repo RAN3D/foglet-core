@@ -60,7 +60,7 @@ const peers = (k = Infinity) => {
 
 const message = () => {
 	o.forEach(f => {
-		f.options.rps.rps.on('spray-wrtc', (id, message) => {
+		f.options.rps.onUnicast((id, message) => {
 			console.log(id, message);
 			logs(`@${f.options.rps.inviewId} Receive a message from ${id}: ` + JSON.stringify(message));
 		});
@@ -69,7 +69,7 @@ const message = () => {
 	const id = o[0].getNeighbours(1);
 	const message = 'UNICAST, Hello world !';
 	logs(`@${o[0].options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
-	o[0].options.rps.rps.emit('spray-wrtc', id, message);
+	o.forEach(f => f.sendUnicast(id, message));
 };
 
 const broadcast = () => {

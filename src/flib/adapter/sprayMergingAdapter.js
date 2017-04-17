@@ -4,6 +4,7 @@ const Spray = require('spray-wrtc');
 const io = require('socket.io-client');
 const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
+const Unicast = require('unicast-definition');
 const FBroadcast = require('../fbroadcast.js');
 const log = require('debug')('foglet-core:spray-wrtc-merge');
 
@@ -22,7 +23,8 @@ class SprayAdapter extends AbstractAdapter {
 		this.inviewId = this.rps.getInviewId();
 		this.outviewId = this.rps.getOutviewId();
 		this.id = this.inviewId+'_'+this.outviewId;
-
+		this.unicast = new Unicast(this.rps, {});
+		this.peer = this.unicast.register(this.options.protocol);
 		this.broadcast = new FBroadcast({
 			rps: this,
 			protocol: this.options.protocol
@@ -128,19 +130,31 @@ class SprayAdapter extends AbstractAdapter {
 		this.broadcast.send(msg, id);
 	}
 
-	send (protocol, id, message) {
-		if(protocol && message && id) {
-			log('Send a message to one client: ', protocol, id, message);
-			this.rps.emit(protocol, id, message);
-		} else if(protocol && message && !id) {
-			const neighbours = this.getNeighbours();
-			log('Send a message to multiple clients: ', protocol, neighbours, message);
-			this.rps.emit(protocol, neighbours, message);
-		}
+	/**
+	 * This callback is a parameter of the onUnicast function.
+	 * @callback callback
+	 * @param {string} id - sender id
+	 * @param {object} message - the message received
+	 */
+	/**
+	 * onUnicast function allow you to listen on the Unicast Definition protocol, Use only when you want to receive a message from a neighbour
+	 * @function onUnicast
+	 * @param {callback} callback The callback for the listener
+	 * @return {void}
+	 */
+	onUnicast (callback) {
+		this.peer.on('receive', callback);
 	}
 
-	receive (protocol, callback) {
-		this.rps.on(protocol, callback);
+	/**
+	 * Send a message to a specific neighbour (id)
+	 * @function sendUnicast
+	 * @param {object} message - The message to send
+	 * @param {string} id - One of your neighbour's id
+	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
+	 */
+	sendUnicast (message, id) {
+		return this.peer.emit(this.protocol, id, message);
 	}
 
 	getNeighbours (k = undefined) {

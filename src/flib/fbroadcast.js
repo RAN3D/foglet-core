@@ -27,6 +27,7 @@ const EventEmitter = require('events');
 const uuid = require('uuid/v4');
 const VVwE = require('version-vector-with-exceptions');
 const _ = require('lodash');
+const Unicast = require('unicast-definition');
 const debug = require('debug')('foglet-core:broadcast');
 
 function MBroadcast (name, id, isReady, payload) {
@@ -68,26 +69,30 @@ class FBroadcast extends EventEmitter {
 			this.sniffer = this.options.sniffer || function (message) {
 				return message;
 			};
-
+			this.unicast = new Unicast(this.source.rps, {});
+			this.peer = this.unicast.register(this.protocol);
 
 			// buffer of operations
 			this.buffer = [];
 			// buffer of anti-entropy messages (chunkified because of large size)
 			this.bufferAntiEntropy = new MAntiEntropyResponse('init');
 
+			this.peer.on(this.protocol, (id, message) => {
+				this._receiveMessage(id, message);
+			});
 
-			this.source.receive(this.protocol, (id, message) => {
+			this.source.onUnicast((id, message) => {
 				this._receiveMessage(id, message);
 			});
 
 
 			setTimeout(() => {
 				// let 2 seconds for the socket to open properly
-				this.source.send(this.protocol, null, new MAntiEntropyRequest(this.causality));
+				this.peer.emit(this.protocol, null, new MAntiEntropyRequest(this.causality));
 			}, this.options.timeBeforeStart);
 
 			setInterval(() =>{
-				this.source.send(this.protocol, null, new MAntiEntropyRequest(this.causality));
+				this.peer.emit(this.protocol, null, new MAntiEntropyRequest(this.causality));
 			}, this.options.delta);
 		}else{
 			return new Error('Not enough parameters', 'fbroadcast.js');
@@ -105,7 +110,7 @@ class FBroadcast extends EventEmitter {
 
 		// #3 send the message to the neighborhood
 		debug(`@${this.source.inviewId}: Send a broadcast message.`);
-		this.source.send(this.protocol, null, mBroadcast);
+		this.source.sendUnicast(this.source.getNeighbours(), mBroadcast);
 		return mBroadcast.id;
 	}
 
@@ -122,10 +127,10 @@ class FBroadcast extends EventEmitter {
 		debug(`@${this.source.inviewId}: sendAntiEntropyResponse..`);
 		let id = uuid();
 		// #1 metadata of the antientropy response
-		let sent = this.source.send(this.protocol, origin, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
+		let sent = this.peer.emit(this.protocol, origin, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
 		let i = 0;
 		while (sent && i < messages.length) {
-			sent = this.source.send(this.protocol, origin, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
+			sent = this.peer.emit(this.protocol, origin, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
 			++i;
 		}
 	}

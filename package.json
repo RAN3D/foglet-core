@@ -45,7 +45,7 @@
     "socket.io-client": "^1.4.8",
     "sorted-cmp-array": "^2.0.1",
     "spray-wrtc": "git://github.com/ran3d/spray-wrtc.git#merging",
-    "unicast-definition": "^0.1.0",
+    "unicast-definition": "git://github.com/ran3d/unicast-definition.git",
     "uuid": "^3.0.1",
     "version-vector-with-exceptions": "0.0.x",
     "vivaldi-coordinates": "^1.0.0"
