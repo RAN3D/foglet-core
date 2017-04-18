@@ -277,8 +277,8 @@ class Foglet extends EventEmitter {
 	 * @function getNeighbours
 	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
 	 */
-	getNeighbours () {
-		return this.options.rps.getNeighbours();
+	getNeighbours (k = Infinity) {
+		return this.options.rps.getNeighbours(k);
 	}
 
 	/**

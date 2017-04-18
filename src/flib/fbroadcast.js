@@ -108,7 +108,7 @@ class FBroadcast extends EventEmitter {
 		if(sniffed) {
 			message = sniffed;
 		}
-		let mBroadcast = new MBroadcast(this.protocol, id, isReady, message);
+		let mBroadcast = new MBroadcast(this.protocol, this.causality.increment(), isReady, message);
 		// #2 register the message in the structure
 		this.causality.incrementFrom(id);
 

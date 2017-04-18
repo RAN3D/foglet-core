@@ -13,7 +13,7 @@ class SprayAdapter extends AbstractAdapter {
 		super();
 		log('Merging version of spray, pending construct...');
 		this.options = _.merge({
-			origins:'*'
+			origins:'*',
 		}, options);
 
 		this.rps = new Spray(this.options);
@@ -157,7 +157,7 @@ class SprayAdapter extends AbstractAdapter {
 		return this.peer.emit(this.options.protocol, id, this.outviewId, message);
 	}
 
-	getNeighbours (k = undefined) {
+	getNeighbours (k = Infinity) {
 		return this.getPeers(k);
 	}
 
