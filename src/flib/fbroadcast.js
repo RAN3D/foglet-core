@@ -29,6 +29,7 @@ const VVwE = require('version-vector-with-exceptions');
 const _ = require('lodash');
 const Unicast = require('unicast-definition');
 const debug = require('debug')('foglet-core:broadcast');
+const VV = require('causaltrack').VV;
 
 function MBroadcast (name, id, isReady, payload) {
 	this.protocol = name;
@@ -52,6 +53,24 @@ function MAntiEntropyResponse (id, causality, nbElements, element) {
 	this.elements = [];
 }
 
+function clone (obj) {
+	return _.merge({}, obj);
+}
+
+function causalMerge (a, b) {
+	if(a._v && b._v && a._e && b._e) {
+		let res = a;
+		let keys = Object.keys(b._v);
+		keys.forEach(k => {
+			res._v[k] = Math.max((res._v[k]|0), b._v[k]);
+		});
+		console.log(res);
+		return res;
+	} else {
+		throw new Error('It is not the right structure.');
+	}
+}
+
 class FBroadcast extends EventEmitter {
 	constructor (options) {
 		super();
@@ -62,7 +81,7 @@ class FBroadcast extends EventEmitter {
 			}, options);
 			this.uid = uuid();
 			this.protocol = 'fbroadcast-'+this.options.protocol;
-			this.causality = new VVwE(this.uid);
+			this.causality = new VV(this.uid);
 
 			this.source = this.options.rps;
 			// The sniffer is working before message is sent and after result is received
@@ -84,14 +103,14 @@ class FBroadcast extends EventEmitter {
 
 			setTimeout(() => {
 				// let 2 seconds for the socket to open properly
-				debug('Send First AntiEntropyRequest.');
 				this._sendAll(new MAntiEntropyRequest(this.causality));
 			}, this.options.timeBeforeStart);
 
 			setInterval(() =>{
-				debug('Send AntiEntropyRequest.');
 				this._sendAll(new MAntiEntropyRequest(this.causality));
 			}, this.options.delta);
+
+			debug(`initialized for:  ${this.options.protocol}`);
 		}else{
 			return new Error('Not enough parameters', 'fbroadcast.js');
 		}
@@ -103,23 +122,22 @@ class FBroadcast extends EventEmitter {
 	}
 
 
-	send (message, id = {_e:0, _c:0}, isReady) {
+	send (message, isReady) {
 		const sniffed = this.sniffer(message);
 		if(sniffed) {
 			message = sniffed;
 		}
-		let mBroadcast = new MBroadcast(this.protocol, this.causality.increment(), isReady, message);
+		const a = this.causality.increment();
+		let mBroadcast = new MBroadcast(this.protocol, a, isReady, message);
 		// #2 register the message in the structure
-		this.causality.incrementFrom(id);
+		this.causality.incrementFrom(a);
 
 		// #3 send the message to the neighborhood
-		debug(`@${this.source.inviewId}: Send a broadcast message.`);
 		this._sendAll(mBroadcast);
 		return mBroadcast.id;
 	}
 
 	_onReceive (message) {
-		debug(`@${this.source.inviewId}: Deliver the message.`);
 		const sniffed = this.sniffer(message);
 		if(sniffed) {
 			message = sniffed;
@@ -128,24 +146,23 @@ class FBroadcast extends EventEmitter {
 	}
 
 	sendAntiEntropyResponse (origin, causalityAtReceipt, messages) {
-		debug(`@${this.source.inviewId}: sendAntiEntropyResponse..`);
 		let id = uuid();
 		// #1 metadata of the antientropy response
-		let sent = this.peer.emit(this.protocol, origin, this.source.getOutviewId(), new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
+		let sent = this.peer.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
 		let i = 0;
 		while (sent && i < messages.length) {
-			sent = this.peer.emit(this.protocol, origin, this.source.getOutviewId(), new MAntiEntropyResponse(id, null, messages.length, messages[i]));
+			sent = this.peer.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
 			++i;
 		}
 	}
 
 	_receiveMessage (id, message) {
-		debug(`@${this.source.inviewId}: ReceiveMessage`, id, message);
 		switch (message.type) {
 		case 'MAntiEntropyRequest':
-			this.emit('antiEntropy', id, message.causality, this.causality.clone());
+			this.emit('antiEntropy', id, message.causality, clone(this.causality));
 			break;
 		case 'MAntiEntropyResponse':
+			//console.log(message);
 			// #A replace the buffered message
 			if (this.bufferAntiEntropy.id !== message.id) {
 				this.bufferAntiEntropy = message;
@@ -170,13 +187,11 @@ class FBroadcast extends EventEmitter {
 					}
 				}
 				// #3 merge causality structures
-				this.causality.merge(this.bufferAntiEntropy.causality);
+				causalMerge(this.causality, this.bufferAntiEntropy.causality);
 			}
 			break;
 		default:
-			debug(`@${this.source.inviewId}: ReceiveBroadcast:1.`, message, this.causality, message.id);
 			if (!this._stopPropagation(message)) {
-				debug(`@${this.source.inviewId}: ReceiveBroadcast:2.`, message);
 				// #1 register the operation
 				this.buffer.push(message);
 				// #2 deliver
@@ -191,12 +206,10 @@ class FBroadcast extends EventEmitter {
 	_stopPropagation (message) {
 		const a = this.causality.isLower(message.id);
 		const b = this._bufferIndexOf( message.id )>=0;
-		debug(`@${this.source.inviewId}: Stoppropagation.`, a, b);
 		return  a||b;
 	}
 
 	_bufferIndexOf (id) {
-		debug(`@${this.source.inviewId}: BufferIndexOf.`);
 		let found = false,
 			index = -1,
 			i = 0;
@@ -211,7 +224,6 @@ class FBroadcast extends EventEmitter {
 	}
 
 	_reviewBuffer () {
-		debug(`@${this.source.inviewId}: ReviewBuffer`);
 		let found = false, i = this.buffer.length - 1;
 		while(i>=0) {
 			let message = this.buffer[i];

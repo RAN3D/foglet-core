@@ -5,7 +5,7 @@ const FBroadcast = require('../src/flib/fbroadcast.js');
 
 describe('[FBROADCAST] functions', function () {
 	this.timeout(30000);
-	it('sendBroadcast with ordered message on 3 peers network', function (done) {
+	it('[FBROADCAST] sendBroadcast with ordered message on 3 peers network', function (done) {
 		let f1 = new Foglet({
 			protocol: 'test-fbroadcast',
 			webrtc: {
@@ -63,15 +63,15 @@ describe('[FBROADCAST] functions', function () {
 
 		f1.connection(f2).then(() => {
 			f2.connection(f3).then(() => {
-				f1.onBroadcast('receive', (message) => {
+				f1.onBroadcast((message) => {
 					receiveResult(1, message);
 				});
 
-				f2.onBroadcast('receive', (message) => {
+				f2.onBroadcast((message) => {
 					receiveResult(2, message);
 				});
 
-				f3.onBroadcast('receive', (message) => {
+				f3.onBroadcast((message) => {
 					receiveResult(3, message);
 				});
 
@@ -86,4 +86,71 @@ describe('[FBROADCAST] functions', function () {
 			});
 		});
 	}); // end it
+
+	it('[FBROADCAST] sendBroadcast/onBroadcast', function (done) {
+		let f1 = new Foglet({
+			protocol:'test-broadcast',
+			webrtc:	{
+				trickle: true,
+				iceServers: []
+			},
+			room: 'test-broadcast'
+		});
+		let f2 = new Foglet({
+			protocol:'test-broadcast',
+			webrtc:	{
+				trickle: true,
+				iceServers: []
+			},
+			room: 'test-broadcast'
+		});
+
+		f2.onBroadcast((data) => {
+			console.log(data);
+			assert(data, 'hello');
+			done();
+		});
+
+		f1.connection(f2).then( () => {
+			setTimeout(function () {
+				f1.sendBroadcast('hello');
+			}, 2000);
+		});
+	});
+
+	it('[FBROADCAST] sendUnicast/onUnicast', function (done) {
+		let f1 = new Foglet({
+			protocol:'test-unicast',
+			webrtc:	{
+				trickle: true,
+				iceServers: []
+			},
+			room: 'test-unicastroom'
+		});
+
+		let f2 = new Foglet({
+			protocol:'test-unicast',
+			webrtc:	{
+				trickle: true,
+				iceServers: []
+			},
+			room: 'test-unicastroom'
+		});
+
+		f2.onUnicast((id, message) => {
+			console.log(id + ' : ' + message);
+			assert(message, 'hello');
+			done();
+		});
+
+		f1.connection(f2).then( () => {
+			setTimeout(function () {
+				const peers = f1.getNeighbours();
+				console.log(peers);
+				for(let i = 0; i < peers.length; i++) {
+					f1.sendUnicast('hello', peers[i]);
+				}
+			}, 2000);
+		});
+	});
 });

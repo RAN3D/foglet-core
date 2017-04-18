@@ -29,7 +29,6 @@
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
-    "causal-broadcast-definition": "^0.1.x",
     "causaltrack": "^0.4.1",
     "debug": "^2.6.3",
     "express": "^4.14.0",

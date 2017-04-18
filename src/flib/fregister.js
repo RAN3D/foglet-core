@@ -25,9 +25,10 @@
 'use strict';
 
 const EventEmitter = require('events');
-const VVwE = require('version-vector-with-exceptions');
-const CausalBroadcast = require('causal-broadcast-definition');
+const FBroadcast = require('./fbroadcast');
 const uuid = require('uuid/v4');
+const debug = require('debug')('foglet-core:register');
+const _ = require('lodash');
 
 /**
  * Create a FRegister Class, this an eventually consitent data structure, using a CausalBroadcast and a version-vector-with-exceptions from Chat-Wane (github)
@@ -42,34 +43,44 @@ class FRegister extends EventEmitter {
 	 */
 	constructor (options) {
 		super();
+		this.options = _.merge({
+			name: 'defaultName',
+			protocol: 'default',
+			source: undefined
+		}, options);
+		if(!this.options.source) throw new Error('Error: FRegister need a valid source option.', 'fregister.js');
 		this.uid = uuid();
-		this.name = options.name;
-		this.source = options.source.rps;
-		this.vector = new VVwE(this.uid);
-		this.protocol = 'fregister-'+options.protocol;
-		this.broadcast = new CausalBroadcast(this.source, this.vector, this.protocol);
+		this.name = this.options.name;
+		this.source = this.options.source;
+		this.protocol = 'fregister-'+this.options.protocol;
+
+		this.broadcast = new FBroadcast({
+			rps:this.source,
+			protocol:this.protocol,
+			delta: 10000,
+			timeBeforeStart:5000
+		});
 		this.value = {};
-		const self = this;
+
 		this.broadcast.on('receive', data => {
-			console.log('[FOGLET:' + self.name + '] Receive a new value');
-			self.value = data;
-			// console.log(self.value);
+			this.value = data;
+			debug('[FREGISTER] Name:' + this.name + ', Receive a new value', this.value);
 			/**
 			 * Emit a message on the signal this.name+"-receive" with the data associated
 			 */
-			self.emit(self.name + '-receive', self.value);
+			this.emit(this.name + '-receive', this.value);
 		});
 
 		/**
 		 * AntiEntropy part in order to retreive data after an antiEntropy emit
 		 */
 		this.broadcast.on('antiEntropy', (id, rcvCausality, lclCausality) => {
-			const data = {
-				protocol: self.name,
-				id: {_e: self.vector.local.e, _c: self.vector.local.v},
-				payload: self.value
+			let data = {
+				protocol: this.name,
+				id: lclCausality,
+				payload: this.value
 			};
-			self.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
+			this.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
 		});
 
 		this.status = 'initialized';
@@ -99,7 +110,7 @@ class FRegister extends EventEmitter {
 	 * @return {void}
 	 */
 	send () {
-		this.broadcast.send(this.getValue(), this.vector.increment());
+		this.broadcast.send(this.getValue());
 	}
 }
 

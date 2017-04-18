@@ -11,7 +11,6 @@ const log = require('debug')('foglet-core:spray-wrtc-merge');
 class SprayAdapter extends AbstractAdapter {
 	constructor (options) {
 		super();
-		log('Merging version of spray, pending construct...');
 		this.options = _.merge({
 			origins:'*',
 		}, options);
@@ -30,7 +29,6 @@ class SprayAdapter extends AbstractAdapter {
 			rps: this,
 			protocol: this.options.protocol
 		});
-		log(this.unicast, this.broadcast);
 		//	Connection to the signaling server
 		this.signaling = io.connect(this.options.signalingAdress, {origins: options.origins});
 
@@ -123,11 +121,11 @@ class SprayAdapter extends AbstractAdapter {
 	 * Send a broadcast message to all connected clients.
 	 * @function sendBroadcast
 	 * @param {object} msg - Message to send,
-	 * @param {string} id - Id of the message to send (see VVwE: github.com/chat-wane/version-vector-with-exceptions).
+	 * @param {string} id - Id of the message to wait before to receive the message sent (see VVwE: github.com/chat-wane/version-vector-with-exceptions).
 	 * @returns {void}
 	 */
 	sendBroadcast (msg, id) {
-		this.broadcast.send(msg, id);
+		return this.broadcast.send(msg, id);
 	}
 
 	/**
@@ -157,12 +155,8 @@ class SprayAdapter extends AbstractAdapter {
 		return this.peer.emit(this.options.protocol, id, this.outviewId, message);
 	}
 
-	getNeighbours (k = Infinity) {
-		return this.getPeers(k);
-	}
-
-	getPeers () {
-		return this.rps.getPeers();
+	getNeighbours (k = undefined) {
+		return this.rps.getPeers(k);
 	}
 
 	exchange () {

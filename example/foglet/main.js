@@ -6,14 +6,14 @@ const Foglet = require('foglet').Foglet;
 const $ = window.$;
 let o = [];
 
-const max = 3;
+const max = 10;
 
 
 for(let i = 0; i < max; ++i) {
 	o[i] = new Foglet({
 		protocol: 'foglet-example',
 		webrtc:	{
-			trickle: false,
+			trickle: true,
 			iceServers : []
 		},
 		signalingAdress:'http://localhost:3000/',
@@ -53,6 +53,7 @@ const signalingConnection = (time2wait = 500) => {
 };
 
 const peers = (k = Infinity) => {
+	console.log(k);
 	o.forEach(f => {
 		logs('@' + f.options.rps.inviewId + ' Peers: ' + f.getNeighbours(k).toString());
 	});
@@ -75,13 +76,19 @@ o.forEach(f => {
 const message = () => {
 	const message = 'UNICAST, Hello world !';
 	const id = o[0].getNeighbours();
-	logs(`@${o[0].options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
+	logs(`==> @${o[0].options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
 	if(id.length > 0) {
 		id.forEach(i => {
-			o[0].sendUnicast(i, message);
+			o[0].sendUnicast(message, i);
 		});
 	}
 };
 const broadcast = () => {
-	o.forEach(f => f.sendBroadcast('BROADCAST, Hello world ! from '+f.options.rps.inviewId));
+	let f = o[0];
+	logs(`==> @${f.options.rps.inviewId} send a broadcast message: `);
+	console.log(f.sendBroadcast('BROADCAST, Hello world ! from '+f.options.rps.inviewId));
 };
+
+o.forEach(f => {
+	f.addRegister('test');
+});

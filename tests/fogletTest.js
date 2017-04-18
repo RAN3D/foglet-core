@@ -2,36 +2,34 @@
 
 let Foglet = require('../src/foglet.js').Foglet;
 
-describe('[FOGLET:INIT]', function () {
-	describe('[FOGLET] Connection and Disconnection', function () {
-		this.timeout(30000);
-		it('[FOGLET] connection return true when connected', function (done) {
-				let f = new Foglet({
-					verbose:true,
-					protocol:'rpsExampleConnected',
-					webrtc:	{
-						trickle: true,
-						iceServers: []
-					},
-					room: 'rpsExampleConnected'
-				});
+describe('[FOGLET] Connection and Disconnection', function () {
+	this.timeout(30000);
+	it('[FOGLET] connection return true when connected', function (done) {
+			let f = new Foglet({
+				verbose:true,
+				protocol:'rpsExampleConnected',
+				webrtc:	{
+					trickle: true,
+					iceServers: []
+				},
+				room: 'rpsExampleConnected'
+			});
 
-				let f1 = new Foglet({
-					verbose:true,
-					protocol:'rpsExampleConnected',
-					webrtc:	{
-						trickle: true,
-						iceServers: []
-					},
-					room: 'rpsExampleConnected'
-				});
-				f.connection(f1).then( (status) => {
-						assert(true, status, 'Status Must be true.');
-						done();
-				});
-		});// END IT
-	});// END of second describe
-}); // end of first describe
+			let f1 = new Foglet({
+				verbose:true,
+				protocol:'rpsExampleConnected',
+				webrtc:	{
+					trickle: true,
+					iceServers: []
+				},
+				room: 'rpsExampleConnected'
+			});
+			f.connection(f1).then( (status) => {
+					assert(true, status, 'Status Must be true.');
+					done();
+			});
+	});// END IT
+});// END of second describe
 
 
 describe('[FOGLET:FREGISTER]', function () {
@@ -52,35 +50,35 @@ describe('[FOGLET:FREGISTER]', function () {
 	});
 	it('AntyEntropy test', function (done) {
 		let f1 = new Foglet({
-			protocol:'antyentropy',
+			protocol:'antientropy',
 			webrtc:	{
 				trickle: true,
 				iceServers: []
 			},
 			timeout: 1000 * 60 * 2,
 			deltatime: 10000,
-			room: 'antyentropy'
+			room: 'antientropy'
 		});
 
 		let f2 = new Foglet({
-			protocol:'antyentropy',
+			protocol:'antientropy',
 			webrtc:	{
 				trickle: true,
 				iceServers: []
 			},
 			timeout: 1000 * 60 * 2,
 			deltatime: 10000,
-			room: 'antyentropy'
+			room: 'antientropy'
 		});
 		let f3 = new Foglet({
-			protocol:'antyentropy',
+			protocol:'antientropy',
 			webrtc:	{
 				trickle: true,
 				iceServers: []
 			},
 			timeout: 1000 * 60 * 2,
 			deltatime: 10000,
-			room: 'antyentropy'
+			room: 'antientropy'
 		});
 
 		// INIT FOGLETS
@@ -92,7 +90,7 @@ describe('[FOGLET:FREGISTER]', function () {
 				setTimeout(() => {
 					assert(f3.getRegister('test').getValue(), 'testValue');
 					done();
-				}, 2000);
+				}, 5000);
 			});
 		});
 	});// END IT
@@ -126,80 +124,15 @@ describe('[FOGLET:FREGISTER]', function () {
 		f.connection(f2).then( () => {
 			setTimeout(() => {
 				f.getRegister('test').setValue(5);
-			}, 2000);
+			}, 5000);
 		});
 	});
 });
 
-describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
+
+
+describe('[FOGLET] Other functions tests', function () {
 	this.timeout(30000);
-	it('[FOGLET] sendBroadcast/onBroadcast', function (done) {
-		let f1 = new Foglet({
-			protocol:'test-broadcast',
-			webrtc:	{
-				trickle: true,
-				iceServers: []
-			},
-			room: 'test-broadcast'
-		});
-		let f2 = new Foglet({
-			protocol:'test-broadcast',
-			webrtc:	{
-				trickle: true,
-				iceServers: []
-			},
-			room: 'test-broadcast'
-		});
-
-		f2.onBroadcast('receive', (data) => {
-			console.log(data);
-			assert(data, 'hello');
-			done();
-		});
-
-		f1.connection(f2).then( () => {
-			setTimeout(function () {
-				f1.sendBroadcast('hello');
-			}, 2000);
-		});
-	});
-
-	it('[FOGLET] sendUnicast/onUnicast/getNeighbours', function (done) {
-		let f1 = new Foglet({
-			protocol:'test-unicast',
-			webrtc:	{
-				trickle: true,
-				iceServers: []
-			},
-			room: 'test-unicastroom'
-		});
-
-		let f2 = new Foglet({
-			protocol:'test-unicast',
-			webrtc:	{
-				trickle: true,
-				iceServers: []
-			},
-			room: 'test-unicastroom'
-		});
-
-		f2.onUnicast((id, message) => {
-			console.log(id + ' : ' + message);
-			assert(message, 'hello');
-			done();
-		});
-
-		f1.connection(f2).then( () => {
-			setTimeout(function () {
-				const peers = f1.getNeighbours();
-				console.log(peers);
-				for(let i = 0; i < peers.length; i++) {
-					f1.sendUnicast('hello', peers[i]);
-				}
-			}, 2000);
-		});
-	});
-
 	it('[FOGLET] getRandomNeighbourId is in getNeighbours', function (done) {
 		let f1 = new Foglet({
 			protocol:'neighbours',
@@ -219,7 +152,6 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 		});
 
 		f1.connection(f2).then( () => {
-			console.log('Get peers: ', f1.options.rps.getPeers(), f2.options.rps.getPeers());
 			console.log('All neighbours: ', f1.getAllNeighbours(), f2.getAllNeighbours());
 			console.log('Peers: ', f1.getNeighbours(), f2.getNeighbours());
 			console.log('Random:', f1.getRandomNeighbourId(), f2.getRandomNeighbourId());
@@ -227,10 +159,6 @@ describe('[FOGLET] Broadcast/Unicast/Neighbours', function () {
 			done();
 		});
 	});
-});
-
-describe('[FOGLET] Other functions tests', function () {
-	this.timeout(30000);
 	it('[FOGLET] _fRegisterKey()', function (done) {
 		let fog = new Foglet({
 			protocol:'_fRegisterKey',

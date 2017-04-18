@@ -136,7 +136,7 @@ class Foglet extends EventEmitter {
 			rps = AdapterSprayMerging;
 			break;
 		default:
-			rps = AdapterFcn;
+			rps = AdapterSprayMerging;
 			break;
 		}
 		return rps;
@@ -208,8 +208,8 @@ class Foglet extends EventEmitter {
 	 * @param {callback} callback - Callback function that handles the response
 	 * @returns {void}
 	**/
-	onBroadcast (signal, callback) {
-		this.options.rps.onBroadcast(signal, callback);
+	onBroadcast (callback) {
+		this.options.rps.onBroadcast(callback);
 	}
 
 
@@ -219,8 +219,8 @@ class Foglet extends EventEmitter {
 	 * @param {object} msg - Message to send.
 	 * @returns {void}
 	 */
-	sendBroadcast (msg) {
-		this.options.rps.sendBroadcast(msg);
+	sendBroadcast (msg, ...args) {
+		return this.options.rps.sendBroadcast(msg, ...args);
 	}
 
 	/**
@@ -247,7 +247,7 @@ class Foglet extends EventEmitter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		this.options.rps.sendUnicast(id, message);
+		return this.options.rps.sendUnicast(message, id);
 	}
 
 	/**
@@ -263,7 +263,6 @@ class Foglet extends EventEmitter {
 			try {
 				const random = Math.floor(Math.random() * peers.length);
 				const result = peers[random];
-				console.log(result);
 				return result;
 			} catch (e) {
 				console.err(e);
@@ -277,7 +276,7 @@ class Foglet extends EventEmitter {
 	 * @function getNeighbours
 	 * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
 	 */
-	getNeighbours (k = Infinity) {
+	getNeighbours (k = undefined) {
 		return this.options.rps.getNeighbours(k);
 	}
 
