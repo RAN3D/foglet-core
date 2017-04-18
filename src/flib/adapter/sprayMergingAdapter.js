@@ -17,14 +17,15 @@ class SprayAdapter extends AbstractAdapter {
 		}, options);
 
 		this.rps = new Spray(this.options);
-		// this.rps.register('1');
-		// this.peer = this.rps.register(this.options.protocol);
-
 		this.inviewId = this.rps.getInviewId();
 		this.outviewId = this.rps.getOutviewId();
 		this.id = this.inviewId+'_'+this.outviewId;
+
+		// Unicast protocol to send message to remote peers
 		this.unicast = new Unicast(this.rps, {});
 		this.peer = this.unicast.register(this.options.protocol);
+
+		// Broadcast protocol so send message to the whole network
 		this.broadcast = new FBroadcast({
 			rps: this,
 			protocol: this.options.protocol
@@ -33,12 +34,6 @@ class SprayAdapter extends AbstractAdapter {
 		//	Connection to the signaling server
 		this.signaling = io.connect(this.options.signalingAdress, {origins: options.origins});
 
-		this.signalingInit = () => {
-			return (offer) => {
-				log(`@${this.inviewId}: Emit the new offer: `, offer);
-				this.signaling.emit('new', {offer, room: this.options.room});
-			};
-		};
 
 		this.directCallback = (src, dest) => {
 			return (offer) => {
@@ -48,6 +43,12 @@ class SprayAdapter extends AbstractAdapter {
 			};
 		};
 
+		this.signalingInit = () => {
+			return (offer) => {
+				log(`@${this.inviewId}: Emit the new offer: `, offer);
+				this.signaling.emit('new', {offer, room: this.options.room});
+			};
+		};
 		this.signaling.on('new_spray', (data) => {
 			const signalingAccept = (offer) => {
 				log(`@${this.inviewId}: Emit the accepted offer: `, offer);
@@ -60,7 +61,6 @@ class SprayAdapter extends AbstractAdapter {
 			log('Receive an accepted offer: ', data);
 			this.rps.connect(data);
 		});
-
 	}
 
 	connection (rps, timeout) {
@@ -143,7 +143,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.peer.on('receive', callback);
+		this.peer.on(this.options.protocol, callback);
 	}
 
 	/**
@@ -154,7 +154,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		return this.peer.emit(this.protocol, id, message);
+		return this.peer.emit(this.options.protocol, id, this.outviewId, message);
 	}
 
 	getNeighbours (k = undefined) {

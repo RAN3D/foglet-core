@@ -81,23 +81,27 @@ class FBroadcast extends EventEmitter {
 				this._receiveMessage(id, message);
 			});
 
-			this.source.onUnicast((id, message) => {
-				this._receiveMessage(id, message);
-			});
-
 
 			setTimeout(() => {
 				// let 2 seconds for the socket to open properly
-				this.peer.emit(this.protocol, null, new MAntiEntropyRequest(this.causality));
+				debug('Send First AntiEntropyRequest.');
+				this._sendAll(new MAntiEntropyRequest(this.causality));
 			}, this.options.timeBeforeStart);
 
 			setInterval(() =>{
-				this.peer.emit(this.protocol, null, new MAntiEntropyRequest(this.causality));
+				debug('Send AntiEntropyRequest.');
+				this._sendAll(new MAntiEntropyRequest(this.causality));
 			}, this.options.delta);
 		}else{
 			return new Error('Not enough parameters', 'fbroadcast.js');
 		}
 	}
+
+	_sendAll (message) {
+		const n = this.source.getNeighbours();
+		if(n.length > 0) n.forEach(p => this.peer.emit(this.protocol, p, this.source.outviewId, message).catch(e => debug('Error: It seems there is not a receiver', e)));
+	}
+
 
 	send (message, id = {_e:0, _c:0}, isReady) {
 		const sniffed = this.sniffer(message);
@@ -110,7 +114,7 @@ class FBroadcast extends EventEmitter {
 
 		// #3 send the message to the neighborhood
 		debug(`@${this.source.inviewId}: Send a broadcast message.`);
-		this.source.sendUnicast(this.source.getNeighbours(), mBroadcast);
+		this._sendAll(mBroadcast);
 		return mBroadcast.id;
 	}
 
@@ -127,10 +131,10 @@ class FBroadcast extends EventEmitter {
 		debug(`@${this.source.inviewId}: sendAntiEntropyResponse..`);
 		let id = uuid();
 		// #1 metadata of the antientropy response
-		let sent = this.peer.emit(this.protocol, origin, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
+		let sent = this.peer.emit(this.protocol, origin, this.source.getOutviewId(), new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
 		let i = 0;
 		while (sent && i < messages.length) {
-			sent = this.peer.emit(this.protocol, origin, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
+			sent = this.peer.emit(this.protocol, origin, this.source.getOutviewId(), new MAntiEntropyResponse(id, null, messages.length, messages[i]));
 			++i;
 		}
 	}
@@ -170,8 +174,7 @@ class FBroadcast extends EventEmitter {
 			}
 			break;
 		default:
-			debug(`@${this.source.inviewId}: ReceiveBroadcast:1.`, message);
-			console.log(this.causality, message.id);
+			debug(`@${this.source.inviewId}: ReceiveBroadcast:1.`, message, this.causality, message.id);
 			if (!this._stopPropagation(message)) {
 				debug(`@${this.source.inviewId}: ReceiveBroadcast:2.`, message);
 				// #1 register the operation
@@ -179,7 +182,7 @@ class FBroadcast extends EventEmitter {
 				// #2 deliver
 				this._reviewBuffer();
 				// #3 rebroadcast
-				this.source.send(this.protocol, null, message);
+				this._sendAll(message);
 			}
 			break;
 		}

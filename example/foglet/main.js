@@ -1,6 +1,6 @@
 'use strict';
 
-localStorage.debug = 'foglet-core:*,spray-wrtc';
+localStorage.debug = 'foglet-core:*';
 
 const Foglet = require('foglet').Foglet;
 const $ = window.$;
@@ -57,28 +57,31 @@ const peers = (k = Infinity) => {
 		logs('@' + f.options.rps.inviewId + ' Peers: ' + f.getNeighbours(k).toString());
 	});
 };
+// Listeners for message
+o.forEach(f => {
+	f.options.rps.onUnicast((id, message) => {
+		console.log(id, message);
+		logs(`@${f.options.rps.inviewId} Receive a message from ${id}: ` + JSON.stringify(message));
+	});
+});
+o.forEach(f => {
+	f.onBroadcast((message) => {
+		console.log(message);
+		logs(`@${f.options.rps.inviewId} Receive a broadcast message : ` + JSON.stringify(message));
+	});
+});
+
 
 const message = () => {
-	o.forEach(f => {
-		f.options.rps.onUnicast((id, message) => {
-			console.log(id, message);
-			logs(`@${f.options.rps.inviewId} Receive a message from ${id}: ` + JSON.stringify(message));
-		});
-	});
-
-	const id = o[0].getNeighbours(1);
 	const message = 'UNICAST, Hello world !';
+	const id = o[0].getNeighbours();
 	logs(`@${o[0].options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
-	o.forEach(f => f.sendUnicast(id, message));
-};
-
-const broadcast = () => {
-	o.forEach(f => {
-		f.onBroadcast((message) => {
-			console.log(message);
-			logs(`@${f.options.rps.inviewId} Receive a broadcast message : ` + JSON.stringify(message));
+	if(id.length > 0) {
+		id.forEach(i => {
+			o[0].sendUnicast(i, message);
 		});
-	});
-
+	}
+};
+const broadcast = () => {
 	o.forEach(f => f.sendBroadcast('BROADCAST, Hello world ! from '+f.options.rps.inviewId));
 };

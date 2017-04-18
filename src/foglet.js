@@ -236,7 +236,7 @@ class Foglet extends EventEmitter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.options.rps.receive(this.options.protocol+'-unicast', callback);
+		this.options.rps.onUnicast(callback);
 	}
 
 	/**
@@ -247,7 +247,7 @@ class Foglet extends EventEmitter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		this.options.rps.send(this.options.protocol+'-unicast', id, message);
+		this.options.rps.sendUnicast(id, message);
 	}
 
 	/**
