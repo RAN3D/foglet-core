@@ -57,19 +57,7 @@ function clone (obj) {
 	return _.merge({}, obj);
 }
 
-function causalMerge (a, b) {
-	if(a._v && b._v && a._e && b._e) {
-		let res = a;
-		let keys = Object.keys(b._v);
-		keys.forEach(k => {
-			res._v[k] = Math.max((res._v[k]|0), b._v[k]);
-		});
-		console.log(res);
-		return res;
-	} else {
-		throw new Error('It is not the right structure.');
-	}
-}
+
 
 class FBroadcast extends EventEmitter {
 	constructor (options) {
@@ -82,7 +70,7 @@ class FBroadcast extends EventEmitter {
 			this.uid = uuid();
 			this.protocol = 'fbroadcast-'+this.options.protocol;
 			this.causality = new VV(this.uid);
-
+			this.causality.incrementFrom({_e:this.uid, _c: 0});
 			this.source = this.options.rps;
 			// The sniffer is working before message is sent and after result is received
 			this.sniffer = this.options.sniffer || function (message) {
@@ -181,13 +169,15 @@ class FBroadcast extends EventEmitter {
 				for (let i = 0; i<this.bufferAntiEntropy.elements.length; ++i) {
 					let element = this.bufferAntiEntropy.elements[i];
 					// #2 only check if the message has not been received yet
+					console.log('*****:', element);
 					if (!this._stopPropagation(element)) {
+						debug('causal id:', element.id);
 						this.causality.incrementFrom(element.id);
 						this.emit('receive', element.payload);
 					}
 				}
 				// #3 merge causality structures
-				causalMerge(this.causality, this.bufferAntiEntropy.causality);
+				this._causalMerge(this.causality, this.bufferAntiEntropy.causality);
 			}
 			break;
 		default:
@@ -230,8 +220,9 @@ class FBroadcast extends EventEmitter {
 			if (this.causality.isLower(message.id)) {
 				this.buffer.splice(i, 1);
 			} else {
-				if (this.causality.isReady(message.isReady)) {
+				if (message.isReady && this.causality.isRdy(message.isReady)) {
 					found = true;
+					debug('reviewBuffer causal id:', message.id);
 					this.causality.incrementFrom(message.id);
 					this.buffer.splice(i, 1);
 					this.emit('receive', message.payload);
@@ -241,6 +232,29 @@ class FBroadcast extends EventEmitter {
 		}
 		if (found) {
 			this._reviewBuffer();
+		}
+	}
+
+	_causalMerge (our, other) {
+		let a = our, b = other;
+		if(a._v && b._v && a._e && b._e) {
+			let la = Object.keys(a._v), lb = Object.keys(b._v);
+			let res;
+			if(la > lb) {
+				res = a;
+				lb.forEach(k => {
+					res._v[k] = Math.max((res._v[k]|0), b._v[k]);
+				});
+			} else {
+				res = b;
+				la.forEach(k => {
+					res._v[k] = Math.max((res._v[k]|0), a._v[k]);
+				});
+			}
+			console.log(res);
+			return res;
+		} else {
+			throw new Error('It is not the right structure.');
 		}
 	}
 }
