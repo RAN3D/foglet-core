@@ -6,7 +6,7 @@ const Foglet = require('foglet').Foglet;
 const $ = window.$;
 let o = [];
 
-const max = 5;
+const max = 10;
 
 
 for(let i = 0; i < max; ++i) {

@@ -59,6 +59,10 @@ class SprayAdapter extends AbstractAdapter {
 			log('Receive an accepted offer: ', data);
 			this.rps.connect(data);
 		});
+
+		this.signaling.on('connected', () => {
+			this.emit('connected');
+		});
 	}
 
 	connection (rps, timeout) {
@@ -82,7 +86,7 @@ class SprayAdapter extends AbstractAdapter {
 					self.signaling.once('joinedRoom', () => {
 						log(' Joined the room', self.options.room);
 						self.rps.join(self.signalingInit()).then(() => {
-							self.emit('connected', { room: self.options.room });
+							self.signaling.emit('connected', { room: self.options.room }); // emit to the server that we are connected.
 						}).catch(error => {
 							log(error);
 							if(error === 'connected') {
