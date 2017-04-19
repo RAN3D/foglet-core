@@ -39,17 +39,27 @@
     "serialize-javascript": "^1.3.0",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.4.8",
-    "sorted-cmp-array": "^2.0.1",
     "spray-wrtc": "git://github.com/ran3d/spray-wrtc.git#merging",
     "unicast-definition": "git://github.com/ran3d/unicast-definition.git",
     "uuid": "^3.0.1",
-    "version-vector-with-exceptions": "0.0.x",
     "vivaldi-coordinates": "^1.0.0"
   },
   "bundledDependencies":[
     "spray-wrtc",
     "fcn-wrtc",
-    "unicast-definition"
+    "unicast-definition",
+    "debug",
+    "express",
+    "fcn-wrtc",
+    "immutable",
+    "lodash",
+    "lru-cache",
+    "q",
+    "serialize-javascript",
+    "socket.io",
+    "socket.io-client",
+    "uuid",
+    "vivaldi-coordinates"
   ],
   "devDependencies": {
     "babel-core": "^6.24.0",
