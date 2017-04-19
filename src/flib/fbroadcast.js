@@ -86,14 +86,14 @@ class FBroadcast extends EventEmitter {
 			});
 
 
-			setTimeout(() => {
+			/*setTimeout(() => {
 				// let 2 seconds for the socket to open properly
 				this._sendAll(new MAntiEntropyRequest(this.causality));
 			}, this.options.timeBeforeStart);
 
 			setInterval(() =>{
 				this._sendAll(new MAntiEntropyRequest(this.causality));
-			}, this.options.delta);
+			}, this.options.delta);*/
 
 			debug(`initialized for:  ${this.options.protocol}`);
 		}else{
@@ -143,7 +143,7 @@ class FBroadcast extends EventEmitter {
 
 	_receiveMessage (id, message) {
 		switch (message.type) {
-		case 'MAntiEntropyRequest': {
+		/*case 'MAntiEntropyRequest': {
 			this.emit('antiEntropy', id, this.causality.from(message.causality), this.causality.clone());
 			break;
 		}
@@ -165,7 +165,6 @@ class FBroadcast extends EventEmitter {
 				// #1 considere each message in the response independantly
 				for (let i = 0; i<this.bufferAntiEntropy.elements.length; ++i) {
 					let element = this.bufferAntiEntropy.elements[i];
-					console.log(element);
 					// #2 only check if the message has not been received yet
 					if (!this._stopPropagation(element)) {
 						this.causality.incrementFrom(element.id);
@@ -173,10 +172,12 @@ class FBroadcast extends EventEmitter {
 					}
 				}
 				// #3 merge causality structures
-				this.causality = this.causality.merge(this.causality.from(this.bufferAntiEntropy.causality));
+				if(this.bufferAntiEntropy.causality) {
+					this.causality = this.causality.merge(this.bufferAntiEntropy.causality);
+				}
 			}
 			break;
-		}
+		}*/
 		default: {
 			if (!this._stopPropagation(message)) {
 				// #1 register the operation

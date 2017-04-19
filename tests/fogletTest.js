@@ -48,7 +48,7 @@ describe('[FOGLET:FREGISTER]', function () {
 		let result = f.getRegister('test').getValue();
 		assert.equal(result, 'a_value', 'Return the correct value');
 	});
-	it('AntyEntropy test', function (done) {
+	/* it('AntyEntropy test', function (done) {
 		let f1 = new Foglet({
 			protocol:'antientropy',
 			webrtc:	{
@@ -99,7 +99,7 @@ describe('[FOGLET:FREGISTER]', function () {
 				}, 5000);
 			});
 		});
-	});// END IT
+	});// END IT */
 
 	it('onRegister()', function (done) {
 		let f = new Foglet({
@@ -122,6 +122,7 @@ describe('[FOGLET:FREGISTER]', function () {
 
 		f.addRegister('test');
 		f2.addRegister('test');
+
 		f2.onRegister('test', (data) =>{
 			assert(data, 5);
 			done();
@@ -160,7 +161,7 @@ describe('[FOGLET] Other functions tests', function () {
 		f1.connection(f2).then( () => {
 			console.log('Peers: ', f1.getNeighbours(), f2.getNeighbours());
 			console.log('Random:', f1.getRandomNeighbourId(), f2.getRandomNeighbourId());
-			// assert(f1.getNeighbours().includes(f1.getRandomNeighbourId()));
+			assert(f1.getNeighbours().includes(f1.getRandomNeighbourId()));
 			done();
 		});
 	});

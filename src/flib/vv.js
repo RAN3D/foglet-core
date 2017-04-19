@@ -22,13 +22,13 @@ VV.prototype.ec = function () {
 
 /**
  * Return a new VV from the object structure provided
- * @param {object} object The new structure
+ * @param {object} o The new structure
  * @return {VV} The new structure provided
  */
-VV.prototype.from = (object) => {
-	if(object._e && object._v) {
-		let res = new VV(object._e);
-		res._v = object._v;
+VV.prototype.from = function (o) {
+	if(o._e && o._v) {
+		let res = new VV(o._e);
+		res._v = o._v;
 		return res;
 	} else {
 		throw new Error('The new structure need to be conformed to: {_e: \'your-id\', _v: {} }');
@@ -39,7 +39,7 @@ VV.prototype.from = (object) => {
  * Clone the current structure
  * @return {VV} The new structure provided
  */
-VV.prototype.clone = function (){
+VV.prototype.clone = function () {
 	return this.from(this);
 };
 
@@ -70,7 +70,6 @@ VV.prototype.incrementFrom = function (ec) {
  */
 VV.prototype.isLower = function (ec) {
 	init(this._v, ec._e);
-	console.log(ec, this._v);
 	return ((ec._e in this._v) && (ec._c <= this._v[ec._e]));
 };
 
