@@ -25,7 +25,6 @@ SOFTWARE.
 
 const EventEmitter = require('events');
 const uuid = require('uuid/v4');
-const VVwE = require('version-vector-with-exceptions');
 const _ = require('lodash');
 const Unicast = require('unicast-definition');
 const debug = require('debug')('foglet-core:broadcast');
@@ -56,8 +55,6 @@ function MAntiEntropyResponse (id, causality, nbElements, element) {
 function clone (obj) {
 	return _.merge({}, obj);
 }
-
-
 
 class FBroadcast extends EventEmitter {
 	constructor (options) {
@@ -146,10 +143,11 @@ class FBroadcast extends EventEmitter {
 
 	_receiveMessage (id, message) {
 		switch (message.type) {
-		case 'MAntiEntropyRequest':
+		case 'MAntiEntropyRequest': {
 			this.emit('antiEntropy', id, message.causality, clone(this.causality));
 			break;
-		case 'MAntiEntropyResponse':
+		}
+		case 'MAntiEntropyResponse': {
 			//console.log(message);
 			// #A replace the buffered message
 			if (this.bufferAntiEntropy.id !== message.id) {
@@ -169,7 +167,6 @@ class FBroadcast extends EventEmitter {
 				for (let i = 0; i<this.bufferAntiEntropy.elements.length; ++i) {
 					let element = this.bufferAntiEntropy.elements[i];
 					// #2 only check if the message has not been received yet
-					console.log('*****:', element);
 					if (!this._stopPropagation(element)) {
 						debug('causal id:', element.id);
 						this.causality.incrementFrom(element.id);
@@ -180,7 +177,8 @@ class FBroadcast extends EventEmitter {
 				this._causalMerge(this.causality, this.bufferAntiEntropy.causality);
 			}
 			break;
-		default:
+		}
+		default: {
 			if (!this._stopPropagation(message)) {
 				// #1 register the operation
 				this.buffer.push(message);
@@ -191,11 +189,14 @@ class FBroadcast extends EventEmitter {
 			}
 			break;
 		}
+
+		}
 	}
 
 	_stopPropagation (message) {
 		const a = this.causality.isLower(message.id);
 		const b = this._bufferIndexOf( message.id )>=0;
+		debug(a, b);
 		return  a||b;
 	}
 
@@ -217,16 +218,15 @@ class FBroadcast extends EventEmitter {
 		let found = false, i = this.buffer.length - 1;
 		while(i>=0) {
 			let message = this.buffer[i];
+			debug(`ReviewBuffer[${i}]`, message);
+			debug('isLower:', this.causality.isLower(message.id))
 			if (this.causality.isLower(message.id)) {
 				this.buffer.splice(i, 1);
 			} else {
-				if (message.isReady && this.causality.isRdy(message.isReady)) {
-					found = true;
-					debug('reviewBuffer causal id:', message.id);
-					this.causality.incrementFrom(message.id);
-					this.buffer.splice(i, 1);
-					this.emit('receive', message.payload);
-				}
+				found = true;
+				this.causality.incrementFrom(message.id);
+				this.buffer.splice(i, 1);
+				this.emit('receive', message.payload);
 			}
 			--i;
 		}
@@ -240,18 +240,17 @@ class FBroadcast extends EventEmitter {
 		if(a._v && b._v && a._e && b._e) {
 			let la = Object.keys(a._v), lb = Object.keys(b._v);
 			let res;
-			if(la > lb) {
+			if(la.length > lb.length) {
 				res = a;
 				lb.forEach(k => {
-					res._v[k] = Math.max((res._v[k]|0), b._v[k]);
+					res._v[k] = Math.max((res._v[k]||0), b._v[k]||0);
 				});
 			} else {
 				res = b;
 				la.forEach(k => {
-					res._v[k] = Math.max((res._v[k]|0), a._v[k]);
+					res._v[k] = Math.max((res._v[k]||0), a._v[k]||0);
 				});
 			}
-			console.log(res);
 			return res;
 		} else {
 			throw new Error('It is not the right structure.');

@@ -77,12 +77,11 @@ class FRegister extends EventEmitter {
 		this.broadcast.on('antiEntropy', (id, rcvCausality, lclCausality) => {
 			let data = {
 				protocol: this.name,
-				id: this.broadcast._causalMerge(lclCausality, rcvCausality),
+				id: lclCausality,
 				payload: this.value
 			};
-			console.log(rcvCausality, lclCausality);
 			if(lclCausality.isLower(rcvCausality)) {
-				this.broadcast.sendAntiEntropyResponse(id, this.broadcast._causalMerge(lclCausality, rcvCausality), [ data ]);
+				this.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
 			}
 		});
 
