@@ -28,7 +28,7 @@ const uuid = require('uuid/v4');
 const _ = require('lodash');
 const Unicast = require('unicast-definition');
 const debug = require('debug')('foglet-core:broadcast');
-const VV = require('causaltrack').VV;
+const VV = require('./vv.js'); // Version-Vector
 
 function MBroadcast (name, id, isReady, payload) {
 	this.protocol = name;
@@ -102,24 +102,24 @@ class FBroadcast extends EventEmitter {
 	}
 
 	_sendAll (message) {
-		const n = this.source.getNeighbours();
+		const n = this.source.getNeighbours(Infinity);
 		if(n.length > 0) n.forEach(p => this.peer.emit(this.protocol, p, this.source.outviewId, message).catch(e => debug('Error: It seems there is not a receiver', e)));
 	}
 
 
-	send (message, isReady) {
+	send (message, isReady = undefined) {
 		const sniffed = this.sniffer(message);
 		if(sniffed) {
 			message = sniffed;
 		}
 		const a = this.causality.increment();
-		let mBroadcast = new MBroadcast(this.protocol, a, isReady, message);
+		let mBroadcast = new MBroadcast(this.protocol, a, isReady || this.causality.clone(), message);
 		// #2 register the message in the structure
 		this.causality.incrementFrom(a);
 
 		// #3 send the message to the neighborhood
 		this._sendAll(mBroadcast);
-		return mBroadcast.id;
+		return mBroadcast.isReady;
 	}
 
 	_onReceive (message) {
@@ -144,11 +144,10 @@ class FBroadcast extends EventEmitter {
 	_receiveMessage (id, message) {
 		switch (message.type) {
 		case 'MAntiEntropyRequest': {
-			this.emit('antiEntropy', id, message.causality, clone(this.causality));
+			this.emit('antiEntropy', id, this.causality.from(message.causality), this.causality.clone());
 			break;
 		}
 		case 'MAntiEntropyResponse': {
-			//console.log(message);
 			// #A replace the buffered message
 			if (this.bufferAntiEntropy.id !== message.id) {
 				this.bufferAntiEntropy = message;
@@ -159,22 +158,22 @@ class FBroadcast extends EventEmitter {
 			}
 			// #C add causality metadata
 			if (message.causality) {
-				this.bufferAntiEntropy.causality = message.causality;
+				this.bufferAntiEntropy.causality = this.causality.from(message.causality);
 			}
 			// #D the buffered message is fully arrived, deliver
 			if (this.bufferAntiEntropy.elements.length === this.bufferAntiEntropy.nbElements) {
 				// #1 considere each message in the response independantly
 				for (let i = 0; i<this.bufferAntiEntropy.elements.length; ++i) {
 					let element = this.bufferAntiEntropy.elements[i];
+					console.log(element);
 					// #2 only check if the message has not been received yet
 					if (!this._stopPropagation(element)) {
-						debug('causal id:', element.id);
 						this.causality.incrementFrom(element.id);
 						this.emit('receive', element.payload);
 					}
 				}
 				// #3 merge causality structures
-				this._causalMerge(this.causality, this.bufferAntiEntropy.causality);
+				this.causality = this.causality.merge(this.causality.from(this.bufferAntiEntropy.causality));
 			}
 			break;
 		}
@@ -196,7 +195,6 @@ class FBroadcast extends EventEmitter {
 	_stopPropagation (message) {
 		const a = this.causality.isLower(message.id);
 		const b = this._bufferIndexOf( message.id )>=0;
-		debug(a, b);
 		return  a||b;
 	}
 
@@ -218,8 +216,6 @@ class FBroadcast extends EventEmitter {
 		let found = false, i = this.buffer.length - 1;
 		while(i>=0) {
 			let message = this.buffer[i];
-			debug(`ReviewBuffer[${i}]`, message);
-			debug('isLower:', this.causality.isLower(message.id))
 			if (this.causality.isLower(message.id)) {
 				this.buffer.splice(i, 1);
 			} else {
@@ -235,27 +231,6 @@ class FBroadcast extends EventEmitter {
 		}
 	}
 
-	_causalMerge (our, other) {
-		let a = our, b = other;
-		if(a._v && b._v && a._e && b._e) {
-			let la = Object.keys(a._v), lb = Object.keys(b._v);
-			let res;
-			if(la.length > lb.length) {
-				res = a;
-				lb.forEach(k => {
-					res._v[k] = Math.max((res._v[k]||0), b._v[k]||0);
-				});
-			} else {
-				res = b;
-				la.forEach(k => {
-					res._v[k] = Math.max((res._v[k]||0), a._v[k]||0);
-				});
-			}
-			return res;
-		} else {
-			throw new Error('It is not the right structure.');
-		}
-	}
 }
 
 module.exports = FBroadcast;

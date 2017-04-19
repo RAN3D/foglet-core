@@ -75,13 +75,15 @@ o.forEach(f => {
 
 const message = () => {
 	const message = 'UNICAST, Hello world !';
-	const id = o[0].getNeighbours();
-	logs(`==> @${o[0].options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
-	if(id.length > 0) {
-		id.forEach(i => {
-			o[0].sendUnicast(message, i);
-		});
-	}
+	o.forEach(f => {
+		const id = f.getNeighbours();
+		logs(`==> @${f.options.rps.inviewId} send a message to ${id}: ` + JSON.stringify(message));
+		if(id.length > 0) {
+			id.forEach(i => {
+				f.sendUnicast(message, i);
+			});
+		}
+	});
 };
 const broadcast = () => {
 	let f = o[0];

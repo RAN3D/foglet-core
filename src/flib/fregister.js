@@ -80,7 +80,8 @@ class FRegister extends EventEmitter {
 				id: lclCausality,
 				payload: this.value
 			};
-			if(lclCausality.isLower(rcvCausality)) {
+			debug(rcvCausality._v, lclCausality._v);
+			if(lclCausality.isLower(rcvCausality.ec())) {
 				this.broadcast.sendAntiEntropyResponse(id, lclCausality, [ data ]);
 			}
 		});
