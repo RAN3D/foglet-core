@@ -35,32 +35,17 @@
     "immutable": "^3.8.1",
     "lodash": "^4.17.4",
     "lru-cache": "^4.0.2",
+    "n2n-overlay-wrtc": "git+https://github.com/ran3d/n2n-overlay-wrtc.git#merging",
+    "neighborhood-wrtc": "git+https://github.com/ran3d/neighborhood-wrtc.git#merging",
     "q": "^1.4.1",
     "serialize-javascript": "^1.3.0",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.4.8",
-    "spray-wrtc": "git://github.com/ran3d/spray-wrtc.git#merging",
-    "unicast-definition": "git://github.com/ran3d/unicast-definition.git",
+    "spray-wrtc": "git+https://github.com/ran3d/spray-wrtc.git#merging",
+    "unicast-definition": "git+https://github.com/ran3d/unicast-definition.git",
     "uuid": "^3.0.1",
     "vivaldi-coordinates": "^1.0.0"
   },
-  "bundledDependencies":[
-    "spray-wrtc",
-    "fcn-wrtc",
-    "unicast-definition",
-    "debug",
-    "express",
-    "fcn-wrtc",
-    "immutable",
-    "lodash",
-    "lru-cache",
-    "q",
-    "serialize-javascript",
-    "socket.io",
-    "socket.io-client",
-    "uuid",
-    "vivaldi-coordinates"
-  ],
   "devDependencies": {
     "babel-core": "^6.24.0",
     "babel-preset-es2015": "^6.24.0",
@@ -104,5 +89,24 @@
         }
       ]
     ]
-  }
+  },
+  "bundledDependencies": [
+    "spray-wrtc",
+    "fcn-wrtc",
+    "unicast-definition",
+    "debug",
+    "express",
+    "fcn-wrtc",
+    "immutable",
+    "lodash",
+    "lru-cache",
+    "q",
+    "serialize-javascript",
+    "socket.io",
+    "socket.io-client",
+    "uuid",
+    "vivaldi-coordinates",
+    "n2n-overlay-wrtc",
+    "neighborhood-wrtc"
+  ]
 }
