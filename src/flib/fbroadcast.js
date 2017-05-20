@@ -73,15 +73,14 @@ class FBroadcast extends EventEmitter {
 			this.sniffer = this.options.sniffer || function (message) {
 				return message;
 			};
-			this.unicast = new Unicast(this.source.rps, {});
-			this.peer = this.unicast.register(this.protocol);
+			this.unicast = new Unicast(this.source.rps, {pid: this.protocol});
 
 			// buffer of operations
 			this.buffer = [];
 			// buffer of anti-entropy messages (chunkified because of large size)
 			this.bufferAntiEntropy = new MAntiEntropyResponse('init');
 
-			this.peer.on(this.protocol, (id, message) => {
+			this.unicast.on(this.protocol, (id, message) => {
 				this._receiveMessage(id, message);
 			});
 
@@ -103,7 +102,7 @@ class FBroadcast extends EventEmitter {
 
 	_sendAll (message) {
 		const n = this.source.getNeighbours(Infinity);
-		if(n.length > 0) n.forEach(p => this.peer.emit(this.protocol, p, this.source.outviewId, message).catch(e => debug('Error: It seems there is not a receiver', e)));
+		if(n.length > 0) n.forEach(p => this.unicast.emit(this.protocol, p, this.source.outviewId, message).catch(e => debug('Error: It seems there is not a receiver', e)));
 	}
 
 
@@ -133,10 +132,10 @@ class FBroadcast extends EventEmitter {
 	sendAntiEntropyResponse (origin, causalityAtReceipt, messages) {
 		let id = uuid();
 		// #1 metadata of the antientropy response
-		let sent = this.peer.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
+		let sent = this.unicast.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
 		let i = 0;
 		while (sent && i < messages.length) {
-			sent = this.peer.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
+			sent = this.unicast.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
 			++i;
 		}
 	}

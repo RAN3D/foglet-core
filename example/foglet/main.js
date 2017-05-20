@@ -6,7 +6,7 @@ const Foglet = require('foglet').Foglet;
 const $ = window.$;
 let o = [];
 
-const max = 10;
+const max = 5;
 
 
 for(let i = 0; i < max; ++i) {
@@ -33,8 +33,12 @@ const directConnection = (time2wait = 500) => {
 	let f = o[0];
 	for(let i = 1; i < max; ++i) {
 		let p = o[i];
+    // for a direct connection, need to connect in both way, inview outview...
 		f.connection(p).then(d =>{
 			logs(`=> Foglet ${f.options.rps.inviewId} has been connected with a direct connection to Foglet ${p.options.rps.inviewId}`);
+		});
+    p.connection(f).then(d =>{
+			logs(`=> Foglet ${p.options.rps.inviewId} has been connected with a direct connection to Foglet ${f.options.rps.inviewId}`);
 		});
 	}
 };

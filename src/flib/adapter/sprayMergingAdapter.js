@@ -21,8 +21,7 @@ class SprayAdapter extends AbstractAdapter {
 		this.id = this.inviewId+'_'+this.outviewId;
 
 		// Unicast protocol to send message to remote peers
-		this.unicast = new Unicast(this.rps, {});
-		this.peer = this.unicast.register(this.options.protocol);
+		this.unicast = new Unicast(this.rps, {pid: this.protocol});
 
 		// Broadcast protocol so send message to the whole network
 		this.broadcast = new FBroadcast({
@@ -110,7 +109,7 @@ class SprayAdapter extends AbstractAdapter {
 		});
 	}
 
-	/**
+  /**
 	 * Allow to listen on Foglet when a broadcasted message arrived
 	 * @function onBroadcast
 	 * @param {callback} callback - Callback function that handles the response
@@ -145,7 +144,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.peer.on(this.options.protocol, callback);
+		this.unicast.on(this.options.protocol, callback);
 	}
 
 	/**
@@ -156,7 +155,7 @@ class SprayAdapter extends AbstractAdapter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		return this.peer.emit(this.options.protocol, id, this.outviewId, message);
+		return this.unicast.emit(this.options.protocol, id, this.outviewId, message);
 	}
 
 	getNeighbours (k = undefined) {

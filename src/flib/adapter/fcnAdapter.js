@@ -11,61 +11,54 @@ const Unicast = require('unicast-definition');
 class fcnAdapter extends AbstractAdapter {
 	constructor (options) {
 		super();
-		this.options = _.merge({
-
-		}, options);
+		this.options = _.merge({}, options);
 
 		this.rps = new Fcn(this.options);
 		this.options.rps = this.rps;
 
-		this.inviewId = this.rps.socket.i.ID;
-		this.outiewId = this.rps.socket.o.ID;
+		// Unicast protocol to send message to remote peers
+		this.unicast = new Unicast(this.rps, {pid: this.options.protocol});
 
-		// COMMUNICATION
-		this.unicast = new Unicast(this.rps, this.options.protocol + '-unicast');
+		// Broadcast protocol so send message to the whole network
 		this.broadcast = new FBroadcast({
-			foglet: this,
+			rps: this,
 			protocol: this.options.protocol
 		});
 	}
 
+	get inviewId () {
+		return this.rps.getInviewId();
+	}
+
+	get outiewId () {
+		return this.rps.getOutviewId();
+	}
+
 	connection (rps, timeout) {
-		if(rps) return Q(this.rps.connection(rps.rps, timeout));
-		return Q(this.rps.connection(undefined, timeout));
-	}
-
-	getNeighbours () {
-		return this.rps.getNeighbours();
-	}
-
-	getPeers () {
-		return this.rps.getPeers();
-	}
-
-	send (id, message) {
-		return this.rps.send(id, message);
+		if(rps) return this.rps.connection(rps.rps, timeout);
+		return this.rps.connection(undefined, timeout);
 	}
 
 	/**
 	 * Allow to listen on Foglet when a broadcasted message arrived
 	 * @function onBroadcast
-	 * @param {string} signal - The signal we will listen to.
 	 * @param {callback} callback - Callback function that handles the response
 	 * @returns {void}
 	**/
-	onBroadcast (signal, callback) {
-		this.broadcast.on(signal, callback);
+	onBroadcast (callback) {
+		this.broadcast.on('receive', callback);
 	}
 
 
 	/**
 	 * Send a broadcast message to all connected clients.
 	 * @function sendBroadcast
-	 * @param {object} msg - Message to send.
+	 * @param {object} msg - Message to send,
+	 * @param {string} id - Id of the message to wait before to receive the message sent (see VVwE: github.com/chat-wane/version-vector-with-exceptions).
 	 * @returns {void}
 	 */
-	sendBroadcast (msg) {
-		this.broadcast.send(msg);
+	sendBroadcast (msg, id) {
+		return this.broadcast.send(msg, id);
 	}
 
 	/**
@@ -81,7 +74,7 @@ class fcnAdapter extends AbstractAdapter {
 	 * @return {void}
 	 */
 	onUnicast (callback) {
-		this.unicast.on('receive', callback);
+		this.unicast.on(this.options.protocol, callback);
 	}
 
 	/**
@@ -92,7 +85,11 @@ class fcnAdapter extends AbstractAdapter {
 	 * @return {boolean} return true if it seems to have sent the message, false otherwise.
 	 */
 	sendUnicast (message, id) {
-		return this.unicast.send(message, id);
+		return this.unicast.emit(this.options.protocol, id, this.rps.getOutviewId(), message);
+	}
+
+	getNeighbours (k = undefined) {
+		return this.rps.getPeers(k).o;
 	}
 
 	exchange () {
