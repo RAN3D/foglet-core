@@ -25,7 +25,7 @@ SOFTWARE.
 
 const EventEmitter = require('events');
 const uuid = require('uuid/v4');
-const _ = require('lodash');
+const lmerge = require('lodash/merge');
 const debug = require('debug');
 // FOGLET
 const FRegister = require('./flib/fregister.js');
@@ -73,7 +73,7 @@ class Foglet extends EventEmitter {
     };
     this.logger = debug('foglet-core:main');
 
-    this.options = _.merge(this.defaultOptions, options);
+    this.options = lmerge(this.defaultOptions, options);
     // LOGS
     this.savedLogs = [];
 

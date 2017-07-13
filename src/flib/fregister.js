@@ -28,7 +28,7 @@ const EventEmitter = require('events');
 const FBroadcast = require('./fbroadcast');
 const uuid = require('uuid/v4');
 const debug = require('debug')('foglet-core:register');
-const _ = require('lodash');
+const lmerge = require('lodash/merge');
 
 /**
 * Create a FRegister Class, this an eventually consitent data structure, using a CausalBroadcast and a version-vector-with-exceptions from Chat-Wane (github)
@@ -43,7 +43,7 @@ class FRegister extends EventEmitter {
   */
   constructor (options) {
     super();
-    this.options = _.merge({
+    this.options = lmerge({
       name: 'defaultName',
       protocol: 'default',
       source: undefined

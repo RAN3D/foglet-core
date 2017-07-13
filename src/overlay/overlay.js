@@ -23,7 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
-const _ = require('lodash');
+const lmerge = require('lodash/merge');
 const EventEmitter = require('events');
 
 class Overlay extends EventEmitter {
@@ -39,7 +39,7 @@ class Overlay extends EventEmitter {
         rpsObject: rps
       }
     };
-    this.defaultOptions = _.merge(this.defaultOptions, options || {});
+    this.defaultOptions = lmerge(this.defaultOptions, options || {});
     this.defaultOptions.rps = rps;
 
     this.overlays = new Map();

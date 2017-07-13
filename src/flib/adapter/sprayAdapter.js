@@ -1,5 +1,5 @@
 'use strict';
-const _ = require('lodash');
+const lmerge = require('lodash/merge');
 const Spray = require('spray-wrtc');
 const io = require('socket.io-client');
 const Q = require('q');
@@ -11,7 +11,7 @@ const log = require('debug')('foglet-core:spray-wrtc-merge');
 class SprayAdapter extends AbstractAdapter {
   constructor (options) {
     super();
-    this.options = _.merge({
+    this.options = lmerge({
       origins:'*',
     }, options);
 

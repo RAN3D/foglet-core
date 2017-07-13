@@ -1,13 +1,13 @@
 'use strict';
 
 const EventEmitter = require ('events');
-const _ = require('lodash');
+const lmerge = require('lodash/merge');
 const io = require('socket.io-client');
 
 class SshControl extends EventEmitter {
   constructor (options = {}) {
     super();
-    this.options = _.merge({
+    this.options = lmerge({
       foglet: undefined,
       address: 'http://localhost:4000/',
       verbose: true,

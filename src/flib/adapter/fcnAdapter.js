@@ -1,9 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
+const lmerge = require('lodash/merge');
 const Fcn = require('fcn-wrtc').Fcn;
-const Q = require('q');
-
 const AbstractAdapter = require('./AbstractAdapter.js');
 const FBroadcast = require('../fbroadcast.js');
 const Unicast = require('unicast-definition');
@@ -11,7 +9,7 @@ const Unicast = require('unicast-definition');
 class fcnAdapter extends AbstractAdapter {
   constructor (options) {
     super();
-    this.options = _.merge({}, options);
+    this.options = lmerge({}, options);
 
     this.rps = new Fcn(this.options);
     this.options.rps = this.rps;

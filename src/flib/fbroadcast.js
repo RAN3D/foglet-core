@@ -25,7 +25,7 @@ SOFTWARE.
 
 const EventEmitter = require('events');
 const uuid = require('uuid/v4');
-const _ = require('lodash');
+const lmerge = require('lodash/merge');
 const Unicast = require('unicast-definition');
 const debug = require('debug')('foglet-core:broadcast');
 const VV = require('./vv.js'); // Version-Vector
@@ -53,14 +53,14 @@ function MAntiEntropyResponse (id, causality, nbElements, element) {
 }
 
 function clone (obj) {
-  return _.merge({}, obj);
+  return lmerge({}, obj);
 }
 
 class FBroadcast extends EventEmitter {
   constructor (options) {
     super();
     if(options.rps && options.protocol) {
-      this.options = _.merge({
+      this.options = lmerge({
         delta: 1000 * 60 * 1 / 2,
         timeBeforeStart: 2 * 1000
       }, options);
