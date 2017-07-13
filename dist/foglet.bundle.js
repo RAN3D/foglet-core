@@ -46257,64 +46257,85 @@ SOFTWARE.
 */
 'use strict';
 
+/**
+ * A Middleware registry coordintaes middleware in a foglet application
+ * @author Thomas Minier
+ */
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var MiddlewareRegistry = function () {
+  /**
+   * Constructor
+   */
+  function MiddlewareRegistry() {
+    _classCallCheck(this, MiddlewareRegistry);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var lmerge = require('lodash/merge');
-var EventEmitter = require('events');
-
-var Overlay = function (_EventEmitter) {
-  _inherits(Overlay, _EventEmitter);
-
-  function Overlay(rps, options) {
-    _classCallCheck(this, Overlay);
-
-    var _this = _possibleConstructorReturn(this, (Overlay.__proto__ || Object.getPrototypeOf(Overlay)).call(this));
-
-    if (!rps) {
-      throw new Error('Need a rps...');
-    }
-
-    _this.defaultOptions = {
-      overlayOptions: {
-        rpsObject: rps
-      }
-    };
-    _this.defaultOptions = lmerge(_this.defaultOptions, options || {});
-    _this.defaultOptions.rps = rps;
-
-    _this.overlays = new Map();
-    return _this;
+    this._middlewares = [];
   }
 
-  _createClass(Overlay, [{
-    key: 'getNeighbours',
-    value: function getNeighbours() {
-      return new Error('Not yet implemented');
+  /**
+   * Register a middleware, with an optional priority
+   * @param  {Object} middleware   - The middleware to register
+   * @param  {function} middleware.in - Function applied on middleware input
+   * @param  {function} middleware.out - Function applied on middleware output
+   * @param  {Number} [priority=0] - (optional) The middleware priority
+   * @return {void}
+   */
+
+
+  _createClass(MiddlewareRegistry, [{
+    key: 'register',
+    value: function register(middleware) {
+      var priority = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+      if (!('in' in middleware) && !('out' in middleware)) throw new Error('A middleware must contains two functions: "in" and "out"');
+      this._middlewares.push({
+        middleware: middleware,
+        priority: priority
+      });
+      this._middlewares.sort(function (x, y) {
+        return x.priority - y.priority;
+      });
     }
+
+    /**
+     * Apply middleware on input data
+     * @param  {*} data - Input data
+     * @return {*} Input data transformed by successive application of middlewares
+     */
+
   }, {
-    key: 'getViews',
-    value: function getViews() {
-      return new Error('Not yet implemented');
+    key: 'in',
+    value: function _in(data) {
+      return this._middlewares.reduce(function (input, obj) {
+        return obj.middleware.in(input);
+      }, data);
     }
+
+    /**
+     * Apply middleware on output data
+     * @param  {*} data - Output data
+     * @return {*} Output data transformed by successive application of middlewares
+     */
+
   }, {
-    key: 'getUniqViews',
-    value: function getUniqViews() {
-      return new Error('Not yet implemented');
+    key: 'out',
+    value: function out(data) {
+      return this._middlewares.reduce(function (input, obj) {
+        return obj.middleware.out(input);
+      }, data);
     }
   }]);
 
-  return Overlay;
-}(EventEmitter);
+  return MiddlewareRegistry;
+}();
 
-module.exports = Overlay;
+module.exports = MiddlewareRegistry;
 
-},{"events":30,"lodash/merge":139}],"foglet":[function(require,module,exports){
+},{}],"foglet":[function(require,module,exports){
 /*
 MIT License
 
@@ -46356,12 +46377,13 @@ var debug = require('debug');
 var FRegister = require('./flib/fregister.js');
 var FInterpreter = require('./flib/finterpreter.js');
 var FStore = require('./flib/fstore.js');
-var Overlay = require('./overlay/overlay.js');
+// const OverlayManager = require('./overlay/OverlayManager.js');
 // Networks
 var AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 var AdapterSpray = require('./flib/adapter/sprayAdapter.js');
 // SSH COntrol
 var SSH = require('./flib/ssh/ssh.js');
+var MiddlewareRegistry = require('./utils/middleware-registry.js');
 
 /**
 * Create a Foglet Class in order to use Spray with ease
@@ -46410,6 +46432,9 @@ var Foglet = function (_EventEmitter) {
     // LOGS
     _this.savedLogs = [];
 
+    // Middlewares
+    _this._middlewares = new MiddlewareRegistry();
+
     // VARIABLES
     _this.id = uuid();
     // RPS
@@ -46420,13 +46445,11 @@ var Foglet = function (_EventEmitter) {
 
     _this.inviewId = _this.options.rps.inviewId;
     _this.outviewId = _this.options.rps.outviewId;
-    // OVERLAY
-    if (_this.defaultOptions.enableOverlay) {
-      _this.options.overlay = new Overlay(_this.options.rps, _this.defaultOptions);
-      _this.options.overlay.on('logs', function (message, data) {
-        return _this._log(data);
-      });
-    }
+    // // OVERLAY
+    // if(this.defaultOptions.enableOverlay) {
+    //   this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
+    //   this.options.overlay.on('logs', (message, data) => this._log(data));
+    // }
     // INTERPRETER
     if (_this.options.enableInterpreter) {
       _this.interpreter = new FInterpreter(_this);
@@ -46539,6 +46562,23 @@ var Foglet = function (_EventEmitter) {
     }
 
     /**
+     * Register a middleware, with an optional priority
+     * @param  {Object} middleware   - The middleware to register
+     * @param  {function} middleware.in - Function applied on middleware input
+     * @param  {function} middleware.out - Function applied on middleware output
+     * @param  {Number} [priority=0] - (optional) The middleware priority
+     * @return {void}
+     */
+
+  }, {
+    key: 'use',
+    value: function use(middleware) {
+      var priority = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+      this._middlewares.register(middleware, priority);
+    }
+
+    /**
     * This callback is a parameter of the onRegister function.
     * @callback callback
     * @param {object} responseData - Data emits on update
@@ -46568,7 +46608,15 @@ var Foglet = function (_EventEmitter) {
   }, {
     key: 'onBroadcast',
     value: function onBroadcast(callback) {
-      this.options.rps.onBroadcast(callback);
+      var _this2 = this;
+
+      this.options.rps.onBroadcast(function (msg) {
+        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          args[_key - 1] = arguments[_key];
+        }
+
+        return callback.apply(undefined, [_this2._middlewares.out(msg)].concat(args));
+      });
     }
 
     /**
@@ -46583,11 +46631,11 @@ var Foglet = function (_EventEmitter) {
     value: function sendBroadcast(msg) {
       var _options$rps;
 
-      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
+      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
       }
 
-      return (_options$rps = this.options.rps).sendBroadcast.apply(_options$rps, [msg].concat(args));
+      return (_options$rps = this.options.rps).sendBroadcast.apply(_options$rps, [this._middlewares.in(msg)].concat(args));
     }
 
     /**
@@ -46606,7 +46654,15 @@ var Foglet = function (_EventEmitter) {
   }, {
     key: 'onUnicast',
     value: function onUnicast(callback) {
-      this.options.rps.onUnicast(callback);
+      var _this3 = this;
+
+      this.options.rps.onUnicast(function (id, msg) {
+        for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+          args[_key3 - 2] = arguments[_key3];
+        }
+
+        return callback.apply(undefined, [id, _this3._middlewares.out(msg)].concat(args));
+      });
     }
 
     /**
@@ -46620,7 +46676,7 @@ var Foglet = function (_EventEmitter) {
   }, {
     key: 'sendUnicast',
     value: function sendUnicast(message, id) {
-      return this.options.rps.sendUnicast(message, id);
+      return this.options.rps.sendUnicast(this._middlewares.in(message), id);
     }
 
     /**
@@ -46686,8 +46742,8 @@ var Foglet = function (_EventEmitter) {
   }, {
     key: '_log',
     value: function _log() {
-      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
+      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
       }
 
       if (this.options.verbose) {
@@ -46707,4 +46763,4 @@ var Foglet = function (_EventEmitter) {
 
 module.exports = { Foglet: Foglet, uuid: uuid };
 
-},{"./flib/adapter/fcnAdapter.js":282,"./flib/adapter/sprayAdapter.js":283,"./flib/finterpreter.js":285,"./flib/fregister.js":286,"./flib/fstore.js":287,"./flib/ssh/ssh.js":288,"./overlay/overlay.js":290,"debug":12,"events":30,"lodash/merge":139,"uuid/v4":278}]},{},[]);
+},{"./flib/adapter/fcnAdapter.js":282,"./flib/adapter/sprayAdapter.js":283,"./flib/finterpreter.js":285,"./flib/fregister.js":286,"./flib/fstore.js":287,"./flib/ssh/ssh.js":288,"./utils/middleware-registry.js":290,"debug":12,"events":30,"lodash/merge":139,"uuid/v4":278}]},{},[]);

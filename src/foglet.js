@@ -31,7 +31,7 @@ const debug = require('debug');
 const FRegister = require('./flib/fregister.js');
 const FInterpreter = require('./flib/finterpreter.js');
 const FStore = require('./flib/fstore.js');
-const Overlay = require('./overlay/overlay.js');
+// const OverlayManager = require('./overlay/OverlayManager.js');
 // Networks
 const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
@@ -89,11 +89,11 @@ class Foglet extends EventEmitter {
 
     this.inviewId = this.options.rps.inviewId;
     this.outviewId = this.options.rps.outviewId;
-    // OVERLAY
-    if(this.defaultOptions.enableOverlay) {
-      this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
-      this.options.overlay.on('logs', (message, data) => this._log(data));
-    }
+    // // OVERLAY
+    // if(this.defaultOptions.enableOverlay) {
+    //   this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
+    //   this.options.overlay.on('logs', (message, data) => this._log(data));
+    // }
     // INTERPRETER
     if(this.options.enableInterpreter) {
       this.interpreter = new FInterpreter(this);
