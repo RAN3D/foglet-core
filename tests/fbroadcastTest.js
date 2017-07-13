@@ -32,46 +32,26 @@ describe('[FBROADCAST] functions', function () {
       room: 'test-fbroadcast'
     });
 
-    let cpt = 0;
-    let totalResult = 4;
-    let results = [];
-    const expectedResults = [ '1', '2', '3', '4', '1', '2', '3', '4' ];
-    const receiveResult = (peer, message) => {
-      console.log('Peer: ', peer, ' |  Message received:' + message);
-      results.push(message);
-      cpt++;
-      if (checkResult(peer, message) && cpt === totalResult) {
-        done();
-      }
-    };
-
-    const checkResult = (peer, message) => {
-      console.log('Peer: ', peer, ' |  Message received:' + message);
-      let check = true;
-      let i = 0;
-      while( check && i < results.length ) {
-        const indexResult = results.indexOf(message);
-        const indexExpectedResult = expectedResults.indexOf(message);
-        if(indexResult !== indexExpectedResult) {
-          check = false;
-        }
-        i++;
-      }
-      return check;
-    };
+    let cptA = 0;
+    let cptB = 0;
+    const results = [ '1', '2', '3', '4' ];
+    const totalResult = 8;
 
     f1.connection(f2).then(() => {
       f2.connection(f3).then(() => {
-        f1.onBroadcast((message) => {
-          receiveResult(1, message);
-        });
 
         f2.onBroadcast((message) => {
-          receiveResult(2, message);
+          assert.equal(message, results[cptA]);
+          cptA++;
+          if ((cptA + cptB) >= totalResult)
+            done();
         });
 
         f3.onBroadcast((message) => {
-          receiveResult(3, message);
+          assert.equal(message, results[cptB]);
+          cptB++;
+          if ((cptA + cptB) >= totalResult)
+            done();
         });
 
         const ec1 = f1.sendBroadcast('1');
@@ -106,7 +86,7 @@ describe('[FBROADCAST] functions', function () {
 
     f2.onBroadcast((data) => {
       console.log(data);
-      assert(data, 'hello');
+      assert.equal(data, 'hello');
       done();
     });
 
@@ -138,13 +118,14 @@ describe('[FBROADCAST] functions', function () {
 
     f2.onUnicast((id, message) => {
       console.log(id + ' : ' + message);
-      assert(message, 'hello');
+      assert.equal(message, 'hello');
       done();
     });
 
     f1.connection(f2).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
+        assert.equal(peers.length, 1);
         console.log(peers);
         for(let i = 0; i < peers.length; i++) {
           f1.sendUnicast('hello', peers[i]);

@@ -25,7 +25,7 @@ describe('[FOGLET] Connection', function () {
       room: 'rpsExampleConnected'
     });
     f.connection(f1).then( (status) => {
-      assert(true, status, 'Status Must be true.');
+      assert.isOk(status, 'Status Must be true.');
       done();
     });
   });// END IT
@@ -72,7 +72,7 @@ describe('[FOGLET:FREGISTER]', function () {
     f2.addRegister('test');
 
     f2.onRegister('test', (data) =>{
-      assert(data, 5);
+      assert.equal(data, 5);
       done();
     });
 
@@ -109,11 +109,11 @@ describe('[FOGLET] Other functions tests', function () {
     f1.connection(f2).then( () => {
       console.log('Peers: ', f1.getNeighbours(), f2.getNeighbours());
       console.log('Random:', f1.getRandomNeighbourId(), f2.getRandomNeighbourId());
-      assert(f1.getNeighbours().includes(f1.getRandomNeighbourId()));
+      assert.include(f1.getNeighbours(), f1.getRandomNeighbourId());
       done();
     });
   });
-  
+
   it('[FOGLET] _fRegisterKey()', function (done) {
     let fog = new Foglet({
       protocol:'_fRegisterKey',
@@ -128,7 +128,7 @@ describe('[FOGLET] Other functions tests', function () {
       name : 'test'
     };
     try {
-      assert(fog._fRegisterKey(test), 'test');
+      assert.equal(fog._fRegisterKey(test), 'test');
       done();
     } catch (error) {
       console.log(error);

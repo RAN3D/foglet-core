@@ -13,7 +13,7 @@ describe('[FSTORE] FStore functions', function () {
       room: 'fstore-test-init'
     });
     console.log(f.store.getStore());
-    f.store.has('views').should.be.true;
+    assert.isOk(f.store.has('views'));
   });
 
   it('[FStore] insert', function () {
@@ -28,9 +28,9 @@ describe('[FSTORE] FStore functions', function () {
 
     f.store.insert('testingValue', { 'a' : 1 });
     console.log(f.store.getStore());
-    f.store.has('testingValue').should.be.true;
-    f.store.get('testingValue').should.be.an('object');
-    f.store.get('testingValue').a.should.be.equal(1);
+    assert.isOk(f.store.has('testingValue'));
+    assert.isObject(f.store.get('testingValue'));
+    assert.equal(f.store.get('testingValue').a, 1);
   });
 
   it('[FStore] update', function () {
@@ -45,12 +45,12 @@ describe('[FSTORE] FStore functions', function () {
 
     f.store.insert('testingValue', { 'a' : 1 });
     console.log(f.store.getStore());
-    f.store.has('testingValue').should.be.true;
-    f.store.get('testingValue').should.be.an('object');
-    f.store.get('testingValue').a.should.be.equal(1);
+    assert.isOk(f.store.has('testingValue'));
+    assert.isObject(f.store.get('testingValue'));
+    assert.equal(f.store.get('testingValue').a, 1);
     f.store.update('testingValue', { 'a' : 2 });
     console.log(f.store.getStore());
-    f.store.get('testingValue').a.should.be.equal(2);
+    assert.equal(f.store.get('testingValue').a, 2);
   });
 
   it('[FStore] delete', function () {
@@ -64,8 +64,8 @@ describe('[FSTORE] FStore functions', function () {
     });
 
     f.store.insert('testingValue', { 'a' : 1 });
-    f.store.has('testingValue').should.be.true;
+    assert.isOk(f.store.has('testingValue'));
     f.store.delete('testingValue');
-    f.store.has('testingValue').should.be.false;
+    assert.isNotOk(f.store.has('testingValue'));
   });
 });
