@@ -37,6 +37,7 @@ const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
 // SSH COntrol
 const SSH = require('./flib/ssh/ssh.js');
+const MiddlewareRegistry = require('./utils/middleware-registry.js');
 
 /**
 * Create a Foglet Class in order to use Spray with ease
@@ -76,6 +77,9 @@ class Foglet extends EventEmitter {
     this.options = lmerge(this.defaultOptions, options);
     // LOGS
     this.savedLogs = [];
+
+    // Middlewares
+    this._middlewares = new MiddlewareRegistry();
 
     // VARIABLES
     this.id = uuid();
@@ -180,6 +184,18 @@ class Foglet extends EventEmitter {
     return this.registerList[name];
   }
 
+  /**
+   * Register a middleware, with an optional priority
+   * @param  {Object} middleware   - The middleware to register
+   * @param  {function} middleware.in - Function applied on middleware input
+   * @param  {function} middleware.out - Function applied on middleware output
+   * @param  {Number} [priority=0] - (optional) The middleware priority
+   * @return {void}
+   */
+  use (middleware, priority = 0) {
+    this._middlewares.register(middleware, priority);
+  }
+
 
   /**
   * This callback is a parameter of the onRegister function.
@@ -205,7 +221,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   **/
   onBroadcast (callback) {
-    this.options.rps.onBroadcast(callback);
+    this.options.rps.onBroadcast((msg, ...args) => callback(this._middlewares.out(msg), ...args));
   }
 
 
@@ -216,7 +232,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   */
   sendBroadcast (msg, ...args) {
-    return this.options.rps.sendBroadcast(msg, ...args);
+    return this.options.rps.sendBroadcast(this._middlewares.in(msg), ...args);
   }
 
   /**
@@ -232,7 +248,7 @@ class Foglet extends EventEmitter {
   * @return {void}
   */
   onUnicast (callback) {
-    this.options.rps.onUnicast(callback);
+    this.options.rps.onUnicast((id, msg, ...args) => callback(id, this._middlewares.out(msg), ...args));
   }
 
   /**
@@ -243,7 +259,7 @@ class Foglet extends EventEmitter {
   * @return {boolean} return true if it seems to have sent the message, false otherwise.
   */
   sendUnicast (message, id) {
-    return this.options.rps.sendUnicast(message, id);
+    return this.options.rps.sendUnicast(this._middlewares.in(message), id);
   }
 
   /**
