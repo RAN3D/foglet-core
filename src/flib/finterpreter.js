@@ -30,285 +30,285 @@ const serialize = require('serialize-javascript');
 const uuid = require('uuid/v4');
 
 class Command {
-	constructor (options) {
-		// Instance a job on a peer
-		this.type = options.type || 'normal';
-		this.callback = serialize(options.callback) || serialize(d => console.log(d));
-		this.value = options.value;
-		this.jobId = options.jobId;
-		// For querying internal functions
-		this.name = options.name;
-		this.args = options.args;
-	}
+  constructor (options) {
+    // Instance a job on a peer
+    this.type = options.type || 'normal';
+    this.callback = serialize(options.callback) || serialize(d => console.log(d));
+    this.value = options.value;
+    this.jobId = options.jobId;
+    // For querying internal functions
+    this.name = options.name;
+    this.args = options.args;
+  }
 }
 
 class FInterpreter extends EventEmitter {
-	/**
-	 * @constructor
-	 * @param {Foglet} foglet This is the parent object in order to get all foglet basics operations
-	 */
-	constructor (foglet) {
-		super();
-		this.foglet = foglet;
-		this.protocol = this.foglet.options.protocol+'-interpreter';
+  /**
+  * @constructor
+  * @param {Foglet} foglet This is the parent object in order to get all foglet basics operations
+  */
+  constructor (foglet) {
+    super();
+    this.foglet = foglet;
+    this.protocol = this.foglet.options.protocol+'-interpreter';
 
-		this.broadcast = new FBroadcast({
-			protocol: this.protocol,
-			rps: this.foglet.options.rps
-		});
+    this.broadcast = new FBroadcast({
+      protocol: this.protocol,
+      rps: this.foglet.options.rps
+    });
 
-		this.unicast = new Unicast(this.foglet.options.rps, this.protocol + '-unicast');
+    this.unicast = new Unicast(this.foglet.options.rps, this.protocol + '-unicast');
 
-		this.signalCustomBroadcast = this.protocol + '-broadcast-custom';
-		this.signalBroadcast = this.protocol + '-broadcast';
-		this.signalUnicast = this.protocol + '-unicast';
+    this.signalCustomBroadcast = this.protocol + '-broadcast-custom';
+    this.signalBroadcast = this.protocol + '-broadcast';
+    this.signalUnicast = this.protocol + '-unicast';
 
-		this.properties = Object.getOwnPropertyNames(Object.getPrototypeOf(this.foglet));
-		// We delete constructor and init
-		this.properties = this.properties.slice(2, this.properties.length);
+    this.properties = Object.getOwnPropertyNames(Object.getPrototypeOf(this.foglet));
+    // We delete constructor and init
+    this.properties = this.properties.slice(2, this.properties.length);
 
-		// Allow to generate uuid
-		this.uid = uuid();
+    // Allow to generate uuid
+    this.uid = uuid();
 
-		const self = this;
+    const self = this;
 
-		this.emitter =  (jobId, key, val) => {
-			let newValue = { jobId };
-			newValue[key] = val;
-			this._sendBroadcast(new Command({
-				type: 'customResponse',
-				value: newValue
-			}));
-		};
+    this.emitter =  (jobId, key, val) => {
+      let newValue = { jobId };
+      newValue[key] = val;
+      this._sendBroadcast(new Command({
+        type: 'customResponse',
+        value: newValue
+      }));
+    };
 
-		this.broadcast.on('receive', message => {
-			self._receiveBroadcast (message);
-		});
+    this.broadcast.on('receive', message => {
+      self._receiveBroadcast (message);
+    });
 
-		this.unicast.on('receive', (id, message) => {
-			self._receiveUnicast (id, message);
-		});
+    this.unicast.on('receive', (id, message) => {
+      self._receiveUnicast (id, message);
+    });
 
-	}
+  }
 
 
 
-	/**
-	 * This a remote Custom function that execute a job at all peers of the network
-	 * @function remoteCustom
-	 * @param {string} value - name of the foglet function to execute
-	 * @param {mapper} callback Mapper callback
-	 * @return {boolean} Return the status of the broadcast
-	 */
-	remoteCustom (value, callback) {
-		let command = new Command({
-			type: 'custom',
-			value,
-			callback,
-			jobId : uuid()
-		});
-		return this._sendBroadcast(command);
-	}
+  /**
+  * This a remote Custom function that execute a job at all peers of the network
+  * @function remoteCustom
+  * @param {string} value - name of the foglet function to execute
+  * @param {mapper} callback Mapper callback
+  * @return {boolean} Return the status of the broadcast
+  */
+  remoteCustom (value, callback) {
+    let command = new Command({
+      type: 'custom',
+      value,
+      callback,
+      jobId : uuid()
+    });
+    return this._sendBroadcast(command);
+  }
 
-	/**
-	 * This a remote Broadcast function that execute a foglet command for all peers f the network
-	 * @function remoteBroadcast
-	 * @param {string} name - name of the foglet function to execute
-	 * @param {array} args - Array or arguments matching the function to execute
-	 * @return {boolean|object} Return true if the broadcast is correct otherwise false or an error
-	 */
-	remoteBroadcast (name, args) {
-		if(typeof name === 'string' && Array.isArray(args)) {
-			let command  = new Command({name, args});
-			let result;
-			try {
-				if(command && command.name && command.args) {
-					if (this.properties.includes(command.name) && this.foglet[command.name].length === command.args.length) {
-						return this._sendBroadcast(command);
-					} else {
-						result = false;
-					}
-				}else{
-					result = false;
-				}
-			} catch (e) {
-				result = e;
-			}
+  /**
+  * This a remote Broadcast function that execute a foglet command for all peers f the network
+  * @function remoteBroadcast
+  * @param {string} name - name of the foglet function to execute
+  * @param {array} args - Array or arguments matching the function to execute
+  * @return {boolean|object} Return true if the broadcast is correct otherwise false or an error
+  */
+  remoteBroadcast (name, args) {
+    if(typeof name === 'string' && Array.isArray(args)) {
+      let command  = new Command({name, args});
+      let result;
+      try {
+        if(command && command.name && command.args) {
+          if (this.properties.includes(command.name) && this.foglet[command.name].length === command.args.length) {
+            return this._sendBroadcast(command);
+          } else {
+            result = false;
+          }
+        }else{
+          result = false;
+        }
+      } catch (e) {
+        result = e;
+      }
 
-			return result;
-		}else{
-			return false;
-		}
-	}
+      return result;
+    }else{
+      return false;
+    }
+  }
 
-	/**
-	 * This a remote Unicast function that execute a foglet command at a Neighbour provided
-	 * @function remoteUnicast
-	 * @param {string} name - name of the foglet function to execute
-	 * @param {array} args - Array or arguments matching the function to execute
-	 * @param {string} id - id of the peer to send the remote function
-	 * @return {boolean|object} Return true if the unicast is correct otherwise false or an error
-	 */
-	remoteUnicast (name, args, id) {
-		if(typeof name === 'string' && Array.isArray(args)) {
-			let command  = new Command({name, args});
-			let result;
-			try {
-				if(command && command.name && command.args) {
-					if (this.properties.includes(command.name) && this.foglet[command.name].length === command.args.length) {
-						return this._sendUnicast(command, id);
-					} else {
-						result = false;
-					}
-				}else{
-					result = false;
-				}
-			} catch (e) {
-				result = e;
-			}
+  /**
+  * This a remote Unicast function that execute a foglet command at a Neighbour provided
+  * @function remoteUnicast
+  * @param {string} name - name of the foglet function to execute
+  * @param {array} args - Array or arguments matching the function to execute
+  * @param {string} id - id of the peer to send the remote function
+  * @return {boolean|object} Return true if the unicast is correct otherwise false or an error
+  */
+  remoteUnicast (name, args, id) {
+    if(typeof name === 'string' && Array.isArray(args)) {
+      let command  = new Command({name, args});
+      let result;
+      try {
+        if(command && command.name && command.args) {
+          if (this.properties.includes(command.name) && this.foglet[command.name].length === command.args.length) {
+            return this._sendUnicast(command, id);
+          } else {
+            result = false;
+          }
+        }else{
+          result = false;
+        }
+      } catch (e) {
+        result = e;
+      }
 
-			return result;
-		}else{
-			return false;
-		}
-	}
+      return result;
+    }else{
+      return false;
+    }
+  }
 
-	/**
-	 * This mapper callback is a parameter of the mapReduce function.
-	 * @callback mapper
-	 * @param {string} jobId - Id of the current job
-	 * @param {Foglet} foglet - Peer foglet
-	 * @param {object} value - Value of the key in the peer store
-	 * @param {function} emitter - This object is the emitter function in order to send back data,
-	 * @example emitter(jobId, key, val)
- 	 */
-	/**
-	 * This reducer callback is a parameter of the mapReduce function.
-	 * @callback reducer
-	 * @param {object} message - It's the entire message received
-	 */
-	/**
-	 * Construct a job Map/reduce
-	 * @function mapReduce
-	 * @param {string} key The key to find in the local store  of the peer where the job is received
-	 * @param {mapper} mapper - It's is the callback mapper function
-	 * @param {reducer} reducer - It's the callback reducer function
-	 * @return {void}
-	 * @example
-	 * let c = foglet.interpreter.mapReduce('views', (jobId, foglet, val, emitter) => {
-	 * 	emitter(jobId, 'myKeys', val);
-	 * }, (message) => {
-	 * 	const val = message.value;
-	 * 	console.log(val); // Will produce { jobId : '....', 'mykeys' : { .... } }
-	 * });
-	 */
-	mapReduce (key, mapper, reducer) {
-		this.remoteCustom(key, mapper);
-		console.log(reducer);
-		this.on(this.signalCustomBroadcast, reducer);
-	}
+  /**
+  * This mapper callback is a parameter of the mapReduce function.
+  * @callback mapper
+  * @param {string} jobId - Id of the current job
+  * @param {Foglet} foglet - Peer foglet
+  * @param {object} value - Value of the key in the peer store
+  * @param {function} emitter - This object is the emitter function in order to send back data,
+  * @example emitter(jobId, key, val)
+  */
+  /**
+  * This reducer callback is a parameter of the mapReduce function.
+  * @callback reducer
+  * @param {object} message - It's the entire message received
+  */
+  /**
+  * Construct a job Map/reduce
+  * @function mapReduce
+  * @param {string} key The key to find in the local store  of the peer where the job is received
+  * @param {mapper} mapper - It's is the callback mapper function
+  * @param {reducer} reducer - It's the callback reducer function
+  * @return {void}
+  * @example
+  * let c = foglet.interpreter.mapReduce('views', (jobId, foglet, val, emitter) => {
+  * 	emitter(jobId, 'myKeys', val);
+  * }, (message) => {
+  * 	const val = message.value;
+  * 	console.log(val); // Will produce { jobId : '....', 'mykeys' : { .... } }
+  * });
+  */
+  mapReduce (key, mapper, reducer) {
+    this.remoteCustom(key, mapper);
+    console.log(reducer);
+    this.on(this.signalCustomBroadcast, reducer);
+  }
 
-	/**
-	 * *****************************************************
-	 * ********************* PRIVATE FUNCTIONS *************
-	 * *****************************************************
-	 */
+  /**
+  * *****************************************************
+  * ********************* PRIVATE FUNCTIONS *************
+  * *****************************************************
+  */
 
-	/**
- 	 * Function activate when a broadcast message is received
- 	 * @function _receiveBroadcast
-	 * @param {object} message - The message received
- 	 * @return {void}
- 	 * @private
- 	 */
-	_receiveBroadcast (message) {
-		let result = null;
-		if(message.type === 'custom') {
-			console.log('customBroadcast', message);
-			this._receiveCustomBroadcast(message);
-		}else if (message.type === 'customResponse') {
-			console.log('customResponse', message);
-			this.emit(this.signalCustomBroadcast, message);
-		} else {
-			console.log('normalReceive', message);
-			result = this.foglet[message.name](...message.args);
-			this.emit(this.signalBroadcast, result, message);
-		}
-	}
+  /**
+  * Function activate when a broadcast message is received
+  * @function _receiveBroadcast
+  * @param {object} message - The message received
+  * @return {void}
+  * @private
+  */
+  _receiveBroadcast (message) {
+    let result = null;
+    if(message.type === 'custom') {
+      console.log('customBroadcast', message);
+      this._receiveCustomBroadcast(message);
+    }else if (message.type === 'customResponse') {
+      console.log('customResponse', message);
+      this.emit(this.signalCustomBroadcast, message);
+    } else {
+      console.log('normalReceive', message);
+      result = this.foglet[message.name](...message.args);
+      this.emit(this.signalBroadcast, result, message);
+    }
+  }
 
-	/**
-	 * Function activate when a custom broadcast message is received
-	 * @function _receiveCustomBroadcast
-	 * @param {object} message - The message received
-	 * @return {void}
-	 * @private
-	 */
-	_receiveCustomBroadcast (message) {
-		const val = this.foglet.store.get(message.value) && this.foglet.store.get(message.value);
-		let callback = this._deserialize(message.callback);
-		if(typeof val === 'function') {
-			callback(message.jobId, this.foglet, val(), this.emitter); // add an emitter in order to send back results
-		} else {
-			callback(message.jobId, this.foglet, val, this.emitter); // add an emitter in order to send back results
-		}
-	}
+  /**
+  * Function activate when a custom broadcast message is received
+  * @function _receiveCustomBroadcast
+  * @param {object} message - The message received
+  * @return {void}
+  * @private
+  */
+  _receiveCustomBroadcast (message) {
+    const val = this.foglet.store.get(message.value) && this.foglet.store.get(message.value);
+    let callback = this._deserialize(message.callback);
+    if(typeof val === 'function') {
+      callback(message.jobId, this.foglet, val(), this.emitter); // add an emitter in order to send back results
+    } else {
+      callback(message.jobId, this.foglet, val, this.emitter); // add an emitter in order to send back results
+    }
+  }
 
-	/**
-	 * Function activate when a unicast message is received
-	 * @function _receiveUnicast
-	 * @param {string} id - Id of the received peer message
-	 * @param {object} message - The message received
-	 * @return {void}
-	 * @private
-	 */
-	_receiveUnicast (id, message) {
-		const result = this.foglet[message.name](...message.args);
-		this.emit(this.signalUnicast, result, id, message);
-	}
+  /**
+  * Function activate when a unicast message is received
+  * @function _receiveUnicast
+  * @param {string} id - Id of the received peer message
+  * @param {object} message - The message received
+  * @return {void}
+  * @private
+  */
+  _receiveUnicast (id, message) {
+    const result = this.foglet[message.name](...message.args);
+    this.emit(this.signalUnicast, result, id, message);
+  }
 
-	/**
-	 * Send a broadcast message as foglet sendBroadcast method but on our protocol
-	 * @function _sendBroadcast
-	 * @param {object} message - The message to send
-	 * @return {void}
-	 * @private
-	 */
-	_sendBroadcast (message) {
-		return this.broadcast.send(message);
-	}
+  /**
+  * Send a broadcast message as foglet sendBroadcast method but on our protocol
+  * @function _sendBroadcast
+  * @param {object} message - The message to send
+  * @return {void}
+  * @private
+  */
+  _sendBroadcast (message) {
+    return this.broadcast.send(message);
+  }
 
-	/**
-	 * Send a unicast message to a specified peer as foglet sendUnicast method but on our protocol
-	 * @function _sendUnicast
-	 * @param {object} message - The message to send
-	 * @param {string} peerId - Id of the peer to send the message
-	 * @return {void}
-	 * @private
-	 */
-	_sendUnicast (message, peerId) {
-		return this.unicast.send(message, peerId);
-	}
+  /**
+  * Send a unicast message to a specified peer as foglet sendUnicast method but on our protocol
+  * @function _sendUnicast
+  * @param {object} message - The message to send
+  * @param {string} peerId - Id of the peer to send the message
+  * @return {void}
+  * @private
+  */
+  _sendUnicast (message, peerId) {
+    return this.unicast.send(message, peerId);
+  }
 
-	/**
-	 * Deserialize a javascript serialized string
-	 * @function _deserialize
-	 * @param {string} serializedJavascript - The string to deserialized
-	 * @return {object} The deserialized string
-	 */
-	_deserialize (serializedJavascript) {
-		return eval('(' + serializedJavascript + ')');
-	}
+  /**
+  * Deserialize a javascript serialized string
+  * @function _deserialize
+  * @param {string} serializedJavascript - The string to deserialized
+  * @return {object} The deserialized string
+  */
+  _deserialize (serializedJavascript) {
+    return eval('(' + serializedJavascript + ')');
+  }
 
-	/**
-	 * Log the message provided
-	 * @function _flog
-	 * @param {object} message - The message to log
-	 * @return {void}
-	 * @private
-	 */
-	_flog (message) {
-		this.foglet._flog('[Interpreter]' + message);
-	}
+  /**
+  * Log the message provided
+  * @function _flog
+  * @param {object} message - The message to log
+  * @return {void}
+  * @private
+  */
+  _flog (message) {
+    this.foglet._flog('[Interpreter]' + message);
+  }
 
 }
 

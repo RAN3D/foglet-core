@@ -27,49 +27,49 @@ const Immutable = require('immutable');
 const uuid = require('uuid/v4');
 
 class FStore {
-	constructor (options) {
-		this.id = uuid();
-		this.store = null;
-		if(options.map){
-			this.store = Immutable.Map(options.map);
-		} else {
-			this.store = Immutable.Map();
-		}
-	}
+  constructor (options) {
+    this.id = uuid();
+    this.store = null;
+    if(options.map) {
+      this.store = Immutable.Map(options.map);
+    } else {
+      this.store = Immutable.Map();
+    }
+  }
 
-	getStore () {
-		return this.store.toJS();
-	}
+  getStore () {
+    return this.store.toJS();
+  }
 
-	get ( key ) {
-		return this.store.get(key);
-	}
+  get ( key ) {
+    return this.store.get(key);
+  }
 
-	has (key) {
-		return this.store.has(key);
-	}
+  has (key) {
+    return this.store.has(key);
+  }
 
-	insert (key, value) {
-		this.store = this.store.set(key, value);
-	}
+  insert (key, value) {
+    this.store = this.store.set(key, value);
+  }
 
-	update (key, value) {
-		this.store = this.store.update(store => {
-			return store.set(key, value);
-		});
-	}
+  update (key, value) {
+    this.store = this.store.update(store => {
+      return store.set(key, value);
+    });
+  }
 
-	delete (key) {
-		this.store = this.store.delete(key);
-	}
+  delete (key) {
+    this.store = this.store.delete(key);
+  }
 
-	clear () {
-		this.store = this.store.clear();
-	}
+  clear () {
+    this.store = this.store.clear();
+  }
 
-	constructFromJS (map) {
-		this.store = Immutable.Map(map);
-	}
+  constructFromJS (map) {
+    this.store = Immutable.Map(map);
+  }
 }
 
 module.exports = FStore;

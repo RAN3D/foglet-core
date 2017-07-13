@@ -23,58 +23,39 @@ SOFTWARE.
 */
 'use strict';
 
-const TManSpray = require('./tman.js').TManSpray;
 const _ = require('lodash');
 const EventEmitter = require('events');
 
 class Overlay extends EventEmitter {
-	constructor (rps, options) {
-		super();
+  constructor (rps, options) {
+    super();
 
-		if(!rps) {
-			throw new Error('Need a rps...');
-		}
+    if(!rps) {
+      throw new Error('Need a rps...');
+    }
 
-		this.defaultOptions = {
-			overlayOptions: {
-				rpsObject: rps
-			}
-		};
-		this.defaultOptions = _.merge(this.defaultOptions, options || {});
-		this.defaultOptions.rps = rps;
+    this.defaultOptions = {
+      overlayOptions: {
+        rpsObject: rps
+      }
+    };
+    this.defaultOptions = _.merge(this.defaultOptions, options || {});
+    this.defaultOptions.rps = rps;
 
-		this.overlay = this.defaultOptions.overlay || new TManSpray(this.defaultOptions);
+    this.overlays = new Map();
+  }
 
-		this.overlay.on('receive', (signal, data) => {
-			this.emit('receive', signal, data);
-		});
-	}
+  getNeighbours () {
+    return new Error('Not yet implemented');
+  }
 
-	init (limit = 0) {
-		this.overlay.init(limit);
-	}
+  getViews () {
+    return new Error('Not yet implemented');
+  }
 
-	getNeighbours () {
-		return this.overlay.socket.getNeighbours();
-	}
-
-	send (id, message) {
-		return this.overlay.send(id, message);
-	}
-
-	getViews () {
-		return this.overlay.views;
-	}
-
-	getUniqViews () {
-		return _.uniqBy(this.getViews(), 'id');
-	}
-
-
-
-	getCycles () {
-		return this.overlay.cycles;
-	}
+  getUniqViews () {
+    return new Error('Not yet implemented');
+  }
 }
 
 module.exports = Overlay;
