@@ -5,41 +5,43 @@ const _ = require('lodash');
 const io = require('socket.io-client');
 
 class SshControl extends EventEmitter {
-	constructor (options = {}) {
-		super();
-		this.options = _.merge({
-			foglet: undefined,
-			address: 'http://localhost:4000/',
-			verbose: true,
-			origins:'*'
-		}, options);
-		this.signaling = io.connect(this.options.address, {origins: options.origins});
-		this.signaling.emit('join', {
-			id: this.options.foglet.id
-		});
+  constructor (options = {}) {
+    super();
+    this.options = _.merge({
+      foglet: undefined,
+      address: 'http://localhost:4000/',
+      verbose: true,
+      origins:'*'
+    }, options);
 
-		this.signaling.on('remoteCommand', (command) => {
-			let parsed;
-			this.log('remoteCommand', command);
-			try {
-				parsed = eval('('+ command +')');
-				this.log(parsed);
-				this.deserialize(parsed.command)(this.options.foglet);
-			} catch (e) {
-				this.log(e);
-			}
-		});
-	}
+    this.signaling = io.connect(this.options.address, {origins: options.origins});
 
-	deserialize (message) {
-		return eval('(' + message + ')');
-	}
+    this.signaling.emit('join', {
+      id: this.options.foglet.id
+    });
 
-	log (signal, message) {
-		if (this.options.verbose && signal !== undefined && message !== undefined) {
-			this.emit('logs', signal, message);
-		}
-	}
+    this.signaling.on('remoteCommand', (command) => {
+      let parsed;
+      this.log('remoteCommand', command);
+      try {
+        parsed = eval('('+ command +')');
+        this.log(parsed);
+        this.deserialize(parsed.command)(this.options.foglet);
+      } catch (e) {
+        this.log(e);
+      }
+    });
+  }
+
+  deserialize (message) {
+    return eval('(' + message + ')');
+  }
+
+  log (signal, message) {
+    if (this.options.verbose && signal !== undefined && message !== undefined) {
+      this.emit('logs', signal, message);
+    }
+  }
 }
 
 module.exports = SshControl;

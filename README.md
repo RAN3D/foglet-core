@@ -1,7 +1,9 @@
-# foglet-core [![Build Status](https://travis-ci.org/folkvir/foglet-core.svg?branch=master)](https://travis-ci.org/folkvir/foglet-core)
+# foglet-core [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core)
 Core of the foglet library
 
 This project aims to provide a solid core infrastructure built with spray-wrtc (see references)
+
+Live example available at https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
 
 ## Install (Assume you have Npm and Node installed)
 
@@ -14,8 +16,6 @@ npm install foglet-core
 The documentation is avalaible [here](https://ran3d.github.io/foglet-core/)
 
 ## [Foglet Live Example](https://ran3d.github.io/foglet-core/example/foglet/foglet.html)
-
-## [Overlay Live Example](https://ran3d.github.io/foglet-core/example/overlay/overfog.html)
 
 ## How to use it and write your example ?
 Before all, insert the spray-wrtc.bundle.js provided by the npm package spray-wrtc in : node_modules/spray-wrtc/build/ into your html file.
