@@ -21,7 +21,7 @@ The documentation is avalaible [here](https://ran3d.github.io/foglet-core/)
 Insert the foglet.bundle.js in your html file.
 
 The bundle provided offers you to write this require into your browser script :
-- ``` const MyWonderfulFoglet = require("foglet").Foglet ```
+- ``` const MyWonderfullFoglet = require("foglet").Foglet ```
 
 If you do not provide a list of ice servers your example will not work on the web but will work on your local network.
 
