@@ -19,7 +19,7 @@ for(let i = 0; i < max; ++i) {
 		signalingAdress:'http://localhost:3000/',
 		room: 'best-room-for-foglet',
 		verbose: true,
-		rpsType: 'spray-wrtc-merging'
+		rpsType: 'spray-wrtc'
 	});
 }
 

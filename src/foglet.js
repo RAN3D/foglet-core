@@ -132,7 +132,7 @@ class Foglet extends EventEmitter {
     case 'fcn-wrtc':
       rps = AdapterFcn;
       break;
-    case 'spray-wrtc-merging':
+    case 'spray-wrtc':
       rps = AdapterSpray;
       break;
     default:
