@@ -3,39 +3,45 @@ Core of the foglet library
 
 This project aims to provide a solid core infrastructure built with spray-wrtc (see references)
 
-Live example available at https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
+There is a [Foglet Live Example](https://ran3d.github.io/foglet-core/example/foglet/foglet.html) of this repository available and some other examples using this package available on https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
 
-## Install (Assume you have Npm and Node installed)
+## Install
 
-Run just one command :
 ```bash
-npm install foglet-core
+npm i --save foglet-core
 ```
 ## Documentation
 
 The documentation is avalaible [here](https://ran3d.github.io/foglet-core/)
 
-## [Foglet Live Example](https://ran3d.github.io/foglet-core/example/foglet/foglet.html)
+## 
 
 ## How to use it and write your example ?
-Before all, insert the spray-wrtc.bundle.js provided by the npm package spray-wrtc in : node_modules/spray-wrtc/build/ into your html file.
-Then insert the foglet.bundle.js in your html file.
+
+Insert the foglet.bundle.js in your html file.
+
 The bundle provided offers you to write this require into your browser script :
-- ``` require("foglet") ```
+- ``` const MyWonderfulFoglet = require("foglet").Foglet ```
 
 If you do not provide a list of ice servers your example will not work on the web but will work on your local network.
 
-But to be begin here is a simple example, after building the bundle and import it in your html file you can write something like this :
+To be begin here is a simple example, after building the bundle and import it in your html file you can write something like this :
 ```javascript
      // Require at least those two libraries
-     var Foglet = require('foglet');
+     var Foglet = require('foglet').Foglet;
 
      // Construction of the network
 
     // Construction of our protocol
     var foglet = new Foglet({
-			protocol: '[your-protocol-name]'
-    	room: '[your-example-name]'
+	protocol: '[your-protocol-name]',
+	room: '[your-example-name]',
+	webrtc:	{
+		trickle: true,
+		iceServers : []
+	},
+	signalingAdress:'http://localhost:3000/',
+	rpsType: 'spray-wrtc'
     });
 
     // Retreive a message sent by a broadcast
@@ -48,26 +54,7 @@ But to be begin here is a simple example, after building the bundle and import i
 			console.log('I\'m connected');
 		});
 
-    //Now your example is connected !
-```
-
-If you want to use our Register Protocol you can write this (after the previous connection) :
-
-```javascript
-     // Create a register named sondage
-    foglet.addRegister("[your-register-name]");
-
-    // Get the register
-    var reg = foglet.getRegister("[your-register-name]");
-
-    // Listening on the signal [your-register-name]-receive where every data are sent when the register is updated.
-    reg.onRegister("[your-register-name]-receive", function(data){
-      console.log(data);
-    });
-
-    // Set its value, and send it by broadcast
-    var value = [0,0]
-    reg.setValue(value);
+    //Now your example is connected (locally)!
 ```
 
 ## Run
