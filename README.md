@@ -21,7 +21,7 @@ The documentation is avalaible [here online](https://ran3d.github.io/foglet-core
 
 ## How to use it and write your example ?
 
-Creates a new HTML file and nsert the **foglet bundle** in it:
+Creates a new HTML file and insert the **foglet bundle** in it:
 ```html
 <script src="node_modules/foglet-core/foglet.bundle.js" type="text/javascript"></script>
 ```
