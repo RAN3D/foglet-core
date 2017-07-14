@@ -1,6 +1,7 @@
 'use strict';
 
 const Foglet = require('../src/foglet.js').Foglet;
+const buildFog = require('./utils.js').buildFog;
 
 const simpleMiddleware = {
   in: msg => msg + ' and Thanks for',
@@ -10,22 +11,8 @@ const simpleMiddleware = {
 describe('Middlewares', function () {
   this.timeout(30000);
   it('should use middleware on broadcast', function (done) {
-    let f1 = new Foglet({
-      protocol:'test-broadcast-middleware',
-      webrtc:  {
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-broadcast-middleware'
-    });
-    let f2 = new Foglet({
-      protocol:'test-broadcast-middleware',
-      webrtc:  {
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-broadcast-middleware'
-    });
+    const foglets = buildFog(Foglet, 2);
+    let f1 = foglets[0], f2 = foglets[1];
 
     f1.use(simpleMiddleware);
     f2.use(simpleMiddleware);
@@ -43,23 +30,8 @@ describe('Middlewares', function () {
   });
 
   it('should use middleware on unicast', function (done) {
-    let f1 = new Foglet({
-      protocol:'test-unicast-middleware',
-      webrtc:  {
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-unicastroom-middleware'
-    });
-
-    let f2 = new Foglet({
-      protocol:'test-unicast-middleware',
-      webrtc:  {
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-unicastroom-middleware'
-    });
+    const foglets = buildFog(Foglet, 2);
+    let f1 = foglets[0], f2 = foglets[1];
 
     f1.use(simpleMiddleware);
     f2.use(simpleMiddleware);

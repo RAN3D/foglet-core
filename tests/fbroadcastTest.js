@@ -1,36 +1,13 @@
 'use strict';
 
 const Foglet = require('../src/foglet.js').Foglet;
+const buildFog = require('./utils.js').buildFog;
 
 describe('[FBROADCAST] functions', function () {
   this.timeout(30000);
   it('[FBROADCAST] sendBroadcast with ordered message on 3 peers network', function (done) {
-    let f1 = new Foglet({
-      protocol: 'test-fbroadcast',
-      webrtc: {
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-fbroadcast'
-    });
-
-    let f2 = new Foglet({
-      protocol: 'test-fbroadcast',
-      webrtc: {
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-fbroadcast'
-    });
-
-    let f3 = new Foglet({
-      protocol: 'test-fbroadcast',
-      webrtc: {
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-fbroadcast'
-    });
+    const foglets = buildFog(Foglet, 3);
+    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
     let cptB = 0;
@@ -67,22 +44,8 @@ describe('[FBROADCAST] functions', function () {
   }); // end it
 
   it('[FBROADCAST] sendBroadcast/onBroadcast', function (done) {
-    let f1 = new Foglet({
-      protocol:'test-broadcast',
-      webrtc:	{
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-broadcast'
-    });
-    let f2 = new Foglet({
-      protocol:'test-broadcast',
-      webrtc:	{
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-broadcast'
-    });
+    const foglets = buildFog(Foglet, 2);
+    let f1 = foglets[0], f2 = foglets[1];
 
     f2.onBroadcast((data) => {
       console.log(data);
@@ -98,23 +61,8 @@ describe('[FBROADCAST] functions', function () {
   });
 
   it('[FBROADCAST] sendUnicast/onUnicast', function (done) {
-    let f1 = new Foglet({
-      protocol:'test-unicast',
-      webrtc:	{
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-unicastroom'
-    });
-
-    let f2 = new Foglet({
-      protocol:'test-unicast',
-      webrtc:	{
-        trickle: true,
-        iceServers: []
-      },
-      room: 'test-unicastroom'
-    });
+    const foglets = buildFog(Foglet, 2);
+    let f1 = foglets[0], f2 = foglets[1];
 
     f2.onUnicast((id, message) => {
       console.log(id + ' : ' + message);

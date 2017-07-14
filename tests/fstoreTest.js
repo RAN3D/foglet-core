@@ -1,17 +1,13 @@
 'use strict';
 
 const Foglet = require('../src/foglet.js').Foglet;
+const buildFog = require('./utils.js').buildFog;
 
 describe('[FSTORE] FStore functions', function () {
   it('[FStore] init', function () {
-    let f = new Foglet({
-      protocol: 'fstore-test-init',
-      webrtc:	{
-        trickle: false,
-        iceServers: []
-      },
-      room: 'fstore-test-init'
-    });
+    const foglets = buildFog(Foglet, 1);
+    let f = foglets[0];
+
     console.log(f.store.getStore());
     assert.isOk(f.store.has('views'));
   });
@@ -34,14 +30,8 @@ describe('[FSTORE] FStore functions', function () {
   });
 
   it('[FStore] update', function () {
-    let f = new Foglet({
-      protocol: 'fstore-test-update',
-      webrtc:	{
-        trickle: false,
-        iceServers: []
-      },
-      room: 'fstore-test-update'
-    });
+    const foglets = buildFog(Foglet, 1);
+    let f = foglets[0];
 
     f.store.insert('testingValue', { 'a' : 1 });
     console.log(f.store.getStore());
@@ -54,14 +44,8 @@ describe('[FSTORE] FStore functions', function () {
   });
 
   it('[FStore] delete', function () {
-    let f = new Foglet({
-      protocol: 'fstore-test-delete',
-      webrtc:	{
-        trickle: false,
-        iceServers: []
-      },
-      room: 'fstore-test-delete'
-    });
+    const foglets = buildFog(Foglet, 1);
+    let f = foglets[0];
 
     f.store.insert('testingValue', { 'a' : 1 });
     assert.isOk(f.store.has('testingValue'));
