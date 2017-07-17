@@ -23,6 +23,8 @@ SOFTWARE.
 */
 'use strict';
 
+const uuid = require('uuid/v4');
+
 /**
  * FogletProtcol represent an abstract protocol.
  *
@@ -44,6 +46,20 @@ class FogletProtocol {
     this._foglet = foglet;
     this._unicastHandlers = new Map();
     this._broadcastHandlers = new Map();
+    this._answerQueue = new Map();
+    // register handler for answers
+    this._unicastHandlers.set('foglet-protocol/service-answers', '_answer');
+    // this._unicastHandlers.set('foglet-protocol/service-answers', msg => {
+    //   if (this._answerQueue.has(msg.answerID)) {
+    //     const answer = this._answerQueue.get(msg.answerID);
+    //     if (msg.type === 'reply') {
+    //       answer.resolve(msg.payload);
+    //     } else if (msg.type === 'reject') {
+    //       answer.reject(msg.payload);
+    //     }
+    //     this._answerQueue.delete(msg.answerID);
+    //   }
+    // });
     this._buildProtocol();
     this._enableHandlers();
   }
@@ -68,6 +84,18 @@ class FogletProtocol {
     return [];
   }
 
+  _answer (msg) {
+    if (this._answerQueue.has(msg.answerID)) {
+      const answer = this._answerQueue.get(msg.answerID);
+      if (msg.type === 'reply') {
+        answer.resolve(msg.value);
+      } else if (msg.type === 'reject') {
+        answer.reject(msg.value);
+      }
+      this._answerQueue.delete(msg.answerID);
+    }
+  }
+
   /**
    * Build protocol services
    * @private
@@ -77,28 +105,30 @@ class FogletProtocol {
     // TODO refactor to reduce code duplicata in this method
     this._unicast().forEach(method => {
       this._registerService(method, (id, payload) => {
-        console.log('send message');
-        this._foglet.sendUnicast({
-          protocol: this._name,
-          method,
-          payload
-        }, id);
-        // TODO add mecanism for reply and reject to resolve promise (for now, set to auto-resolve)
-        return Promise.resolve();
+        return new Promise((resolve, reject) => {
+          const answerID = this._registerAnswer(resolve, reject);
+          this._foglet.sendUnicast({
+            protocol: this._name,
+            method,
+            payload,
+            answerID
+          }, id);
+        });
       }, this._unicastHandlers);
     });
 
     // do the same for broadcast service
     this._broadcast().forEach(method => {
       this._registerService(method, payload => {
-        console.log('send message');
-        this._foglet.sendBroadcast({
-          protocol: this._name,
-          method,
-          payload
+        return new Promise((resolve, reject) => {
+          const answerID = this._registerAnswer(resolve, reject);
+          this._foglet.sendBroadcast({
+            protocol: this._name,
+            method,
+            payload,
+            answerID
+          });
         });
-        // TODO add mecanism for reply and reject to resolve promise (for now, set to auto-resolve)
-        return Promise.resolve();
       }, this._broadcastHandlers);
     });
   }
@@ -122,20 +152,54 @@ class FogletProtocol {
     handlers.set(`${this._name}/${serviceName}`, handlerName);
   }
 
+
+  _registerAnswer (resolve, reject) {
+    const answerID = uuid();
+    this._answerQueue.set(answerID, { resolve, reject });
+    return answerID;
+  }
+
   /**
    * Setup handlers to process incoming messages
    * @private
    * @return {void}
    */
   _enableHandlers () {
-    const handleMessage = (msg, handlers) => {
+    const handleMessage = (msg, handlers, senderID = null) => {
       const msgType = `${msg.protocol}/${msg.method}`;
       if (handlers.has(msgType)) {
         const handlerName = handlers.get(msgType);
-        this[handlerName](msg.payload); // TODO add reply and reject callbacks
+        if (senderID !== null && msgType !== 'foglet-protocol/service-answers') {
+          const reply = value => {
+            console.log(msg.answerID);
+            this._foglet.sendUnicast({
+              protocol: 'foglet-protocol',
+              method: 'service-answers',
+              payload: {
+                type: 'reply',
+                answerID: msg.answerID,
+                value
+              }
+            }, senderID);
+          };
+          const reject = value => {
+            this._foglet.sendUnicast({
+              protocol: 'foglet-protocol',
+              method: 'service-answers',
+              payload: {
+                type: 'reject',
+                answerID: msg.answerID,
+                value
+              }
+            }, senderID);
+          };
+          this[handlerName](msg.payload, reply, reject);
+        } else {
+          this[handlerName](msg.payload);
+        }
       }
     };
-    this._foglet.onUnicast((id, msg) => handleMessage(msg, this._unicastHandlers));
+    this._foglet.onUnicast((id, msg) => handleMessage(msg, this._unicastHandlers, id));
     this._foglet.onBroadcast(msg => handleMessage(msg, this._broadcastHandlers));
   }
 }
