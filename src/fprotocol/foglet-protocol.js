@@ -34,6 +34,11 @@ SOFTWARE.
  * @author Thomas Minier
  */
 class FogletProtocol {
+  /**
+   * Constructor
+   * @param  {string} name   - The protocol's name
+   * @param  {Foglet} foglet - The Foglet instance used by the protocol to communicate
+   */
   constructor (name, foglet) {
     this._name = name;
     this._foglet = foglet;
@@ -43,21 +48,35 @@ class FogletProtocol {
     this._enableHandlers();
   }
 
+  /**
+   * Returns the names of unicast services offered by this protocol.
+   *
+   * This method must be implemented by protocol developpers to specificy their protocol.
+   * @return {string[]} The names of unicast services offered by this protocol
+   */
   _unicast () {
     return [];
   }
 
+  /**
+   * Returns the names of broadcast services offered by this protocol.
+   *
+   * This method must be implemented by protocol developpers to specificy their protocol.
+   * @return {string[]} The names of broadcast services offered by this protocol
+   */
   _broadcast () {
     return [];
   }
 
+  /**
+   * Build protocol services
+   * @private
+   * @return {void}
+   */
   _buildProtocol () {
-    // TODO refactore to reduce code duplicata in this method
+    // TODO refactor to reduce code duplicata in this method
     this._unicast().forEach(method => {
-      // create service method to call this service in unicast
-      if (method in this)
-        throw new SyntaxError(`Cannot create a new service for protocol ${this._name} if the method ${method} is already defined`);
-      this[method] = (id, payload) => {
+      this._registerService(method, (id, payload) => {
         console.log('send message');
         this._foglet.sendUnicast({
           protocol: this._name,
@@ -66,19 +85,12 @@ class FogletProtocol {
         }, id);
         // TODO add mecanism for reply and reject to resolve promise (for now, set to auto-resolve)
         return Promise.resolve();
-      };
-      // register handler
-      if (!(`_${method}` in this))
-        throw new SyntaxError(`The handler '_${method}' is not defined in the prtotype of the protocol ${this._name}`);
-      this._unicastHandlers.set(`${this._name}/${method}`, `_${method}`);
+      }, this._unicastHandlers);
     });
 
     // do the same for broadcast service
     this._broadcast().forEach(method => {
-      // create service method to call this service in unicast
-      if (method in this)
-        throw new SyntaxError(`Cannot create a new service for protocol ${this._name} if the method ${method} is already defined`);
-      this[method] = payload => {
+      this._registerService(method, payload => {
         console.log('send message');
         this._foglet.sendBroadcast({
           protocol: this._name,
@@ -87,29 +99,44 @@ class FogletProtocol {
         });
         // TODO add mecanism for reply and reject to resolve promise (for now, set to auto-resolve)
         return Promise.resolve();
-      };
-      // register handler
-      if (!(`_${method}` in this))
-        throw new SyntaxError(`The handler '_${method}' is not defined in the prtotype of the protocol ${this._name}`);
-      this._broadcastHandlers.set(`${this._name}/${method}`, `_${method}`);
+      }, this._broadcastHandlers);
     });
   }
 
+  /**
+   * Register a service
+   * @private
+   * @param  {string} serviceName   - The service name
+   * @param  {function} serviceMethod - The method called by the service
+   * @param  {Map} handlers - The collection in hwihc the serrvice handler must be registered
+   * @return {void}
+   */
+  _registerService (serviceName, serviceMethod, handlers) {
+    const handlerName = `_${serviceName}`;
+    if (serviceName in this)
+      throw new SyntaxError(`Cannot create a new service for protocol ${this._name} if the method ${serviceName} is already defined`);
+    this[serviceName] = serviceMethod;
+    // register handler
+    if (!(handlerName in this))
+      throw new SyntaxError(`The handler '${handlerName}' is not defined in the prtotype of the protocol ${this._name}`);
+    handlers.set(`${this._name}/${serviceName}`, handlerName);
+  }
+
+  /**
+   * Setup handlers to process incoming messages
+   * @private
+   * @return {void}
+   */
   _enableHandlers () {
-    this._foglet.onUnicast((id, msg) => {
+    const handleMessage = (msg, handlers) => {
       const msgType = `${msg.protocol}/${msg.method}`;
-      if (this._unicastHandlers.has(msgType)) {
-        const handlerName = this._unicastHandlers.get(msgType);
+      if (handlers.has(msgType)) {
+        const handlerName = handlers.get(msgType);
         this[handlerName](msg.payload); // TODO add reply and reject callbacks
       }
-    });
-    this._foglet.onBroadcast(msg => {
-      const msgType = `${msg.protocol}/${msg.method}`;
-      if (this._broadcastHandlers.has(msgType)) {
-        const handlerName = this._broadcastHandlers.get(msgType);
-        this[handlerName](msg.payload); // TODO add reply and reject callbacks
-      }
-    });
+    };
+    this._foglet.onUnicast((id, msg) => handleMessage(msg, this._unicastHandlers));
+    this._foglet.onBroadcast(msg => handleMessage(msg, this._broadcastHandlers));
   }
 }
 
