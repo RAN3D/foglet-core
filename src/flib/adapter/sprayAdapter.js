@@ -6,7 +6,7 @@ const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
 const Unicast = require('unicast-definition');
 const FBroadcast = require('../fbroadcast.js');
-const log = require('debug')('foglet-core:spray-wrtc-merge');
+const log = require('debug')('foglet-core:spray-wrtc');
 
 class SprayAdapter extends AbstractAdapter {
   constructor (options) {
@@ -64,6 +64,12 @@ class SprayAdapter extends AbstractAdapter {
     });
   }
 
+  /**
+   * Connect a spray RPS to another spray RPS by using a signaling server
+   * @param  {SprayAdapter} rps Do you want to connect to a direct {SprayAdapter} object ? Do it by adding the object here.
+   * @param  {number} timeout Specify the timeout of the connection
+   * @return {Promise}  Return a promise, resolve when the connection is successfully achieved, rejected by tiemout or errors during the connection
+   */
   connection (rps, timeout) {
     log('Pending connection...');
     const self = this;
@@ -158,10 +164,18 @@ class SprayAdapter extends AbstractAdapter {
     return this.unicast.emit(this.options.protocol, id, this.outviewId, message);
   }
 
+  /**
+   * Get the list of neighbours
+   * @return {array}
+   */
   getNeighbours (k = undefined) {
     return this.rps.getPeers(k);
   }
 
+  /**
+   * Init a shuffle of the network, i.e: renewing the neighborhood.
+   * @return {void}
+   */
   exchange () {
     this.rps.exchange();
   }

@@ -67,6 +67,7 @@
     "karma-mocha-reporter": "^2.2.0",
     "karma-socketio-server": "^1.0.0",
     "mocha": "^3.4.1",
+    "p2p-graph": "^1.2.1",
     "watchify": "^3.7.0"
   },
   "bundledDependencies": [

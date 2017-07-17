@@ -31,7 +31,7 @@ const debug = require('debug');
 const FRegister = require('./flib/fregister.js');
 const FInterpreter = require('./flib/finterpreter.js');
 const FStore = require('./flib/fstore.js');
-// const OverlayManager = require('./overlay/OverlayManager.js');
+const OverlayManager = require('./overlay/OverlayManager.js');
 // Networks
 const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
@@ -69,7 +69,21 @@ class Foglet extends EventEmitter {
       room: 'default-room',
       protocol: 'foglet-protocol-default',
       verbose: true,
-      enableOverlay: false,
+      rpsType: 'spray-wrtc',
+      overlay: {
+        limit: 10,
+        enable: false, // use only RPS
+        /**
+         * List of overlay wanted.
+         * You can add your own overlay by adding them here as a list of: [OverlayOne, OverlayTwo, id3, id4, ...]
+         * Each element has to be a Class (not initialized) or a string representing the id of default implemented Overlay
+         * By default we will activate the RPS and if specified by string ids we will activate pre-implemented overlay such as {LatenciesOverlay}
+         * @type {Array}
+         */
+        overlays: [],
+
+        verbose: true
+      },
       enableInterpreter: false
     };
     this.logger = debug('foglet-core:main');
@@ -89,16 +103,20 @@ class Foglet extends EventEmitter {
 
     this.inviewId = this.options.rps.inviewId;
     this.outviewId = this.options.rps.outviewId;
-    // // OVERLAY
-    // if(this.defaultOptions.enableOverlay) {
-    //   this.options.overlay = new Overlay(this.options.rps, this.defaultOptions);
-    //   this.options.overlay.on('logs', (message, data) => this._log(data));
-    // }
+
+    // RPS && OVERLAYS
+    // to use the last overlay or the rps if overlay are disable use:  om.use()
+    let overlayOptions = this.options.overlay;
+    overlayOptions.rps = this.options.rps;
+    this.options.om = new OverlayManager(overlayOptions);
+
+
     // INTERPRETER
     if(this.options.enableInterpreter) {
       this.interpreter = new FInterpreter(this);
       this.interpreter.on('logs', (message, data) => this._log(data));
     }
+
     // SSH COntrol
     if (this.options.ssh && this.options.ssh.address) {
       this.ssh = new SSH({
@@ -142,7 +160,54 @@ class Foglet extends EventEmitter {
     return rps;
   }
   /**
+   * @private
+  * RPS Connection method for Foglet to the network specified by protocol and room options
+  * Firstly we connect the RPS then we added create specified in options
+  * @param {Foglet} foglet Foglet to connect, none by default and the connection is by signaling. Otherwise it uses a direct callback
+  * @param {number} timeout Time before rejecting the promise.
+  * @function connection
+  * @return {Promise} Return a Q.Promise
+  * @example
+  * var f = new Foglet({...});
+  * f.connection().then((response) => console.log).catch(error => console.err);
+  */
+  _rpsConnection (foglet = undefined, timeout = 60000) {
+    if(foglet) return this.options.rps.connection(foglet.options.rps, timeout);
+    return this.options.rps.connection(undefined, timeout);
+  }
+
+  /**
+   * Connect all overlay to the network
+   * @return {Promise} Resolved when all overlay are well connected to the network.
+   */
+  _overlayConnection () {
+    return new Promise((resolve, reject) => {
+      // engage the connection overlay process
+      if(this.options.overlay.enable) {
+        if(this.options.overlay.overlays.length > 0) {
+          let tabs = [];
+          for(let i =0; i<this.options.overlay.overlays.length; ++i) tabs.push(i);
+          try {
+            let a = this.options.overlay.overlays.reduce(indice => {
+              return this.options.om.overlay.add(this.options.overlay.overlays[indice]);
+            }, Promise.resolve());
+            console.log(a);
+            return a;
+          } catch (e) {
+            reject(e);
+          }
+        } else {
+          resolve(status);
+        }
+      } else {
+        resolve(status);
+      }
+    });
+  }
+
+  /**
   * Connection method for Foglet to the network specified by protocol and room options
+  * Firstly we connect the RPS then we added overlays specified in options
   * @param {Foglet} foglet Foglet to connect, none by default and the connection is by signaling. Otherwise it uses a direct callback
   * @param {number} timeout Time before rejecting the promise.
   * @function connection
@@ -152,8 +217,17 @@ class Foglet extends EventEmitter {
   * f.connection().then((response) => console.log).catch(error => console.err);
   */
   connection (foglet = undefined, timeout = 60000) {
-    if(foglet) return this.options.rps.connection(foglet.options.rps, timeout);
-    return this.options.rps.connection(undefined, timeout);
+    return new Promise((resolve, reject) => {
+      this._rpsConnection(foglet, timeout).then((status) => {
+        this._overlayConnection().then(() => {
+          resolve(true);
+        }).catch(e => {
+          reject(e);
+        })
+      }).catch((e) => {
+        reject(e);
+      });
+    });
   }
 
   /**
@@ -164,7 +238,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   */
   addRegister (name) {
-    const source = this.options.rps;
+    const source = this.options.om.use().overlay;
     const options = {
       name,
       source,
@@ -221,7 +295,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   **/
   onBroadcast (callback) {
-    this.options.rps.onBroadcast((msg, ...args) => callback(this._middlewares.out(msg), ...args));
+    this.options.om.use().overlay.onBroadcast((msg, ...args) => callback(this._middlewares.out(msg), ...args));
   }
 
 
@@ -232,7 +306,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   */
   sendBroadcast (msg, ...args) {
-    return this.options.rps.sendBroadcast(this._middlewares.in(msg), ...args);
+    return this.options.om.use().overlay.sendBroadcast(this._middlewares.in(msg), ...args);
   }
 
   /**
@@ -248,7 +322,7 @@ class Foglet extends EventEmitter {
   * @return {void}
   */
   onUnicast (callback) {
-    this.options.rps.onUnicast((id, msg, ...args) => callback(id, this._middlewares.out(msg), ...args));
+    this.options.om.use().overlay.onUnicast((id, msg, ...args) => callback(id, this._middlewares.out(msg), ...args));
   }
 
   /**
@@ -259,7 +333,7 @@ class Foglet extends EventEmitter {
   * @return {boolean} return true if it seems to have sent the message, false otherwise.
   */
   sendUnicast (message, id) {
-    return this.options.rps.sendUnicast(this._middlewares.in(message), id);
+    return this.options.om.use().overlay.sendUnicast(this._middlewares.in(message), id);
   }
 
   /**
@@ -268,7 +342,7 @@ class Foglet extends EventEmitter {
   * @return {string} return an id or a null string otherwise
   */
   getRandomNeighbourId () {
-    const peers = this.options.rps.getNeighbours();
+    const peers = this.options.om.use().overlay.getNeighbours();
     if(peers.length === 0) {
       return '';
     } else {
@@ -289,7 +363,7 @@ class Foglet extends EventEmitter {
   * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
   */
   getNeighbours (k = undefined) {
-    return this.options.rps.getNeighbours(k);
+    return this.options.om.use().overlay.getNeighbours(k);
   }
 
   /**
