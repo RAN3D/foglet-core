@@ -23,25 +23,15 @@ SOFTWARE.
 */
 'use strict';
 
-const FogletProtcol = require('./foglet-protocol.js');
+const FogletProtocol = require('./foglet-protocol.js');
 
-class FogletResource extends FogletProtcol {
+class FogletResource extends FogletProtocol {
   constructor (name, foglet) {
-    super(foglet);
-    this._namespace = `resource/${name}`;
-    this.unicast()
-    .service('get', this._get)
-    .service('post', this._post)
-    .service('patch', this._patch)
-    .service('delete', this._delete);
+    super(`foglet-core/foglet-resource/${name}`, foglet);
   }
 
-  get (id) {
-    return new Promise((resolve, reject) => {
-      const msgID = someRandomID();
-      this.unicast(id).call('get');
-      this._registerAnswerHandler(msgID, resolve, reject);
-    });
+  _unicast () {
+    return [ 'get', 'post', 'patch', 'delete' ];
   }
 
   _get (msg, reply, reject) {

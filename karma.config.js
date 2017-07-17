@@ -27,14 +27,16 @@ module.exports = function (config) {
       'tests/fbroadcastTest.js',
       // 'tests/finterpreterTest.js',
       'tests/fstoreTest.js',
-      'tests/middleware-test.js'
+      'tests/middleware-test.js',
+      'tests/fprotocol/*-test.js'
     ],
     preprocessors:{
       'tests/fogletTest.js': [ 'coverage', 'browserify' ],
       'tests/fbroadcastTest.js': [ 'coverage', 'browserify' ],
       // 'tests/finterpreterTest.js' : [ 'coverage', 'browserify' ],
       'tests/fstoreTest.js': [ 'coverage', 'browserify' ],
-      'tests/middleware-test.js': [ 'coverage', 'browserify' ]
+      'tests/middleware-test.js': [ 'coverage', 'browserify' ],
+      'tests/fprotocol/*-test.js': [ 'coverage', 'browserify' ]
     },
     // list of files to exclude
     exclude: [
@@ -47,12 +49,12 @@ module.exports = function (config) {
       transform: [ [ 'babelify', {presets: [ 'es2015' ]} ], 'browserify-istanbul' ]
     },
     extensions: [ '.js' ],
-    proxies : {
+    proxies: {
       './': 'http://localhost:3000'
     },
-    port:3001,
+    port: 3001,
     expressHttpServer: {
-      port:4001,
+      port: 4001,
       // this function takes express app object and allows you to modify it
       // to your liking. For more see http://expressjs.com/4x/api.html
       appVisitor: signaling
@@ -80,7 +82,7 @@ module.exports = function (config) {
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
     autoWatch: true,
-    browserNoActivityTimeout:50000,
+    browserNoActivityTimeout: 50000,
     colors: true,
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
