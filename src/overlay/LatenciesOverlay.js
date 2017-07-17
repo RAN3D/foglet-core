@@ -34,7 +34,7 @@ class LatenciesOverlay extends AbstractOverlay {
     debug('Latencies Overlay initialized.');
   }
 
-  connection (timeout) {
+  connection () {
     return Promise.resolve();
   }
 }

@@ -98,30 +98,36 @@ class OverlayManager extends EventEmitter {
    * @return {Promise<string>} id Id of the new overlay
    */
   add (overlay) {
+    this.log(overlay, typeof overlay);
     let obj = {
-      id: uuid(),
-      origin: {
-        overlay: overlay.class,
-        options: overlay.options
-      }
+      id: uuid()
     };
     if(typeof overlay === 'function') {
       obj.overlay = new overlay({
         manager: this, // reference to the manager to access to other overlay when needed
         previous: llast(this.overlays),
-        options: overlay.options
+        options: overlay.options,
+        origin: {
+          overlay: overlay.class,
+          options: overlay.options
+        }
       });
     } else if( typeof overlay === 'string' ) {
       try {
-        obj.overlay = new this._defaultOverlay(overlay)({
+        let overlord = this._defaultOverlay(overlay);
+        obj.overlay = new overlord({
           manager: this, // reference to the manager to access to other overlay when needed
           previous: llast(this.overlays),
-          options: overlay.options
+          options: overlay.options,
+          origin: {
+            overlay: overlord,
+            options: {}
+          }
         });
         // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
         obj.id = obj.overlay.id;
       } catch (e) {
-        return Promise.reject(new Error('string id have to be an id of available overlay. See link{http://github.com/ra3nd/foglet-core} for documentation of available overlays.'));
+        return Promise.reject(new Error('string id have to be an id of available overlay. See link{http://github.com/ra3nd/foglet-core} for documentation of available overlays.', e));
       }
     } else {
       Promise.reject(new Error('overlay have to class reference or an available string id'));
@@ -130,7 +136,7 @@ class OverlayManager extends EventEmitter {
     this.overlays.push(obj);
     // Connect this overlay to the network.
     return new Promise((resolve, reject) => {
-      this.get(obj.id).connection().then(() => {
+      this.get(obj.id).overlay.connection().then(() => {
         this.log('Overlay added.');
         resolve(obj.id);
       }).catch((e) => {

@@ -6,7 +6,6 @@ const Foglet = require('foglet').Foglet;
 
 const $ = window.$;
 let o = [];
-let graph;
 let graphSignaling = [];
 const max = 5;
 
@@ -14,19 +13,21 @@ function init () {
   o = [];
   for(let i = 0; i < max; ++i) {
     o[i] = new Foglet({
-      protocol: 'foglet-example',
-      webrtc:	{
-        trickle: true,
-        iceServers : []
+      protocol: 'foglet-example', // foglet running on the protocol foglet-example, defined for spray-wrtc
+      webrtc:	{ // add WebRTC options
+        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
+        iceServers : [] // define iceServers in non local instance
       },
-      signalingAdress: 'http://signaling.herokuapp.com/',
-      room: 'best-room-for-foglet',
-      verbose: true,
-      rpsType: 'spray-wrtc',
-      overlay:{
-        limit: 10,
-        enable:false,
-        overlays:[]
+      timeout: 5 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+      deltatime: 30 * 1000, // spray-wrtc shuffle interval
+      signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+      room: 'best-room-for-foglet', // room to join
+      verbose: true, // want some logs ? switch to false otherwise
+      rpsType: 'spray-wrtc', // type of the rps: spray-wrtc
+      overlay:{ // overlay options
+        limit: 10, // limit of overlays you can add
+        enable:false, // want to activate overlay ? switch to false otherwise
+        overlays: [ 'latencies' ] // add an latencies overlay
       }
     });
   }
@@ -51,13 +52,6 @@ const logs = (...args) => {
   // $('#appendLogs').append('<p>' + string + '</p>');
 };
 
-// function clearDirectGraph () {
-//   $('#graph').empty();
-//   graph = undefined;
-//   $('#graph').append("<div id='p2pGraph' style='border: 1px solid black;'>Direct connection graph: <hr/></div>");
-//   graph = new P2PGraph('#p2pGraph');
-// }
-
 function clearSignalingGraph () {
   $('#graph').empty();
   graphSignaling = [];
@@ -68,24 +62,6 @@ function clearSignalingGraph () {
 }
 
 
-// function drawDirect() {
-//   let j = 0;
-//   o.forEach(peer => {
-//     peer.getNeighbours().forEach(neigh => {
-//       console.log(neigh);
-//       if(!graphSignaling[j].hasPeer(neigh)) {
-//         graphSignaling[j].add({
-//           id: neigh,
-//           me: false,
-//           name: neigh
-//         });
-//         graphSignaling[j].connect(peer.id, neigh);
-//       }
-//     });//end of peer.getneighbours()...
-//     j++;
-//   });// end of o.foreach(...)
-// }
-//
 const directConnection = (time2wait = 500) => {
   clearSignalingGraph();
   init();
@@ -96,18 +72,10 @@ const directConnection = (time2wait = 500) => {
     graphSignaling[i].add({id: p.id, me: true, name: p.id});
     // for a direct connection, need to connect in both way, inview outview...
     f.connection(p).then(d =>{
-      // graphSignaling[i].add({id: .id, me: true, name: o[i].id});
       logs(`=> Foglet ${f.options.rps.inviewId} has been connected with a direct connection to Foglet ${p.options.rps.inviewId}`);
       drawSignaling();
     });
     p.connection(f).then(d =>{
-      // graphSignaling[ind].add({id: o[ind].id, me: true, name: 'Peer: '+ind});
-      // graph.connect(p.id, f.id);
-      // graph.add({
-      //   id: 'peer'+i,
-      //   me: false,
-      //   name: f.id
-      // });
       logs(`=> Foglet ${p.options.rps.inviewId} has been connected with a direct connection to Foglet ${f.options.rps.inviewId}`);
     });
   }
@@ -132,13 +100,6 @@ function drawSignaling () {
 }
 
 const signalingConnection = (time2wait = 500) => {
-  // if(graph) {
-  //   try {
-  //     graph.destroy();
-  //   } catch (e) {
-  //     graph = undefined;
-  //   }
-  // }
   clearSignalingGraph();
   init();
   for (let i = 0; i < max; ++i) {

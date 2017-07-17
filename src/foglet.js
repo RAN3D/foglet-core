@@ -75,7 +75,7 @@ class Foglet extends EventEmitter {
         enable: false, // use only RPS
         /**
          * List of overlay wanted.
-         * You can add your own overlay by adding them here as a list of: [OverlayOne, OverlayTwo, id3, id4, ...]
+         * You can add your own overlay by adding them here as a list of: [{class: OverlayOne, options: {...}}, {class: OverlayTwo, options: {}}, id3, id4, ...]
          * Each element has to be a Class (not initialized) or a string representing the id of default implemented Overlay
          * By default we will activate the RPS and if specified by string ids we will activate pre-implemented overlay such as {LatenciesOverlay}
          * @type {Array}
@@ -188,8 +188,9 @@ class Foglet extends EventEmitter {
           let tabs = [];
           for(let i =0; i<this.options.overlay.overlays.length; ++i) tabs.push(i);
           try {
-            let a = this.options.overlay.overlays.reduce(indice => {
-              return this.options.om.overlay.add(this.options.overlay.overlays[indice]);
+            let a = tabs.reduce((acc, current, index) => {
+              this._log(this.options.overlay.overlays[index], index);
+              return this.options.om.add(this.options.overlay.overlays[index]);
             }, Promise.resolve());
             console.log(a);
             return a;
