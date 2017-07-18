@@ -23,16 +23,19 @@ SOFTWARE.
 */
 'use strict';
 
-const uuid = require('uuid/v4');
+const AnswerQueue = require('./answer-queue.js');
 const HandlerManager = require('./handler-manager.js');
 
 /**
- * FogletProtcol represent an abstract protocol.
- *
+ * FogletProtocol represent an abstract protocol.
  * A Protocol is a a set of behaviours used to interact with others foglet that shares the same protocol.
- * It contains:
- * * rules, i.e. anonymous functions, to execute when receving specific message (by unicast and/or broadcast)
- * *
+ *
+ * One can define a new protocol by subclassing {@link FogletProtocol} and implementing the following methods:
+ * * `unicast` to define the unicast services offered by the protocol.
+ * * `broadcast` to define the broadcast services offered by the protocol.
+ * Once these methods have been implemented, you need to implement a `handler method` per service offered.
+ * A handler is a method of the subclass where its name is the name of the related service prefixed with `_`.
+ * For example, a service **get** requires to define a method named **_get** in the subclass.
  * @abstract
  * @author Thomas Minier
  */
@@ -46,7 +49,7 @@ class FogletProtocol {
     this._name = name;
     this._foglet = foglet;
     this._handlerManager = new HandlerManager(this);
-    this._answerQueue = new Map();
+    this._answerQueue = new AnswerQueue();
     this._buildProtocol();
     this._handlerManager.init();
   }
@@ -72,15 +75,7 @@ class FogletProtocol {
   }
 
   _answer (msg) {
-    if (this._answerQueue.has(msg.answerID)) {
-      const answer = this._answerQueue.get(msg.answerID);
-      if (msg.type === 'reply') {
-        answer.resolve(msg.value);
-      } else if (msg.type === 'reject') {
-        answer.reject(msg.value);
-      }
-      this._answerQueue.delete(msg.answerID);
-    }
+    this._answerQueue.resolve(msg.answerID, msg.type, msg.value);
   }
 
   /**
@@ -89,17 +84,16 @@ class FogletProtocol {
    * @return {void}
    */
   _buildProtocol () {
-    // TODO refactor to reduce code duplicata in this method
+    // register unicast services
     this._unicast().forEach(method => {
       this._registerService(method, (id, payload) => {
         return new Promise((resolve, reject) => {
-          const answerID = this._registerAnswer(resolve, reject);
-          this._foglet.sendUnicast({
+          const msg = {
             protocol: this._name,
             method,
-            payload,
-            answerID
-          }, id);
+            payload
+          };
+          this._foglet.sendUnicast(this._answerQueue.stamp(msg, resolve, reject), id);
         });
       });
       this._handlerManager.registerUnicastHandler(`${this._name}/${method}`, `_${method}`);
@@ -109,13 +103,12 @@ class FogletProtocol {
     this._broadcast().forEach(method => {
       this._registerService(method, payload => {
         return new Promise((resolve, reject) => {
-          const answerID = this._registerAnswer(resolve, reject);
-          this._foglet.sendBroadcast({
+          const msg = {
             protocol: this._name,
             method,
-            payload,
-            answerID
-          });
+            payload
+          };
+          this._foglet.sendBroadcast(this._answerQueue.stamp(msg, resolve, reject));
         });
       });
       this._handlerManager.registerBroadcastHandler(`${this._name}/${method}`, `_${method}`);
@@ -133,13 +126,6 @@ class FogletProtocol {
     if (serviceName in this)
       throw new SyntaxError(`Cannot create a new service for protocol ${this._name} if the method ${serviceName} is already defined`);
     this[serviceName] = serviceMethod;
-  }
-
-
-  _registerAnswer (resolve, reject) {
-    const answerID = uuid();
-    this._answerQueue.set(answerID, { resolve, reject });
-    return answerID;
   }
 }
 
