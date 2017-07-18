@@ -24,6 +24,7 @@ SOFTWARE.
 'use strict';
 
 const uuid = require('uuid/v4');
+const HandlerManager = require('./handler-manager.js');
 
 /**
  * FogletProtcol represent an abstract protocol.
@@ -44,24 +45,10 @@ class FogletProtocol {
   constructor (name, foglet) {
     this._name = name;
     this._foglet = foglet;
-    this._unicastHandlers = new Map();
-    this._broadcastHandlers = new Map();
+    this._handlerManager = new HandlerManager(this);
     this._answerQueue = new Map();
-    // register handler for answers
-    this._unicastHandlers.set('foglet-protocol/service-answers', '_answer');
-    // this._unicastHandlers.set('foglet-protocol/service-answers', msg => {
-    //   if (this._answerQueue.has(msg.answerID)) {
-    //     const answer = this._answerQueue.get(msg.answerID);
-    //     if (msg.type === 'reply') {
-    //       answer.resolve(msg.payload);
-    //     } else if (msg.type === 'reject') {
-    //       answer.reject(msg.payload);
-    //     }
-    //     this._answerQueue.delete(msg.answerID);
-    //   }
-    // });
     this._buildProtocol();
-    this._enableHandlers();
+    this._handlerManager.init();
   }
 
   /**
@@ -114,7 +101,8 @@ class FogletProtocol {
             answerID
           }, id);
         });
-      }, this._unicastHandlers);
+      });
+      this._handlerManager.registerUnicastHandler(`${this._name}/${method}`, `_${method}`);
     });
 
     // do the same for broadcast service
@@ -129,7 +117,8 @@ class FogletProtocol {
             answerID
           });
         });
-      }, this._broadcastHandlers);
+      });
+      this._handlerManager.registerBroadcastHandler(`${this._name}/${method}`, `_${method}`);
     });
   }
 
@@ -138,18 +127,12 @@ class FogletProtocol {
    * @private
    * @param  {string} serviceName   - The service name
    * @param  {function} serviceMethod - The method called by the service
-   * @param  {Map} handlers - The collection in hwihc the serrvice handler must be registered
    * @return {void}
    */
-  _registerService (serviceName, serviceMethod, handlers) {
-    const handlerName = `_${serviceName}`;
+  _registerService (serviceName, serviceMethod) {
     if (serviceName in this)
       throw new SyntaxError(`Cannot create a new service for protocol ${this._name} if the method ${serviceName} is already defined`);
     this[serviceName] = serviceMethod;
-    // register handler
-    if (!(handlerName in this))
-      throw new SyntaxError(`The handler '${handlerName}' is not defined in the prtotype of the protocol ${this._name}`);
-    handlers.set(`${this._name}/${serviceName}`, handlerName);
   }
 
 
@@ -157,50 +140,6 @@ class FogletProtocol {
     const answerID = uuid();
     this._answerQueue.set(answerID, { resolve, reject });
     return answerID;
-  }
-
-  /**
-   * Setup handlers to process incoming messages
-   * @private
-   * @return {void}
-   */
-  _enableHandlers () {
-    const handleMessage = (msg, handlers, senderID = null) => {
-      const msgType = `${msg.protocol}/${msg.method}`;
-      if (handlers.has(msgType)) {
-        const handlerName = handlers.get(msgType);
-        if (senderID !== null && msgType !== 'foglet-protocol/service-answers') {
-          const reply = value => {
-            console.log(msg.answerID);
-            this._foglet.sendUnicast({
-              protocol: 'foglet-protocol',
-              method: 'service-answers',
-              payload: {
-                type: 'reply',
-                answerID: msg.answerID,
-                value
-              }
-            }, senderID);
-          };
-          const reject = value => {
-            this._foglet.sendUnicast({
-              protocol: 'foglet-protocol',
-              method: 'service-answers',
-              payload: {
-                type: 'reject',
-                answerID: msg.answerID,
-                value
-              }
-            }, senderID);
-          };
-          this[handlerName](msg.payload, reply, reject);
-        } else {
-          this[handlerName](msg.payload);
-        }
-      }
-    };
-    this._foglet.onUnicast((id, msg) => handleMessage(msg, this._unicastHandlers, id));
-    this._foglet.onBroadcast(msg => handleMessage(msg, this._broadcastHandlers));
   }
 }
 
