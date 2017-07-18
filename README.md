@@ -1,5 +1,5 @@
 <div style='text-align:center'>
-<img src="https://octodex.github.com/images/socialite.jpg" width="200"><img src="https://octodex.github.com/images/collabocats.jpg" width="200"><img src="https://octodex.github.com/images/socialite.jpg" width="200">
+<img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/collabocats.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'>
 <hr/>
 </div>
 
@@ -12,7 +12,7 @@ This project aims to provide a solid core infrastructure built with spray-wrtc (
 
 There is few examples available using this package:
 * [Simple Foglet with spray-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
-* [Simple Foglet with tman-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
+* [Simple Foglet with tman-wrtc network](https://ran3d.github.io/foglet-core/example/tman.html)
 
 Some other examples using this package available on https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
 
