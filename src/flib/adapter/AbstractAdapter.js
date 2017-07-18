@@ -37,7 +37,7 @@ class AbstractAdapter extends EventEmitter {
    * @return {Promise}  Return a promise, resolve when the connection is successsfully achieved, rejected by tiemout or errors during the connection
    */
   connection (rps, timeout) {
-    throw('Not Yet Implemented');
+    throw new Error('Connection Not Yet Implemented', 'AbstractAdapter.js');
   }
 
   /**
@@ -45,7 +45,7 @@ class AbstractAdapter extends EventEmitter {
    * @return {array}
    */
   getNeighbours () {
-    throw('Not Yet Implemented');
+    throw new Error('getNeighbours Not Yet Implemented', 'AbstractAdapter.js');
   }
 
   /**
@@ -55,7 +55,7 @@ class AbstractAdapter extends EventEmitter {
   * @returns {void}
   **/
   onBroadcast (callback) {
-    throw('Not Yet Implemented');
+    throw new Error('onBroadcast Not Yet Implemented', 'AbstractAdapter.js');
   }
 
   /**
@@ -66,7 +66,7 @@ class AbstractAdapter extends EventEmitter {
   * @returns {void}
   */
   sendBroadcast (msg) {
-    throw('Not Yet Implemented');
+    throw new Error('sendBroadcast Not Yet Implemented', 'AbstractAdapter.js');
   }
 
   /**
@@ -82,7 +82,7 @@ class AbstractAdapter extends EventEmitter {
   * @return {void}
   */
   onUnicast (callback) {
-    throw('Not Yet Implemented');
+    throw new Error('onUnicast Not Yet Implemented', 'AbstractAdapter.js');
   }
 
   /**
@@ -93,7 +93,7 @@ class AbstractAdapter extends EventEmitter {
   * @return {boolean} return true if it seems to have sent the message, false otherwise.
   */
   sendUnicast (message, id) {
-    throw('Not Yet Implemented');
+    throw new Error('sendUnicast Not Yet Implemented', 'AbstractAdapter.js');
   }
 
   /**
@@ -101,7 +101,7 @@ class AbstractAdapter extends EventEmitter {
    * @return {void}
    */
   exchange () {
-    throw('Not Yet Implemented');
+    throw new Error('exchange Not Yet Implemented', 'AbstractAdapter.js');
   }
 
 }

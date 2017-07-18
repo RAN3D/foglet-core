@@ -196,7 +196,7 @@ class SprayAdapter extends AbstractAdapter {
   }
 
   /**
-   * Init a shuffle of the network, i.e: renewing the neighborhood.
+   * Optionnal: Init a shuffle of the network, i.e: renewing the neighborhood.
    * @return {void}
    */
   exchange () {

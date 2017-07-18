@@ -41,6 +41,7 @@
     "socket.io": "^1.7.4",
     "socket.io-client": "^1.7.4",
     "spray-wrtc": "^2.0.1",
+    "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.0.1",
     "vivaldi-coordinates": "^1.0.0"

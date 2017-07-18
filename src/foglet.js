@@ -35,6 +35,8 @@ const OverlayManager = require('./overlay/OverlayManager.js');
 // Networks
 const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
+const AdapterTman = require('./flib/adapter/TmanAdapter.js');
+
 // SSH COntrol
 const SSH = require('./flib/ssh/ssh.js');
 const MiddlewareRegistry = require('./utils/middleware-registry.js');
@@ -152,6 +154,9 @@ class Foglet extends EventEmitter {
       break;
     case 'spray-wrtc':
       rps = AdapterSpray;
+      break;
+    case 'tman-wrtc':
+      rps = AdapterTman;
       break;
     default:
       rps = AdapterSpray;

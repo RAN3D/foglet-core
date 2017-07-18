@@ -10,7 +10,11 @@ This project aims to provide a solid core infrastructure built with spray-wrtc (
 
 ## Examples
 
-There is a [Foglet Live Example](https://ran3d.github.io/foglet-core/example/foglet.html) of this repository available and some other examples using this package available on https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
+There is few examples available using this package:
+* [Simple Foglet with spray-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
+* [Simple Foglet with tman-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
+
+Some other examples using this package available on https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
 
 ## Installation
 
