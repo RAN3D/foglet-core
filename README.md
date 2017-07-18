@@ -1,23 +1,35 @@
-# foglet-core [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core)
+<p style='text-align:center'>
+<img src="https://octodex.github.com/images/socialite.jpg" width="200"><img src="https://octodex.github.com/images/collabocats.jpg" width="200"><img src="https://octodex.github.com/images/socialite.jpg" width="200">
+<hr/>
+</p>
+# foglet-core  [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core)
 Core of the foglet library
 
 This project aims to provide a solid core infrastructure built with spray-wrtc (see references)
+<hr/>
+
+
+## Examples
 
 There is a [Foglet Live Example](https://ran3d.github.io/foglet-core/example/foglet.html) of this repository available and some other examples using this package available on https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
 
-[Documentation](https://ran3d.github.io/foglet-core/)
+<hr/>
 
 ## Installation
 
-**Prerequisite**: [a Browser compatible with WebRTC](http://caniuse.com/#feat=rtcpeerconnection)
+**Prerequisite**: [a compatible browser with WebRTC](http://caniuse.com/#feat=rtcpeerconnection)
 
 ```bash
 npm install --save foglet-core
 ```
 
+<hr/>
+
 ## Documentation
 
 The documentation is avalaible [here online](https://ran3d.github.io/foglet-core/)
+
+<hr/>
 
 ## How to use it and write your example ?
 
@@ -66,6 +78,7 @@ To be begin with, write a simple piece of JS code:
 Then, open the HTML file and look into the developpers console.
 You should see that your foglet has been connected to the RPS.
 
+<hr/>
 ## Signaling server
 
 In order to run this library, you have to provide the address of a **signaling server** using the `signalingAdress`option.
@@ -73,12 +86,15 @@ This server must be compatible with the foglet library.
 
 The library [`foglet-signaling-server`](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
 
+<hr/>
 
 ## Contributors:
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
 * [Chat-Wane](https://github.com/Chat-Wane/)
 * [T. Minier (Callidon)](https://github.com/Callidon)
 
+
+<hr/>
 ## References
 
 **About [spray-wrtc](https://github.com/RAN3D/spray-wrtc)**
