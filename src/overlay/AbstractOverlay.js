@@ -8,7 +8,7 @@ class AbstractOverlay extends EventEmitter {
     super();
     if(!options.previous) {
       // NEED A BASE (a RPS or an another overlay)
-      throw new Error('NEED A BASE (a RPS or an another overlay)')
+      throw new SyntaxError('NEED A BASE (a RPS or an another overlay)')
     }
     this.manager = options.manager;
     this.previous = options.previous;
