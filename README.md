@@ -6,7 +6,7 @@
 # foglet-core  [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core)
 Core of the foglet library
 
-This project aims to provide a solid core infrastructure built with spray-wrtc (see references)
+This project aims to provide a solid core infrastructure for developping fog computing applications built with spray-wrtc (see references)
 
 ## Examples
 
@@ -14,19 +14,21 @@ There is few examples available using this package:
 * [Simple Foglet with spray-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
 * [Simple Foglet with tman-wrtc network](https://ran3d.github.io/foglet-core/example/tman.html)
 
-Some other examples using this package available on https://ran3d.github.io/foglet/ and repository at https://github.com/RAN3D/foglet   
+Some other examples are available on https://ran3d.github.io/foglet/ and their source code at https://github.com/RAN3D/foglet   
 
 ## Installation
 
-**Prerequisite**: [a compatible browser with WebRTC](http://caniuse.com/#feat=rtcpeerconnection)
+**Prerequisite**: [a browser compatible with WebRTC](http://caniuse.com/#feat=rtcpeerconnection)
 
 ```bash
 npm install --save foglet-core
 ```
 
+The foglet library is distributed as a browserified bundle.
+
 ## Documentation
 
-The documentation is avalaible [here online](https://ran3d.github.io/foglet-core/)
+The documentation is available [here online](https://ran3d.github.io/foglet-core/)
 
 ## How to use it and write your example ?
 
@@ -36,11 +38,13 @@ Creates a new HTML file and insert the **foglet bundle** in it:
 ```
 
 Then, requires the Foglet library:
-- `const MyWonderfullFoglet = require("foglet").Foglet`
+```javascript
+const Foglet = require("foglet").Foglet
+```
 
 If you do not provide a list of **ice servers**, your example will work in localhost but not on the Web.
 
-To be begin with, write a simple piece of JS code:
+To be begin with, let's write a simple piece of JS code:
 ```html
 <script type="text/javascript">
   'use strict';
@@ -77,12 +81,13 @@ You should see that your foglet has been connected to the RPS.
 
 ## Signaling server
 
-In order to run this library, you have to provide the address of a **signaling server** using the `signalingAdress`option.
+In order to run this library, you have to provide the address of a **signaling server** using the `signalingAdress` option.
 This server must be compatible with the foglet library.
 
 The library [`foglet-signaling-server`](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
 
 ## Contributors:
+
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
 * [Chat-Wane](https://github.com/Chat-Wane/)
 * [T. Minier (Callidon)](https://github.com/Callidon)
