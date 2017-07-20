@@ -52,19 +52,27 @@ class AnswerQueue {
   }
 
   /**
-   * Resolve an answer
+   * Resolve the answer to a message
    * @param {string} answerID - The id of the answer to resolve
-   * @param {string} type - The answer's type (reply or reject)
    * @param {*} payload - The answer's content
    * @return {void}
    */
-  resolve (answerID, type, payload) {
+  resolve (answerID, payload) {
     if (this._waitingAnswers.has(answerID)) {
-      if (type === 'reply') {
-        this._waitingAnswers.get(answerID).resolve(payload);
-      } else if (type === 'reject') {
-        this._waitingAnswers.get(answerID).reject(payload);
-      }
+      this._waitingAnswers.get(answerID).resolve(payload);
+      this._waitingAnswers.delete(answerID);
+    }
+  }
+
+  /**
+   * Resolve an answer by a reject
+   * @param {string} answerID - The id of the answer to reject
+   * @param {*} payload - The answer's content
+   * @return {void}
+   */
+  reject (answerID, payload) {
+    if (this._waitingAnswers.has(answerID)) {
+      this._waitingAnswers.get(answerID).reject(payload);
       this._waitingAnswers.delete(answerID);
     }
   }

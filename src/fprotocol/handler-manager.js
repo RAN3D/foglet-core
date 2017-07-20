@@ -37,7 +37,8 @@ class HandlerManager {
     this._protocol = protocol;
     this._unicastHandlers = new Map();
     this._broadcastHandlers = new Map();
-    this._unicastHandlers.set('foglet-protocol/service-answers', '_answer');
+    this._unicastHandlers.set('foglet-protocol/service-answers/reply', '_answerReply');
+    this._unicastHandlers.set('foglet-protocol/service-answers/reject', '_answerReject');
   }
 
   /**
@@ -89,9 +90,8 @@ class HandlerManager {
         const reply = value => {
           this._protocol._foglet.sendUnicast({
             protocol: 'foglet-protocol',
-            method: 'service-answers',
+            method: 'service-answers/reply',
             payload: {
-              type: 'reply',
               answerID: msg.answerID,
               value
             }
@@ -100,9 +100,8 @@ class HandlerManager {
         const reject = value => {
           this._protocol._foglet.sendUnicast({
             protocol: 'foglet-protocol',
-            method: 'service-answers',
+            method: 'service-answers/reject',
             payload: {
-              type: 'reject',
               answerID: msg.answerID,
               value
             }
@@ -118,7 +117,6 @@ class HandlerManager {
   /**
    * Handle the reception of a broadcast message
    * @private
-   * @param {string} senderID - ID of the peer who send the message
    * @param {Object} msg - The message received
    * @return {void}
    */
