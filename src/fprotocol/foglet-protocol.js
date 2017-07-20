@@ -38,6 +38,20 @@ const HandlerManager = require('./handler-manager.js');
  * For example, a service **get** requires to define a method named **_get** in the subclass.
  * @abstract
  * @author Thomas Minier
+ * @example
+ * class SimpleUnicastProtocol extends FogletProtocol {
+
+   _unicast () {
+     return [ 'get' ];
+   }
+
+   _get (msg, reply, reject) {
+     if (msg.number % 2 === 0)
+        reply('you send an event number');
+     else
+        reject('you send an event number, it is not good!!!');
+   }
+ }
  */
 class FogletProtocol {
   /**
