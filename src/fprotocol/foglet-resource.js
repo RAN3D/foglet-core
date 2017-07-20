@@ -31,23 +31,23 @@ class FogletResource extends FogletProtocol {
   }
 
   _unicast () {
-    return [ 'get', 'post', 'patch', 'delete' ];
+    return [ 'get', 'insert', 'update', 'delete' ];
   }
 
   _get (msg, reply, reject) {
-    reject(new Error('implement a get method'));
+    reject(new Error('A valid FogletResource must implement a get handler'));
   }
 
-  _post (msg, reply, reject) {
-    reject(new Error('implement a post method'));
+  _insert (msg, reply, reject) {
+    reject(new Error('A valid FogletResource must implement an insert handler'));
   }
 
-  _patch (msg, reply, reject) {
-    reject(new Error('implement a patch method'));
+  _update (msg, reply, reject) {
+    reject(new Error('A valid FogletResource must implement an update handler'));
   }
 
   _delete (msg, reply, reject) {
-    reject(new Error('implement a delete method'));
+    reject(new Error('A valid FogletResource must implement a delete handler'));
   }
 }
 
