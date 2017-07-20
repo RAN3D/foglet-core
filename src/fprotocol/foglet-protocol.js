@@ -74,8 +74,24 @@ class FogletProtocol {
     return [];
   }
 
-  _answer (msg) {
-    this._answerQueue.resolve(msg.answerID, msg.type, msg.value);
+  /**
+   * Handler which resolve answers to messages
+   * @private
+   * @param {Object} msg - Answer received
+   * @return{void}
+   */
+  _answerReply (msg) {
+    this._answerQueue.resolve(msg.answerID, msg.value);
+  }
+
+  /**
+   * Handler which reject answers to messages
+   * @private
+   * @param {Object} msg - Answer received
+   * @return{void}
+   */
+  _answerReject (msg) {
+    this._answerQueue.reject(msg.answerID, msg.value);
   }
 
   /**
