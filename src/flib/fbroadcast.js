@@ -23,34 +23,39 @@ SOFTWARE.
 */
 'use strict';
 
-const EventEmitter = require('events');
+const AbstractBroadcast = require('./abstract-broadcast.js');
 const uuid = require('uuid/v4');
 const lmerge = require('lodash/merge');
 const sortedIndexBy = require('lodash/sortedIndexBy');
-const Unicast = require('unicast-definition');
 const debug = require('debug')('foglet-core:broadcast');
 const VV = require('./vv.js'); // Version-Vector
 
-function MBroadcast (name, id, isReady, payload) {
-  this.protocol = name;
-  this.id = id;
-  this.isReady = isReady;
-  this.payload = payload;
+function BroadcastMessage (protocol, id, isReady, payload) {
+  return {
+    protocol,
+    id,
+    isReady,
+    payload
+  };
 }
 
 function MAntiEntropyRequest (causality) {
-  this.type = 'MAntiEntropyRequest';
-  this.causality = causality;
+  return {
+    type: 'MAntiEntropyRequest',
+    causality
+  };
 }
 
 
 function MAntiEntropyResponse (id, causality, nbElements, element) {
-  this.type = 'MAntiEntropyResponse';
-  this.id = id;
-  this.causality = causality;
-  this.nbElements = nbElements;
-  this.element = element;
-  this.elements = [];
+  return {
+    type: 'MAntiEntropyResponse',
+    id,
+    causality,
+    nbElements,
+    element,
+    elements: []
+  };
 }
 
 function clone (obj) {
@@ -66,61 +71,76 @@ function formatID (message) {
   return `_e=${message.id._e}&_c=${message.id._c}`;
 }
 
-class FBroadcast extends EventEmitter {
+/**
+ * FBroadcast represent the base implementation of a broadcast protocol for the foglet library.
+ * @extends AbstractBroadcast
+ * @author Arnaud Grall (Folkvir)
+ */
+class FBroadcast extends AbstractBroadcast {
   constructor (options) {
-    super();
+    super(options.rps, options.protocol);
     if(options.rps && options.protocol) {
       this.options = lmerge({
         delta: 1000 * 60 * 1 / 2,
         timeBeforeStart: 2 * 1000
       }, options);
       this.uid = uuid();
-      this.protocol = 'fbroadcast-'+this.options.protocol;
       this.causality = new VV(this.uid);
       this.causality.incrementFrom({_e:this.uid, _c: 0});
-      this.source = this.options.rps;
       // The sniffer is working before message is sent and after result is received
       this.sniffer = this.options.sniffer || function (message) {
         return message;
       };
-      this.unicast = new Unicast(this.source.rps, {pid: this.protocol});
 
       // buffer of operations
       this.buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
       this.bufferAntiEntropy = new MAntiEntropyResponse('init');
 
-      this.unicast.on(this.protocol, (id, message) => {
-        this._receiveMessage(id, message);
-      });
-
       debug(`initialized for:  ${this.options.protocol}`);
-    }else{
+    } else {
       return new Error('Not enough parameters', 'fbroadcast.js');
     }
   }
 
+  /**
+   * Send a message to all neighbours
+   * @private
+   * @param  {Object} message - The message to send
+   * @return {void}
+   */
   _sendAll (message) {
     const n = this.source.getNeighbours(Infinity);
     if(n.length > 0) n.forEach(p => this.unicast.emit(this.protocol, p, this.source.outviewId, message).catch(e => debug('Error: It seems there is not a receiver', e)));
   }
 
-
+  /**
+   * Send a message in broadcast
+   * @param  {Object}  message  - The message to send
+   * @param  {Boolean} [isReady=undefined]
+   * @return {boolean}
+   */
   send (message, isReady = undefined) {
     const sniffed = this.sniffer(message);
     if(sniffed) {
       message = sniffed;
     }
     const a = this.causality.increment();
-    let mBroadcast = new MBroadcast(this.protocol, a, isReady || this.causality.clone(), message);
+    const broadcastMessage = BroadcastMessage(this.protocol, a, isReady || this.causality.clone(), message);
     // #2 register the message in the structure
     this.causality.incrementFrom(a);
 
     // #3 send the message to the neighborhood
-    this._sendAll(mBroadcast);
-    return mBroadcast.isReady;
+    this._sendAll(broadcastMessage);
+    return broadcastMessage.isReady;
   }
 
+  /**
+   * On reception of a message
+   * @deprecated
+   * @param  {[type]} message [description]
+   * @return {[type]}         [description]
+   */
   _onReceive (message) {
     const sniffed = this.sniffer(message);
     if(sniffed) {
@@ -129,6 +149,14 @@ class FBroadcast extends EventEmitter {
     this.emit('receive', message);
   }
 
+  /**
+   * Send entropy response
+   * @deprecated
+   * @param  {[type]} origin             [description]
+   * @param  {[type]} causalityAtReceipt [description]
+   * @param  {[type]} messages           [description]
+   * @return {[type]}                    [description]
+   */
   sendAntiEntropyResponse (origin, causalityAtReceipt, messages) {
     let id = uuid();
     // #1 metadata of the antientropy response
@@ -140,10 +168,19 @@ class FBroadcast extends EventEmitter {
     }
   }
 
+  /**
+   * Handler executed when a message is recevied
+   * @param  {string} id  - Message issuer's ID
+   * @param  {Object} message - The message received
+   * @return {void}
+   */
   _receiveMessage (id, message) {
     switch (message.type) {
     default: {
-      if (!this._stopPropagation(message)) {
+      if (!this._shouldStopPropagation(message)) {
+        // if not present, add the issuer of the message in the message
+        if (!('issuer' in message))
+          message.issuer = id;
         // #1 register the operation
         // maintain `this.buffer` sorted to search in O(log n)
         const index = sortedIndexBy(this.buffer, message, formatID);
@@ -158,13 +195,23 @@ class FBroadcast extends EventEmitter {
     }
   }
 
-  _stopPropagation (message) {
+  /**
+   * Check if a message should be propagated or not
+   * @param  {Object} message - The message to check
+   * @return {boolean} True if the message should not be propagated, False if it should be.
+   */
+  _shouldStopPropagation (message) {
     const causalityLower = this.causality.isLower(message.id);
-    const messageNotReceived = this._bufferIndexOf(formatID(message)) > -1;
-    return  causalityLower || messageNotReceived;
+    const messageReceived = this._findInBuffer(formatID(message)) > -1;
+    return  causalityLower || messageReceived;
   }
 
-  _bufferIndexOf (id) {
+  /**
+   * Try to find the index of a message in the internal buffer
+   * @param  {string} id - Message's ID
+   * @return {int} The index of the message in the buffer, or -1 if not found
+   */
+  _findInBuffer (id) {
     // use a binary search algorithm since `this.buffer` is sorted by IDs
     let minIndex = 0;
     let maxIndex = this.length - 1;
@@ -185,25 +232,27 @@ class FBroadcast extends EventEmitter {
     return -1;
   }
 
+  /**
+   * Scan buffer to deliver waiting messages
+   * @return {void}
+   */
   _reviewBuffer () {
-    let found = false, i = this.buffer.length - 1;
-    while(i >= 0) {
-      let message = this.buffer[i];
+    let message, found = false;
+    for (let index = this.buffer.length - 1; index >= 0; --index) {
+      message = this.buffer[index];
       if (this.causality.isLower(message.id)) {
-        this.buffer.splice(i, 1);
+        this.buffer.splice(index, 1);
       } else {
         found = true;
         this.causality.incrementFrom(message.id);
-        this.buffer.splice(i, 1);
-        this.emit('receive', message.payload);
+        this.buffer.splice(index, 1);
+        this.emit('receive', message.payload, message.issuer);
       }
-      --i;
     }
     if (found) {
       this._reviewBuffer();
     }
   }
-
 }
 
 module.exports = FBroadcast;
