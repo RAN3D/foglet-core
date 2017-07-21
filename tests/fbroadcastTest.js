@@ -45,15 +45,18 @@ describe('[FBROADCAST] functions', function () {
 
   it('[FBROADCAST] sendBroadcast/onBroadcast', function (done) {
     const foglets = buildFog(Foglet, 2);
+    let neighbourID = null;
     let f1 = foglets[0], f2 = foglets[1];
 
-    f2.onBroadcast((data) => {
+    f2.onBroadcast((data, id) => {
       console.log(data);
       assert.equal(data, 'hello');
+      assert.equal(id, neighbourID);
       done();
     });
 
-    f1.connection(f2).then( () => {
+    f1.connection(f2).then(() => {
+      neighbourID = f1.outviewId;
       setTimeout(function () {
         f1.sendBroadcast('hello');
       }, 2000);
