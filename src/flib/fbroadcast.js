@@ -86,13 +86,13 @@ class FBroadcast extends AbstractBroadcast {
       }, options);
       this.uid = uuid();
       this.causality = new VV(this.uid);
-      this.causality.incrementFrom({_e:this.uid, _c: 0});
-      // The sniffer is working before message is sent and after result is received
+      this.causality.incrementFrom({ _e: this.uid, _c: 0 });
+      // The sniffer is applied before a message is sent or received
       this.sniffer = this.options.sniffer || function (message) {
         return message;
       };
 
-      // buffer of operations
+      // buffer of received messages
       this.buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
       this.bufferAntiEntropy = new MAntiEntropyResponse('init');
@@ -197,17 +197,19 @@ class FBroadcast extends AbstractBroadcast {
 
   /**
    * Check if a message should be propagated or not
+   * @private
    * @param  {Object} message - The message to check
    * @return {boolean} True if the message should not be propagated, False if it should be.
    */
   _shouldStopPropagation (message) {
     const causalityLower = this.causality.isLower(message.id);
-    const messageReceived = this._findInBuffer(formatID(message)) > -1;
-    return  causalityLower || messageReceived;
+    const messageAlreadyReceived = this._findInBuffer(formatID(message)) > -1;
+    return  causalityLower || messageAlreadyReceived;
   }
 
   /**
    * Try to find the index of a message in the internal buffer
+   * @private
    * @param  {string} id - Message's ID
    * @return {int} The index of the message in the buffer, or -1 if not found
    */
@@ -233,7 +235,8 @@ class FBroadcast extends AbstractBroadcast {
   }
 
   /**
-   * Scan buffer to deliver waiting messages
+   * Scan internal buffer to deliver waiting messages
+   * @private
    * @return {void}
    */
   _reviewBuffer () {
