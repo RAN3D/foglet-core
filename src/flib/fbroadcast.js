@@ -26,6 +26,7 @@ SOFTWARE.
 const EventEmitter = require('events');
 const uuid = require('uuid/v4');
 const lmerge = require('lodash/merge');
+const sortedIndexBy = require('lodash/sortedIndexBy');
 const Unicast = require('unicast-definition');
 const debug = require('debug')('foglet-core:broadcast');
 const VV = require('./vv.js'); // Version-Vector
@@ -54,6 +55,15 @@ function MAntiEntropyResponse (id, causality, nbElements, element) {
 
 function clone (obj) {
   return lmerge({}, obj);
+}
+
+/**
+ * Format the IDs of messages in string format
+ * @param  {Obbject} message - The message to format
+ * @return {string} The formatted message's id in string format
+ */
+function formatID (message) {
+  return `_e=${message.id._e}&_c=${message.id._c}`;
 }
 
 class FBroadcast extends EventEmitter {
@@ -132,44 +142,52 @@ class FBroadcast extends EventEmitter {
 
   _receiveMessage (id, message) {
     switch (message.type) {
-      default: {
-        if (!this._stopPropagation(message)) {
-          // #1 register the operation
-          this.buffer.push(message);
-          // #2 deliver
-          this._reviewBuffer();
-          // #3 rebroadcast
-          this._sendAll(message);
-        }
-        break;
+    default: {
+      if (!this._stopPropagation(message)) {
+        // #1 register the operation
+        // maintain `this.buffer` sorted to search in O(log n)
+        const index = sortedIndexBy(this.buffer, message, formatID);
+        this.buffer.splice(index, 0, message);
+        // #2 deliver
+        this._reviewBuffer();
+        // #3 rebroadcast
+        this._sendAll(message);
       }
-
+      break;
+    }
     }
   }
 
   _stopPropagation (message) {
-    const a = this.causality.isLower(message.id);
-    const b = this._bufferIndexOf( message.id )>=0;
-    return  a||b;
+    const causalityLower = this.causality.isLower(message.id);
+    const messageNotReceived = this._bufferIndexOf(formatID(message)) > -1;
+    return  causalityLower || messageNotReceived;
   }
 
   _bufferIndexOf (id) {
-    let found = false,
-      index = -1,
-      i = 0;
-    while (!found && i<this.buffer.length) {
-      // (TODO) fix uglyness
-      if (JSON.stringify(this.buffer[i].id) === JSON.stringify(id)) {
-        found = true; index = i;
+    // use a binary search algorithm since `this.buffer` is sorted by IDs
+    let minIndex = 0;
+    let maxIndex = this.length - 1;
+    let currentIndex, currentElement;
+
+    while (minIndex <= maxIndex) {
+      currentIndex = (minIndex + maxIndex) / 2 | 0;
+      currentElement = formatID(this.buffer[currentIndex]);
+
+      if (currentElement < id) {
+        minIndex = currentIndex + 1;
+      } else if (currentElement > id) {
+        maxIndex = currentIndex - 1;
+      } else {
+        return currentIndex;
       }
-      ++i;
     }
-    return index;
+    return -1;
   }
 
   _reviewBuffer () {
     let found = false, i = this.buffer.length - 1;
-    while(i>=0) {
+    while(i >= 0) {
       let message = this.buffer[i];
       if (this.causality.isLower(message.id)) {
         this.buffer.splice(i, 1);
