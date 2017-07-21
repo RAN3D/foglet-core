@@ -27,7 +27,7 @@ const EventEmitter = require('events');
 const Unicast = require('unicast-definition');
 
 /**
- * AbstractBroadcast representes an abstract broadcast protocol
+ * AbstractBroadcast represents an abstract broadcast protocol.
  * @abstract
  * @extends EventEmitter
  * @author Thomas Minier
@@ -52,7 +52,7 @@ class AbstractBroadcast extends EventEmitter {
    * Send a message in broadcast
    * @param  {Object}  message  - The message to send
    * @param  {Boolean} [isReady=undefined]
-   * @return {[type]}
+   * @return {boolean}
    */
   send (message, isReady = undefined) {
     throw new Error('A valid broadcast protocol should implement a send method');
