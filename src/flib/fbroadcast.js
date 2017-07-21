@@ -95,7 +95,7 @@ class FBroadcast extends AbstractBroadcast {
       // buffer of received messages
       this.buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
-      this.bufferAntiEntropy = new MAntiEntropyResponse('init');
+      this.bufferAntiEntropy = MAntiEntropyResponse('init');
 
       debug(`initialized for:  ${this.options.protocol}`);
     } else {
@@ -202,9 +202,9 @@ class FBroadcast extends AbstractBroadcast {
    * @return {boolean} True if the message should not be propagated, False if it should be.
    */
   _shouldStopPropagation (message) {
-    const causalityLower = this.causality.isLower(message.id);
-    const messageAlreadyReceived = this._findInBuffer(formatID(message)) > -1;
-    return  causalityLower || messageAlreadyReceived;
+    if (this.causality.isLower(message.id))
+      return true;
+    return this._findInBuffer(formatID(message)) > -1;
   }
 
   /**
