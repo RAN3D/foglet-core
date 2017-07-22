@@ -23,15 +23,16 @@ module.exports = function (config) {
     ],
     // list of files / patterns to load in the browser
     files: [
-      'tests/*-tests.js',
+      'tests/*-test.js',
       'tests/**/*-test.js'
     ],
     preprocessors:{
-      'tests/*-tests.js': [ 'coverage', 'browserify' ],
+      'tests/*-test.js': [ 'coverage', 'browserify' ],
       'tests/**/*-test.js': [ 'coverage', 'browserify' ]
     },
     // list of files to exclude
     exclude: [
+      'tests/finterpreter-test.js',
       'src/rps/**/*.js',
       'src/utils/**/*.js'
     ],
