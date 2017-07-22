@@ -206,7 +206,7 @@ class Foglet extends EventEmitter {
   */
   connection (foglet = undefined, timeout = 60000) {
     if(foglet) {
-      console.log('dest: ', foglet._defaultOverlay().rps, 'src: ', this._defaultOverlay().rps);
+      // console.log('dest: ', foglet._defaultOverlay().rps, 'src: ', this._defaultOverlay().rps);
       return this._defaultOverlay().connection(foglet._defaultOverlay().rps, timeout);
     } else {
       return this._defaultOverlay().connection(foglet, timeout);
