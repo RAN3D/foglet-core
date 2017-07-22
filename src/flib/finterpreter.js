@@ -24,7 +24,7 @@ SOFTWARE.
 'use strict';
 
 const EventEmitter = require('events');
-const FBroadcast = require('./fbroadcast.js');
+const FBroadcast = require('../broadcast/fbroadcast.js');
 const Unicast = require('unicast-definition');
 const serialize = require('serialize-javascript');
 const uuid = require('uuid/v4');

@@ -28,7 +28,7 @@ const debug = require('debug')('foglet-core:om:latencies');
 const TMan = require('tman-wrtc');
 const io = require('socket.io-client');
 const Unicast = require('unicast-definition');
-const FBroadcast = require('../flib/fbroadcast.js');
+const FBroadcast = require('../broadcast/fbroadcast.js');
 const lmerge = require('lodash/merge');
 const uuid = require('uuid/v4');
 
@@ -45,7 +45,7 @@ class LatenciesOverlay extends AbstractOverlay {
       timeout: 60 * 60 * 1000,
       ranking: (peer, foglet = this) => (a, b) => {
         foglet._ping(a.peer).then((timeA) => {
-          foglet._ping(b.peer).then((timeB) => {
+          return foglet._ping(b.peer).then((timeB) => {
             debug('Ping: ', timeA, timeB);
             if(timeA < timeB) return 1;
             if(timeA > timeB) return -1;
@@ -55,14 +55,14 @@ class LatenciesOverlay extends AbstractOverlay {
             return 1;
           });
         }).catch(e => {
-          foglet._ping(b.peer).then((timeB) => {
+          return foglet._ping(b.peer).then((timeB) => {
             debug('Ping: one peer is unreachable peer', b.peer, ' win with', timeB);
             return -1;
           }).catch(e => {
             debug('Ping: peers are unreachable. No one win.');
             return 0;
           });
-        })
+        });
       },
       webrtc:	{ // add WebRTC options
         trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)

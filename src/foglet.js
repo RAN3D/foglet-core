@@ -28,16 +28,16 @@ const uuid = require('uuid/v4');
 const lmerge = require('lodash/merge');
 const debug = require('debug');
 // FOGLET
-const FRegister = require('./flib/fregister.js');
+const FRegister = require('./storage/fregister.js');
 const FInterpreter = require('./flib/finterpreter.js');
-const FStore = require('./flib/fstore.js');
+const FStore = require('./storage/fstore.js');
 const OverlayManager = require('./overlay/OverlayManager.js');
 // Networks
-const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
-const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
+const AdapterFcn = require('./adapter/fcnAdapter.js');
+const AdapterSpray = require('./adapter/sprayAdapter.js');
 
 // SSH COntrol
-const SSH = require('./flib/ssh/ssh.js');
+const SSH = require('./ssh/ssh.js');
 const MiddlewareRegistry = require('./utils/middleware-registry.js');
 
 /**

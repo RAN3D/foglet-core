@@ -28,7 +28,7 @@ const uuid = require('uuid/v4');
 const lmerge = require('lodash/merge');
 const sortedIndexBy = require('lodash/sortedIndexBy');
 const debug = require('debug')('foglet-core:broadcast');
-const VV = require('./vv.js'); // Version-Vector
+const VV = require('../utils/vv.js'); // Version-Vector
 
 function BroadcastMessage (protocol, id, isReady, payload) {
   return {

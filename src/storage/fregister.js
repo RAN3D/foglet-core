@@ -25,7 +25,7 @@ SOFTWARE.
 'use strict';
 
 const EventEmitter = require('events');
-const FBroadcast = require('./fbroadcast');
+const FBroadcast = require('../broadcast/fbroadcast');
 const uuid = require('uuid/v4');
 const debug = require('debug')('foglet-core:register');
 const lmerge = require('lodash/merge');

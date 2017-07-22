@@ -26,7 +26,7 @@ SOFTWARE.
 const lmerge = require('lodash/merge');
 const Fcn = require('fcn-wrtc').Fcn;
 const AbstractAdapter = require('./AbstractAdapter.js');
-const FBroadcast = require('../fbroadcast.js');
+const FBroadcast = require('../broadcast/fbroadcast.js');
 const Unicast = require('unicast-definition');
 
 class fcnAdapter extends AbstractAdapter {

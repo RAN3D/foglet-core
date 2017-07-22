@@ -29,7 +29,7 @@ const io = require('socket.io-client');
 const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
 const Unicast = require('unicast-definition');
-const FBroadcast = require('../fbroadcast.js');
+const FBroadcast = require('../broadcast/fbroadcast.js');
 const log = require('debug')('foglet-core:spray-wrtc');
 
 class SprayAdapter extends AbstractAdapter {
