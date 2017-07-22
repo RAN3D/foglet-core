@@ -69,7 +69,7 @@ class OverlayManager extends EventEmitter {
       manager: this
     });
 
-    this.log('OverlayManager initialized.', this.overlays);
+    this.log('OverlayManager initialized.', this.defaultOptions);
   }
 
   /**
@@ -84,9 +84,6 @@ class OverlayManager extends EventEmitter {
       result = LatenciesOverlay;
       break;
     }
-    default: {
-      result = new RangeError('No overlay corresponding to this id: '+id);
-    }
     } // switch end
     return result;
   }
@@ -98,61 +95,66 @@ class OverlayManager extends EventEmitter {
    * @return {Promise<string>} id Id of the new overlay
    */
   add (overlay) {
+    if(typeof overlay !== 'object') throw new SyntaxError('An overlay is an object {class: ..., options: {...}}');
     this.log(overlay, typeof overlay);
     let obj = {
       id: uuid()
     };
-    if(typeof overlay === 'function') {
+    if(typeof overlay.class === 'function') {
       obj.overlay = new overlay({
         manager: this, // reference to the manager to access to other overlay when needed
-        previous: llast(this.overlays),
+        previous: this.overlays[0],
         options: overlay.options,
         origin: {
           overlay: overlay.class,
           options: overlay.options
         }
       });
-    } else if( typeof overlay === 'string' ) {
+    } else if( typeof overlay.class === 'string' ) {
+      let overlord = this._defaultOverlay(overlay.class);
+      if(!overlord) {
+        return Promise.reject(new Error('No overlay available for this string id.'));
+      }
       try {
-        let overlord = this._defaultOverlay(overlay);
+        // initialization of the the overlay.
         obj.overlay = new overlord({
           manager: this, // reference to the manager to access to other overlay when needed
-          previous: llast(this.overlays),
+          previous: this.overlays[0],
           options: overlay.options,
           origin: {
             overlay: overlord,
             options: {}
           }
         });
+
         // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
         obj.id = obj.overlay.id;
       } catch (e) {
-        return Promise.reject(new Error('string id have to be an id of available overlay. See link{http://github.com/ra3nd/foglet-core} for documentation of available overlays.', e));
+        return Promise.reject(e);
       }
     } else {
-      Promise.reject(new Error('overlay have to class reference or an available string id'));
+      return Promise.reject(new Error('overlay have to class reference or an available string id'));
     }
     // push this overlay to our list
     this.overlays.push(obj);
-    // Connect this overlay to the network.
-    return new Promise((resolve, reject) => {
-      this.get(obj.id).overlay.connection().then(() => {
-        this.log('Overlay added.');
-        resolve(obj.id);
-      }).catch((e) => {
-        reject(e);
-      });
-    });
+    return Promise.resolve(obj.id);
   }
 
   /**
-   * Use the adequat overlay, i.e: if enable, use the last overlay created, otherwise use the RPS
+   * Use the adequat overlay, i.e: if enable, use the last overlay created, otherwise if id specified, use the overlays reprsenting by its id, otherwise use the RPS
    * @return {AbstractOverlay|AbstractAdapter}
    */
-  use () {
+  use (id = undefined) {
     if(this.defaultOptions.enable) {
-      // return the last overlay
-      return llast(this.overlays);
+      // return the overlay corresponding to its id
+      let filter;
+      if(id) {
+        filter = this.overlays.filter((elem) => elem.id === id);
+        if(filter.length === 1) return filter[0];
+      } else {
+        // otherwise return the last overlay
+        return llast(this.overlays);
+      }
     }else {
       // return RPS
       return this.overlays[0];
@@ -182,52 +184,6 @@ class OverlayManager extends EventEmitter {
    */
   getListByIds () {
     return this.overlays.map(p => p.id);
-  }
-
-  /**
-   * Delete an overlay (experimental).
-   * Due to intrinsic composition of overlays we have to reload the next overlay use by the deleted with the previous one.
-   * Due to this it may cause "bugs" or non-expected behavior in the network. We use SPRAY-WRTC as main RPS because it is fault-tolerant and avoids churn.
-   * But with other networks, behaviors are not well defined. Take care of your network !
-   * @param  {string} id Id of the overlay to delete, you cannot delete the rps.
-   * @return {Promise} Resolve when the deletion succeed and the overlay is properly connected in case of reloading. Otheriwe rejected.
-   */
-  delete (id) {
-    return new Promise((resolve, reject) => {
-      try {
-        let index = lfindIndex(this.overlays, (obj) => obj.id === id);
-        if(index !== 0 && index !== -1) {
-          let last = llast(this.overlays);
-          if(id === last) {
-            ldropRight(this.overlays, 1);
-            this.log('Overlay deleted.')
-            resolve();
-          } else {
-            // need to reload the next overlay with the previous overlay
-            let previous = this.overlays[index - 1];
-            let next = this.overlays[index + 1];
-            next.overlay = new next.origin.overlay({
-              manager: this, // reference to the manager to access to other overlay when needed
-              previous: previous,
-              options: next.origin.options
-            });
-            next.overlay.connection().then(() => {
-              // now we can safely remove the element from the array
-              lpullAt(this.overlays, [ index ]);
-              this.log('Overlay deleted and reloaded.').
-              resolve();
-            }).catch(e => {
-              this.log('Reload of the next overlay went wrong... Try to search around the connection function of your Overlay.')
-              reject(e);
-            });
-          }
-        } else {
-          reject(new SyntaxError('Undefined or can\'t delete the RPS.'));
-        }
-      } catch (e) {
-        reject(e);
-      }
-    });
   }
 
   log (...args) {

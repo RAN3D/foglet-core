@@ -23,6 +23,7 @@ SOFTWARE.
 */
 'use strict';
 const lmerge = require('lodash/merge');
+const lremove = require('lodash/remove');
 const Spray = require('spray-wrtc');
 const io = require('socket.io-client');
 const Q = require('q');
@@ -35,16 +36,23 @@ class SprayAdapter extends AbstractAdapter {
   constructor (options) {
     super();
     this.options = lmerge({
+      webrtc:	{ // add WebRTC options
+        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
+        iceServers : [] // define iceServers in non local instance
+      },
       origins:'*',
     }, options);
+
+    // if webrtc options specified: create object config for Spray
+    this.options = lmerge({config: this.options.webrtc}, this.options);
 
     this.rps = new Spray(this.options);
     this.inviewId = this.rps.getInviewId();
     this.outviewId = this.rps.getOutviewId();
     this.id = this.inviewId+'_'+this.outviewId;
-
     // Unicast protocol to send message to remote peers
     this.unicast = new Unicast(this.rps, {pid: this.protocol});
+    this.status = 'disconnected';
 
     // Broadcast protocol so send message to the whole network
     this.broadcast = new FBroadcast({
@@ -65,20 +73,20 @@ class SprayAdapter extends AbstractAdapter {
 
     this.signalingInit = () => {
       return (offer) => {
-        log(`@${this.inviewId}: Emit the new offer: `, offer);
-        this.signaling.emit('new', {offer, room: this.options.room});
+        log(`@${this.inviewId}[${this.status}]: Emit the new offer: `, offer);
+        if(this.status === 'disconnected') this.signaling.emit('new', {offer, room: this.options.room});
       };
     };
     this.signaling.on('new_spray', (data) => {
       const signalingAccept = (offer) => {
-        log(`@${this.inviewId}: Emit the accepted offer: `, offer);
+        log(`@${this.inviewId}[${this.status}]: Emit the accepted offer: `, offer);
         this.signaling.emit('accept', { offer, room: this.options.room });
       };
-      log(`@${this.inviewId}: Receive a new offer: `, data);
+      log(`@${this.inviewId}[${this.status}]: Receive a new offer: `, data);
       this.rps.connect(signalingAccept, data);
     });
     this.signaling.on('accept_spray', (data) => {
-      log('Receive an accepted offer: ', data);
+      log(`@${this.inviewId}[${this.status}]: Receive an accepted offer: `, data);
       this.rps.connect(data);
     });
 
@@ -99,11 +107,12 @@ class SprayAdapter extends AbstractAdapter {
     return Q.Promise(function (resolve, reject) {
       try {
         if(rps) {
-          self.rps.join(self.directCallback(self.rps, rps.rps)).then(() => {
+          self.rps.join(self.directCallback(self.rps, rps)).then(() => {
             self.emit('connected', { room: self.options.room });
           }).catch(error => {
             log(error);
             if(error === 'connected') {
+              self.status = 'connected';
               resolve(true);
             } else {
               reject(error);
@@ -118,6 +127,7 @@ class SprayAdapter extends AbstractAdapter {
             }).catch(error => {
               log(error);
               if(error === 'connected') {
+                self.status = 'connected';
                 resolve(true);
               } else {
                 reject(error);
@@ -127,6 +137,7 @@ class SprayAdapter extends AbstractAdapter {
         }
         self.once('connected', () => {
           log(`@${self.id} is now connected`);
+          self.status = 'connected';
           resolve(true);
         });
         setTimeout(() => {
@@ -192,7 +203,13 @@ class SprayAdapter extends AbstractAdapter {
    * @return {array}
    */
   getNeighbours (k = undefined) {
-    return this.rps.getPeers(k);
+    // BUG, sometimes our id is in our partial view.
+    // Tempory fix by removing this element if in results
+    let result = this.rps.getPeers(k);
+    // lremove(result, (elem) => {
+    //   return elem === this.inviewId;
+    // })
+    return result;
   }
 
   /**

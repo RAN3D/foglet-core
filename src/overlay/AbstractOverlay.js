@@ -1,7 +1,6 @@
 'use strict';
 
 const EventEmitter = require ('events');
-const lmerge = require('lodash/merge');
 
 class AbstractOverlay extends EventEmitter {
   constructor (options) {
@@ -12,7 +11,7 @@ class AbstractOverlay extends EventEmitter {
     }
     this.manager = options.manager;
     this.previous = options.previous;
-    this.options = lmerge({}, options.options);
+    this.options =  options;
   }
 
   /**
@@ -22,7 +21,7 @@ class AbstractOverlay extends EventEmitter {
    * @return {Promise}  Return a promise, resolve when the connection is successsfully achieved, rejected by tiemout or errors during the connection
    */
   connection (previousNetwork, timeout) {
-    throw('Not Yet Implemented');
+    throw new Error('Connection Not Yet Implemented', 'AbstractOverlay.js');
   }
 
   /**
@@ -30,7 +29,7 @@ class AbstractOverlay extends EventEmitter {
    * @return {array}
    */
   getNeighbours () {
-    throw('Not Yet Implemented');
+    throw new Error('getNeighbours Not Yet Implemented', 'AbstractOverlay.js');
   }
 
   /**
@@ -39,7 +38,7 @@ class AbstractOverlay extends EventEmitter {
    * @return {void}
    */
   onBroadcast (callback) {
-    throw('Not Yet Implemented');
+    throw new Error('onBroadcast Not Yet Implemented', 'AbstractOverlay.js');
   }
 
   /**
@@ -50,7 +49,7 @@ class AbstractOverlay extends EventEmitter {
   * @returns {void}
   */
   sendBroadcast (msg) {
-    throw('Not Yet Implemented');
+    throw new Error('senBroadcast Not Yet Implemented', 'AbstractOverlay.js');
   }
 
   /**
@@ -66,7 +65,7 @@ class AbstractOverlay extends EventEmitter {
   * @return {void}
   */
   onUnicast (callback) {
-    throw('Not Yet Implemented');
+    throw new Error('onUnicast Not Yet Implemented', 'AbstractOverlay.js');
   }
 
   /**
@@ -77,7 +76,7 @@ class AbstractOverlay extends EventEmitter {
   * @return {boolean} return true if it seems to have sent the message, false otherwise.
   */
   sendUnicast (message, id) {
-    throw('Not Yet Implemented');
+    throw new Error('sendUnicast Not Yet Implemented', 'AbstractOverlay.js');
   }
 
   /**
@@ -85,7 +84,7 @@ class AbstractOverlay extends EventEmitter {
    * @return {void}
    */
   exchange () {
-    throw('Not Yet Implemented');
+    throw new Error('exchange Not Yet Implemented', 'AbstractOverlay.js');
   }
 
 }

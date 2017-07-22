@@ -10,9 +10,7 @@ This project aims to provide a solid core infrastructure for developping fog com
 
 ## Examples
 
-There is few examples available using this package:
-* [Simple Foglet with spray-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
-* [Simple Foglet with tman-wrtc network](https://ran3d.github.io/foglet-core/example/tman.html)
+There is an examples available using this package: [Simple Foglet with spray-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
 
 Some other examples are available on https://ran3d.github.io/foglet/ and their source code at https://github.com/RAN3D/foglet   
 

@@ -35,7 +35,6 @@ const OverlayManager = require('./overlay/OverlayManager.js');
 // Networks
 const AdapterFcn = require('./flib/adapter/fcnAdapter.js');
 const AdapterSpray = require('./flib/adapter/sprayAdapter.js');
-const AdapterTman = require('./flib/adapter/TmanAdapter.js');
 
 // SSH COntrol
 const SSH = require('./flib/ssh/ssh.js');
@@ -72,6 +71,7 @@ class Foglet extends EventEmitter {
       protocol: 'foglet-protocol-default',
       verbose: true,
       rpsType: 'spray-wrtc',
+      useOverlayId: undefined, // you can specified the overlay used by default by foglet-core, if undefined, we use the last overlay specified, or if no overlay specified, the rps
       overlay: {
         limit: 10,
         enable: false, // use only RPS
@@ -91,10 +91,8 @@ class Foglet extends EventEmitter {
     this.logger = debug('foglet-core:main');
 
     this.options = lmerge(this.defaultOptions, options);
-    // LOGS
-    this.savedLogs = [];
 
-    // Middlewares
+     // Middlewares
     this._middlewares = new MiddlewareRegistry();
 
     // VARIABLES
@@ -110,8 +108,9 @@ class Foglet extends EventEmitter {
     // to use the last overlay or the rps if overlay are disable use:  om.use()
     let overlayOptions = this.options.overlay;
     overlayOptions.rps = this.options.rps;
-    this.options.om = new OverlayManager(overlayOptions);
-
+    this.om = new OverlayManager(overlayOptions);
+    // add all overlay specified;
+    this._createOverlays();
 
     // INTERPRETER
     if(this.options.enableInterpreter) {
@@ -155,37 +154,18 @@ class Foglet extends EventEmitter {
     case 'spray-wrtc':
       rps = AdapterSpray;
       break;
-    case 'tman-wrtc':
-      rps = AdapterTman;
-      break;
     default:
       rps = AdapterSpray;
       break;
     }
     return rps;
   }
-  /**
-   * @private
-  * RPS Connection method for Foglet to the network specified by protocol and room options
-  * Firstly we connect the RPS then we added create specified in options
-  * @param {Foglet} foglet Foglet to connect, none by default and the connection is by signaling. Otherwise it uses a direct callback
-  * @param {number} timeout Time before rejecting the promise.
-  * @function connection
-  * @return {Promise} Return a Q.Promise
-  * @example
-  * var f = new Foglet({...});
-  * f.connection().then((response) => console.log).catch(error => console.err);
-  */
-  _rpsConnection (foglet = undefined, timeout = 60000) {
-    if(foglet) return this.options.rps.connection(foglet.options.rps, timeout);
-    return this.options.rps.connection(undefined, timeout);
-  }
 
   /**
-   * Connect all overlay to the network
+   * Create all overlay
    * @return {Promise} Resolved when all overlay are well connected to the network.
    */
-  _overlayConnection () {
+  _createOverlays () {
     return new Promise((resolve, reject) => {
       // engage the connection overlay process
       if(this.options.overlay.enable) {
@@ -193,12 +173,14 @@ class Foglet extends EventEmitter {
           let tabs = [];
           for(let i =0; i<this.options.overlay.overlays.length; ++i) tabs.push(i);
           try {
-            let a = tabs.reduce((acc, current, index) => {
+            tabs.reduce((acc, current, index) => {
               this._log(this.options.overlay.overlays[index], index);
-              return this.options.om.add(this.options.overlay.overlays[index]);
-            }, Promise.resolve());
-            console.log(a);
-            return a;
+              return this.om.add(this.options.overlay.overlays[index]);
+            }, Promise.resolve()).then(() => {
+              resolve();
+            }).catch((e) => {
+              reject(e);
+            });
           } catch (e) {
             reject(e);
           }
@@ -223,17 +205,22 @@ class Foglet extends EventEmitter {
   * f.connection().then((response) => console.log).catch(error => console.err);
   */
   connection (foglet = undefined, timeout = 60000) {
-    return new Promise((resolve, reject) => {
-      this._rpsConnection(foglet, timeout).then((status) => {
-        this._overlayConnection().then(() => {
-          resolve(true);
-        }).catch(e => {
-          reject(e);
-        })
-      }).catch((e) => {
-        reject(e);
-      });
-    });
+    if(foglet) {
+      console.log('dest: ', foglet._defaultOverlay().rps, 'src: ', this._defaultOverlay().rps);
+      return this._defaultOverlay().connection(foglet._defaultOverlay().rps, timeout);
+    } else {
+      return this._defaultOverlay().connection(foglet, timeout);
+    }
+  }
+
+  /**
+   * @private
+   * Return the specified overlay by its id
+   * @param {string} id Id of an overlay
+   * @return {object} Return the overlay use by foglet-core
+   */
+  _defaultOverlay (id = this.options.useOverlayId) {
+    return this.om.use(id).overlay;
   }
 
   /**
@@ -244,7 +231,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   */
   addRegister (name) {
-    const source = this.options.om.use().overlay;
+    const source = this._defaultOverlay();
     const options = {
       name,
       source,
@@ -301,7 +288,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   **/
   onBroadcast (callback) {
-    this.options.om.use().overlay.onBroadcast((msg, ...args) => callback(this._middlewares.out(msg), ...args));
+    this._defaultOverlay().onBroadcast((msg, ...args) => callback(this._middlewares.out(msg), ...args));
   }
 
 
@@ -312,7 +299,7 @@ class Foglet extends EventEmitter {
   * @returns {void}
   */
   sendBroadcast (msg, ...args) {
-    return this.options.om.use().overlay.sendBroadcast(this._middlewares.in(msg), ...args);
+    return this._defaultOverlay().sendBroadcast(this._middlewares.in(msg), ...args);
   }
 
   /**
@@ -328,7 +315,7 @@ class Foglet extends EventEmitter {
   * @return {void}
   */
   onUnicast (callback) {
-    this.options.om.use().overlay.onUnicast((id, msg, ...args) => callback(id, this._middlewares.out(msg), ...args));
+    this._defaultOverlay().onUnicast((id, msg, ...args) => callback(id, this._middlewares.out(msg), ...args));
   }
 
   /**
@@ -339,7 +326,7 @@ class Foglet extends EventEmitter {
   * @return {boolean} return true if it seems to have sent the message, false otherwise.
   */
   sendUnicast (message, id) {
-    return this.options.om.use().overlay.sendUnicast(this._middlewares.in(message), id);
+    return this._defaultOverlay().sendUnicast(this._middlewares.in(message), id);
   }
 
   /**
@@ -348,7 +335,7 @@ class Foglet extends EventEmitter {
   * @return {string} return an id or a null string otherwise
   */
   getRandomNeighbourId () {
-    const peers = this.options.om.use().overlay.getNeighbours();
+    const peers = this._defaultOverlay().getNeighbours();
     if(peers.length === 0) {
       return '';
     } else {
@@ -369,7 +356,7 @@ class Foglet extends EventEmitter {
   * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
   */
   getNeighbours (k = undefined) {
-    return this.options.om.use().overlay.getNeighbours(k);
+    return this._defaultOverlay().getNeighbours(k);
   }
 
   /**
@@ -392,13 +379,7 @@ class Foglet extends EventEmitter {
   */
   _log (...args) {
     if(this.options.verbose) {
-      const msg = {
-        time: new Date(),
-        message: '[FOGLET]:' + ' @' + this.id + ': ',
-        data: args
-      };
-      this.savedLogs.push(msg);
-      this.logger('%O', ...args);
+      this.logger(...args);
     }
   }
 }

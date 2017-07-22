@@ -46,16 +46,31 @@
         </div>
         <div class="col-md-10 col-md-offset-1">
 
-          <h1>Foglet</h1>
-          <button class='btn btn-info' onclick='directConnection(500)' style='align:center'> DIRECT CONNECTION </button>
-          <button class='btn btn-info' onclick='signalingConnection(500)' style='align:center'> SIGNALING CONNECTION </button>
-					<button class='btn btn-info' onclick='peers()' style='align:center'> GET NEIGHBOURS </button>
-					<button class='btn btn-info' onclick='message()' style='align:center'> SEND MESSAGE </button>
-					<button class='btn btn-info' onclick='broadcast()' style='align:center'> BROADCAST </button>
-          <hr/>
           <div class='row'>
-            <div class='.col-md-12' id='graph'>
+            <h1>Foglet (example with a RPS and a Latency Overlay)</h1>
+            <button class='btn btn-info' onclick='directConnection()' style='align:center'> DIRECT CONNECTION </button>
+            <button class='btn btn-info' onclick='signalingConnection(500)' style='align:center'> SIGNALING CONNECTION </button>
+            <button class='btn btn-info' onclick='redrawBoth()' style='align:center'> REDRAW GRAPHS </button>
+  					<button class='btn btn-info' onclick='message()' style='align:center'> SEND MESSAGE </button>
+  					<button class='btn btn-info' onclick='broadcast()' style='align:center'> BROADCAST </button>
+            <hr/>
+          </div>
+
+          <p> Shuffle every 10 seconds, Tiemout: 2 minutes, Graph Refresh every 5 seconds.</p>
+
+          <div class='row'>
+            <div class='row' >
+
+              <div class='col-md-6' >
+                <h2> Overlay </h2>
+                <div id='mainGraph'> </div>
+              </div>
+              <div class='col-md-6' >
+                <h2> RPS </h2>
+                <div id='bisGraph'> </div>
+              </div>
             </div>
+            <div class='row' id='message'> </div>
           </div>
 
         </div>

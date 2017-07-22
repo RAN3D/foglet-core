@@ -32,8 +32,14 @@ const Unicast = require('unicast-definition');
 class fcnAdapter extends AbstractAdapter {
   constructor (options) {
     super();
-    this.options = lmerge({}, options);
-
+    this.options = lmerge({
+      webrtc: {
+        trickle: true,
+        iceServers: []
+      }
+    }, options);
+    // if webrtc options specified: create object config for Spray
+    this.options = lmerge({config: this.options.webrtc}, this.options);
     this.rps = new Fcn(this.options);
     this.options.rps = this.rps;
 
