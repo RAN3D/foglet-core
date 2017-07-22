@@ -70,7 +70,6 @@
     "mocha": "^3.4.1",
     "p2p-graph": "^1.2.1",
     "uglify-es": "github:mishoo/UglifyJS2#harmony",
-    "uglify-js": "^3.0.25",
     "watchify": "^3.7.0"
   },
   "bundledDependencies": [
