@@ -7,12 +7,13 @@
     "lint": "eslint src/",
     "esdoc": "esdoc && npm run esdoc:example",
     "esdoc:example": "cp -R ./dist ./example ./docs",
-    "all": "npm run build:foglet && npm test && npm run esdoc",
+    "all": "npm run build:foglet && npm run build:foglet-min && npm test && npm run esdoc",
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
     "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
     "build:foglet": "browserify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]   > ./dist/foglet.bundle.js",
-    "build:watch": "watchify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]  -o ./dist/foglet.bundle.js -v -d "
+    "build:watch": "watchify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]  -o ./dist/foglet.bundle.js -v -d ",
+    "build:foglet-min": "browserify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
   },
   "repository": {
     "type": "git",
@@ -68,6 +69,8 @@
     "karma-socketio-server": "^1.0.0",
     "mocha": "^3.4.1",
     "p2p-graph": "^1.2.1",
+    "uglify-es": "github:mishoo/UglifyJS2#harmony",
+    "uglify-js": "^3.0.25",
     "watchify": "^3.7.0"
   },
   "bundledDependencies": [
