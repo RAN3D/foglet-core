@@ -37,42 +37,44 @@ describe('FogletResource', () => {
     const s1 = new StudentResource(f1),
       s2 = new StudentResource(f2);
     f1.connection(f2).then(() => {
-      const peers = f1.getNeighbours();
-      assert.equal(peers.length, 1);
-      const peerID = peers[0];
+      return f2.connection(f1).then(() => {
+        const peers = f1.getNeighbours();
+        assert.equal(peers.length, 1);
+        const peerID = peers[0];
 
-      s1.get(peerID)
-      .then(students => {
-        assert.equal(students.length, 0);
-        return s1.insert(peerID, { student: 'Bob the genious' });
-      })
-      .then(msg => {
-        assert.equal(msg, 'new student inserted');
-        return s1.get(peerID);
-      })
-      .then(students => {
-        assert.equal(students.length, 1);
-        assert.equal(students[0], 'Bob the genious');
-        return s1.update(peerID, { index: 0, student: 'Bob the classic student' });
-      })
-      .then(msg => {
-        assert.equal(msg, 'student updated');
-        return s1.get(peerID);
-      })
-      .then(students => {
-        assert.equal(students.length, 1);
-        assert.equal(students[0], 'Bob the classic student');
-        return s1.delete(peerID, { index: 0 });
-      })
-      .then(msg => {
-        assert.equal(msg, 'student deleted');
-        return s1.get(peerID);
-      })
-      .then(students => {
-        assert.equal(students.length, 0);
-        done();
-      })
-      .catch(done);
+        s1.get(peerID)
+        .then(students => {
+          assert.equal(students.length, 0);
+          return s1.insert(peerID, { student: 'Bob the genious' });
+        })
+        .then(msg => {
+          assert.equal(msg, 'new student inserted');
+          return s1.get(peerID);
+        })
+        .then(students => {
+          assert.equal(students.length, 1);
+          assert.equal(students[0], 'Bob the genious');
+          return s1.update(peerID, { index: 0, student: 'Bob the classic student' });
+        })
+        .then(msg => {
+          assert.equal(msg, 'student updated');
+          return s1.get(peerID);
+        })
+        .then(students => {
+          assert.equal(students.length, 1);
+          assert.equal(students[0], 'Bob the classic student');
+          return s1.delete(peerID, { index: 0 });
+        })
+        .then(msg => {
+          assert.equal(msg, 'student deleted');
+          return s1.get(peerID);
+        })
+        .then(students => {
+          assert.equal(students.length, 0);
+          done();
+        })
+        .catch(done);
+      });
     });
   });
 });

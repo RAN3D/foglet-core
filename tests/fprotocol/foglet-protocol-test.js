@@ -50,9 +50,11 @@ describe('FogletProtocol', () => {
       }, done);
 
       f1.connection(f2).then(() => {
-        const peers = f1.getNeighbours();
-        assert.equal(peers.length, 1);
-        p1.get(peers[0], expected);
+        return f2.connection(f1).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          p1.get(peers[0], expected);
+        });
       });
     });
 
@@ -65,14 +67,16 @@ describe('FogletProtocol', () => {
       });
 
       f1.connection(f2).then(() => {
-        const peers = f1.getNeighbours();
-        assert.equal(peers.length, 1);
-        p1.get(peers[0], 'Hello')
-        .then(msg => {
-          assert.equal(msg, 'Hello world!');
-          done();
-        })
-        .catch(done);
+        return f2.connection(f1).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          p1.get(peers[0], 'Hello')
+          .then(msg => {
+            assert.equal(msg, 'Hello world!');
+            done();
+          })
+          .catch(done);
+        });
       });
     });
 
@@ -85,12 +89,14 @@ describe('FogletProtocol', () => {
       });
 
       f1.connection(f2).then(() => {
-        const peers = f1.getNeighbours();
-        assert.equal(peers.length, 1);
-        p1.get(peers[0], 'Hello')
-        .catch(msg => {
-          assert.equal(msg, 'Hello world!');
-          done();
+        return f2.connection(f1).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          p1.get(peers[0], 'Hello')
+          .catch(msg => {
+            assert.equal(msg, 'Hello world!');
+            done();
+          });
         });
       });
     });
