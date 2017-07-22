@@ -23,20 +23,12 @@ module.exports = function (config) {
     ],
     // list of files / patterns to load in the browser
     files: [
-      'tests/fogletTest.js',
-      'tests/fbroadcastTest.js',
-      // 'tests/finterpreterTest.js',
-      'tests/fstoreTest.js',
-      'tests/middleware-test.js',
-      'tests/fprotocol/*-test.js'
+      'tests/*-tests.js',
+      'tests/**/*-test.js'
     ],
     preprocessors:{
-      'tests/fogletTest.js': [ 'coverage', 'browserify' ],
-      'tests/fbroadcastTest.js': [ 'coverage', 'browserify' ],
-      // 'tests/finterpreterTest.js' : [ 'coverage', 'browserify' ],
-      'tests/fstoreTest.js': [ 'coverage', 'browserify' ],
-      'tests/middleware-test.js': [ 'coverage', 'browserify' ],
-      'tests/fprotocol/*-test.js': [ 'coverage', 'browserify' ]
+      'tests/*-tests.js': [ 'coverage', 'browserify' ],
+      'tests/**/*-test.js': [ 'coverage', 'browserify' ]
     },
     // list of files to exclude
     exclude: [
