@@ -23,10 +23,9 @@ SOFTWARE.
 */
 'use strict';
 const lmerge = require('lodash/merge');
-const lremove = require('lodash/remove');
+// const lremove = require('lodash/remove');
 const Spray = require('spray-wrtc');
 const io = require('socket.io-client');
-const Q = require('q');
 const AbstractAdapter = require('./AbstractAdapter.js');
 const Unicast = require('unicast-definition');
 const FBroadcast = require('../broadcast/fbroadcast.js');
@@ -104,7 +103,7 @@ class SprayAdapter extends AbstractAdapter {
   connection (rps, timeout) {
     log('Pending connection...');
     const self = this;
-    return Q.Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
       try {
         if(rps) {
           self.rps.join(self.directCallback(self.rps, rps)).then(() => {
