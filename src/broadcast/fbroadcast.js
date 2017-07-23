@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016 Grall Arnaud
+Copyright (c) 2016-2017 Grall Arnaud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the 'Software'), to deal
@@ -29,38 +29,12 @@ const lmerge = require('lodash/merge');
 const sortedIndexBy = require('lodash/sortedIndexBy');
 const debug = require('debug')('foglet-core:broadcast');
 const VV = require('../utils/vv.js'); // Version-Vector
+const messages = require('./messages.js');
 
-function BroadcastMessage (protocol, id, isReady, payload) {
-  return {
-    protocol,
-    id,
-    isReady,
-    payload
-  };
-}
-
-function MAntiEntropyRequest (causality) {
-  return {
-    type: 'MAntiEntropyRequest',
-    causality
-  };
-}
-
-
-function MAntiEntropyResponse (id, causality, nbElements, element) {
-  return {
-    type: 'MAntiEntropyResponse',
-    id,
-    causality,
-    nbElements,
-    element,
-    elements: []
-  };
-}
-
-function clone (obj) {
-  return lmerge({}, obj);
-}
+// currenlty unused
+// function clone (obj) {
+//   return lmerge({}, obj);
+// }
 
 /**
  * Format the IDs of messages in string format
@@ -95,7 +69,7 @@ class FBroadcast extends AbstractBroadcast {
       // buffer of received messages
       this.buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
-      this.bufferAntiEntropy = MAntiEntropyResponse('init');
+      this.bufferAntiEntropy = messages.MAntiEntropyResponse('init');
 
       debug(`initialized for:  ${this.options.protocol}`);
     } else {
@@ -126,7 +100,7 @@ class FBroadcast extends AbstractBroadcast {
       message = sniffed;
     }
     const a = this.causality.increment();
-    const broadcastMessage = BroadcastMessage(this.protocol, a, isReady || this.causality.clone(), message);
+    const broadcastMessage = messages.BroadcastMessage(this.protocol, a, isReady || this.causality.clone(), message);
     // #2 register the message in the structure
     this.causality.incrementFrom(a);
 
@@ -160,10 +134,10 @@ class FBroadcast extends AbstractBroadcast {
   sendAntiEntropyResponse (origin, causalityAtReceipt, messages) {
     let id = uuid();
     // #1 metadata of the antientropy response
-    let sent = this.unicast.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
+    let sent = this.unicast.emit(this.protocol, origin, this.source.outviewId, messages.MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
     let i = 0;
     while (sent && i < messages.length) {
-      sent = this.unicast.emit(this.protocol, origin, this.source.outviewId, new MAntiEntropyResponse(id, null, messages.length, messages[i]));
+      sent = this.unicast.emit(this.protocol, origin, this.source.outviewId, messages.MAntiEntropyResponse(id, null, messages.length, messages[i]));
       ++i;
     }
   }
