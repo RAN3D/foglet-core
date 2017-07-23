@@ -50,10 +50,12 @@ describe('FogletProtocol', () => {
       }, done);
 
       f1.connection(f2).then(() => {
-        return f2.connection(f1).then(() => {
+        f2.connection(f1).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
-          p1.get(peers[0], expected);
+          setTimeout(function () {
+            p1.get(peers[0], expected);
+          }, 1000);
         });
       });
     });
@@ -67,15 +69,17 @@ describe('FogletProtocol', () => {
       });
 
       f1.connection(f2).then(() => {
-        return f2.connection(f1).then(() => {
+        f2.connection(f1).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
-          p1.get(peers[0], 'Hello')
-          .then(msg => {
-            assert.equal(msg, 'Hello world!');
-            done();
-          })
-          .catch(done);
+          setTimeout(function () {
+            p1.get(peers[0], 'Hello')
+            .then(msg => {
+              assert.equal(msg, 'Hello world!');
+              done();
+            })
+            .catch(done);
+          }, 1000);
         });
       });
     });
@@ -89,14 +93,19 @@ describe('FogletProtocol', () => {
       });
 
       f1.connection(f2).then(() => {
-        return f2.connection(f1).then(() => {
+        f2.connection(f1).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
-          p1.get(peers[0], 'Hello')
-          .catch(msg => {
-            assert.equal(msg, 'Hello world!');
-            done();
-          });
+          setTimeout(function () {
+            p1.get(peers[0], 'Hello')
+            .then(msg => {
+              done(new Error('Message should have rejected but instead got reply with ' + msg));
+            })
+            .catch(msg => {
+              assert.equal(msg, 'Hello world!');
+              done();
+            });
+          }, 1000);
         });
       });
     });
@@ -113,7 +122,9 @@ describe('FogletProtocol', () => {
       }, done);
 
       f1.connection(f2).then(() => {
-        p1.get(expected);
+        setTimeout(function () {
+          p1.get(expected);
+        }, 1000);
       });
     });
   });

@@ -52,8 +52,12 @@ module.exports = function (config) {
       // to your liking. For more see http://expressjs.com/4x/api.html
       appVisitor: signaling
     },
+    client: {
+      mocha: {
+        timeout: 3000
+      }
+    },
     reporters: [ 'coverage', 'mocha' ],
-
     coverageReporter: {
       // specify a common output directory
       dir: 'coverage',
