@@ -13,23 +13,29 @@ function init () {
   o = [];
   for(let i = 0; i < max; ++i) {
     o[i] = new Foglet({
-      protocol: 'foglet-example', // foglet running on the protocol foglet-example, defined for spray-wrtc
-      webrtc:	{ // add WebRTC options
-        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-        iceServers : [] // define iceServers in non local instance
-      },
-      timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-      delta: 10 * 1000, // spray-wrtc shuffle interval
-      signalingAdress: 'https://signaling.herokuapp.com/',
-      // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
-      room: 'best-room-for-foglet', // room to join
       verbose: true, // want some logs ? switch to false otherwise
-      rpsType: 'spray-wrtc', // type of the rps: spray-wrtc
+      rps: {
+        type: 'spray-wrtc',
+        options: {
+          protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
+          webrtc:	{ // add WebRTC options
+            trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
+            iceServers : [] // define iceServers in non local instance
+          },
+          timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+          delta: 10 * 1000, // spray-wrtc shuffle interval
+          signaling: {
+            address: 'https://signaling.herokuapp.com/',
+            // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+            room: 'best-room-for-foglet' // room to join
+          }
+        }
+      },
       overlay:{ // overlay options
         limit: 10, // limit of overlays you can add
         enable:true, // want to activate overlay ? switch to false otherwise
         overlays: [ {class: 'latencies', options: {} } ] // add an latencies overlay
-      }
+      },
     });
   }
 
@@ -62,11 +68,11 @@ const redrawMain = () => {
   $('#mainGraph').append(`<div id='mainGraphBis' style='border: 1px solid black;'></div>`);
   graph = new P2PGraph('#mainGraphBis');
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i]._defaultOverlay().inviewId
+    let id = o[i].getNetwork().network.inviewId
     graph.add({id, me: false, name: id});
   }
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i]._defaultOverlay().inviewId
+    let id = o[i].getNetwork().network.inviewId
     o[i].getNeighbours().forEach(peer => {
       // console.log('Main: ', id, 'Neighbor: ', peer);
       graph.connect(peer, id);
