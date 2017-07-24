@@ -26,19 +26,19 @@ SOFTWARE.
 const EventEmitter = require('events');
 const uuid = require('uuid/v4');
 const lmerge = require('lodash/merge');
-const debug = require('debug');
+const debug = require('debug')('foglet-core:main');
+
+// NetworkManager
+const NetworkManager = require('./network/network-manager.js');
+
+
 // FOGLET
-const FRegister = require('./storage/fregister.js');
-const FInterpreter = require('./flib/finterpreter.js');
-const FStore = require('./storage/fstore.js');
-const OverlayManager = require('./overlay/OverlayManager.js');
-// Networks
-const AdapterFcn = require('./adapter/fcnAdapter.js');
-const AdapterSpray = require('./adapter/sprayAdapter.js');
+// const FRegister = require('./storage/fregister.js');
+// const FStore = require('./storage/fstore.js');
 
 // SSH COntrol
-const SSH = require('./ssh/ssh.js');
-const MiddlewareRegistry = require('./utils/middleware-registry.js');
+// const SSH = require('./ssh/ssh.js');
+// const MiddlewareRegistry = require('./utils/middleware-registry.js');
 
 /**
 * Create a Foglet Class in order to use Spray with ease
@@ -88,110 +88,73 @@ class Foglet extends EventEmitter {
       },
       enableInterpreter: false
     };
-    this.logger = debug('foglet-core:main');
-
     this.options = lmerge(this.defaultOptions, options);
+    this.id = uuid();
+
+    // add the network part !
+    this.networkManager = new NetworkManager(this.options);
 
      // Middlewares
-    this._middlewares = new MiddlewareRegistry();
+    // this._middlewares = new MiddlewareRegistry();
 
-    // VARIABLES
-    this.id = uuid();
-    // RPS
-    this.options.rps = new (this._chooseRps(this.options.rpsType))(this.options);
-    this.options.rps.on('logs', (message, data) => this._log(data));
 
-    this.inviewId = this.options.rps.inviewId;
-    this.outviewId = this.options.rps.outviewId;
+    // this.inviewId = this.options.rps.inviewId;
+    // this.outviewId = this.options.rps.outviewId;
 
-    // RPS && OVERLAYS
-    // to use the last overlay or the rps if overlay are disable use:  om.use()
-    let overlayOptions = this.options.overlay;
-    overlayOptions.rps = this.options.rps;
-    this.om = new OverlayManager(overlayOptions);
-    // add all overlay specified;
-    this._createOverlays();
-
-    // INTERPRETER
-    if(this.options.enableInterpreter) {
-      this.interpreter = new FInterpreter(this);
-      this.interpreter.on('logs', (message, data) => this._log(data));
-    }
-
-    // SSH COntrol
-    if (this.options.ssh && this.options.ssh.address) {
-      this.ssh = new SSH({
-        foglet: this,
-        address: this.options.ssh.address
-      });
-      this.ssh.on('logs', (message, data) => this._log(data));
-    }
+    // // SSH COntrol
+    // if (this.options.ssh && this.options.ssh.address) {
+    //   this.ssh = new SSH({
+    //     foglet: this,
+    //     address: this.options.ssh.address
+    //   });
+    //   this.ssh.on('logs', (message, data) => this._log(data));
+    // }
 
     // DATA STRUCTURES
-    this.registerList = {};
-    const self = this;
-    this.store = new FStore({
-      map : {
-        views : function () {
-          return self.getNeighbours();
-        },
-        jobs: {},
-      }
-    });
-
-    this._log('Signaling server used : ' + this.options.signalingAdress + ' on the room : ' + this.options.room);
+    // this.registerList = {};
+    // const self = this;
+    // this.store = new FStore({
+    //   map : {
+    //     views : function () {
+    //       return self.getNeighbours();
+    //     },
+    //     jobs: {},
+    //   }
+    // });
   }
 
-  /**
-  * @private
-  */
-  _chooseRps (rpsType) {
-    let rps = null;
-    switch(rpsType) {
-    case 'fcn-wrtc':
-      rps = AdapterFcn;
-      break;
-    case 'spray-wrtc':
-      rps = AdapterSpray;
-      break;
-    default:
-      rps = AdapterSpray;
-      break;
-    }
-    return rps;
-  }
 
-  /**
-   * Create all overlay
-   * @return {Promise} Resolved when all overlay are well connected to the network.
-   */
-  _createOverlays () {
-    return new Promise((resolve, reject) => {
-      // engage the connection overlay process
-      if(this.options.overlay.enable) {
-        if(this.options.overlay.overlays.length > 0) {
-          let tabs = [];
-          for(let i =0; i<this.options.overlay.overlays.length; ++i) tabs.push(i);
-          try {
-            tabs.reduce((acc, current, index) => {
-              this._log(this.options.overlay.overlays[index], index);
-              return this.om.add(this.options.overlay.overlays[index]);
-            }, Promise.resolve()).then(() => {
-              resolve();
-            }).catch((e) => {
-              reject(e);
-            });
-          } catch (e) {
-            reject(e);
-          }
-        } else {
-          resolve(status);
-        }
-      } else {
-        resolve(status);
-      }
-    });
-  }
+  // /**
+  //  * Create all overlay
+  //  * @return {Promise} Resolved when all overlay are well connected to the network.
+  //  */
+  // _createOverlays () {
+  //   return new Promise((resolve, reject) => {
+  //     // engage the connection overlay process
+  //     if(this.options.overlay.enable) {
+  //       if(this.options.overlay.overlays.length > 0) {
+  //         let tabs = [];
+  //         for(let i =0; i<this.options.overlay.overlays.length; ++i) tabs.push(i);
+  //         try {
+  //           tabs.reduce((acc, current, index) => {
+  //             this._log(this.options.overlay.overlays[index], index);
+  //             return this.om.add(this.options.overlay.overlays[index]);
+  //           }, Promise.resolve()).then(() => {
+  //             resolve();
+  //           }).catch((e) => {
+  //             reject(e);
+  //           });
+  //         } catch (e) {
+  //           reject(e);
+  //         }
+  //       } else {
+  //         resolve(status);
+  //       }
+  //     } else {
+  //       resolve(status);
+  //     }
+  //   });
+  // }
 
   /**
   * Connection method for Foglet to the network specified by protocol and room options
@@ -207,79 +170,84 @@ class Foglet extends EventEmitter {
   connection (foglet = undefined, timeout = 60000) {
     if(foglet) {
       // console.log('dest: ', foglet._defaultOverlay().rps, 'src: ', this._defaultOverlay().rps);
-      return this._defaultOverlay().connection(foglet._defaultOverlay().rps, timeout);
+      return this.getNetwork().signaling.connection(foglet.getNetwork().network.rps, timeout);
     } else {
-      return this._defaultOverlay().connection(foglet, timeout);
+      return this.getNetwork().signaling.connection(foglet, timeout);
     }
   }
 
   /**
-   * @private
    * Return the specified overlay by its id
-   * @param {string} id Id of an overlay
-   * @return {object} Return the overlay use by foglet-core
+   * @param {string} id Index of a network, default: index of the last overlay added or 0 (the rps) if no overlay
+   * @return {object} Return the network to use
    */
-  _defaultOverlay (id = this.options.useOverlayId) {
-    return this.om.use(id).overlay;
+  getNetwork (index = this.options.useNetworkIndex) {
+    return this.networkManager.use(index);
   }
 
-  /**
-  * Add a register to the foglet, it will broadcast new values to connected clients.
-  * @function addRegister
-  * @param {String} name - Name of the register
-  * @throws {FRegisterAddException} Throw an exception is not defined or different of the null string
-  * @returns {void}
-  */
-  addRegister (name) {
-    const source = this._defaultOverlay();
-    const options = {
-      name,
-      source,
-      protocol: name+'-'+this.options.protocol,
-    };
-    const reg = new FRegister(options);
-    this.registerList[this._fRegisterKey(reg)] = reg;
-  }
+  // /**
+  // * Add a register to the foglet, it will broadcast new values to connected clients.
+  // * @function addRegister
+  // * @param {String} name - Name of the register
+  // * @throws {FRegisterAddException} Throw an exception is not defined or different of the null string
+  // * @returns {void}
+  // */
+  // addRegister (name) {
+  //   const source = this._defaultOverlay();
+  //   const options = {
+  //     name,
+  //     source,
+  //     protocol: name+'-'+this.options.protocol,
+  //   };
+  //   const reg = new FRegister(options);
+  //   this.registerList[this._fRegisterKey(reg)] = reg;
+  // }
+  //
+  // /**
+  // * Return a register by its name
+  // * @function getRegister
+  // * @param {String} name - Name of the register
+  // * @returns {void}
+  // */
+  // getRegister (name) {
+  //   return this.registerList[name];
+  // }
+
+  // /**
+  //  * Register a middleware, with an optional priority
+  //  * @param  {Object} middleware   - The middleware to register
+  //  * @param  {function} middleware.in - Function applied on middleware input
+  //  * @param  {function} middleware.out - Function applied on middleware output
+  //  * @param  {Number} [priority=0] - (optional) The middleware priority
+  //  * @return {void}
+  //  */
+  // use (middleware, priority = 0) {
+  //   this._middlewares.register(middleware, priority);
+  // }
+  //
+  //
+  // /**
+  // * This callback is a parameter of the onRegister function.
+  // * @callback callback
+  // * @param {object} responseData - Data emits on update
+  // */
+  // /**
+  // * Allow to listen emits on a register when updated with a specified name and callback
+  // * @function onRegister
+  // * @param {String} name - Name of the register
+  // * @param {callback} callback - Callback function that handles the response
+  // * @returns {void}
+  // */
+  // onRegister (name, callback) {
+  //   this.getRegister(name).on(name+'-receive', callback);
+  // }
 
   /**
-  * Return a register by its name
-  * @function getRegister
-  * @param {String} name - Name of the register
-  * @returns {void}
-  */
-  getRegister (name) {
-    return this.registerList[name];
-  }
-
-  /**
-   * Register a middleware, with an optional priority
-   * @param  {Object} middleware   - The middleware to register
-   * @param  {function} middleware.in - Function applied on middleware input
-   * @param  {function} middleware.out - Function applied on middleware output
-   * @param  {Number} [priority=0] - (optional) The middleware priority
-   * @return {void}
-   */
-  use (middleware, priority = 0) {
-    this._middlewares.register(middleware, priority);
-  }
-
-
-  /**
-  * This callback is a parameter of the onRegister function.
+  * This callback is a parameter of the onBroadcast function.
   * @callback callback
-  * @param {object} responseData - Data emits on update
+  * @param {string} id - sender id
+  * @param {object} message - the message received
   */
-  /**
-  * Allow to listen emits on a register when updated with a specified name and callback
-  * @function onRegister
-  * @param {String} name - Name of the register
-  * @param {callback} callback - Callback function that handles the response
-  * @returns {void}
-  */
-  onRegister (name, callback) {
-    this.getRegister(name).on(name+'-receive', callback);
-  }
-
   /**
   * Allow to listen on Foglet when a broadcasted message arrived
   * @function onBroadcast
@@ -288,7 +256,8 @@ class Foglet extends EventEmitter {
   * @returns {void}
   **/
   onBroadcast (callback) {
-    this._defaultOverlay().onBroadcast((msg, ...args) => callback(this._middlewares.out(msg), ...args));
+    // this._defaultOverlay().communication.onBroadcast((msg, ...args) => callback(this._middlewares.out(msg), ...args));
+    this.getNetwork().communication.onBroadcast((msg) => callback(msg));
   }
 
 
@@ -298,8 +267,9 @@ class Foglet extends EventEmitter {
   * @param {object} msg - Message to send.
   * @returns {void}
   */
-  sendBroadcast (msg, ...args) {
-    return this._defaultOverlay().sendBroadcast(this._middlewares.in(msg), ...args);
+  sendBroadcast (msg) {
+    // return this._defaultOverlay().communication.sendBroadcast(this._middlewares.in(msg), ...args);
+    return this.getNetwork().communication.sendBroadcast(msg);
   }
 
   /**
@@ -315,7 +285,8 @@ class Foglet extends EventEmitter {
   * @return {void}
   */
   onUnicast (callback) {
-    this._defaultOverlay().onUnicast((id, msg, ...args) => callback(id, this._middlewares.out(msg), ...args));
+    // this._defaultOverlay().communication.onUnicast((id, msg, ...args) => callback(id, this._middlewares.out(msg), ...args));
+    this.getNetwork().communication.onUnicast((id, msg) => callback(id, msg));
   }
 
   /**
@@ -325,8 +296,9 @@ class Foglet extends EventEmitter {
   * @param {string} id - One of your neighbour's id
   * @return {boolean} return true if it seems to have sent the message, false otherwise.
   */
-  sendUnicast (message, id) {
-    return this._defaultOverlay().sendUnicast(this._middlewares.in(message), id);
+  sendUnicast (id, message) {
+    // return this._defaultOverlay().communication.sendUnicast(id, this._middlewares.in(message));
+    return this.getNetwork().communication.sendUnicast(id, message);
   }
 
   /**
@@ -335,7 +307,7 @@ class Foglet extends EventEmitter {
   * @return {string} return an id or a null string otherwise
   */
   getRandomNeighbourId () {
-    const peers = this._defaultOverlay().getNeighbours();
+    const peers = this.getNetwork().network.getNeighbours();
     if(peers.length === 0) {
       return '';
     } else {
@@ -356,32 +328,32 @@ class Foglet extends EventEmitter {
   * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
   */
   getNeighbours (k = undefined) {
-    return this._defaultOverlay().getNeighbours(k);
+    return this.getNetwork().network.getNeighbours(k);
   }
 
-  /**
-  * Return the name of a Register
-  * @function _fRegisterKey
-  * @private
-  * @param {Register} obj - Register to return the name
-  * @return {string} name - Name of the register in parameter
-  */
-  _fRegisterKey (obj) {
-    return obj.name;
-  }
+  // /**
+  // * Return the name of a Register
+  // * @function _fRegisterKey
+  // * @private
+  // * @param {Register} obj - Register to return the name
+  // * @return {string} name - Name of the register in parameter
+  // */
+  // _fRegisterKey (obj) {
+  //   return obj.name;
+  // }
 
-  /**
-  * Log by prefixing the message;
-  * @function _log
-  * @private
-  * @param {string} msg Message to log
-  * @returns {void}
-  */
-  _log (...args) {
-    if(this.options.verbose) {
-      this.logger(...args);
-    }
-  }
+  // /**
+  // * Log by prefixing the message;
+  // * @function _log
+  // * @private
+  // * @param {string} msg Message to log
+  // * @returns {void}
+  // */
+  // _log (...args) {
+  //   if(this.options.verbose) {
+  //     this.logger(...args);
+  //   }
+  // }
 }
 
 module.exports = { Foglet, uuid };

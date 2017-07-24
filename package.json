@@ -43,6 +43,7 @@
     "spray-wrtc": "^2.0.2",
     "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
+    "url-parse": "^1.1.9",
     "uuid": "^3.0.1",
     "vivaldi-coordinates": "^1.0.0"
   },
