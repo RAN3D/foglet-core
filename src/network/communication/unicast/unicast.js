@@ -7,10 +7,9 @@ const debug = require('debug')('foglet-core:unicast');
 class Unicast extends AbstractUnicast {
   constructor (source, protocol) {
     super(source, protocol);
-    debug(source, protocol);
-    this.unicast = new UnicastDefinition(this.source, {pid: this.protocol});
+    this.unicast = new UnicastDefinition(this.source.rps, {pid: this.protocol});
     this.unicast.on(this.protocol, (id, message) => {
-      this._receiveMessage(id, message);
+      this._receive(id, message);
     });
   }
 

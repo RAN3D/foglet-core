@@ -38,17 +38,23 @@ class SprayAdapter extends AbstractAdapter {
       },
       origins:'*',
     }, options);
+
     // if webrtc options specified: create object config for Spray
     this.options = lmerge({config: this.options.webrtc}, this.options);
 
     // need to expose a rps
     this.rps = new Spray(this.options);
 
-    // need to expose an inview/outview ids
-    this.inviewId = this.rps.getInviewId();
-    this.outviewId = this.rps.getOutviewId();
     // make a unique id of this network
-    this.id = this.inviewId+'_'+this.outviewId;
+    this.id = this.rps.PEER;
+  }
+
+  get inviewId () {
+    return this.rps.getInviewId();
+  }
+
+  get outviewId () {
+    return this.rps.getOutviewId();
   }
 
   /**

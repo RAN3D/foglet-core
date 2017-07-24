@@ -32,9 +32,8 @@ function init () {
         }
       },
       overlay:{ // overlay options
-        limit: 10, // limit of overlays you can add
         enable:true, // want to activate overlay ? switch to false otherwise
-        overlays: [ {class: 'latencies', options: {} } ] // add an latencies overlay
+        type: [ {class: 'latencies', options: {} } ] // add an latencies overlay
       },
     });
   }
@@ -47,8 +46,8 @@ function init () {
   });
 
   o.forEach(peer => {
-    peer.onBroadcast((message) => {
-      console.log('Receive a broadcasted message: ', message)
+    peer.onBroadcast((id, message) => {
+      console.log('Receive a broadcasted message: ', message, 'from ', id);
     });
   });
 }
@@ -68,12 +67,12 @@ const redrawMain = () => {
   $('#mainGraph').append(`<div id='mainGraphBis' style='border: 1px solid black;'></div>`);
   graph = new P2PGraph('#mainGraphBis');
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].getNetwork().network.inviewId
+    let id = o[i].networkManager.rps.network.inviewId
     graph.add({id, me: false, name: id});
   }
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].getNetwork().network.inviewId
-    o[i].getNeighbours().forEach(peer => {
+    let id = o[i].networkManager.rps.network.inviewId
+    o[i].networkManager.rps.network.getNeighbours().forEach(peer => {
       // console.log('Main: ', id, 'Neighbor: ', peer);
       graph.connect(peer, id);
     });
@@ -87,12 +86,12 @@ const redrawBis = () => {
   graphBis = new P2PGraph('#bisGraphBis');
 
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].om.getList()[0].overlay.inviewId;
+    let id = o[i].networkManager.use().network.inviewId;
     graphBis.add({id, me: false, name: id});
   }
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].om.getList()[0].overlay.inviewId;
-    o[i].om.getList()[0].overlay.getNeighbours().forEach(peer => {
+    let id = o[i].networkManager.use().network.inviewId;
+    o[i].networkManager.use().network.getNeighbours().forEach(peer => {
       // console.log('Main: ', id, 'Neighbor: ', peer);
       graphBis.connect(peer, id);
     });
@@ -132,12 +131,12 @@ const message = () => {
     const id = f.getNeighbours();
     if(id.length > 0) {
       id.forEach(i => {
-        f.sendUnicast(message, i);
+        f.sendUnicast(i, message);
       });
     }
   });
 };
 const broadcast = () => {
   let f = o[0];
-  console.log(f.sendBroadcast('BROADCAST, Hello world ! from '+f.options.rps.inviewId));
+  console.log(f.sendBroadcast('BROADCAST, Hello world ! '));
 };

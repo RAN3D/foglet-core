@@ -28,15 +28,14 @@ const EventEmitter = require ('events');
 class AbstractOverlay extends EventEmitter {
   constructor (options) {
     super();
-    if(!options.previous) {
+    if(!options.manager) {
       // NEED A BASE (a RPS or an another overlay)
-      throw new SyntaxError('NEED A BASE (a RPS or an another overlay)');
+      throw new SyntaxError('Need the manager to access to other networks.');
     }
     this.manager = options.manager;
-    this.previous = options.previous;
     this.options =  options;
   }
-  
+
   /**
    * Get the list of neighbours
    * @return {array}

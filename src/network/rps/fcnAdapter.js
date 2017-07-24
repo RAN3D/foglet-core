@@ -45,7 +45,7 @@ class fcnAdapter extends AbstractAdapter {
     return this.rps.getInviewId();
   }
 
-  get outiewId () {
+  get outviewId () {
     return this.rps.getOutviewId();
   }
 

@@ -25,7 +25,8 @@ class Signaling extends EventEmitter {
       room: uuid(),
       timeout: 20000
     }, options);
-    this.source = source;
+    this.network = source;
+    this.source = source.rps;
     this.status = 'disconnected';
     debug(this);
   }
