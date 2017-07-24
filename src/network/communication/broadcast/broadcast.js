@@ -57,17 +57,10 @@ class Broadcast extends AbstractBroadcast {
       this.uid = uuid();
       this.causality = new VV(this.uid);
       this.causality.incrementFrom({ _e: this.uid, _c: 0 });
-      // The sniffer is applied before a message is sent or received
-      this.sniffer = this.options.sniffer || function (message) {
-        return message;
-      };
-
       // buffer of received messages
       this.buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
       this.bufferAntiEntropy = messages.MAntiEntropyResponse('init');
-
-      debug(`initialized for:  ${protocol}`);
     } else {
       return new Error('Not enough parameters', 'fbroadcast.js');
     }
@@ -91,10 +84,6 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean}
    */
   send (message, isReady = undefined) {
-    const sniffed = this.sniffer(message);
-    if(sniffed) {
-      message = sniffed;
-    }
     const a = this.causality.increment();
     const broadcastMessage = messages.BroadcastMessage(this.protocol, a, isReady || this.causality.clone(), message);
     // #2 register the message in the structure
@@ -103,20 +92,6 @@ class Broadcast extends AbstractBroadcast {
     // #3 send the message to the neighborhood
     this._sendAll(broadcastMessage);
     return broadcastMessage.isReady;
-  }
-
-  /**
-   * On reception of a message
-   * @deprecated
-   * @param  {[type]} message [description]
-   * @return {[type]}         [description]
-   */
-  _onReceive (message) {
-    const sniffed = this.sniffer(message);
-    if(sniffed) {
-      message = sniffed;
-    }
-    this.emit('receive', message);
   }
 
   /**
@@ -144,7 +119,7 @@ class Broadcast extends AbstractBroadcast {
    * @param  {Object} message - The message received
    * @return {void}
    */
-  _receiveMessage (id, message) {
+  _receive (id, message) {
     switch (message.type) {
     default: {
       if (!this._shouldStopPropagation(message)) {
@@ -219,7 +194,7 @@ class Broadcast extends AbstractBroadcast {
         found = true;
         this.causality.incrementFrom(message.id);
         this.buffer.splice(index, 1);
-        this.emit('receive', message.payload, message.issuer);
+        this.emit('receive', message.issuer, message.payload);
       }
     }
     if (found) {

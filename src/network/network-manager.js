@@ -4,19 +4,13 @@ const EventEmitter = require('events');
 
 // lodash utils
 const lmerge = require('lodash/merge');
-// const llast = require('lodash/last');
-// const lfind = require('lodash/find');
-// const ldropRight = require('lodash/dropRight');
-// const lfindIndex = require('lodash/findIndex');
-// const lpullAt = require('lodash/pullAt');
-
-// uuid generator
-const uuid = require('uuid/v4');
+const llast = require('lodash/last');
 
 // Networks
 const Network = require('./network.js');
 const FcnAdapter = require('./rps/fcnAdapter.js');
 const SprayAdapter = require('./rps/sprayAdapter.js');
+const LatenciesOverlay = require('./overlay/latencies-overlay.js');
 
 // debug
 const debug = require('debug')('foglet-core:network-manager');
@@ -35,10 +29,9 @@ class NetworkManager extends EventEmitter {
         }
       },
       overlay: {
-        type: [],
-        options: { // options wiil be passed to all components of the overlay
-
-        }
+        enable: false,
+        type: [], // string id or your overlay class reference
+        options: { }// options wiil be passed to all components of the overlay
       }
     }, options);
 
@@ -47,7 +40,7 @@ class NetworkManager extends EventEmitter {
 
     // construct overlay
     this.overlays = [];
-    // this._constructOverlays(this.options.overlays);
+    this._constructOverlays(this.options.overlay);
 
     debug('Networks (Rps and overlays) initialized.');
   }
@@ -58,10 +51,16 @@ class NetworkManager extends EventEmitter {
    * @param {number} index Index of the rps/overlay
    * @return {Network} Return a network to use.
    */
-  use (index = 0) {
-    if(this.overlays.length === 0 || index === 0) return this.rps;
-    if(index === this.overlays.length) throw new RangeError('Index out of bound !');
-    return this.overlays[index - 1];
+  use (index) {
+    // if no index, or no overlays
+    if(!index) {
+      if(this.overlays.length === 0) return this.rps;
+      return llast(this.overlays);
+    } else {
+      if(this.overlays.length === 0) return this.rps;
+      return this.overlays[index];
+
+    }
   }
 
   /**
@@ -99,55 +98,76 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
+   * @private
+   * Construct all overlays speicified;
+   * @param  {Object} options Overlay options specified
+   * @return {void}
+   */
+  _constructOverlays (options) {
+    debug(options);
+    if(options.enable) {
+      let overlayNumber = options.type.length;
+      debug('#Overlay: ', overlayNumber);
+      for(let i = 0; i < overlayNumber; ++i) {
+        this._addOverlay(options.type[0], options.options);
+      }
+    } else {
+      debug('Overlay not enabled, RPS only available.');
+    }
+  }
+
+  /**
+   * @private
+   * Return an Overlay class reference
+   * @param  {string} type Overlay type
+   * @return {}
+   */
+  _chooseOverlay (type) {
+    let overlay = null;
+    switch(type) {
+    case 'latencies':
+      overlay = LatenciesOverlay;
+      break;
+    }
+    return overlay;
+  }
+
+  /**
+   * @private
    * Add an overlay to the our list of overlays, construct the overlay, and connect the overlay to the network by using the connection() Promise.
    * Return the overlay id after its construction, initialization
    * @param {Overlay|string} overlay Class Overlay, THIS IS NOT AN OBJECT ALREADY INITIALIZED ! THIS A REFERENCE TO THE CLASS Overlay, Or it can be a string representing the id of a default Implemented overlay
    * @return {Promise<string>} id Id of the new overlay
    */
-  add (overlay) {
+  _addOverlay (overlay, globalOptions) {
+    debug(overlay, globalOptions);
     if(typeof overlay !== 'object') throw new SyntaxError('An overlay is an object {class: ..., options: {...}}');
-    this.log(overlay, typeof overlay);
-    let obj = {
-      id: uuid()
-    };
+    let objNetwork = undefined;
+    // override and merge of global options with specified options
+    let options = lmerge(globalOptions, overlay.options);
+    options.manager = this;
     if(typeof overlay.class === 'function') {
-      obj.overlay = new overlay({
-        manager: this, // reference to the manager to access to other overlay when needed
-        previous: this.overlays[0],
-        options: overlay.options,
-        origin: {
-          overlay: overlay.class,
-          options: overlay.options
-        }
-      });
+      let net = new overlay(options);
+      objNetwork = new Network(net, options);
     } else if( typeof overlay.class === 'string' ) {
-      let overlord = this._defaultOverlay(overlay.class);
+      let overlord = this._chooseOverlay(overlay.class);
       if(!overlord) {
         return Promise.reject(new Error('No overlay available for this string id.'));
       }
       try {
         // initialization of the the overlay.
-        obj.overlay = new overlord({
-          manager: this, // reference to the manager to access to other overlay when needed
-          previous: this.overlays[0],
-          options: overlay.options,
-          origin: {
-            overlay: overlord,
-            options: {}
-          }
-        });
-
+        let net = new overlord(options);
+        objNetwork = new Network(net, options);
         // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
-        obj.id = obj.overlay.id;
       } catch (e) {
         return Promise.reject(e);
       }
     } else {
+      // push this overlay to our list
       return Promise.reject(new Error('overlay have to class reference or an available string id'));
     }
-    // push this overlay to our list
-    this.overlays.push(obj);
-    return Promise.resolve(obj.id);
+    this.overlays.push(objNetwork);
+    return Promise.resolve();
   }
 }
 

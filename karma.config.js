@@ -32,7 +32,7 @@ module.exports = function (config) {
     },
     // list of files to exclude
     exclude: [
-      'tests/finterpreter-test.js',
+      'fprotocol/*.js',
       'src/rps/**/*.js',
       'src/utils/**/*.js'
     ],

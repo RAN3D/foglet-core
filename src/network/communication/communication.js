@@ -6,10 +6,9 @@ const Broadcast = require('./broadcast/broadcast.js');
 
 class Communication {
   constructor (source, protocol) {
-    debug(source, protocol);
-    this.unicast = new Unicast(source, protocol);
-    this.broadcast = new Broadcast(source, protocol);
-    debug('Communication enabled for protocol; ' + protocol);
+    this.network = source;
+    this.unicast = new Unicast(this.network, protocol);
+    this.broadcast = new Broadcast(this.network, protocol);
   }
 
   /**
@@ -23,22 +22,25 @@ class Communication {
   }
 
   /**
+   * @todo Complete tests of this function
    * Send a message to multiple peers
    * @param  {array<string>} ids     Array of ids to the send message
    * @param  {Object} message Message to send
    * @return {Promise}         Promise resolve when all message are sent
    */
   sendMultipleUnicast (ids, message) {
+    debug('@Experimental function.');
     return this.unicast.sendMultiple(ids, message);
   }
 
   /**
   * Send a broacasted message
-  * @param  {[type]} message Message to broadcast over the network
+  * @param  {Object} message Message to broadcast over the network
+  * @param  {VersionVector} isReady Id of the message to wait before this message is received
   * @return {Object}  id of the message sent
   */
-  sendBroadcast (message) {
-    return this.broadcast.send(message);
+  sendBroadcast (message, isReady = undefined) {
+    return this.broadcast.send(message, isReady);
   }
 
   /**

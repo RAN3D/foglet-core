@@ -41,12 +41,11 @@ class AbstractBroadcast extends EventEmitter {
    */
   constructor (source, protocol) {
     super();
-    debug(source, protocol);
     this.source = source;
     this.protocol = 'foglet-broadcast-protocol-' + protocol;
-    this.unicast = new Unicast(source, protocol);
+    this.unicast = new Unicast(source, this.protocol);
     this.unicast.on('receive', (id, message) => {
-      this._receiveMessage(id, message);
+      this._receive(id, message);
     });
   }
 
