@@ -47,12 +47,12 @@ class ServiceBuilder {
     this._builder = null;
     this._handler = null;
     this._beforeHooks = {
-      send: null,
-      receive: null
+      send: [],
+      receive: []
     };
     this._afterHooks = {
-      send: null,
-      receive: null
+      send: [],
+      receive: []
     };
   }
 
@@ -101,8 +101,8 @@ class ServiceBuilder {
    */
   get before () {
     return {
-      send: callback => this._beforeHooks.send = callback,
-      receive: callback => this._beforeHooks.receive = callback
+      send: callback => this._beforeHooks.send.push(callback),
+      receive: callback => this._beforeHooks.receive.push(callback)
     };
   }
 
@@ -118,8 +118,8 @@ class ServiceBuilder {
    */
   get after () {
     return {
-      send: callback => this._afterHooks.send = callback,
-      receive: callback => this._afterHooks.receive = callback
+      send: callback => this._afterHooks.send.push(callback),
+      receive: callback => this._afterHooks.receive.push(callback)
     };
   }
 
@@ -135,10 +135,8 @@ class ServiceBuilder {
       throw new ServiceBuldingError('');
     this._builder.buildService(protocol);
     this._builder.buildHandler(protocol, this._handler);
-    if (this._beforeHooks !== null)
-      this._builder.buildBeforeHooks(protocol, this._beforeHooks);
-    if (this._afterHooks !== null)
-      this._builder.buildAfterHooks(protocol, this._afterHooks);
+    this._builder.buildBeforeHooks(protocol, this._beforeHooks);
+    this._builder.buildAfterHooks(protocol, this._afterHooks);
   }
 
   /**
