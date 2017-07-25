@@ -104,10 +104,8 @@ class NetworkManager extends EventEmitter {
    * @return {void}
    */
   _constructOverlays (options) {
-    debug(options);
     if(options.enable) {
       let overlayNumber = options.type.length;
-      debug('#Overlay: ', overlayNumber);
       for(let i = 0; i < overlayNumber; ++i) {
         this._addOverlay(options.type[0], options.options);
       }

@@ -3,6 +3,9 @@
 const Foglet = require('../src/foglet.js').Foglet;
 const buildFog = require('./utils.js').buildFog;
 
+localStorage.debug = 'foglet-core:*';
+
+
 describe('[COMMUNICATION] Unicast/Broadcast', function () {
   this.timeout(30000);
 
@@ -25,6 +28,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
       }, 2000);
     });
   });
+
   it('[Unicast-simple] sendUnicast/onUnicast', function (done) {
     const foglets = buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
@@ -46,6 +50,37 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
       }, 2000);
     });
   });
+
+  it('[Unicast-complex] sendMulticast', function (done) {
+    const foglets = buildFog(Foglet, 2);
+    let f1 = foglets[0], f2 = foglets[1];
+
+    let wanted = 0, received = 0;
+    function receive (id, message) {
+      received++;
+      assert.equal(message, 'hello');
+      if(received === wanted) done();
+    }
+
+    f2.onUnicast((id, message) => {
+      console.log(id + ' : ' + message);
+      receive(id, message);
+    });
+
+
+    f1.connection(f2).then( () => {
+      setTimeout(() => {
+        let peers = f1.getNeighbours();
+        wanted = peers.length;
+        f1.sendMulticast(peers, 'hello').then(() => {
+          console.log('Multicast sent to ', peers);
+        }).catch(e => {
+          console.log(e);
+        });
+      }, 2000);
+    })
+  });
+
   it('[Broadcast-complex] sendBroadcast with ordered message on 3 peers network', function (done) {
     const foglets = buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];

@@ -27,8 +27,6 @@ class Signaling extends EventEmitter {
     }, options);
     this.network = source;
     this.source = source.rps;
-    this.status = 'disconnected';
-    debug(this);
   }
 
   connection (network, timeout = this.options.timeout) {
@@ -46,10 +44,13 @@ class Signaling extends EventEmitter {
             }
           });
         } else {
-          this._signalingJoinRoom(this.options.room);
-          this._signalingjoinOnRoom(() => {
+          debug('Connecting to the room ' + this.options.room + '...');
+          this.signaling.emit('joinRoom', { room: this.options.room  });
+
+          this.signaling.on('joinedRoom', () => {
+            debug('Connected to the room: ' + this.options.room);
             this.source.join(this._signalingInit()).then(() => {
-              this._signalingConnected(this.options.room);
+              this.signaling.emit('connected', { room: this.options.room });
             }).catch(error => {
               if(error === 'connected') {
                 this.emit('connected');
@@ -60,11 +61,10 @@ class Signaling extends EventEmitter {
           });
         }
         this.once('connected', () => {
-          this.status = 'connected';
           resolve(true);
         });
         setTimeout(() => {
-          reject();
+          reject('connection timed out.');
         }, timeout);
       } catch (error) {
         reject(error);
@@ -78,7 +78,7 @@ class Signaling extends EventEmitter {
   */
   signaling () {
     //	Connection to the signaling server
-    this.signaling = io.connect(this.options.signalingAdress, {origins: this.options.origins});
+    this.signaling = io.connect(this.options.address, {origins: this.options.origins});
 
     this.signaling.on('new_spray', (data) => {
       const signalingAccept = (offer) => {
@@ -86,14 +86,14 @@ class Signaling extends EventEmitter {
         this.signaling.emit('accept', { offer, room: this.options.room });
       };
       debug('Receive a new offer: ', data);
-      this.source.rps.connect(signalingAccept, data);
+      this.source.connect(signalingAccept, data);
     });
     this.signaling.on('accept_spray', (data) => {
       debug('Receive an accepted offer: ', data);
-      this.source.rps.connect(data);
+      this.source.connect(data);
     });
-
     this.signaling.on('connected', () => {
+      debug('Peer connected.');
       this.emit('connected');
     });
   }
@@ -125,25 +125,6 @@ class Signaling extends EventEmitter {
     };
   }
 
-  /**
-   * @private
-   * Signal to the server that we want to join a room
-   * @param  {string} room The room to join
-   * @return {void}
-   */
-  _signalingJoinRoom (room) {
-    this.signaling.emit('joinRoom', { room });
-  }
-
-  /**
-   * @private
-   * Signal to the server that we are connected
-   * @param  {signaling} room The room to signal that we are connected
-   * @return {void}
-   */
-  _signalingConnected (room) {
-    this.signaling.emit('connected', { room });
-  }
   /**
    * @private
    * Begin a signaling exchange

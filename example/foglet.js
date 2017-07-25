@@ -97,6 +97,7 @@ const redrawBis = () => {
     });
   }
 };
+
 const directConnection = () => {
   init();
   let f = o[0];
@@ -115,6 +116,7 @@ const signalingConnection = (time2wait = 500) => {
   for (let i = 0; i < max; ++i) {
     (function (ind) {
       setTimeout(function () {
+        o[ind].share();
         o[ind].connection().then(d =>{
           if(i === max - 1) {
             redrawBoth();

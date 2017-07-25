@@ -36,9 +36,9 @@ class Unicast extends AbstractUnicast {
   sendMultiple (ids = [], message) {
     return new Promise((resolve, reject) => {
       if (ids.length > 0) {
-        return ids.reduce((acc, current, index) => {
-          return this.emit(this.protocol, ids[index], this.source.outviewId, message);
-        }, Promise.resolve());
+        ids.reduce((acc, current, index) => {
+          return this.send(ids[index], message);
+        }, Promise.resolve()).then(() => resolve()).catch(e => reject(e));
       } else {
         debug('No ids specified, message not sent');
         reject();
