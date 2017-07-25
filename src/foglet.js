@@ -31,17 +31,14 @@ const lmerge = require('lodash/merge');
 // NetworkManager
 const NetworkManager = require('./network/network-manager.js');
 
-// Storage
-const FStore = require('./storage/fstore.js');
-
 // SSH COntrol
-// const SSH = require('./ssh/ssh.js');
+const SSH = require('./utils/ssh.js');
 
 // Middleware
 const MiddlewareRegistry = require('./utils/middleware-registry.js');
 
 /**
-* Create a Foglet Class in order to use Spray with ease
+* Create a Foglet Class (facade pattern)
 * @class Foglet
 * @author Grall Arnaud (folkvir)
 */
@@ -103,7 +100,10 @@ class Foglet extends EventEmitter {
             }
           }
         ] // add an latencies overlay
-      }
+      },
+      ssh: undefined  /*{
+        address: 'http://localhost:4000/'
+      }*/
     };
     this.options = lmerge(this.defaultOptions, options);
     this.id = uuid();
@@ -114,26 +114,15 @@ class Foglet extends EventEmitter {
     // Middlewares
     this._middlewares = new MiddlewareRegistry();
 
-    // // SSH COntrol
-    // if (this.options.ssh && this.options.ssh.address) {
-    //   this.ssh = new SSH({
-    //     foglet: this,
-    //     address: this.options.ssh.address
-    //   });
-    //   this.ssh.on('logs', (message, data) => this._log(data));
-    // }
+    // SSH COntrol
+    if (this.options.ssh && this.options.ssh.address) {
+      this.ssh = new SSH({
+        foglet: this,
+        address: this.options.ssh.address
+      });
+      this.ssh.on('logs', (message, data) => this._log(data));
+    }
 
-    // DATA STRUCTURES
-    this.registerList = {};
-    const self = this;
-    this.store = new FStore({
-      map : {
-        views : function () {
-          return self.getNeighbours();
-        },
-        jobs: {},
-      }
-    });
   }
 
   get inviewId () {
@@ -165,6 +154,22 @@ class Foglet extends EventEmitter {
   }
 
   /**
+   * Enable the signaling share system, peer will connect to us.
+   * @return {void}
+   */
+  share () {
+    this.getNetwork().signaling.signaling();
+  }
+
+  /**
+   * Disable the signaling share system, peer will be not able to connect with us.
+   * @return {void}
+   */
+  unshare () {
+    this.getNetwork().signaling.unsignaling();
+  }
+
+  /**
    * Return the specified overlay by its id, if index not specified, return the rps
    * @param {string} id Index of a network, default: index of the last overlay added or 0 (the rps) if no overlay
    * @return {object} Return the network to use
@@ -183,23 +188,6 @@ class Foglet extends EventEmitter {
    */
   use (middleware, priority = 0) {
     this._middlewares.register(middleware, priority);
-  }
-
-
-  /**
-  * This callback is a parameter of the onRegister function.
-  * @callback callback
-  * @param {object} responseData - Data emits on update
-  */
-  /**
-  * Allow to listen emits on a register when updated with a specified name and callback
-  * @function onRegister
-  * @param {String} name - Name of the register
-  * @param {callback} callback - Callback function that handles the response
-  * @returns {void}
-  */
-  onRegister (name, callback) {
-    this.getRegister(name).on(name+'-receive', callback);
   }
 
   /**
@@ -255,6 +243,17 @@ class Foglet extends EventEmitter {
   */
   sendUnicast (id, message) {
     return this.getNetwork().communication.sendUnicast(id, this._middlewares.in(message));
+  }
+
+  /**
+  * Send a message to a specific neighbour (id)
+  * @function sendUnicast
+  * @param {object} message - The message to send
+  * @param {string} id - One of your neighbour's id
+  * @return {boolean} return true if it seems to have sent the message, false otherwise.
+  */
+  sendMulticast (ids = [], message) {
+    return this.getNetwork().communication.sendMulticast(ids, this._middlewares.in(message));
   }
 
   /**

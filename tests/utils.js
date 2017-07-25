@@ -19,7 +19,7 @@ const buildFog = (Foglet, size) => {
           timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
           delta: 10 * 1000, // spray-wrtc shuffle interval
           signaling: {
-            address: 'https://localhost:3000',
+            address: 'http://localhost:3000',
             // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
             room: `test-room-generated-${id}`
           }

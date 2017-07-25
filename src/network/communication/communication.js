@@ -1,6 +1,6 @@
 'use strict';
 
-const debug = require('debug')('foglet-core:communication');
+// const debug = require('debug')('foglet-core:communication');
 const Unicast = require('./unicast/unicast.js');
 const Broadcast = require('./broadcast/broadcast.js');
 
@@ -28,8 +28,7 @@ class Communication {
    * @param  {Object} message Message to send
    * @return {Promise}         Promise resolve when all message are sent
    */
-  sendMultipleUnicast (ids, message) {
-    debug('@Experimental function.');
+  sendMulticast (ids, message) {
     return this.unicast.sendMultiple(ids, message);
   }
 
