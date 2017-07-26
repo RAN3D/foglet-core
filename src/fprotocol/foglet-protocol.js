@@ -24,7 +24,7 @@ SOFTWARE.
 'use strict';
 
 const AnswerQueue = require('./answer-queue.js');
-const HandlerManager = require('./handler-manager.js');
+// const HandlerManager = require('./handler-manager.js');
 
 /**
  * FogletProtocol represent an abstract protocol.
@@ -58,34 +58,24 @@ class FogletProtocol {
    * Constructor
    * @param  {string} name   - The protocol's name
    * @param  {Foglet} foglet - The Foglet instance used by the protocol to communicate
+   * @param  {...*} args - Additional arguments passed down to the `_init` function
    */
-  constructor (name, foglet) {
+  constructor (name, foglet, ...args) {
     this._name = name;
     this._foglet = foglet;
-    this._handlerManager = new HandlerManager(this);
+    // this._handlerManager = new HandlerManager(this);
     this._answerQueue = new AnswerQueue();
-    this._buildProtocol();
-    this._handlerManager.init();
+    this._initHandlers();
+    if ('_init' in this)
+      this._init(this, ...args);
   }
 
-  /**
-   * Returns the names of unicast services offered by this protocol.
-   *
-   * This method must be implemented by protocol developpers to specificy their protocol.
-   * @return {string[]} The names of unicast services offered by this protocol
-   */
-  _unicast () {
-    return [];
+  _sendUnicast (id, msg, resolve, reject) {
+    this._foglet.sendUnicast(this._answerQueue.stamp(msg, resolve, reject), id);
   }
 
-  /**
-   * Returns the names of broadcast services offered by this protocol.
-   *
-   * This method must be implemented by protocol developpers to specificy their protocol.
-   * @return {string[]} The names of broadcast services offered by this protocol
-   */
-  _broadcast () {
-    return [];
+  _sendBroadcast (msg) {
+    this._foglet.sendBroadcast(msg);
   }
 
   /**
@@ -108,9 +98,68 @@ class FogletProtocol {
     this._answerQueue.reject(msg.answerID, msg.value);
   }
 
+  _initHandlers () {
+    this._foglet.onUnicast((id, msg) => this._handleUnicast(id, msg));
+    this._foglet.onBroadcast((msg, id) => this._handleBroadcast(msg, id));
+  }
+
+  /**
+   * Handle the reception of an unicast message
+   * @private
+   * @param {string} senderID - ID of the peer who send the message
+   * @param {Object} msg - The message received
+   * @return {void}
+   */
+  _handleUnicast (senderID, msg) {
+    const handlerName = `_${msg.method}`;
+    if (this._name === msg.protocol && handlerName in this) {
+      // do not generate helpers for message emitted through the reply & reject helpers
+      if (msg.method !== 'answerReply' || msg.method !== 'answerReject') {
+        const reply = value => {
+          this._foglet.sendUnicast({
+            protocol: 'foglet-protocol',
+            method: 'answerReply',
+            payload: {
+              answerID: msg.answerID,
+              value
+            }
+          }, senderID);
+        };
+        const reject = value => {
+          this._foglet.sendUnicast({
+            protocol: 'foglet-protocol',
+            method: 'answerReject',
+            payload: {
+              answerID: msg.answerID,
+              value
+            }
+          }, senderID);
+        };
+        this[handlerName].call(this, senderID, msg.payload, reply, reject);
+      } else {
+        this[handlerName].call(this, senderID, msg.payload);
+      }
+    }
+  }
+
+  /**
+   * Handle the reception of a broadcast message
+   * @private
+   * @param {Object} msg - The message received
+   * @param {string} senderID - ID of the peer who send the message
+   * @return {void}
+   */
+  _handleBroadcast (msg, senderID) {
+    const handlerName = `_${msg.method}`;
+    if (this._name === msg.protocol && handlerName in this) {
+      this[handlerName].call(this, senderID, msg.payload);
+    }
+  }
+
   /**
    * Build protocol services
    * @private
+   * @deprecated
    * @return {void}
    */
   _buildProtocol () {
@@ -148,6 +197,7 @@ class FogletProtocol {
   /**
    * Register a service
    * @private
+   * @deprecated
    * @param  {string} serviceName   - The service name
    * @param  {function} serviceMethod - The method called by the service
    * @return {void}

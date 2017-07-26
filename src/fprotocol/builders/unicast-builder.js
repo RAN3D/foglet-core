@@ -23,14 +23,14 @@ SOFTWARE.
 */
 'use strict';
 
-const AbstractBuilder = require('./abstract-builder.js');
+const AbstractMethodBuilder = require('./abstract-method-builder.js');
 
 /**
  * A builder specialized for unicast services
- * @extends AbstractBuilder
+ * @extends AbstractMethodBuilder
  * @author Thomas Minier
  */
-class UnicastBuilder extends AbstractBuilder {
+class UnicastBuilder extends AbstractMethodBuilder {
 
   /**
    * Build the service method used to send messages.
@@ -39,15 +39,16 @@ class UnicastBuilder extends AbstractBuilder {
    * @return {void}
    */
   buildService (protocol) {
+    const method = this._snakedCasedName;
     protocol.prototype[this._snakedCasedName] = function (id, payload) {
       const self = this;
       return new Promise(function (resolve, reject) {
         const msg = {
           protocol: self._name,
-          method: this._serviceName,
+          method,
           payload
         };
-        self._foglet.sendUnicast(self._answerQueue.stamp(msg, resolve, reject), id);
+        self._sendUnicast(id, msg, resolve, reject);
       });
     };
   }
