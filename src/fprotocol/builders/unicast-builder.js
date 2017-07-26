@@ -39,9 +39,13 @@ class UnicastBuilder extends AbstractMethodBuilder {
    * @return {void}
    */
   buildService (protocol) {
-    const method = this._snakedCasedName;
-    protocol.prototype[this._snakedCasedName] = function (id, payload) {
+    const method = this.methodName;
+    const beforeSendHook = this.beforeSendName;
+    const afterSendHook = this.afterSendName;
+    protocol.prototype[method] = function (id, payload) {
       const self = this;
+      if (beforeSendHook in self)
+        payload = self[beforeSendHook].call(self, payload);
       return new Promise(function (resolve, reject) {
         const msg = {
           protocol: self._name,
@@ -49,6 +53,8 @@ class UnicastBuilder extends AbstractMethodBuilder {
           payload
         };
         self._sendUnicast(id, msg, resolve, reject);
+        if (afterSendHook in self)
+          self[afterSendHook].call(self, payload);
       });
     };
   }

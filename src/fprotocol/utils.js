@@ -23,39 +23,26 @@ SOFTWARE.
 */
 'use strict';
 
-const AbstractMethodBuilder = require('./abstract-method-builder.js');
+const camelCase = require('lodash/camelCase');
+const capitalize = require('lodash/capitalize');
 
-/**
- * A builder specialized for broadcast services
- * @extends AbstractMethodBuilder
- * @author Thomas Minier
- */
-class BroadcastBuilder extends AbstractMethodBuilder {
-
-  /**
-   * Build the service method used to send messages.
-   * @override
-   * @param  {function} protocol - The protocol class
-   * @return {void}
-   */
-  buildService (protocol) {
-    const method = this.methodName;
-    const beforeSendHook = this.beforeSendName;
-    const afterSendHook = this.afterSendName;
-    protocol.prototype[method] = function (payload) {
-      const self = this;
-      if (beforeSendHook in self)
-        payload = self[beforeSendHook].call(self, payload);
-      const msg = {
-        protocol: self._name,
-        method,
-        payload
-      };
-      self._sendBroadcast(msg);
-      if (afterSendHook in self)
-        self[afterSendHook].call(self, payload);
-    };
+module.exports = {
+  methodName: method => {
+    return camelCase(method);
+  },
+  handlerName: method => {
+    return `_${camelCase(method)}`;
+  },
+  beforeSendName: method => {
+    return `_beforeSend${capitalize(camelCase(method))}`;
+  },
+  beforeReceiveName: method => {
+    return `_beforeReceive${capitalize(camelCase(method))}`;
+  },
+  afterSendName: method => {
+    return `_afterSend${capitalize(camelCase(method))}`;
+  },
+  afterReceiveName: method => {
+    return `_afterReceive${capitalize(camelCase(method))}`;
   }
-}
-
-module.exports = BroadcastBuilder;
+};
