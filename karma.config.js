@@ -23,14 +23,10 @@ module.exports = function (config) {
     ],
     // list of files / patterns to load in the browser
     files: [
-      'tests/fprotocol/foglet-protocol-test.js'
-      // 'tests/*-test.js',
-      // 'tests/**/*-test.js'
+      'tests/*-test.js'
     ],
     preprocessors:{
-      'tests/fprotocol/foglet-protocol-test.js': [ 'coverage', 'browserify' ]
-      // 'tests/*-test.js': [ 'coverage', 'browserify' ],
-      // 'tests/**/*-test.js': [ 'coverage', 'browserify' ]
+      'tests/*-test.js': [ 'coverage', 'browserify' ]
     },
     // list of files to exclude
     exclude: [
