@@ -39,11 +39,12 @@ class BroadcastBuilder extends AbstractMethodBuilder {
    * @return {void}
    */
   buildService (protocol) {
+    const method = this._snakedCasedName;
     protocol.prototype[this._snakedCasedName] = function (payload) {
       const self = this;
       const msg = {
         protocol: self._name,
-        method: this._snakedCasedName,
+        method,
         payload
       };
       self._sendBroadcast(msg);
