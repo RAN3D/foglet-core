@@ -46,7 +46,7 @@ function reduceHooks (hooks) {
 }
 
 /**
- * An AbstractBuilder defines an abstract class capable of builiding a service.
+ * An AbstractBuilder defines an abstract class capable of builiding a service method.
  * It defines, in the prototype of a protocol subclass:
  * * The service method, used to send messages.
  * * The service handler, used to handle reception of messages for this service.
@@ -54,7 +54,7 @@ function reduceHooks (hooks) {
  * @abstract
  * @author Thomas Minier
  */
-class AbstractBuilder {
+class AbstractMethodBuilder {
   /**
    * Constructor
    * @param  {string} serviceName - The name of the service
@@ -111,4 +111,4 @@ class AbstractBuilder {
   }
 }
 
-module.exports = AbstractBuilder;
+module.exports = AbstractMethodBuilder;

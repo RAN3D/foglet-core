@@ -23,15 +23,15 @@ SOFTWARE.
 */
 'use strict';
 
-const UnicastBuilder = require('./builders/unicast-builder.js');
-const BroadcastBuilder = require('./builders/broadcast-builder.js');
+const UnicastBuilder = require('./unicast-builder.js');
+const BroadcastBuilder = require('./broadcast-builder.js');
 
 /**
  * Error thrown when a service builder has an invalid configuration
  * @extends Error
  * @author Thomas Minier
  */
-class ServiceBuldingError extends Error {}
+class ServiceBuildingError extends Error {}
 
 /**
  * A ServiceBuilder build a service into the prototype of a protocol, including the service method, the handler & the possible hooks.
@@ -132,7 +132,7 @@ class ServiceBuilder {
    */
   apply (protocol) {
     if (!this._validate())
-      throw new ServiceBuldingError('');
+      throw new ServiceBuildingError('');
     this._builder.buildService(protocol);
     this._builder.buildHandler(protocol, this._handler);
     this._builder.buildBeforeHooks(protocol, this._beforeHooks);

@@ -23,14 +23,14 @@ SOFTWARE.
 */
 'use strict';
 
-const AbstractBuilder = require('./abstract-builder.js');
+const AbstractMethodBuilder = require('./abstract-method-builder.js');
 
 /**
  * A builder specialized for broadcast services
- * @extends AbstractBuilder
+ * @extends AbstractMethodBuilder
  * @author Thomas Minier
  */
-class BroadcastBuilder extends AbstractBuilder {
+class BroadcastBuilder extends AbstractMethodBuilder {
 
   /**
    * Build the service method used to send messages.
@@ -43,10 +43,10 @@ class BroadcastBuilder extends AbstractBuilder {
       const self = this;
       const msg = {
         protocol: self._name,
-        method: this._serviceName,
+        method: this._snakedCasedName,
         payload
       };
-      self._foglet.sendBroadcast(msg);
+      self._sendBroadcast(msg);
     };
   }
 }

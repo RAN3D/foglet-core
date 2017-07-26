@@ -25,7 +25,8 @@ SOFTWARE.
 
 const compact = require('lodash/compact');
 const FogletProtocol = require('./foglet-protocol.js');
-const ServiceBuilder = require('./service-builder.js');
+const ServiceBuilder = require('./builders/service-builder.js');
+const InitBuilder = require('./builders/init-builder.js');
 
 /**
  * Create a function that evaluates a tagged template to create a new subclass of {@link FogletProtocol}
@@ -37,15 +38,19 @@ function define (protocolName) {
   return function (services, ...callbacks) {
     let builder;
     const protocolClass = class extends FogletProtocol {
-      constructor (foglet) {
-        super(protocolName, foglet);
+      constructor (foglet, ...args) {
+        super(protocolName, foglet, ...args);
       }
     };
     // clean services names before building
     compact(services.map(str => str.trim()))
     .forEach((name, index) => {
-      builder = new ServiceBuilder(name);
-      callbacks[index](builder);
+      if (name === 'init' || name === 'constructor') {
+        builder = new InitBuilder(callbacks[index]);
+      } else {
+        builder = new ServiceBuilder(name);
+        callbacks[index](builder);
+      }
       builder.apply(protocolClass);
     });
     return protocolClass;
