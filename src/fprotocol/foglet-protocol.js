@@ -24,6 +24,7 @@ SOFTWARE.
 'use strict';
 
 const AnswerQueue = require('./answer-queue.js');
+const utils = require('./utils.js');
 
 /**
  * FogletProtocol represent an abstract protocol.
@@ -126,8 +127,12 @@ class FogletProtocol {
    * @return {void}
    */
   _handleUnicast (senderID, msg) {
-    const handlerName = `_${msg.method}`;
+    const handlerName = utils.handlerName(msg.method);
     if (this._name === msg.protocol && handlerName in this) {
+      // apply before hooks
+      const beforeReceive = utils.beforeReceiveName(msg.method);
+      if (beforeReceive in this)
+        msg.payload = this[beforeReceive].call(this, msg.payload);
       // do not generate helpers for message emitted through the reply & reject helpers
       if (msg.method !== 'answerReply' || msg.method !== 'answerReject') {
         const reply = value => {
@@ -154,6 +159,10 @@ class FogletProtocol {
       } else {
         this[handlerName].call(this, senderID, msg.payload);
       }
+      // apply after receive hook
+      const afterReceive = utils.afterReceiveName(msg.method);
+      if (afterReceive in this)
+        this[afterReceive].call(this, msg.payload);
     }
   }
 
@@ -165,9 +174,18 @@ class FogletProtocol {
    * @return {void}
    */
   _handleBroadcast (senderID, msg) {
-    const handlerName = `_${msg.method}`;
+    const handlerName = utils.handlerName(msg.method);
     if (this._name === msg.protocol && handlerName in this) {
+      // apply before hooks
+      const beforeReceive = utils.beforeReceiveName(msg.method);
+      if (beforeReceive in this)
+        msg.payload = this[beforeReceive].call(this, msg.payload);
+        // call handler
       this[handlerName].call(this, senderID, msg.payload);
+      // apply after receive hook
+      const afterReceive = utils.afterReceiveName(msg.method);
+      if (afterReceive in this)
+        this[afterReceive].call(this, msg.payload);
     }
   }
 }

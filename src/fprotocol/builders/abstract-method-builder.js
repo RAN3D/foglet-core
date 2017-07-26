@@ -24,7 +24,7 @@ SOFTWARE.
 'use strict';
 
 const camelCase = require('lodash/camelCase');
-const snakeCase = require('lodash/snakeCase');
+const capitalize = require('lodash/capitalize');
 
 /**
  * Apply hooks on a message in reduce fashion.
@@ -62,7 +62,31 @@ class AbstractMethodBuilder {
   constructor (serviceName) {
     this._serviceName = serviceName;
     this._camelCasedName = camelCase(this._serviceName);
-    this._snakedCasedName = snakeCase(this._serviceName);
+    this._capitalizedCamelCase = capitalize(this._camelCasedName);
+  }
+
+  get methodName () {
+    return this._camelCasedName;
+  }
+
+  get handlerName () {
+    return `_${this._camelCasedName}`;
+  }
+
+  get beforeSendName () {
+    return `_beforeSend${this._capitalizedCamelCase}`;
+  }
+
+  get beforeReceiveName () {
+    return `_beforeReceive${this._capitalizedCamelCase}`;
+  }
+
+  get afterSendName () {
+    return `_afterSend${this._capitalizedCamelCase}`;
+  }
+
+  get afterReceiveName () {
+    return `_afterReceive${this._capitalizedCamelCase}`;
   }
 
   /**
@@ -81,7 +105,7 @@ class AbstractMethodBuilder {
    * @return {void}
    */
   buildHandler (protocol, handler) {
-    protocol.prototype[`_${this._snakedCasedName}`] = handler;
+    protocol.prototype[this.handlerName] = handler;
   }
 
   /**
@@ -92,9 +116,9 @@ class AbstractMethodBuilder {
    */
   buildBeforeHooks (protocol, beforeHooks) {
     if (beforeHooks.send.length > 0)
-      protocol.prototype[`_beforeSend${this._camelCasedName}`] = reduceHooks(beforeHooks.send);
+      protocol.prototype[this.beforeSendName] = reduceHooks(beforeHooks.send);
     if (beforeHooks.receive.length > 0)
-      protocol.prototype[`_beforeReceive${this._camelCasedName}`] = reduceHooks(beforeHooks.receive);
+      protocol.prototype[this.beforeReceiveName] = reduceHooks(beforeHooks.receive);
   }
 
   /**
@@ -105,9 +129,9 @@ class AbstractMethodBuilder {
    */
   buildAfterHooks (protocol, afterHooks) {
     if (afterHooks.send.length > 0)
-      protocol.prototype[`_afterSend${this._camelCasedName}`] = reduceHooks(afterHooks.send);
+      protocol.prototype[this.afterSendName] = reduceHooks(afterHooks.send);
     if (afterHooks.receive.length > 0)
-      protocol.prototype[`_afterReceive${this._camelCasedName}`] = reduceHooks(afterHooks.receive);
+      protocol.prototype[this.afterReceiveName] = reduceHooks(afterHooks.receive);
   }
 }
 
