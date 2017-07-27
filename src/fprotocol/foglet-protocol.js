@@ -76,7 +76,7 @@ class FogletProtocol {
    * @return {void}
    */
   _sendUnicast (id, msg, resolve, reject) {
-    this._foglet.sendUnicast(this._answerQueue.stamp(msg, resolve, reject), id);
+    this._foglet.sendUnicast(id, this._answerQueue.stamp(msg, resolve, reject));
   }
 
   /**
@@ -116,7 +116,7 @@ class FogletProtocol {
    */
   _initHandlers () {
     this._foglet.onUnicast((id, msg) => this._handleUnicast(id, msg));
-    this._foglet.onBroadcast((msg, id) => this._handleBroadcast(id, msg));
+    this._foglet.onBroadcast((id, msg) => this._handleBroadcast(id, msg));
   }
 
   /**
@@ -136,24 +136,24 @@ class FogletProtocol {
       // do not generate helpers for message emitted through the reply & reject helpers
       if (msg.method !== 'answerReply' || msg.method !== 'answerReject') {
         const reply = value => {
-          this._foglet.sendUnicast({
+          this._sendUnicast(senderID, {
             protocol: this._name,
             method: 'answerReply',
             payload: {
               answerID: msg.answerID,
               value
             }
-          }, senderID);
+          });
         };
         const reject = value => {
-          this._foglet.sendUnicast({
+          this._sendUnicast(senderID, {
             protocol: this._name,
             method: 'answerReject',
             payload: {
               answerID: msg.answerID,
               value
             }
-          }, senderID);
+          });
         };
         this[handlerName].call(this, senderID, msg.payload, reply, reject);
       } else {
