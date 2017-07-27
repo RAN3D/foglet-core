@@ -2,7 +2,7 @@
   "name": "foglet-core",
   "version": "2.1.0",
   "description": "Core of the foglet library",
-  "main": "src/foglet.js",
+  "main": "./foglet-core.js",
   "scripts": {
     "lint": "eslint src/",
     "esdoc": "esdoc && npm run esdoc:example",
@@ -11,9 +11,9 @@
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
     "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
-    "build:foglet": "browserify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]   > ./dist/foglet.bundle.js",
-    "build:watch": "watchify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ]  -o ./dist/foglet.bundle.js -v -d ",
-    "build:foglet-min": "browserify -r ./src/foglet.js:foglet -t [ babelify --presets [ es2015 ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
+    "build:foglet": "browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ es2015 ] ]   > ./dist/foglet.bundle.js",
+    "build:watch": "watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ es2015 ] ]  -o ./dist/foglet.bundle.js -v -d ",
+    "build:foglet-min": "browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ es2015 ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
   },
   "repository": {
     "type": "git",

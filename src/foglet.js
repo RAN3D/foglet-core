@@ -101,7 +101,7 @@ class Foglet extends EventEmitter {
           }
         ] // add an latencies overlay
       },
-      ssh: undefined  /*{
+      ssh: undefined  /* {
         address: 'http://localhost:4000/'
       }*/
     };
