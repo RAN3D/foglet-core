@@ -25,6 +25,10 @@
     "webRTC"
   ],
   "author": "Folkvir",
+  "contributors": [
+    "Chat Wane (https://github.com/Chat-Wane)",
+    "Thomas Minier (https://github.com/Callidon)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ran3d/foglet-core/issues"
@@ -33,19 +37,12 @@
   "dependencies": {
     "debug": "^2.6.8",
     "fcn-wrtc": "^2.0.4",
-    "immutable": "^3.8.1",
     "lodash": "^4.17.4",
-    "n2n-overlay-wrtc": "^2.0.1",
-    "neighborhood-wrtc": "^2.0.0",
-    "serialize-javascript": "^1.3.0",
-    "socket.io": "^1.7.4",
     "socket.io-client": "^1.7.4",
     "spray-wrtc": "^2.0.2",
     "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
-    "url-parse": "^1.1.9",
-    "uuid": "^3.0.1",
-    "vivaldi-coordinates": "^1.0.0"
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.24.0",
@@ -79,15 +76,8 @@
     "unicast-definition",
     "debug",
     "fcn-wrtc",
-    "immutable",
     "lodash",
-    "q",
-    "serialize-javascript",
-    "socket.io",
     "socket.io-client",
-    "uuid",
-    "vivaldi-coordinates",
-    "n2n-overlay-wrtc",
-    "neighborhood-wrtc"
+    "uuid"
   ]
 }
