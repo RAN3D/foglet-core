@@ -27,22 +27,22 @@ const camelCase = require('lodash/camelCase');
 const capitalize = require('lodash/capitalize');
 
 module.exports = {
-  methodName: method => {
+  methodName: function (method) {
     return camelCase(method);
   },
-  handlerName: method => {
+  handlerName: function (method) {
     return `_${camelCase(method)}`;
   },
-  beforeSendName: method => {
+  beforeSendName: function (method) {
     return `_beforeSend${capitalize(camelCase(method))}`;
   },
-  beforeReceiveName: method => {
+  beforeReceiveName: function (method) {
     return `_beforeReceive${capitalize(camelCase(method))}`;
   },
-  afterSendName: method => {
+  afterSendName: function (method) {
     return `_afterSend${capitalize(camelCase(method))}`;
   },
-  afterReceiveName: method => {
+  afterReceiveName: function (method) {
     return `_afterReceive${capitalize(camelCase(method))}`;
   }
 };
