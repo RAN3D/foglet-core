@@ -67,7 +67,7 @@ class NetworkManager extends EventEmitter {
    * Construct the RPS by its type and options
    * @param  {string} type    type of the RPS, spray-wrtc/fcn-wrtc/...
    * @param  {Object} options Options of the RPS
-   * @return {}
+   * @return {void}
    */
   _constructRps (type, options) {
     let rpsClass = this._chooseRps(type);
@@ -79,7 +79,7 @@ class NetworkManager extends EventEmitter {
    * @private
    * Return a RPS class reference
    * @param  {string} type RPS type
-   * @return {}
+   * @return {void}
    */
   _chooseRps (type) {
     let rps = null;
@@ -118,7 +118,7 @@ class NetworkManager extends EventEmitter {
    * @private
    * Return an Overlay class reference
    * @param  {string} type Overlay type
-   * @return {}
+   * @return {void}
    */
   _chooseOverlay (type) {
     let overlay = null;

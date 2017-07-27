@@ -26,23 +26,35 @@ SOFTWARE.
 const camelCase = require('lodash/camelCase');
 const capitalize = require('lodash/capitalize');
 
+const methodName = method => {
+  return camelCase(method);
+};
+
+const handlerName = method => {
+  return `_${camelCase(method)}`;
+};
+
+const beforeSendName = method => {
+  return `_beforeSend${capitalize(camelCase(method))}`;
+};
+
+const beforeReceiveName = method => {
+  return `_beforeReceive${capitalize(camelCase(method))}`;
+};
+
+const afterSendName = method => {
+  return `_afterSend${capitalize(camelCase(method))}`;
+};
+
+const afterReceiveName = method => {
+  return `_afterReceive${capitalize(camelCase(method))}`;
+};
+
 module.exports = {
-  methodName: function (method) {
-    return camelCase(method);
-  },
-  handlerName: function (method) {
-    return `_${camelCase(method)}`;
-  },
-  beforeSendName: function (method) {
-    return `_beforeSend${capitalize(camelCase(method))}`;
-  },
-  beforeReceiveName: function (method) {
-    return `_beforeReceive${capitalize(camelCase(method))}`;
-  },
-  afterSendName: function (method) {
-    return `_afterSend${capitalize(camelCase(method))}`;
-  },
-  afterReceiveName: function (method) {
-    return `_afterReceive${capitalize(camelCase(method))}`;
-  }
+  methodName,
+  handlerName,
+  beforeSendName,
+  beforeReceiveName,
+  afterSendName,
+  afterReceiveName
 };
