@@ -25,29 +25,24 @@ module.exports = function (config) {
     files: [
       'tests/*-test.js'
     ],
-    preprocessors:{
-      'tests/*-test.js': [ 'coverage', 'browserify' ]
+    preprocessors: {
+      'tests/*-test.js': [ 'browserify' ]
     },
     // list of files to exclude
-    exclude: [
-      'fprotocol/*.js',
-      'src/rps/**/*.js',
-      'src/utils/**/*.js'
-    ],
+    exclude: [],
     // browserify with babelify
     browserify: {
       debug: true,
-      transform: [ [ 'babelify', {presets: [ 'es2015' ]} ], 'browserify-istanbul' ]
+      transform: [
+        [ 'babelify', {presets: [ 'es2015' ]} ],
+        'browserify-istanbul'
+      ],
     },
     extensions: [ '.js' ],
-    proxies: {
-      './': 'http://localhost:3000'
-    },
     port: 3001,
     expressHttpServer: {
       port: 4001,
-      // this function takes express app object and allows you to modify it
-      // to your liking. For more see http://expressjs.com/4x/api.html
+      // inject foglet signaling server
       appVisitor: signaling
     },
     client: {
