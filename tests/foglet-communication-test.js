@@ -7,8 +7,6 @@ localStorage.debug = 'foglet-core:*';
 
 
 describe('[COMMUNICATION] Unicast/Broadcast', function () {
-  this.timeout(30000);
-
   it('[Broadcast-simple] sendBroadcast/onBroadcast', function (done) {
     const foglets = utils.buildFog(Foglet, 2);
     let neighbourID = null;
@@ -74,9 +72,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
         wanted = peers.length;
         f1.sendMulticast(peers, 'hello').then(() => {
           console.log('Multicast sent to ', peers);
-        }).catch(e => {
-          console.log(e);
-        });
+        }).catch(done);
       }, 2000);
     });
   });
@@ -89,20 +85,19 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
     let cptB = 0;
     const results = [ '1', '2', '3', '4' ];
     const totalResult = 8;
+    const check = utils.doneAfter(totalResult, done);
 
     utils.pathConnect(foglets).then(() => {
       f2.onBroadcast((id, message) => {
         assert.equal(message, results[cptA]);
         cptA++;
-        if ((cptA + cptB) >= totalResult)
-          done();
+        check();
       });
 
       f3.onBroadcast((id, message) => {
         assert.equal(message, results[cptB]);
         cptB++;
-        if ((cptA + cptB) >= totalResult)
-          done();
+        check();
       });
 
       const ec1 = f1.sendBroadcast('1');

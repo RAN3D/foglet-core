@@ -146,7 +146,7 @@ describe('FogletProtocol', () => {
       });
 
       it('should allow after hooks on send & receive', done => {
-        let cpt = 0;
+        const check = utils.doneAfter(2, done);
         UnicastHookProtocol = defineProtocol('unicast-protocol-with-hooks')`
           get
           ${service => {
@@ -154,13 +154,11 @@ describe('FogletProtocol', () => {
             service.on.receive(function () {});
             service.after.send(function (msg) {
               assert.equal(msg, 'So Long');
-              cpt++;
+              check();
             });
             service.after.receive(function (msg) {
               assert.equal(msg, 'So Long');
-              cpt++;
-              assert.equal(cpt, 2);
-              done();
+              check();
             });
           }}
         `;
@@ -242,7 +240,7 @@ describe('FogletProtocol', () => {
       });
 
       it('should allow after hooks on send & receive', done => {
-        let cpt = 0;
+        const check = utils.doneAfter(2, done);
         BroadcastHookProtocol = defineProtocol('broadcast-protocol-with-hooks')`
           get
           ${service => {
@@ -250,13 +248,11 @@ describe('FogletProtocol', () => {
             service.on.receive(function () {});
             service.after.send(function (msg) {
               assert.equal(msg, 'So Long');
-              cpt++;
+              check();
             });
             service.after.receive(function (msg) {
               assert.equal(msg, 'So Long');
-              cpt++;
-              assert.equal(cpt, 2);
-              done();
+              check();
             });
           }}
         `;

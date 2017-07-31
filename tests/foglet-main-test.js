@@ -4,7 +4,6 @@ const Foglet = require('../src/foglet.js').Foglet;
 const utils = require('./utils.js');
 
 describe('[FOGLET] Other functions tests', function () {
-  this.timeout(30000);
   it('[FOGLET] getRandomNeighbourId is in getNeighbours', function (done) {
     const foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];

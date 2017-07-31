@@ -44,7 +44,17 @@ const pathConnect = (peers, duplex = false) => {
   }));
 };
 
+const doneAfter = (limit, done) => {
+  let cpt = 0;
+  return () => {
+    cpt++;
+    if (cpt >= limit)
+      done();
+  };
+};
+
 module.exports = {
   buildFog,
-  pathConnect
+  pathConnect,
+  doneAfter
 };

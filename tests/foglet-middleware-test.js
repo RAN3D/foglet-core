@@ -9,7 +9,6 @@ const simpleMiddleware = {
 };
 
 describe('Middlewares', function () {
-  this.timeout(30000);
   it('should use middleware on broadcast', function (done) {
     const foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
