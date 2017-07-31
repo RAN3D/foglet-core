@@ -2,7 +2,7 @@
 
 const Foglet = require('../src/foglet.js').Foglet;
 const defineProtocol = require('../src/fprotocol/protocol-builder.js');
-const buildFog = require('./utils.js').buildFog;
+const utils = require('./utils.js');
 
 const UnicastProtocol = defineProtocol('sample-unicast-protocol')`
   init
@@ -40,7 +40,7 @@ describe('FogletProtocol', () => {
   describe('#unicast', () => {
     describe('#communication', () => {
       it('should receive messages from remote services', done => {
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const expected = 'Hello world!';
         const p1 = new UnicastProtocol(f1),
@@ -48,64 +48,58 @@ describe('FogletProtocol', () => {
             assert.equal(msg, expected);
           }, done);
 
-        f1.connection(f2).then(() => {
-          f2.connection(f1).then(() => {
-            const peers = f1.getNeighbours();
-            assert.equal(peers.length, 1);
-            setTimeout(function () {
-              p1.get(peers[0], expected);
-            }, 1000);
-          });
+        utils.pathConnect(foglets, true).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          setTimeout(function () {
+            p1.get(peers[0], expected);
+          }, 1000);
         });
       });
 
       it('should allow peers to reply to service calls', done => {
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastProtocol(f1),
           p2 = new UnicastProtocol(f2, (id, msg, reply) => {
             reply(msg + ' world!');
           });
 
-        f1.connection(f2).then(() => {
-          f2.connection(f1).then(() => {
-            const peers = f1.getNeighbours();
-            assert.equal(peers.length, 1);
-            setTimeout(function () {
-              p1.get(peers[0], 'Hello')
-              .then(msg => {
-                assert.equal(msg, 'Hello world!');
-                done();
-              })
-              .catch(done);
-            }, 1000);
-          });
+        utils.pathConnect(foglets, true).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          setTimeout(function () {
+            p1.get(peers[0], 'Hello')
+            .then(msg => {
+              assert.equal(msg, 'Hello world!');
+              done();
+            })
+            .catch(done);
+          }, 1000);
         });
       });
 
       it('should allow peers to reject service calls', done => {
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastProtocol(f1),
           p2 = new UnicastProtocol(f2, (id, msg, reply, reject) => {
             reject(msg + ' world!');
           });
 
-        f1.connection(f2).then(() => {
-          f2.connection(f1).then(() => {
-            const peers = f1.getNeighbours();
-            assert.equal(peers.length, 1);
-            setTimeout(function () {
-              p1.get(peers[0], 'Hello')
-              .then(msg => {
-                done(new Error('Message should have rejected but instead got reply with ' + msg));
-              })
-              .catch(msg => {
-                assert.equal(msg, 'Hello world!');
-                done();
-              });
-            }, 1000);
-          });
+        utils.pathConnect(foglets, true).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          setTimeout(function () {
+            p1.get(peers[0], 'Hello')
+            .then(msg => {
+              done(new Error('Message should have rejected but instead got reply with ' + msg));
+            })
+            .catch(msg => {
+              assert.equal(msg, 'Hello world!');
+              done();
+            });
+          }, 1000);
         });
       });
     });
@@ -135,21 +129,19 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastHookProtocol(f1),
           p2 = new UnicastHookProtocol(f2, (id, msg) => {
             assert.equal(msg, 'So Long and Thanks for all the Fish');
           }, done);
 
-        f1.connection(f2).then(() => {
-          f2.connection(f1).then(() => {
-            const peers = f1.getNeighbours();
-            assert.equal(peers.length, 1);
-            setTimeout(function () {
-              p1.get(peers[0], 'So Long');
-            }, 1000);
-          });
+        utils.pathConnect(foglets, true).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          setTimeout(function () {
+            p1.get(peers[0], 'So Long');
+          }, 1000);
         });
       });
 
@@ -173,19 +165,17 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastHookProtocol(f1),
           p2 = new UnicastHookProtocol(f2);
 
-        f1.connection(f2).then(() => {
-          f2.connection(f1).then(() => {
-            const peers = f1.getNeighbours();
-            assert.equal(peers.length, 1);
-            setTimeout(function () {
-              p1.get(peers[0], 'So Long');
-            }, 1000);
-          });
+        utils.pathConnect(foglets, true).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          setTimeout(function () {
+            p1.get(peers[0], 'So Long');
+          }, 1000);
         });
       });
     });
@@ -194,7 +184,7 @@ describe('FogletProtocol', () => {
   describe('#broadcast', () => {
     describe('#communication', () => {
       it('should receive messages from remote services', done => {
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const expected = 'Hello world!';
         const p1 = new BroadcastProtocol(f1),
@@ -202,7 +192,7 @@ describe('FogletProtocol', () => {
             assert.equal(msg, expected);
           }, done);
 
-        f1.connection(f2).then(() => {
+        utils.pathConnect(foglets).then(() => {
           setTimeout(function () {
             p1.get(expected);
           }, 1000);
@@ -235,21 +225,19 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const p1 = new BroadcastHookProtocol(f1),
           p2 = new BroadcastHookProtocol(f2, (id, msg) => {
             assert.equal(msg, 'So Long and Thanks for all the Fish');
           }, done);
 
-        f1.connection(f2).then(() => {
-          f2.connection(f1).then(() => {
-            const peers = f1.getNeighbours();
-            assert.equal(peers.length, 1);
-            setTimeout(function () {
-              p1.get('So Long');
-            }, 1000);
-          });
+        utils.pathConnect(foglets, true).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          setTimeout(function () {
+            p1.get('So Long');
+          }, 1000);
         });
       });
 
@@ -273,19 +261,17 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        const foglets = buildFog(Foglet, 2);
+        const foglets = utils.buildFog(Foglet, 2);
         let f1 = foglets[0], f2 = foglets[1];
         const p1 = new BroadcastHookProtocol(f1),
           p2 = new BroadcastHookProtocol(f2);
 
-        f1.connection(f2).then(() => {
-          f2.connection(f1).then(() => {
-            const peers = f1.getNeighbours();
-            assert.equal(peers.length, 1);
-            setTimeout(function () {
-              p1.get('So Long');
-            }, 1000);
-          });
+        utils.pathConnect(foglets, true).then(() => {
+          const peers = f1.getNeighbours();
+          assert.equal(peers.length, 1);
+          setTimeout(function () {
+            p1.get('So Long');
+          }, 1000);
         });
       });
     });

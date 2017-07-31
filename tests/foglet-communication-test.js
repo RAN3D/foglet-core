@@ -1,7 +1,7 @@
 'use strict';
 
 const Foglet = require('../src/foglet.js').Foglet;
-const buildFog = require('./utils.js').buildFog;
+const utils = require('./utils.js');
 
 localStorage.debug = 'foglet-core:*';
 
@@ -10,7 +10,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
   this.timeout(30000);
 
   it('[Broadcast-simple] sendBroadcast/onBroadcast', function (done) {
-    const foglets = buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
     let neighbourID = null;
     let f1 = foglets[0], f2 = foglets[1];
 
@@ -21,7 +21,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
       done();
     });
 
-    f1.connection(f2).then(() => {
+    utils.pathConnect(foglets).then(() => {
       neighbourID = f1.outviewId;
       setTimeout(function () {
         f1.sendBroadcast('hello');
@@ -30,7 +30,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
   });
 
   it('[Unicast-simple] sendUnicast/onUnicast', function (done) {
-    const foglets = buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     f2.onUnicast((id, message) => {
@@ -39,7 +39,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
       done();
     });
 
-    f1.connection(f2).then( () => {
+    utils.pathConnect(foglets).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
         assert.equal(peers.length, 1);
@@ -52,7 +52,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
   });
 
   it('[Unicast-complex] sendMulticast', function (done) {
-    const foglets = buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     let wanted = 0, received = 0;
@@ -68,7 +68,7 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
     });
 
 
-    f1.connection(f2).then( () => {
+    utils.pathConnect(foglets).then( () => {
       setTimeout(() => {
         let peers = f1.getNeighbours();
         wanted = peers.length;
@@ -78,11 +78,11 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
           console.log(e);
         });
       }, 2000);
-    })
+    });
   });
 
   it('[Broadcast-complex] sendBroadcast with ordered message on 3 peers network', function (done) {
-    const foglets = buildFog(Foglet, 3);
+    const foglets = utils.buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
@@ -90,31 +90,26 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
     const results = [ '1', '2', '3', '4' ];
     const totalResult = 8;
 
-    f1.connection(f2).then(() => {
-      f2.connection(f3).then(() => {
-        f2.onBroadcast((id, message) => {
-          assert.equal(message, results[cptA]);
-          cptA++;
-          if ((cptA + cptB) >= totalResult)
-            done();
-        });
-
-        f3.onBroadcast((id, message) => {
-          assert.equal(message, results[cptB]);
-          cptB++;
-          if ((cptA + cptB) >= totalResult)
-            done();
-        });
-
-        const ec1 = f1.sendBroadcast('1');
-        f1.sendBroadcast('2', ec1);
-
-        const ec2 = f1.sendBroadcast('3');
-        f1.sendBroadcast('4', ec2);
-      }).catch(error => {
-        console.log(error);
-        done(error);
+    utils.pathConnect(foglets).then(() => {
+      f2.onBroadcast((id, message) => {
+        assert.equal(message, results[cptA]);
+        cptA++;
+        if ((cptA + cptB) >= totalResult)
+          done();
       });
-    });
+
+      f3.onBroadcast((id, message) => {
+        assert.equal(message, results[cptB]);
+        cptB++;
+        if ((cptA + cptB) >= totalResult)
+          done();
+      });
+
+      const ec1 = f1.sendBroadcast('1');
+      f1.sendBroadcast('2', ec1);
+
+      const ec2 = f1.sendBroadcast('3');
+      f1.sendBroadcast('4', ec2);
+    }).catch(done);
   }); // end it
 });

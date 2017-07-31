@@ -29,6 +29,22 @@ const buildFog = (Foglet, size) => {
   return fog;
 };
 
+const pathConnect = (peers, duplex = false) => {
+  const pairs = [];
+  for(let ind = 0; ind < peers.length - 1; ind++) {
+    pairs.push([ peers[ind ], peers[ind + 1] ]);
+  }
+  return Promise.all(pairs.map(pair => {
+    return pair[0].connection(pair[1])
+    .then(() => {
+      if (duplex)
+        return pair[1].connection(pair[0]);
+      return Promise.resolve();
+    });
+  }));
+};
+
 module.exports = {
-  buildFog
+  buildFog,
+  pathConnect
 };

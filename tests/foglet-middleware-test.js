@@ -1,7 +1,7 @@
 'use strict';
 
 const Foglet = require('../src/foglet.js').Foglet;
-const buildFog = require('./utils.js').buildFog;
+const utils = require('./utils.js');
 
 const simpleMiddleware = {
   in: msg => msg + ' and Thanks for',
@@ -11,18 +11,18 @@ const simpleMiddleware = {
 describe('Middlewares', function () {
   this.timeout(30000);
   it('should use middleware on broadcast', function (done) {
-    const foglets = buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     f1.use(simpleMiddleware);
     f2.use(simpleMiddleware);
 
     f2.onBroadcast((id, data) => {
-      assert(data === 'So Long and Thanks for all the Fish');
+      assert.equal(data, 'So Long and Thanks for all the Fish');
       done();
     });
 
-    f1.connection(f2).then( () => {
+    utils.pathConnect(foglets).then( () => {
       setTimeout(function () {
         f1.sendBroadcast('So Long');
       }, 2000);
@@ -30,21 +30,21 @@ describe('Middlewares', function () {
   });
 
   it('should use middleware on unicast', function (done) {
-    const foglets = buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     f1.use(simpleMiddleware);
     f2.use(simpleMiddleware);
 
     f2.onUnicast((id, message) => {
-      assert(message === 'So Long and Thanks for all the Fish');
+      assert.equal(message, 'So Long and Thanks for all the Fish');
       done();
     });
 
-    f1.connection(f2).then( () => {
+    utils.pathConnect(foglets).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
-        assert(peers.length === 1);
+        assert.equal(peers.length, 1);
         f1.sendUnicast(peers[0], 'So Long');
       }, 2000);
     });
