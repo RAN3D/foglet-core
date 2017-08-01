@@ -59,7 +59,13 @@ class MiddlewareRegistry {
    * @return {*} Input data transformed by successive application of middlewares
    */
   in (data) {
-    return this._middlewares.reduce((input, obj) => obj.middleware.in(input), data);
+    let temp;
+    return this._middlewares.reduce((input, obj) => {
+      temp = obj.middleware.in(input);
+      if (temp !== undefined || temp !== null)
+        return temp;
+      return input;
+    }, data);
   }
 
   /**
@@ -68,7 +74,13 @@ class MiddlewareRegistry {
    * @return {*} Output data transformed by successive application of middlewares
    */
   out (data) {
-    return this._middlewares.reduce((input, obj) => obj.middleware.out(input), data);
+    let temp;
+    return this._middlewares.reduce((input, obj) => {
+      temp = obj.middleware.in(input);
+      if (temp !== undefined || temp !== null)
+        return temp;
+      return input;
+    }, data);
   }
 }
 
