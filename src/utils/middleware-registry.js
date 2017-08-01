@@ -76,7 +76,7 @@ class MiddlewareRegistry {
   out (data) {
     let temp;
     return this._middlewares.reduce((input, obj) => {
-      temp = obj.middleware.in(input);
+      temp = obj.middleware.out(input);
       if (temp !== undefined || temp !== null)
         return temp;
       return input;
