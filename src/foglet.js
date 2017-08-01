@@ -31,11 +31,59 @@ const lmerge = require('lodash/merge');
 // NetworkManager
 const NetworkManager = require('./network/network-manager.js');
 
-// SSH COntrol
+// SSH Control
 const SSH = require('./utils/ssh.js');
 
 // Middleware
 const MiddlewareRegistry = require('./utils/middleware-registry.js');
+
+// Foglet default options
+const DEFAULT_OPTIONS = {
+  verbose: true, // want some logs ? switch to false otherwise
+  rps: {
+    type: 'spray-wrtc',
+    options: {
+      protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
+      webrtc:	{ // add WebRTC options
+        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
+        iceServers : [] // define iceServers in non local instance
+      },
+      timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+      delta: 10 * 1000, // spray-wrtc shuffle interval
+      signaling: {
+        address: 'https://signaling.herokuapp.com/',
+        // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+        room: 'best-room-for-foglet-rps' // room to join
+      }
+    }
+  },
+  overlay: { // overlay options
+    options: { // these options will be propagated to all components, but overrided if same options are listed in the list of overlays
+      webrtc:	{ // add WebRTC options
+        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
+        iceServers : [] // define iceServers in non local instance
+      },
+      timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+      delta: 10 * 1000 // spray-wrtc shuffle interval
+    }, // options wiil be passed to all components of the overlay
+    overlays: [
+      // {
+      //   class: 'latencies',
+      //   options: {
+      //     protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
+      //     signaling: {
+      //       address: 'https://signaling.herokuapp.com/',
+      //       // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+      //       room: 'best-room-for-foglet-overlay' // room to join
+      //     }
+      //   }
+      // }
+    ] // add an latencies overlay
+  },
+  ssh: undefined  /* {
+    address: 'http://localhost:4000/'
+  }*/
+};
 
 /**
  * A configuration object used to build an overlay
@@ -118,83 +166,56 @@ class Foglet extends EventEmitter {
   * @param {Object} options.overlay - Options used to configure custom overlay in addition of the RPS
   * @param {Object} options.overlay.options - Options propagated to all overlays, same as the options field used to configure the RPS.
   * @param {OverlayConfig[]} options.overlay.overlays - Set of config objects used to build the overlays
-  * @throws {InitConstructException} If options is undefined
-  * @throws {ConstructException} spray, protocol and room must be defined.
+  * @throws {InitConstructException} thrown when options are not provided
+  * @throws {ConstructException} thrown when key options are missing
   * @returns {void}
   */
   constructor (options = {}) {
     super();
-    this.defaultOptions = {
-      verbose: true, // want some logs ? switch to false otherwise
-      rps: {
-        type: 'spray-wrtc',
-        options: {
-          protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
-          webrtc:	{ // add WebRTC options
-            trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-            iceServers : [] // define iceServers in non local instance
-          },
-          timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-          delta: 10 * 1000, // spray-wrtc shuffle interval
-          signaling: {
-            address: 'https://signaling.herokuapp.com/',
-            // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
-            room: 'best-room-for-foglet-rps' // room to join
-          }
-        }
-      },
-      overlay: { // overlay options
-        options: { // these options will be propagated to all components, but overrided if same options are listed in the list of overlays
-          webrtc:	{ // add WebRTC options
-            trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-            iceServers : [] // define iceServers in non local instance
-          },
-          timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-          delta: 10 * 1000 // spray-wrtc shuffle interval
-        }, // options wiil be passed to all components of the overlay
-        overlays: [
-          // {
-          //   class: 'latencies',
-          //   options: {
-          //     protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
-          //     signaling: {
-          //       address: 'https://signaling.herokuapp.com/',
-          //       // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
-          //       room: 'best-room-for-foglet-overlay' // room to join
-          //     }
-          //   }
-          // }
-        ] // add an latencies overlay
-      },
-      ssh: undefined  /* {
-        address: 'http://localhost:4000/'
-      }*/
-    };
-    this.options = lmerge(this.defaultOptions, options);
-    this.id = uuid();
+    this._id = uuid();
+    this._options = lmerge(DEFAULT_OPTIONS, options);
 
     // add the network part !
-    this.networkManager = new NetworkManager(this.options);
+    this._networkManager = new NetworkManager(this._options);
 
     // Middlewares
     this._middlewares = new MiddlewareRegistry();
 
-    // SSH COntrol
-    if (this.options.ssh && this.options.ssh.address) {
-      this.ssh = new SSH({
+    // SSH Control
+    // currently disabled
+    if (this._options.ssh && this._options.ssh.address) {
+      this._ssh = new SSH({
         foglet: this,
-        address: this.options.ssh.address
+        address: this._options.ssh.address
       });
-      this.ssh.on('logs', (message, data) => this._log(data));
+      this._ssh.on('logs', (message, data) => this._log(data));
     }
 
   }
 
-  get inviewId () {
+  /**
+   * Get the foglet ID.
+   *
+   * **WARNING:** this id is not the same as used by the RPS.
+   * @return {string} The foglet ID
+   */
+  get id () {
+    return this._id;
+  }
+
+  /**
+   * Get the in-view ID of this foglet
+   * @return {string} The in-view ID of the foglet
+   */
+  get inViewID () {
     return this.getNetwork().network.inviewId;
   }
 
-  get outviewId () {
+  /**
+   * Get the out-view ID of this foglet
+   * @return {string} The out-view ID of the foglet
+   */
+  get outViewID () {
     return this.getNetwork().network.outviewId;
   }
 
@@ -209,7 +230,7 @@ class Foglet extends EventEmitter {
   * @return {Promise} A Promise fullfilled when the foglet is connected
   * @example
   * const foglet = new Foglet({
-  * // some options...
+  *   // some options...
   * });
   * foglet.connection().then(console.log).catch(console.err);
   */
@@ -223,7 +244,7 @@ class Foglet extends EventEmitter {
   }
 
   /**
-   * Connect the foglet to the signaling server.
+   * Connect the foglet to the signaling server
    * @return {void}
    */
   share () {
@@ -231,7 +252,7 @@ class Foglet extends EventEmitter {
   }
 
   /**
-   * Revoke the connection with the signaling server.
+   * Revoke the connection with the signaling server
    * @return {void}
    */
   unshare () {
@@ -243,8 +264,8 @@ class Foglet extends EventEmitter {
    * @param {string} id - ID of a network. By default: the index of the last overlay added or 0 (the rps) if no overlay
    * @return {object} Return the network for the given ID.
    */
-  getNetwork (index = undefined) {
-    return this.networkManager.use(index);
+  getNetwork (id = undefined) {
+    return this._networkManager.use(id);
   }
 
   /**
@@ -254,6 +275,21 @@ class Foglet extends EventEmitter {
    * @param  {function} middleware.out - Function applied on middleware output
    * @param  {Number} [priority=0] - (optional) The middleware priority
    * @return {void}
+   * @example
+   * const foglet = new Foglet({
+   *  // some options...
+   * });
+   *
+   * const middleware = {
+   *  in: msg => {
+   *    return msg + ' and Thanks';
+   *  },
+   *  out: msg => {
+   *    return msg + ' for all the Fish';
+   *  }
+   * };
+   *
+   * foglet.use(middleware);
    */
   use (middleware, priority = 0) {
     this._middlewares.register(middleware, priority);
@@ -261,8 +297,16 @@ class Foglet extends EventEmitter {
 
   /**
   * Listen for incoming **broadcast** messages, and invoke a callback on each of them.
-  * @param {callback} MessageCallback - Callback function inovked with the message
+  * @param {MessageCallback} callback - Callback function inovked with the message
   * @returns {void}
+  * @example
+  * const foglet = new Foglet({
+  *   // some options...
+  * });
+  *
+  * foglet.onBroadcast((id, msg) => {
+  *   console.log('The peer', id, 'just sent by broadcast:', msg);
+  * });
   **/
   onBroadcast (callback) {
     this.getNetwork().communication.onBroadcast((id, msg) => callback(id, this._middlewares.out(msg)));
@@ -273,6 +317,12 @@ class Foglet extends EventEmitter {
   * Send a broadcast message to all connected peers in the network.
   * @param {object} message - The message to send
   * @return {boolean} True if the messahe has been sent, False otherwise
+  * @example
+  * const foglet = new Foglet({
+  *   // some options...
+  * });
+  *
+  * foglet.sendBroadcast('Hello everyone!');
   */
   sendBroadcast (message) {
     return this.getNetwork().communication.sendBroadcast(this._middlewares.in(message));
@@ -280,9 +330,17 @@ class Foglet extends EventEmitter {
 
   /**
   * Listen for incoming **unicast** messages, and invoke a callback on each of them.
-  * @param {callback} MessageCallback - Callback function inovked with the message
+  * @param {MessageCallback} callback - Callback function inovked with the message
   * @return {void}
-  */
+  * @example
+  * const foglet = new Foglet({
+  *   // some options...
+  * });
+  *
+  * foglet.onUnicast((id, msg) => {
+  *   console.log('My neighbour', id, 'just sent me by unicast:', msg);
+  * });
+  **/
   onUnicast (callback) {
     this.getNetwork().communication.onUnicast((id, msg) => callback(id, this._middlewares.out(msg)));
   }
@@ -292,6 +350,15 @@ class Foglet extends EventEmitter {
   * @param {string} id - The ID of the targeted neighbour
   * @param {object} message - The message to send
   * @return {boolean} True if the messahe has been sent, False otherwise
+  * @example
+  * const foglet = new Foglet({
+  *   // some options...
+  * });
+  *
+  * // get the ID of one neighbour
+  * const id = foglet.getRandomNeighbourId();
+  *
+  * foglet.sendUnicast(id, 'Hi diddly ho neighborino!');
   */
   sendUnicast (id, message) {
     return this.getNetwork().communication.sendUnicast(id, this._middlewares.in(message));
@@ -303,6 +370,15 @@ class Foglet extends EventEmitter {
   * @param {string[]} ids - The IDs of the targeted neighbours
   * @param {object} message - The message to send
   * @return {boolean} True if the messahe has been sent, False otherwise
+  * @example
+  * const foglet = new Foglet({
+  *   // some options...
+  * });
+  *
+  * // get IDs of some neighbours
+  * const ids = foglet.getNeighbours(5);
+  *
+  * foglet.sendMulticast(ids, 'Everyone, get in here!');
   */
   sendMulticast (ids = [], message) {
     return this.getNetwork().communication.sendMulticast(ids, this._middlewares.in(message));
@@ -332,6 +408,16 @@ class Foglet extends EventEmitter {
   * Get the IDs of all available neighbours.
   * @param {integer} limit - Max number of neighours to get
   * @return {string[]} Set of IDs for all available neighbours.
+  * @example
+  * const foglet = new Foglet({
+  *   // some options...
+  * });
+  *
+  * // print the IDs of up to five neighbours
+  * console.log(foglet.getNeighbours(5));
+  *
+  * // print the IDs of all neighbours
+  * console.log(foglet.getNeighbours());
   */
   getNeighbours (limit = undefined) {
     return this.getNetwork().network.getNeighbours(limit);

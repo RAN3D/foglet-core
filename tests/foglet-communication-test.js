@@ -6,33 +6,13 @@ const utils = require('./utils.js');
 localStorage.debug = 'foglet-core:*';
 
 
-describe('[COMMUNICATION] Unicast/Broadcast', function () {
-  it('[Broadcast-simple] sendBroadcast/onBroadcast', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
-    let neighbourID = null;
-    let f1 = foglets[0], f2 = foglets[1];
-
-    f2.onBroadcast((id, data) => {
-      console.log(id, data);
-      assert.equal(id, neighbourID);
-      assert.equal(data, 'hello');
-      done();
-    });
-
-    utils.pathConnect(foglets).then(() => {
-      neighbourID = f1.outviewId;
-      setTimeout(function () {
-        f1.sendBroadcast('hello');
-      }, 2000);
-    });
-  });
-
-  it('[Unicast-simple] sendUnicast/onUnicast', function (done) {
+describe('Foglet High-level communication', function () {
+  it('should send messages to a neighbour using unicast', function (done) {
     const foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     f2.onUnicast((id, message) => {
-      console.log(id + ' : ' + message);
+      assert.equal(id, f1.outViewID);
       assert.equal(message, 'hello');
       done();
     });
@@ -46,38 +26,54 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
           f1.sendUnicast(peers[i], 'hello');
         }
       }, 2000);
-    });
+    }).catch(done);
   });
 
-  it('[Unicast-complex] sendMulticast', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
-    let f1 = foglets[0], f2 = foglets[1];
+  it('should send messages to several neighbours using multicast', function (done) {
+    const foglets = utils.buildFog(Foglet, 3);
+    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let wanted = 0, received = 0;
     function receive (id, message) {
       received++;
+      assert.equal(id, f1.outViewID);
       assert.equal(message, 'hello');
-      if(received === wanted) done();
+      if(received >= wanted)
+        done();
     }
 
-    f2.onUnicast((id, message) => {
-      console.log(id + ' : ' + message);
-      receive(id, message);
-    });
-
+    f2.onUnicast(receive);
+    f3.onUnicast(receive);
 
     utils.pathConnect(foglets).then( () => {
       setTimeout(() => {
-        let peers = f1.getNeighbours();
+        const peers = f1.getNeighbours();
         wanted = peers.length;
-        f1.sendMulticast(peers, 'hello').then(() => {
-          console.log('Multicast sent to ', peers);
-        }).catch(done);
+        f1.sendMulticast(peers, 'hello');
       }, 2000);
-    });
+    }).catch(done);
   });
 
-  it('[Broadcast-complex] sendBroadcast with ordered message on 3 peers network', function (done) {
+  it('should send messages to all peers using broadcast in a network with 2 peers', function (done) {
+    const foglets = utils.buildFog(Foglet, 2);
+    let neighbourID = null;
+    let f1 = foglets[0], f2 = foglets[1];
+
+    f2.onBroadcast((id, data) => {
+      assert.equal(id, neighbourID);
+      assert.equal(data, 'hello');
+      done();
+    });
+
+    utils.pathConnect(foglets).then(() => {
+      neighbourID = f1.outViewID;
+      setTimeout(function () {
+        f1.sendBroadcast('hello');
+      }, 2000);
+    }).catch(done);
+  });
+
+  it('should send messages to all peers using broadcast in a network with 3 peers', function (done) {
     const foglets = utils.buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
@@ -89,22 +85,25 @@ describe('[COMMUNICATION] Unicast/Broadcast', function () {
 
     utils.pathConnect(foglets).then(() => {
       f2.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID);
         assert.equal(message, results[cptA]);
         cptA++;
         check();
       });
 
       f3.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID);
         assert.equal(message, results[cptB]);
         cptB++;
         check();
       });
 
-      const ec1 = f1.sendBroadcast('1');
-      f1.sendBroadcast('2', ec1);
-
-      const ec2 = f1.sendBroadcast('3');
-      f1.sendBroadcast('4', ec2);
+      setTimeout(() => {
+        f1.sendBroadcast('1');
+        f1.sendBroadcast('2');
+        f1.sendBroadcast('3');
+        f1.sendBroadcast('4');
+      }, 2000);
     }).catch(done);
-  }); // end it
+  });
 });
