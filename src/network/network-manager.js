@@ -104,13 +104,12 @@ class NetworkManager extends EventEmitter {
    * @return {void}
    */
   _constructOverlays (options) {
-    if(options.enable) {
-      let overlayNumber = options.type.length;
-      for(let i = 0; i < overlayNumber; ++i) {
-        this._addOverlay(options.type[0], options.options);
-      }
+    if(options.overlays.length > 0) {
+      options.overlays.forEach(config => {
+        this._addOverlay(config, options.options);
+      });
     } else {
-      debug('Overlay not enabled, RPS only available.');
+      debug('No overlays added, only the base RPS is available');
     }
   }
 
@@ -135,11 +134,12 @@ class NetworkManager extends EventEmitter {
    * Add an overlay to the our list of overlays, construct the overlay, and connect the overlay to the network by using the connection() Promise.
    * Return the overlay id after its construction, initialization
    * @param {Overlay|string} overlay Class Overlay, THIS IS NOT AN OBJECT ALREADY INITIALIZED ! THIS A REFERENCE TO THE CLASS Overlay, Or it can be a string representing the id of a default Implemented overlay
-   * @return {Promise<string>} id Id of the new overlay
+   * @return {Promise<string>} A Promise resolved with the ID of the new overlay
    */
   _addOverlay (overlay, globalOptions) {
     debug(overlay, globalOptions);
-    if(typeof overlay !== 'object') throw new SyntaxError('An overlay is an object {class: ..., options: {...}}');
+    if(typeof overlay !== 'object')
+      throw new SyntaxError('An overlay is an object {class: ..., options: {...}}');
     let objNetwork = undefined;
     // override and merge of global options with specified options
     let options = lmerge(globalOptions, overlay.options);
@@ -149,23 +149,21 @@ class NetworkManager extends EventEmitter {
       objNetwork = new Network(net, options);
     } else if( typeof overlay.class === 'string' ) {
       let overlord = this._chooseOverlay(overlay.class);
-      if(!overlord) {
-        return Promise.reject(new Error('No overlay available for this string id.'));
-      }
+      if(!overlord)
+        throw new Error('No overlay available for this string id.');
       try {
         // initialization of the the overlay.
         let net = new overlord(options);
         objNetwork = new Network(net, options);
         // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
       } catch (e) {
-        return Promise.reject(e);
+        throw e;
       }
     } else {
       // push this overlay to our list
-      return Promise.reject(new Error('overlay have to class reference or an available string id'));
+      throw new Error('overlay have to class reference or an available string id');
     }
     this.overlays.push(objNetwork);
-    return Promise.resolve();
   }
 }
 

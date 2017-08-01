@@ -38,6 +38,17 @@ const SSH = require('./utils/ssh.js');
 const MiddlewareRegistry = require('./utils/middleware-registry.js');
 
 /**
+ * A configuration object used to build an overlay
+ * @typedef {Object} OverlayConfig
+ * @property {string} class - Name of the overlay
+ * @property {Object} options - Dedicated options used to build the overlay
+ * @property {string} options.protocol - Name of the protocol run by the overlay
+ * @property {Object} options.protocolsignaling - Options used to configure the interactions with the signaling server
+ * @property {string} options.protocol.signaling.address - URL of the signaling server
+ * @property {string} options.protocol.signaling.room - Name of the room in which the application run
+ */
+
+/**
 * Create a Foglet Class (facade pattern)
 * @class Foglet
 * @author Grall Arnaud (folkvir)
@@ -46,7 +57,21 @@ class Foglet extends EventEmitter {
   /**
   * Constructor of Foglet
   * @constructs Foglet
-  * @param {object} options - it's an object representing options avalaible
+  * @param {Object} options - Options used to build the Foglet
+  * @param {boolean} options.verbose - If True, activate logging
+  * @param {Object} options.rps - Oprtions used to configure the Random Peer Sampling (RPS) network
+  * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray or `fcn-wrtc` for a fully connected network over WebRTC)
+  * @param {Object} options.rps.options - Options by the type of RPS choosed
+  * @param {string} options.rps.options.protocol - Name of the protocol run by the application
+  * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see WebRTC docs for more details)
+  * @param {number} options.rps.options.timeout - RPS timeout before definitively close a WebRTC connection
+  * @param {number} options.rps.options.delta - RPS shuffle interval
+  * @param {Object} options.rps.options.signaling - Options used to configure the interactions with the signaling server
+  * @param {string} options.rps.options.signaling.address - URL of the signaling server
+  * @param {string} options.rps.options.signaling.room - Name of the room in which the application run
+  * @param {Object} options.overlay - Options used to configure custom overlay in addition of the RPS
+  * @param {Object} options.overlay.options - Options propagated to all overlays, same as the options field used to configure the RPS.
+  * @param {OverlayConfig[]} options.overlay.overlays - Set of config objects used to build the overlays
   * @throws {InitConstructException} If options is undefined
   * @throws {ConstructException} spray, protocol and room must be defined.
   * @example
@@ -77,8 +102,7 @@ class Foglet extends EventEmitter {
           }
         }
       },
-      overlay:{ // overlay options
-        enable:false, // want to activate overlay ? switch to false otherwise
+      overlay: { // overlay options
         options: { // these options will be propagated to all components, but overrided if same options are listed in the list of overlays
           webrtc:	{ // add WebRTC options
             trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
@@ -87,18 +111,18 @@ class Foglet extends EventEmitter {
           timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
           delta: 10 * 1000 // spray-wrtc shuffle interval
         }, // options wiil be passed to all components of the overlay
-        type: [
-          {
-            class: 'latencies',
-            options: {
-              protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
-              signaling: {
-                address: 'https://signaling.herokuapp.com/',
-                // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
-                room: 'best-room-for-foglet-overlay' // room to join
-              }
-            }
-          }
+        overlays: [
+          // {
+          //   class: 'latencies',
+          //   options: {
+          //     protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
+          //     signaling: {
+          //       address: 'https://signaling.herokuapp.com/',
+          //       // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+          //       room: 'best-room-for-foglet-overlay' // room to join
+          //     }
+          //   }
+          // }
         ] // add an latencies overlay
       },
       ssh: undefined  /* {
@@ -142,7 +166,7 @@ class Foglet extends EventEmitter {
   * @return {Promise} Return a Q.Promise
   * @example
   * var f = new Foglet({...});
-  * f.connection().then((response) => console.log).catch(error => console.err);
+  * f.connection().then(console.log).catch(console.err);
   */
   connection (foglet = undefined, timeout = 60000) {
     if(foglet) {
@@ -264,7 +288,7 @@ class Foglet extends EventEmitter {
   getRandomNeighbourId () {
     const peers = this.getNetwork().network.getNeighbours();
     if(peers.length === 0) {
-      return '';
+      return null;
     } else {
       try {
         const random = Math.floor(Math.random() * peers.length);
@@ -272,7 +296,7 @@ class Foglet extends EventEmitter {
         return result;
       } catch (e) {
         console.err(e);
-        return '';
+        return null;
       }
     }
   }
