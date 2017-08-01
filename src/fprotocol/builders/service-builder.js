@@ -140,7 +140,7 @@ class ServiceBuilder {
   }
 
   /**
-   * Valid the builder
+   * Validate the builder
    * @private
    * @return {boolean} true if the builder is valid, False otherwise
    */

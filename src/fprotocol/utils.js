@@ -26,26 +26,50 @@ SOFTWARE.
 const camelCase = require('lodash/camelCase');
 const capitalize = require('lodash/capitalize');
 
+/**
+ * Get the name of a service method
+ * @private
+ */
 const methodName = method => {
   return camelCase(method);
 };
 
+/**
+ * Get the name of a handler
+ * @private
+ */
 const handlerName = method => {
   return `_${camelCase(method)}`;
 };
 
+/**
+ * Get the name of a before hook for a service method
+ * @private
+ */
 const beforeSendName = method => {
   return `_beforeSend${capitalize(camelCase(method))}`;
 };
 
+/**
+ * Get the name of a before hook for a handler
+ * @private
+ */
 const beforeReceiveName = method => {
   return `_beforeReceive${capitalize(camelCase(method))}`;
 };
 
+/**
+ * Get the name of a before hook for a service method
+ * @private
+ */
 const afterSendName = method => {
   return `_afterSend${capitalize(camelCase(method))}`;
 };
 
+/**
+ * Get the name of an after hook for a handler
+ * @private
+ */
 const afterReceiveName = method => {
   return `_afterReceive${capitalize(camelCase(method))}`;
 };
