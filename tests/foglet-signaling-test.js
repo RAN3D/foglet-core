@@ -1,6 +1,6 @@
 'use strict';
 
-const Foglet = require('../src/foglet.js').Foglet;
+const Foglet = require('../src/foglet.js');
 const utils = require('./utils.js');
 
 describe('[SIGNALING] Direct/Signaling connections', function () {

@@ -23,7 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
-const Foglet = require('./src/foglet.js').Foglet;
+const Foglet = require('./src/foglet.js');
 const protocol = require('./src/fprotocol/protocol-builder.js');
 
 module.exports = {

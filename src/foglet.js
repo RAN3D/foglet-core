@@ -48,8 +48,54 @@ const MiddlewareRegistry = require('./utils/middleware-registry.js');
  * @property {string} options.protocol.signaling.room - Name of the room in which the application run
  */
 
+ /**
+ * A callback invoked when a message is received (either by unicast or broadcast)
+ * @callback MessageCallback
+ * @param {string} id - The ID of the peer who send the message
+ * @param {object} message - The message received
+ */
+
 /**
-* Create a Foglet Class (facade pattern)
+* Foglet is the main class used to build fog computing applications.
+*
+* It serves as a High level API over a Random Peer Sampling (RPS) network, typically Spray ({@link https://github.com/RAN3D/spray-wrtc}).
+* It provides utitlities to send to other peers in the network, and to receives messages send to him by these same peers.
+* Messages can be send to a single neighbour, in a **unicast** way, or to all peers in the network, in a **broadcast** way.
+* @example
+* 'use strict';
+* const Foglet = require('foglet');
+*
+* // let's create a simple application that send message in broadcast
+* const foglet = new Foglet({
+*   rps: {
+*     type: 'spray-wrtc', // we choose Spray as a our RPS
+*     options: {
+*       protocol: 'my-awesome-broadcast-application', // the name the protocol run by our app
+*       webrtc: { // some WebRTC options
+*         trickle: true, // enable trickle
+*         iceServers : [] // define iceServers here if you want ot run this code in distinct browsers
+*       },
+*       signaling: { // configure the signaling server
+*         address: 'http://signaling.herokuapp.com', // put the URL of the signaling server here
+*         room: 'my-awesome-broadcast-application' // the name of the room for the peers of our application
+*       }
+*     }
+*   }
+* });
+*
+* // connect the foglet to the signaling server
+* foglet.share();
+*
+* // Connect the foglet to our network
+* foglet.connection().then(() => {
+*   // listen for broadcast messages
+*   foglet.onBroadcast((id, message) => {
+*     console.log('The peer', id, 'just sent me by broadcast:', message);
+*   });
+*
+*   // send a message in broadcast
+*   foglet.sendBroadcast('Hello World !');
+* });
 * @class Foglet
 * @author Grall Arnaud (folkvir)
 */
@@ -74,11 +120,6 @@ class Foglet extends EventEmitter {
   * @param {OverlayConfig[]} options.overlay.overlays - Set of config objects used to build the overlays
   * @throws {InitConstructException} If options is undefined
   * @throws {ConstructException} spray, protocol and room must be defined.
-  * @example
-  * var f = new Foglet({
-  * 	spray: new Spray()
-  * 	room: "your-room-name"
-  * })
   * @returns {void}
   */
   constructor (options = {}) {
@@ -158,15 +199,19 @@ class Foglet extends EventEmitter {
   }
 
   /**
-  * Connection method for Foglet to the network specified by protocol and room options
-  * Firstly we connect the RPS then we added overlays specified in options
-  * @param {Foglet} foglet Foglet to connect, none by default and the connection is by signaling. Otherwise it uses a direct callback
-  * @param {number} timeout Time before rejecting the promise.
-  * @function connection
-  * @return {Promise} Return a Q.Promise
+  * Connect the Foglet to the network.
+  * If a parameter is supplied, the foglet try to connect with another foglet.
+  *
+  * Otherwise, it uses the signaling server to perform the connection.
+  * In this case, one must call {@link Foglet#share} before, to connect the foglet to the signaling server first.
+  * @param {Foglet} foglet - (optional) Foglet to connect with. If omitted, rely on the signaling server.
+  * @param {number} [timeout=6000] - (optional)Connection timeout. Default to 6.0s
+  * @return {Promise} A Promise fullfilled when the foglet is connected
   * @example
-  * var f = new Foglet({...});
-  * f.connection().then(console.log).catch(console.err);
+  * const foglet = new Foglet({
+  * // some options...
+  * });
+  * foglet.connection().then(console.log).catch(console.err);
   */
   connection (foglet = undefined, timeout = 60000) {
     if(foglet) {
@@ -178,7 +223,7 @@ class Foglet extends EventEmitter {
   }
 
   /**
-   * Enable the signaling share system, peer will connect to us.
+   * Connect the foglet to the signaling server.
    * @return {void}
    */
   share () {
@@ -186,7 +231,7 @@ class Foglet extends EventEmitter {
   }
 
   /**
-   * Disable the signaling share system, peer will be not able to connect with us.
+   * Revoke the connection with the signaling server.
    * @return {void}
    */
   unshare () {
@@ -194,9 +239,9 @@ class Foglet extends EventEmitter {
   }
 
   /**
-   * Return the specified overlay by its id, if index not specified, return the rps
-   * @param {string} id Index of a network, default: index of the last overlay added or 0 (the rps) if no overlay
-   * @return {object} Return the network to use
+   * Search for an overlay by ID. If not found, return the base RPS.
+   * @param {string} id - ID of a network. By default: the index of the last overlay added or 0 (the rps) if no overlay
+   * @return {object} Return the network for the given ID.
    */
   getNetwork (index = undefined) {
     return this.networkManager.use(index);
@@ -215,16 +260,8 @@ class Foglet extends EventEmitter {
   }
 
   /**
-  * This callback is a parameter of the onBroadcast function.
-  * @callback callback
-  * @param {string} id - sender id
-  * @param {object} message - the message received
-  */
-  /**
-  * Allow to listen on Foglet when a broadcasted message arrived
-  * @function onBroadcast
-  * @param {string} signal - The signal we will listen to.
-  * @param {callback} callback - Callback function that handles the response
+  * Listen for incoming **broadcast** messages, and invoke a callback on each of them.
+  * @param {callback} MessageCallback - Callback function inovked with the message
   * @returns {void}
   **/
   onBroadcast (callback) {
@@ -233,25 +270,17 @@ class Foglet extends EventEmitter {
 
 
   /**
-  * Send a broadcast message to all connected clients.
-  * @function sendBroadcast
-  * @param {object} msg - Message to send.
-  * @returns {void}
+  * Send a broadcast message to all connected peers in the network.
+  * @param {object} message - The message to send
+  * @return {boolean} True if the messahe has been sent, False otherwise
   */
-  sendBroadcast (msg) {
-    return this.getNetwork().communication.sendBroadcast(this._middlewares.in(msg));
+  sendBroadcast (message) {
+    return this.getNetwork().communication.sendBroadcast(this._middlewares.in(message));
   }
 
   /**
-  * This callback is a parameter of the onUnicast function.
-  * @callback callback
-  * @param {string} id - sender id
-  * @param {object} message - the message received
-  */
-  /**
-  * onUnicast function allow you to listen on the Unicast Definition protocol, Use only when you want to receive a message from a neighbour
-  * @function onUnicast
-  * @param {callback} callback The callback for the listener
+  * Listen for incoming **unicast** messages, and invoke a callback on each of them.
+  * @param {callback} MessageCallback - Callback function inovked with the message
   * @return {void}
   */
   onUnicast (callback) {
@@ -259,31 +288,29 @@ class Foglet extends EventEmitter {
   }
 
   /**
-  * Send a message to a specific neighbour (id)
-  * @function sendUnicast
+  * Send a message to a specific neighbour (in a **unicast** way).
+  * @param {string} id - The ID of the targeted neighbour
   * @param {object} message - The message to send
-  * @param {string} id - One of your neighbour's id
-  * @return {boolean} return true if it seems to have sent the message, false otherwise.
+  * @return {boolean} True if the messahe has been sent, False otherwise
   */
   sendUnicast (id, message) {
     return this.getNetwork().communication.sendUnicast(id, this._middlewares.in(message));
   }
 
   /**
-  * Send a message to a specific neighbour (id)
-  * @function sendUnicast
+  * Send a message to a set of neighbours (in a **multicast** way).
+  * These messages will be received by neighbours on the **unicast** channel.
+  * @param {string[]} ids - The IDs of the targeted neighbours
   * @param {object} message - The message to send
-  * @param {string} id - One of your neighbour's id
-  * @return {boolean} return true if it seems to have sent the message, false otherwise.
+  * @return {boolean} True if the messahe has been sent, False otherwise
   */
   sendMulticast (ids = [], message) {
     return this.getNetwork().communication.sendMulticast(ids, this._middlewares.in(message));
   }
 
   /**
-  * Get a random id of my current neighbours
-  * @function getRandomPeerId
-  * @return {string} return an id or a null string otherwise
+  * Get the ID of a random neighbour
+  * @return {string|null} The ID of a random neighbour, or `null` if not found.
   */
   getRandomNeighbourId () {
     const peers = this.getNetwork().network.getNeighbours();
@@ -302,14 +329,14 @@ class Foglet extends EventEmitter {
   }
 
   /**
-  * Get a list of all available neighbours in the outview
-  * @function getNeighbours
-  * @return {array}  Array of string representing neighbours id, if no neighbours, return an empty array
+  * Get the IDs of all available neighbours.
+  * @param {integer} limit - Max number of neighours to get
+  * @return {string[]} Set of IDs for all available neighbours.
   */
-  getNeighbours (k = undefined) {
-    return this.getNetwork().network.getNeighbours(k);
+  getNeighbours (limit = undefined) {
+    return this.getNetwork().network.getNeighbours(limit);
   }
 
 }
 
-module.exports = { Foglet, uuid };
+module.exports = Foglet;

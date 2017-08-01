@@ -1,6 +1,6 @@
 'use strict';
 
-const Foglet = require('../src/foglet.js').Foglet;
+const Foglet = require('../src/foglet.js');
 const defineProtocol = require('../src/fprotocol/protocol-builder.js');
 const utils = require('./utils.js');
 
