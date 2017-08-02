@@ -30,12 +30,20 @@ const lmerge = require('lodash/merge');
 const uuid = require('uuid/v4');
 
 /**
- * Socket io signaling, this class is in relation to foglet-signaling-server {@see https://github.com/RAN3D/foglet-signaling-server}
- * Allow direct connection to network or signaling connection via a signaling server
- * Expose a connection method in order to connect the peer.
+ * Signaling is an interface with a signaling server with the same APi as `foglet-signaling-server` {@see https://github.com/RAN3D/foglet-signaling-server}.
+ *
+ * It allow for direct connection between peers, or for connection through a signaling server.
+ * @extends EventEmitter
  * @author Folkvir
  */
 class Signaling extends EventEmitter {
+  /**
+   * Constructor
+   * @param {AbstractNetwork} source - The source RPS/network
+   * @param {Object} options - Options used to configure the connection to the signaling server
+   * @param {string} options.address - URL of the signaling server
+   * @param {string} options.room - Name of the room in which the application run
+   */
   constructor (source, options) {
     super();
     if(!source || !options || !options.address || !options.room) {
@@ -52,8 +60,16 @@ class Signaling extends EventEmitter {
     this.source = source.rps;
   }
 
+  /**
+   * Connect the peer to the network.
+   * If no peer is supplied, rely on the signaling server to connect the peer to the network.
+   * @param {AbstractNetwork|undefined} network - (optional) network to connect with. If not supplied, use the signaling server instead.
+   * @param {number} timeout - (optional) Timeout for the interactions with the signaling server
+   * @return {Promise} A promise fullfilled when the connection is established or failed.
+   */
   connection (network, timeout = this.options.timeout) {
-    if(!network && !this.signaling) return Promise.reject('There is no available connection to the server. Try to use the function signaling() before.');
+    if(!network && !this.signaling)
+      return Promise.reject('There is no available connection to the server. Try to use the function signaling() before.');
     return new Promise((resolve, reject) => {
       try {
         if(network) {
@@ -134,8 +150,8 @@ class Signaling extends EventEmitter {
 
 
   /**
-   * @private
    * Enable direct connection between 2 peers
+   * @private
    * @param  {Object} src  Source
    * @param  {Object} dest Destination
    * @return {function} Function that connect the source to the destination
@@ -149,12 +165,12 @@ class Signaling extends EventEmitter {
   }
 
   /**
-   * @private
    * Begin a signaling exchange
-   * @return {[type]} [description]
+   * @private
+   * @return {function} The function used to handle an offer
    */
   _signalingInit () {
-    return (offer) => {
+    return offer => {
       debug('Emit a new offer.');
       this.signaling.emit('new', {offer, room: this.options.room});
     };
