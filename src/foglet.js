@@ -153,7 +153,7 @@ class Foglet extends EventEmitter {
   * @constructs Foglet
   * @param {Object} options - Options used to build the Foglet
   * @param {boolean} options.verbose - If True, activate logging
-  * @param {Object} options.rps - Oprtions used to configure the Random Peer Sampling (RPS) network
+  * @param {Object} options.rps - Options used to configure the Random Peer Sampling (RPS) network
   * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray or `fcn-wrtc` for a fully connected network over WebRTC)
   * @param {Object} options.rps.options - Options by the type of RPS choosed
   * @param {string} options.rps.options.protocol - Name of the protocol run by the application
@@ -260,12 +260,25 @@ class Foglet extends EventEmitter {
   }
 
   /**
-   * Search for an overlay by ID. If not found, return the base RPS.
-   * @param {string} id - ID of a network. By default: the index of the last overlay added or 0 (the rps) if no overlay
-   * @return {object} Return the network for the given ID.
+    * Select and get an overlay to use for communication using its index.
+    * The RPS is always the first network, at `index = 0`.
+    * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
+    * for the first overlay.
+   * @param  {integer} [index=0] - (optional) Index of the network to get. Default to the RPS.
+   * @return {Network} Return the network for the given ID.
+   * @example
+   * const foglet = new Foglet({
+   *  // some options...
+   * });
+   *
+   * // Get the RPS
+   * const rps = foglet.getNetwork();
+   *
+   * // Get the third overlay
+   * const thirdOverlay = foglet.getNetwork(3);
    */
-  getNetwork (id = undefined) {
-    return this._networkManager.use(id);
+  getNetwork (index = 0) {
+    return this._networkManager.use(index);
   }
 
   /**

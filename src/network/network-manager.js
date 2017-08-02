@@ -4,7 +4,6 @@ const EventEmitter = require('events');
 
 // lodash utils
 const lmerge = require('lodash/merge');
-const llast = require('lodash/last');
 
 // Networks
 const Network = require('./network.js');
@@ -16,70 +15,90 @@ const LatenciesOverlay = require('./overlay/latencies-overlay.js');
 const debug = require('debug')('foglet-core:network-manager');
 
 /**
- * A network is composed of a RPS/Overlay a signaling part and a communication part
+ * A NetworkManager manage several distinct {@link Network} instances, i.e. a RPS and a set of overlays,
+ * and allow peers to choose which network they want to interact with.
+ * @extends EventEmitter
+ * @author Grall Arnaud (folkvir)
  */
 class NetworkManager extends EventEmitter {
+  /**
+   * Constructor
+   * @param  {Object} options - Options used to build the networks
+   * @param {Object} options.rps - Options used to configure the Random Peer Sampling (RPS) network
+   * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray or `fcn-wrtc` for a fully connected network over WebRTC)
+   * @param {Object} options.rps.options - Options by the type of RPS choosed
+   * @param {string} options.rps.options.protocol - Name of the protocol run by the application
+   * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see WebRTC docs for more details)
+   * @param {number} options.rps.options.timeout - RPS timeout before definitively close a WebRTC connection
+   * @param {number} options.rps.options.delta - RPS shuffle interval
+   * @param {Object} options.rps.options.signaling - Options used to configure the interactions with the signaling server
+   * @param {string} options.rps.options.signaling.address - URL of the signaling server
+   * @param {string} options.rps.options.signaling.room - Name of the room in which the application run
+   * @param {Object} options.overlay - Options used to configure custom overlay in addition of the RPS
+   * @param {Object} options.overlay.options - Options propagated to all overlays, same as the options field used to configure the RPS.
+   * @param {OverlayConfig[]} options.overlay.overlays - Set of config objects used to build the overlays
+   */
   constructor (options) {
     super();
-    this.options = lmerge({
+    this._options = lmerge({
       rps: {
         type: 'spray-wrtc',
-        options: { // options wiil be passed to all components of the rps
+        options: { // options will be passed to all components of the rps
           protocol: 'spray-wrtc-communication'
         }
       },
       overlay: {
-        enable: false,
-        type: [], // string id or your overlay class reference
-        options: { }// options wiil be passed to all components of the overlay
+        overlays: [], // string id or your overlay class reference
+        options: {} // options will be passed to all components of the overlay
       }
     }, options);
 
-    // construct the rps => this.rps = ....
-    this._constructRps(this.options.rps.type, this.options.rps.options);
+    // construct the rps => this._rps = ....
+    this._rps = this._constructRps(this._options.rps.type, this._options.rps.options);
 
-    // construct overlay
-    this.overlays = [];
-    this._constructOverlays(this.options.overlay);
+    // construct overlay(s)
+    this._overlays = [];
+    this._constructOverlays(this._options.overlay.overlays, this._options.overlay.options);
 
     debug('Networks (Rps and overlays) initialized.');
   }
 
   /**
-   * Use a network, by default the last overlay added is your default network,
-   * If you specify an index beginning by 0 representing the rps, you can use any network you added.
-   * @param {number} index Index of the rps/overlay
-   * @return {Network} Return a network to use.
+   * Select and get an overlay to use for communication using its index.
+   * The RPS is always the first network, at `index = 0`.
+   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
+   * for the first overlay.
+   * @param  {integer} [index=0] - (optional) Index of the network to get. Default to the RPS.
+   * @return {Network} Return the selected network to use.
    */
-  use (index) {
-    // if no index, or no overlays
-    if(!index) {
-      if(this.overlays.length === 0) return this.rps;
-      return llast(this.overlays);
-    } else {
-      if(this.overlays.length === 0) return this.rps;
-      return this.overlays[index];
-
-    }
+  use (index = 0) {
+    if(index === 0 || index < this._overlays.length)
+      return this._rps;
+    return this._overlays[index];
   }
 
   /**
    * Construct the RPS by its type and options
-   * @param  {string} type    type of the RPS, spray-wrtc/fcn-wrtc/...
-   * @param  {Object} options Options of the RPS
-   * @return {void}
+   * @private
+   * @param  {string} type    - Type of the RPS (spray-wrtc/fcn-wrtc/...)
+   * @param  {Object} options - Options of the RPS
+   * @param  {string} options.protocol - Name of the protocol run by the RPS
+   * @param  {Object} options.signaling - Options used to configure the interactions with the signaling server
+   * @param  {string} options.signaling.address - URL of the signaling server
+   * @param  {string} options.signaling.room - Name of the room in which the application run
+   * @return {Network} The constructed RPS
    */
   _constructRps (type, options) {
-    let rpsClass = this._chooseRps(type);
-    let rps = new rpsClass(options);
-    this.rps = new Network(rps, options);
+    const rpsClass = this._chooseRps(type);
+    const rps = new rpsClass(options);
+    return new Network(rps, options.signaling, options.protocol);
   }
 
   /**
+   * Get a RPS constructor given its type in string format
    * @private
-   * Return a RPS class reference
-   * @param  {string} type RPS type
-   * @return {void}
+   * @param  {string} type - RPS type
+   * @return {function} The RPS constructor
    */
   _chooseRps (type) {
     let rps = null;
@@ -98,14 +117,15 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
+   * Construct all overlays specified
    * @private
-   * Construct all overlays speicified;
-   * @param  {Object} options Overlay options specified
+   * @param  {OverlayConfig[]} overlays - Set of objects describing the overlays to build
+   * @param  {Object} options - Options propagated to all overlays, same as the options field used to configure the RPS.
    * @return {void}
    */
-  _constructOverlays (options) {
-    if(options.overlays.length > 0) {
-      options.overlays.forEach(config => {
+  _constructOverlays (overlays, options) {
+    if(overlays.length > 0) {
+      overlays.forEach(config => {
         this._addOverlay(config, options.options);
       });
     } else {
@@ -114,10 +134,10 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
+   * Get an Overlay constructor given its type in string format
    * @private
-   * Return an Overlay class reference
-   * @param  {string} type Overlay type
-   * @return {void}
+   * @param  {string} type - Overlay type
+   * @return {function} The Overlay constructor
    */
   _chooseOverlay (type) {
     let overlay = null;
@@ -130,9 +150,9 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
+   * Add an overlay to the our list of overlays: construct the overlay, and connect it to the network by using the connection() Promise.
+   * Return the overlay id after its initialization
    * @private
-   * Add an overlay to the our list of overlays, construct the overlay, and connect the overlay to the network by using the connection() Promise.
-   * Return the overlay id after its construction, initialization
    * @param {Overlay|string} overlay Class Overlay, THIS IS NOT AN OBJECT ALREADY INITIALIZED ! THIS A REFERENCE TO THE CLASS Overlay, Or it can be a string representing the id of a default Implemented overlay
    * @return {Promise<string>} A Promise resolved with the ID of the new overlay
    */
@@ -146,7 +166,7 @@ class NetworkManager extends EventEmitter {
     options.manager = this;
     if(typeof overlay.class === 'function') {
       let net = new overlay(options);
-      objNetwork = new Network(net, options);
+      objNetwork = new Network(net, options.signaling, options.protocol);
     } else if( typeof overlay.class === 'string' ) {
       let overlord = this._chooseOverlay(overlay.class);
       if(!overlord)
@@ -154,7 +174,7 @@ class NetworkManager extends EventEmitter {
       try {
         // initialization of the the overlay.
         let net = new overlord(options);
-        objNetwork = new Network(net, options);
+        objNetwork = new Network(net, options.signaling, options.protocol);
         // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
       } catch (e) {
         throw e;
@@ -163,7 +183,7 @@ class NetworkManager extends EventEmitter {
       // push this overlay to our list
       throw new Error('overlay have to class reference or an available string id');
     }
-    this.overlays.push(objNetwork);
+    this._overlays.push(objNetwork);
   }
 }
 
