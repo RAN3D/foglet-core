@@ -107,7 +107,7 @@ const DEFAULT_OPTIONS = {
 * Foglet is the main class used to build fog computing applications.
 *
 * It serves as a High level API over a Random Peer Sampling (RPS) network, typically Spray ({@link https://github.com/RAN3D/spray-wrtc}).
-* It provides utitlities to send to other peers in the network, and to receives messages send to him by these same peers.
+* It provides utilities to send to other peers in the network, and to receives messages send to him by these same peers.
 * Messages can be send to a single neighbour, in a **unicast** way, or to all peers in the network, in a **broadcast** way.
 * @example
 * 'use strict';
@@ -144,7 +144,6 @@ const DEFAULT_OPTIONS = {
 *   // send a message in broadcast
 *   foglet.sendBroadcast('Hello World !');
 * });
-* @class Foglet
 * @author Grall Arnaud (folkvir)
 */
 class Foglet extends EventEmitter {
@@ -399,7 +398,7 @@ class Foglet extends EventEmitter {
 
   /**
   * Get the ID of a random neighbour
-  * @return {string|null} The ID of a random neighbour, or `null` if not found.
+  * @return {string|null} The ID of a random neighbour, or `null` if not found
   */
   getRandomNeighbourId () {
     const peers = this.getNetwork().network.getNeighbours();
@@ -418,9 +417,9 @@ class Foglet extends EventEmitter {
   }
 
   /**
-  * Get the IDs of all available neighbours.
+  * Get the IDs of all available neighbours
   * @param {integer} limit - Max number of neighours to get
-  * @return {string[]} Set of IDs for all available neighbours.
+  * @return {string[]} Set of IDs for all available neighbours
   * @example
   * const foglet = new Foglet({
   *   // some options...

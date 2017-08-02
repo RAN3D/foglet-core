@@ -23,9 +23,15 @@ SOFTWARE.
 */
 'use strict';
 
-const EventEmitter = require ('events');
+const AbstractNetwork = require('./abstract-network.js');
 
-class AbstractOverlay extends EventEmitter {
+/**
+ * AbstractOverlay represents an abstract overlay
+ * @abstract
+ * @extends AbstractNetwork
+ * @author Grall Arnaud (Folkvir)
+ */
+class AbstractOverlay extends AbstractNetwork {
   constructor (options) {
     super();
     if(!options.manager) {
@@ -34,14 +40,6 @@ class AbstractOverlay extends EventEmitter {
     }
     this.manager = options.manager;
     this.options =  options;
-  }
-
-  /**
-   * Get the list of neighbours
-   * @return {array}
-   */
-  getNeighbours () {
-    throw new Error('getNeighbours Not Yet Implemented', 'AbstractOverlay.js');
   }
 
 }

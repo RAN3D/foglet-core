@@ -1,10 +1,10 @@
 /*
 MIT License
 
-Copyright (c) 2016 Grall Arnaud
+Copyright (c) 2016-2017 Grall Arnaud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the 'Software'), to deal
+of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
@@ -13,7 +13,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -23,33 +23,18 @@ SOFTWARE.
 */
 'use strict';
 
-const lmerge = require('lodash/merge');
-const Fcn = require('fcn-wrtc').Fcn;
-const AbstractNetwork = require('./../abstract/abstract-network.js');
+const EventEmitter = require ('events');
 
 /**
- * fcnAdapter adapts the usage of a Fully connected network over WebRTC in the foglet library.
- * @see https://github.com/RAN3D/fcn-wrtc for more details about this type of network
- * @extends AbstractNetwork
+ * AbstractNetwork represents an abstract network layer
+ * @abstract
  * @author Grall Arnaud (Folkvir)
  */
-class fcnAdapter extends AbstractNetwork {
-  constructor (options) {
-    super();
-    this._options = lmerge({
-      webrtc: {
-        trickle: true,
-        iceServers: []
-      }
-    }, options);
-    // if webrtc options specified: create object config for Spray
-    this._options = lmerge({config: this._options.webrtc}, this._options);
-    this._rps = new Fcn(this._options);
-  }
+class AbstractNetwork extends EventEmitter {
 
   /**
    * The Random Peer Sampling Network itself
-   * @return {Fcn} The random Peer Sampling Network
+   * @return {*} The random Peer Sampling Network
    */
   get rps () {
     return this._rps;
@@ -60,7 +45,7 @@ class fcnAdapter extends AbstractNetwork {
    * @return {string} The in-view ID of the peer
    */
   get inviewId () {
-    return this._rps.getInviewId();
+    throw new Error('A valid network must implement a inviewId getter');
   }
 
   /**
@@ -68,7 +53,7 @@ class fcnAdapter extends AbstractNetwork {
    * @return {string} The out-view ID of the peer
    */
   get outviewId () {
-    return this._rps.getOutviewId();
+    throw new Error('A valid network must implement a outviewId getter');
   }
 
   /**
@@ -76,10 +61,9 @@ class fcnAdapter extends AbstractNetwork {
    * @param  {integer} limit - Max number of neighbours to look for
    * @return {string[]} Set of IDs for all available neighbours
    */
-  getNeighbours (k = undefined) {
-    return this._rps.getPeers(k).o;
+  getNeighbours (limit) {
+    throw new Error('A valid network must implement a getNeighbours method');
   }
-
 }
 
-module.exports = fcnAdapter;
+module.exports = AbstractNetwork;

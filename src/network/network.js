@@ -15,16 +15,40 @@ const Signaling = require('./signaling/signaling.js');
 class Network {
   /**
    * Constructor
-   * @param  {AbstractAdapter|AbstractOverlay} network - The network layer
+   * @param  {AbstractNetwork} network - The network layer
    * @param  {Object} signaling - Options used to build the signaling part
    * @param  {string} signaling.address - URL of the signaling server
    * @param  {string} signaling.room - Name of the room in which the application run
    * @param  {string} protocol - Name of the protocol run by the network
    */
   constructor (network, signaling, protocol) {
-    this.network = network;
-    this.signaling = new Signaling(network, signaling);
-    this.communication = new Communication(network, protocol);
+    this._network = network;
+    this._signaling = new Signaling(network, signaling);
+    this._communication = new Communication(network, protocol);
+  }
+
+  /**
+   * The network component
+   * @return {AbstractNetwork} The network component
+   */
+  get network () {
+    return this._network;
+  }
+
+  /**
+   * The signaling component
+   * @return {Signaling} The signaling component
+   */
+  get signaling () {
+    return this._signaling;
+  }
+
+  /**
+   * The communication component
+   * @return {Communication} The communication component
+   */
+  get communication () {
+    return this._communication;
   }
 }
 

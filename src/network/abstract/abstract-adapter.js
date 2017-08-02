@@ -23,19 +23,11 @@ SOFTWARE.
 */
 'use strict';
 
-const EventEmitter = require ('events');
+const AbstractNetwork = require('./abstract-network.js');
 
-class AbstractAdapter extends EventEmitter {
+class AbstractAdapter extends AbstractNetwork {
   constructor () {
     super();
-  }
-
-  /**
-   * Get the list of neighbours
-   * @return {array}
-   */
-  getNeighbours () {
-    throw new Error('getNeighbours Not Yet Implemented', 'AbstractAdapter.js');
   }
 }
 
