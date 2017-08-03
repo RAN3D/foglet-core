@@ -31,10 +31,20 @@ const EventEmitter = require ('events');
  * @author Grall Arnaud (Folkvir)
  */
 class AbstractNetwork extends EventEmitter {
+  /**
+   * Constructor
+   * @param {*} rps - The Random Peer Sampling used by the network
+   * @param {Object} options - Additional options used to build the network
+   */
+  constructor (rps, options) {
+    super();
+    this._rps = rps;
+    this._options = options;
+  }
 
   /**
    * The Random Peer Sampling Network itself
-   * @return {*} The random Peer Sampling Network
+   * @return {*} The Random Peer Sampling Network
    */
   get rps () {
     return this._rps;

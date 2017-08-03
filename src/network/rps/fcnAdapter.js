@@ -35,24 +35,15 @@ const AbstractNetwork = require('./../abstract/abstract-network.js');
  */
 class fcnAdapter extends AbstractNetwork {
   constructor (options) {
-    super();
-    this._options = lmerge({
+    let opts = lmerge({
       webrtc: {
         trickle: true,
         iceServers: []
       }
     }, options);
     // if webrtc options specified: create object config for Spray
-    this._options = lmerge({config: this._options.webrtc}, this._options);
-    this._rps = new Fcn(this._options);
-  }
-
-  /**
-   * The Random Peer Sampling Network itself
-   * @return {Fcn} The random Peer Sampling Network
-   */
-  get rps () {
-    return this._rps;
+    opts = lmerge({config: opts.webrtc}, opts);
+    super(new Fcn(opts), opts);
   }
 
   /**

@@ -36,8 +36,7 @@ const lmerge = require('lodash/merge');
  */
 class SprayAdapter extends AbstractNetwork {
   constructor (options) {
-    super();
-    const sprayOptions = lmerge({
+    let sprayOptions = lmerge({
       webrtc:	{ // add WebRTC options
         trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
         iceServers : [] // define iceServers in non local instance
@@ -46,21 +45,11 @@ class SprayAdapter extends AbstractNetwork {
     }, options);
 
     // if webrtc options specified: create object config for Spray
-    this._options = lmerge({config: sprayOptions.webrtc}, sprayOptions);
-
-    // need to expose a rps
-    this._rps = new Spray(this._options);
+    sprayOptions = lmerge({config: sprayOptions.webrtc}, sprayOptions);
+    super(new Spray(sprayOptions), sprayOptions);
 
     // make a unique id of this network
     this.id = this._rps.PEER;
-  }
-
-  /**
-   * The Random Peer Sampling Network itself
-   * @return {Spray} The random Peer Sampling Network
-   */
-  get rps () {
-    return this._rps;
   }
 
   /**
