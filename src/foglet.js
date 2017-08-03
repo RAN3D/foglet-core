@@ -118,10 +118,10 @@ const DEFAULT_OPTIONS = {
 *   rps: {
 *     type: 'spray-wrtc', // we choose Spray as a our RPS
 *     options: {
-*       protocol: 'my-awesome-broadcast-application', // the name the protocol run by our app
+*       protocol: 'my-awesome-broadcast-application', // the name of the protocol run by our app
 *       webrtc: { // some WebRTC options
 *         trickle: true, // enable trickle
-*         iceServers : [] // define iceServers here if you want ot run this code in distinct browsers
+*         iceServers : [] // define iceServers here if you want to run this code outside localhost
 *       },
 *       signaling: { // configure the signaling server
 *         address: 'http://signaling.herokuapp.com', // put the URL of the signaling server here

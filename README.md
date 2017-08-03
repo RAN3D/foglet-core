@@ -6,13 +6,7 @@
 # foglet-core  [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core)
 Core of the foglet library
 
-This project aims to provide a solid core infrastructure for developping fog computing applications built with spray-wrtc (see references)
-
-## Examples
-
-There is an examples available using this package: [Simple Foglet with spray-wrtc network](https://ran3d.github.io/foglet-core/example/foglet.html)
-
-Some other examples are available on https://ran3d.github.io/foglet/ and their source code at https://github.com/RAN3D/foglet
+This project aims to provide a solid core infrastructure for developping fog computing applications built with spray-wrtc (see references).
 
 ## Installation
 
@@ -24,11 +18,14 @@ npm install --save foglet-core
 
 The foglet library is distributed as a browserified bundle.
 
-## Documentation
+## Buliding fog computing applications
 
-The documentation is available [here online](https://ran3d.github.io/foglet-core/)
+[**The foglet cookbook**](https://ran3d.github.io/foglet-cookbook/) contains tutorials on build complex fog computing application using
+`foglet-core`.
 
-## How to use it and write your example ?
+You can also check out [the documentation online](https://ran3d.github.io/foglet-core/)
+
+## Getting started
 
 Creates a new HTML file and insert the **foglet bundle** in it:
 ```html
@@ -46,30 +43,38 @@ To be begin with, let's write a simple piece of JS code:
 ```html
 <script type="text/javascript">
   'use strict';
-  const Foglet = require('foglet').Foglet;
+  const Foglet = require('foglet');
 
-  // Construction of the network
-  var foglet = new Foglet({
-    protocol: 'example-protocol', // choose a protocol to connect your example
-    room: 'example-room', // choose a room to connect all the peers through the signaling server
-    webrtc:	{
-      trickle: true,
-      iceServers : []
-    },
-    signalingAdress:'http://localhost:3000/', // the adress of your signaling server
-    rpsType: 'spray-wrtc' // choose your type of Random Peer Sampling network
+  // let's create a simple application that send message in broadcast
+  const foglet = new Foglet({
+    rps: {
+      type: 'spray-wrtc', // we choose Spray as a our RPS
+      options: {
+        protocol: 'my-awesome-broadcast-application', // the name of the protocol run by our app
+        webrtc: { // some WebRTC options
+          trickle: true, // enable trickle
+          iceServers : [] // define iceServers here if you want to run this code outside localhost
+        },
+        signaling: { // configure the signaling server
+          address: 'http://signaling.herokuapp.com', // put the URL of the signaling server here
+          room: 'my-awesome-broadcast-application' // the name of the room for the peers of our application
+        }
+      }
+    }
   });
 
-  // Retreive a message sent by a broadcast
-  foglet.onBroadcast(message => {
-    console.log('received a broadcast:', message);
-  });
+  // connect the foglet to the signaling server
+  foglet.share();
 
-  // Connect our Foglet to our example network
-  foglet.connection().then(d => {
-    console.log('I\'m connected');
-    // let's send some messages
-    foglet.sendBroadcast('So Long and Thanks for all the Fish!');
+  // Connect the foglet to our network
+  foglet.connection().then(() => {
+    // listen for broadcast messages
+    foglet.onBroadcast((id, message) => {
+      console.log('The peer', id, 'just sent me by broadcast:', message);
+    });
+
+    // send a message in broadcast
+    foglet.sendBroadcast('Hello World !');
   });
 </script>
 ```
@@ -82,7 +87,7 @@ You should see that your foglet has been connected to the RPS.
 In order to run this library, you have to provide the address of a **signaling server** using the `signalingAdress` option.
 This server must be compatible with the foglet library.
 
-The library [`foglet-signaling-server`](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
+The library [foglet-signaling-server](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
 
 ## Contributors:
 
