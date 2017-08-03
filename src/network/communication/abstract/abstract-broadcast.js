@@ -36,15 +36,15 @@ const debug = require('debug')('foglet-core:communication:abstractbroadcast');
 class AbstractBroadcast extends EventEmitter {
   /**
    * Constructor
-   * @param  {AbstractAdapter} source - The source RPS/overlay
+   * @param  {AbstractNetwork} source - The source RPS/overlay
    * @param  {string} protocol - The name of the broadcast protocol
    */
   constructor (source, protocol) {
     super();
-    this.source = source;
-    this.protocol = 'foglet-broadcast-protocol-' + protocol;
-    this.unicast = new Unicast(source, this.protocol);
-    this.unicast.on('receive', (id, message) => {
+    this._source = source;
+    this._protocol = 'foglet-broadcast-protocol-' + protocol;
+    this._unicast = new Unicast(this._source, this._protocol);
+    this._unicast.on('receive', (id, message) => {
       this._receive(id, message);
     });
   }

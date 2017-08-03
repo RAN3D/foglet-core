@@ -42,11 +42,16 @@ function formatID (message) {
 }
 
 /**
- * FBroadcast represent the base implementation of a broadcast protocol for the foglet library.
+ * Broadcast represent the base implementation of a broadcast protocol for the foglet library.
  * @extends AbstractBroadcast
  * @author Arnaud Grall (Folkvir)
  */
 class Broadcast extends AbstractBroadcast {
+  /**
+   * Constructor
+   * @param  {AbstractNetwork} source - The source RPS/overlay
+   * @param  {string} protocol - The name of the broadcast protocol
+   */
   constructor (source, protocol) {
     super(source, protocol);
     if(source && protocol) {
@@ -55,12 +60,12 @@ class Broadcast extends AbstractBroadcast {
         timeBeforeStart: 2 * 1000
       }, this.options);
       this.uid = uuid();
-      this.causality = new VV(this.uid);
-      this.causality.incrementFrom({ _e: this.uid, _c: 0 });
+      this._causality = new VV(this.uid);
+      this._causality.incrementFrom({ _e: this.uid, _c: 0 });
       // buffer of received messages
-      this.buffer = [];
+      this._buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
-      this.bufferAntiEntropy = messages.MAntiEntropyResponse('init');
+      this._bufferAntiEntropy = messages.MAntiEntropyResponse('init');
     } else {
       return new Error('Not enough parameters', 'fbroadcast.js');
     }
@@ -73,8 +78,8 @@ class Broadcast extends AbstractBroadcast {
    * @return {void}
    */
   _sendAll (message) {
-    const n = this.source.getNeighbours(Infinity);
-    if(n.length > 0) n.forEach(p => this.unicast.send(p, message).catch(e => debug('Error: It seems there is not a receiver', e)));
+    const n = this._source.getNeighbours(Infinity);
+    if(n.length > 0) n.forEach(p => this._unicast.send(p, message).catch(e => debug('Error: It seems there is not a receiver', e)));
   }
 
   /**
@@ -84,10 +89,10 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean}
    */
   send (message, isReady = undefined) {
-    const a = this.causality.increment();
-    const broadcastMessage = messages.BroadcastMessage(this.protocol, a, isReady || this.causality.clone(), message);
+    const a = this._causality.increment();
+    const broadcastMessage = messages.BroadcastMessage(this._protocol, a, isReady || this._causality.clone(), message);
     // #2 register the message in the structure
-    this.causality.incrementFrom(a);
+    this._causality.incrementFrom(a);
 
     // #3 send the message to the neighborhood
     this._sendAll(broadcastMessage);
@@ -105,10 +110,10 @@ class Broadcast extends AbstractBroadcast {
   sendAntiEntropyResponse (origin, causalityAtReceipt, messages) {
     let id = uuid();
     // #1 metadata of the antientropy response
-    let sent = this.unicast.send(origin, messages.MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
+    let sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, causalityAtReceipt, messages.length));
     let i = 0;
     while (sent && i < messages.length) {
-      sent = this.unicast.send(origin, messages.MAntiEntropyResponse(id, null, messages.length, messages[i]));
+      sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, null, messages.length, messages[i]));
       ++i;
     }
   }
@@ -127,9 +132,9 @@ class Broadcast extends AbstractBroadcast {
         if (!('issuer' in message))
           message.issuer = id;
         // #1 register the operation
-        // maintain `this.buffer` sorted to search in O(log n)
-        const index = sortedIndexBy(this.buffer, message, formatID);
-        this.buffer.splice(index, 0, message);
+        // maintain `this._buffer` sorted to search in O(log n)
+        const index = sortedIndexBy(this._buffer, message, formatID);
+        this._buffer.splice(index, 0, message);
         // #2 deliver
         this._reviewBuffer();
         // #3 rebroadcast
@@ -147,7 +152,7 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean} True if the message should not be propagated, False if it should be.
    */
   _shouldStopPropagation (message) {
-    if (this.causality.isLower(message.id))
+    if (this._causality.isLower(message.id))
       return true;
     return this._findInBuffer(formatID(message)) > -1;
   }
@@ -159,14 +164,14 @@ class Broadcast extends AbstractBroadcast {
    * @return {int} The index of the message in the buffer, or -1 if not found
    */
   _findInBuffer (id) {
-    // use a binary search algorithm since `this.buffer` is sorted by IDs
+    // use a binary search algorithm since `this._buffer` is sorted by IDs
     let minIndex = 0;
     let maxIndex = this.length - 1;
     let currentIndex, currentElement;
 
     while (minIndex <= maxIndex) {
       currentIndex = (minIndex + maxIndex) / 2 | 0;
-      currentElement = formatID(this.buffer[currentIndex]);
+      currentElement = formatID(this._buffer[currentIndex]);
 
       if (currentElement < id) {
         minIndex = currentIndex + 1;
@@ -186,14 +191,14 @@ class Broadcast extends AbstractBroadcast {
    */
   _reviewBuffer () {
     let message, found = false;
-    for (let index = this.buffer.length - 1; index >= 0; --index) {
-      message = this.buffer[index];
-      if (this.causality.isLower(message.id)) {
-        this.buffer.splice(index, 1);
+    for (let index = this._buffer.length - 1; index >= 0; --index) {
+      message = this._buffer[index];
+      if (this._causality.isLower(message.id)) {
+        this._buffer.splice(index, 1);
       } else {
         found = true;
-        this.causality.incrementFrom(message.id);
-        this.buffer.splice(index, 1);
+        this._causality.incrementFrom(message.id);
+        this._buffer.splice(index, 1);
         this.emit('receive', message.issuer, message.payload);
       }
     }

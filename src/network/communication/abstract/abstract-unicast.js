@@ -34,19 +34,20 @@ const EventEmitter = require('events');
 class AbstractUnicast extends EventEmitter {
   /**
    * Constructor
-   * @param  {AbstractAdapter} source - The source RPS/overlay
-   * @param  {string} protocol - The name of the broadcast protocol
+   * @param  {AbstractNetwork} source - The source RPS/overlay
+   * @param  {string} protocol - The name of the unicast protocol
    */
   constructor (source, protocol) {
     super();
-    this.source = source;
-    this.protocol = 'foglet-unicast-protocol-' + protocol;
+    this._source = source;
+    this._protocol = 'foglet-unicast-protocol-' + protocol;
   }
 
   /**
    * Send a message to the peer specified by its id
    * @param  {string}  id  - The id to send the message
-   * @param  {Object} message
+   * @param  {*} message - The message to send
+   * @return {Promise} A Promise fulfilled when the message is sent
    */
   send (id, message) {
     throw new Error('A valid unicast protocol should implement a send method with a msg and id.');
@@ -55,7 +56,7 @@ class AbstractUnicast extends EventEmitter {
   /**
    * Handler executed when a message is recevied
    * @param  {string} id  - Message issuer's ID
-   * @param  {Object} message - The message received
+   * @param  {*} message - The message received
    * @return {void}
    */
   _receive (id, message) {

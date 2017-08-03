@@ -2,50 +2,55 @@
 
 const AbstractUnicast = require('./../abstract/abstract-unicast.js');
 const UnicastDefinition = require('unicast-definition');
-const debug = require('debug')('foglet-core:unicast');
 
+/**
+ * Unicast represent the base implementation of an unicast protocol for the foglet library.
+ * @extends AbstractUnicast
+ * @author Arnaud Grall (Folkvir)
+ */
 class Unicast extends AbstractUnicast {
+  /**
+   * Constructor
+   * @param  {AbstractNetwork} source - The source RPS/overlay
+   * @param  {string} protocol - The name of the unicast protocol
+   */
   constructor (source, protocol) {
     super(source, protocol);
-    this.unicast = new UnicastDefinition(this.source.rps, {pid: this.protocol});
-    this.unicast.on(this.protocol, (id, message) => {
+    this._unicast = new UnicastDefinition(this._source.rps, {pid: this._protocol});
+    this._unicast.on(this._protocol, (id, message) => {
       this._receive(id, message);
     });
   }
 
   /**
-   * Send a message to a specified peer by its id
-   * @param  {string} id      Id of the peer
-   * @param  {Object} message Message to send to the peer
-   * @return {Promise}         Resolve when the message has been sent
+   * Send a message to a peer using its ID.
+   * This peer must be a neighbour.
+   * @param  {string}  id  - The id to send the message
+   * @param  {*} message - The message to send
+   * @return {Promise} A Promise fulfilled when the message is sent
    */
   send (id, message) {
-    if (id && message) {
-      return this.unicast.emit(this.protocol, id, this.source.outviewId, message);
-    } else {
-      return Promise.reject('Missing id or message');
-    }
+    return this._unicast.emit(this._protocol, id, this._source.outviewId, message);
   }
 
   /**
-   * Send a message to specified peers id
-   * @param  {array<string>} ids      List of peer ids
-   * @param  {Object} message Message to send to all peers
-   * @return {Promise}         Resolved when all message sent, otherwise rejected.
+   * Send a message to multiple peers
+   * @param  {string[]} ids - Set of peer IDs
+   * @param  {Object} message - Message to send
+   * @return {Promise} A Promise fulfilled when all message have been sent
    */
   sendMultiple (ids = [], message) {
-    return new Promise((resolve, reject) => {
-      if (ids.length > 0) {
-        ids.reduce((acc, current, index) => {
-          return this.send(ids[index], message);
-        }, Promise.resolve()).then(() => resolve()).catch(e => reject(e));
-      } else {
-        debug('No ids specified, message not sent');
-        reject();
-      }
-    });
+    return ids.reduce((prev, peerID) => {
+      return prev.then(() => this.send(peerID, message));
+    }, Promise.resolve());
   }
 
+  /**
+   * Handler executed when a message is recevied
+   * @param  {string} id  - Message issuer's ID
+   * @param  {*} message - The message received
+   * @return {void}
+   */
   _receive (id, message) {
     this.emit('receive', id, message);
   }
