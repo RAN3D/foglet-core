@@ -20,7 +20,7 @@ The foglet library is distributed as a browserified bundle.
 
 ## Buliding fog computing applications
 
-[**The foglet cookbook**](https://ran3d.github.io/foglet-cookbook/) contains tutorials on build complex fog computing application using
+[**The foglet cookbook**](https://github.com/RAN3D/foglet-cookbook/) contains tutorials on build complex fog computing application using
 `foglet-core`.
 
 You can also check out [the documentation online](https://ran3d.github.io/foglet-core/)
