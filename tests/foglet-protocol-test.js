@@ -4,14 +4,16 @@ const Foglet = require('../src/foglet.js');
 const defineProtocol = require('../src/fprotocol/protocol-builder.js');
 const utils = require('./utils.js');
 
+function initProtocol (callback, done) {
+  this._callback = callback;
+  this._done = done;
+}
+
 const UnicastProtocol = defineProtocol('sample-unicast-protocol')`
   init
-  ${(self, callback, done) => {
-    self._callback = callback;
-    self._done = done;
-  }}
+  ${initProtocol}
   get
-  ${service => {
+  ${function (service) {
     service.is.unicast();
     service.on.receive(function (id, msg, reply, reject) {
       if (this._callback) this._callback(id, msg, reply, reject);
@@ -22,12 +24,9 @@ const UnicastProtocol = defineProtocol('sample-unicast-protocol')`
 
 const BroadcastProtocol = defineProtocol('sample-broadcast-protocol')`
   init
-  ${(self, callback, done) => {
-    self._callback = callback;
-    self._done = done;
-  }}
+  ${initProtocol}
   get
-  ${service => {
+  ${function (service) {
     service.is.broadcast();
     service.on.receive(function (id, msg) {
       if (this._callback) this._callback(id, msg);
@@ -109,12 +108,9 @@ describe('FogletProtocol', () => {
       it('should allow before hooks on send & receive', done => {
         UnicastHookProtocol = defineProtocol('unicast-protocol-with-hooks')`
           init
-          ${(self, callback, done) => {
-            self._callback = callback;
-            self._done = done;
-          }}
+          ${initProtocol}
           get
-          ${service => {
+          ${function (service) {
             service.is.unicast();
             service.on.receive(function (id, msg) {
               if (this._callback) this._callback(id, msg);
@@ -149,7 +145,7 @@ describe('FogletProtocol', () => {
         const check = utils.doneAfter(2, done);
         UnicastHookProtocol = defineProtocol('unicast-protocol-with-hooks')`
           get
-          ${service => {
+          ${function (service) {
             service.is.unicast();
             service.on.receive(function () {});
             service.after.send(function (msg) {
@@ -203,12 +199,9 @@ describe('FogletProtocol', () => {
       it('should allow before hooks on send & receive', done => {
         BroadcastHookProtocol = defineProtocol('broadcast-protocol-with-hooks')`
           init
-          ${(self, callback, done) => {
-            self._callback = callback;
-            self._done = done;
-          }}
+          ${initProtocol}
           get
-          ${service => {
+          ${function (service) {
             service.is.broadcast();
             service.on.receive(function (id, msg) {
               if (this._callback) this._callback(id, msg);
@@ -243,7 +236,7 @@ describe('FogletProtocol', () => {
         const check = utils.doneAfter(2, done);
         BroadcastHookProtocol = defineProtocol('broadcast-protocol-with-hooks')`
           get
-          ${service => {
+          ${function (service) {
             service.is.broadcast();
             service.on.receive(function () {});
             service.after.send(function (msg) {

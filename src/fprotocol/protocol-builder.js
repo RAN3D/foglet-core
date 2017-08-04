@@ -32,20 +32,21 @@ const InitBuilder = require('./builders/init-builder.js');
  * Create a function that evaluates a tagged template to create a new subclass of {@link FogletProtocol}
  * that implements the protocol described in the template.
  * @param  {string} protocolName - The name of the protocol
- * @return {function}
+ * @return {function} A function that evaluates a tagged template to create a new subclass of {@link FogletProtocol}
  * @example
  * const ExampleUnicastProtocol = defineProtocol('example-unicast-protocol')`
  *  init
- *  ${(self, callback, done) => {
- *    self._callback = callback;
- *    self._done = done;
+ *  ${function (base) {
+ *    this._base = base;
  *  }}
  *  get
- *  ${service => {
+ *  ${function(service) {
  *    service.is.unicast();
  *    service.on.receive(function (id, msg, reply, reject) {
- *      if (this._callback) this._callback(id, msg, reply, reject);
- *      if (this._done) this._done();
+ *      if (msg.number % this._base === 0)
+ *        reply(`${msg.number} is a multiple of ${this._base}`);
+ *      else
+ *        reject(`${msg.number} is not a multiple of ${this._base}`);
  *    });
  *  }}
  *  `;

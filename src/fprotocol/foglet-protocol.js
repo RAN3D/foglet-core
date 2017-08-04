@@ -31,24 +31,6 @@ const utils = require('./utils.js');
  * A Protocol is a a set of behaviours used to interact with others foglet that shares the same protocol.
  * @abstract
  * @author Thomas Minier
- * @example
- * const ExampleUnicastProtocol = defineProtocol('example-unicast-protocol')`
- *  init
- *  ${(self, callback, done) => {
- *    self._callback = callback;
- *    self._done = done;
- *  }}
- *  get
- *  ${service => {
- *    service.is.unicast();
- *    service.on.receive(function (id, msg, reply, reject) {
- *      if (this._callback) this._callback(id, msg, reply, reject);
- *      if (this._done) this._done();
- *    });
- *  }}
- *  `;
- *
- * module.exports = ExampleUnicastProtocol;
  */
 class FogletProtocol {
   /**
@@ -63,7 +45,7 @@ class FogletProtocol {
     this._answerQueue = new AnswerQueue();
     this._initHandlers();
     if ('_init' in this)
-      this._init(this, ...args);
+      this._init.call(this, ...args);
   }
 
   /**
