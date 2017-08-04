@@ -2,7 +2,7 @@
 'use strict';
 const uuid = require('uuid/v4');
 
-const buildFog = (Foglet, size) => {
+const buildFog = (Foglet, size, overlays = []) => {
   const fog = [];
   // creates a random seed for romm & protocol
   const id = uuid();
@@ -20,10 +20,12 @@ const buildFog = (Foglet, size) => {
           delta: 10 * 1000, // spray-wrtc shuffle interval
           signaling: {
             address: 'http://localhost:3000',
-            // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
             room: `test-room-generated-${id}`
           }
         }
+      },
+      overlay: {
+        overlays
       }
     }));
   return fog;
@@ -44,6 +46,15 @@ const pathConnect = (peers, duplex = false) => {
   }));
 };
 
+const overlayConnect = (index, ...peers) => {
+  return peers.reduce((prev, peer) => {
+    return prev.then(() => {
+      peer.getNetwork(index).signaling.signaling();
+      return peer.getNetwork(index).signaling.connection();
+    });
+  }, Promise.resolve());
+};
+
 const doneAfter = (limit, done) => {
   let cpt = 0;
   return () => {
@@ -56,5 +67,6 @@ const doneAfter = (limit, done) => {
 module.exports = {
   buildFog,
   pathConnect,
+  overlayConnect,
   doneAfter
 };

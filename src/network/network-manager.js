@@ -97,7 +97,7 @@ class NetworkManager extends EventEmitter {
   use (index = 0) {
     if(index === 0 || index < this._overlays.length)
       return this._rps;
-    return this._overlays[index];
+    return this._overlays[index - 1];
   }
 
   /**
@@ -188,7 +188,7 @@ class NetworkManager extends EventEmitter {
     let options = lmerge(globalOptions, overlay.options);
     options.manager = this;
     if(typeof overlay.class === 'function') {
-      let net = new overlay(options);
+      let net = new overlay.class(options);
       objNetwork = new Network(net, options.signaling, options.protocol);
     } else if( typeof overlay.class === 'string' ) {
       let overlord = this._chooseOverlay(overlay.class);
