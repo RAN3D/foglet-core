@@ -115,8 +115,7 @@ class Signaling extends EventEmitter {
           this._socket.on('joinedRoom', () => {
             debug('Connected to the room: ' + this.options.room);
             this._source.join(this._signalingInit()).then(() => {
-              done();
-              // this._socket.emit('connected', { room: this.options.room });
+              this._socket.emit('connected', { room: this.options.room });
             }).catch(handleError);
           });
         }
