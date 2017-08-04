@@ -56,55 +56,78 @@ class Signaling extends EventEmitter {
       room: uuid(),
       timeout: 20000
     }, options);
-    this.network = source;
-    this.source = source.rps;
+    this._network = source;
+    this._source = source.rps;
+    this._socket = io(this.options.address, {
+      autoConnect: false,
+      origins: this.options.origins
+    });
+    this._socket.on('new_spray', (data) => {
+      const signalingAccept = offer => {
+        debug('Emit the accepted offer: ', offer);
+        this._socket.emit('accept', { offer, room: this.options.room });
+      };
+      debug('Receive a new offer: ', data);
+      this._source.connect(signalingAccept, data);
+    });
+    this._socket.on('accept_spray', (data) => {
+      debug('Receive an accepted offer: ', data);
+      this._source.connect(data);
+    });
   }
 
   /**
    * Connect the peer to the network.
    * If no peer is supplied, rely on the signaling server to connect the peer to the network.
-   * @param {AbstractNetwork|undefined} network - (optional) network to connect with. If not supplied, use the signaling server instead.
+   * @param {AbstractNetwork|null} network - (optional) Network to connect with. If not supplied, use the signaling server instead.
    * @param {number} timeout - (optional) Timeout for the interactions with the signaling server
    * @return {Promise} A promise fullfilled when the connection is established or failed.
    */
-  connection (network, timeout = this.options.timeout) {
-    if(!network && !this.signaling)
+  connection (network = null, timeout = this.options.timeout) {
+    if(network === null && this._socket === null)
       return Promise.reject('There is no available connection to the server. Try to use the function signaling() before.');
     return new Promise((resolve, reject) => {
+      const timeoutID = setTimeout(() => {
+        reject('connection timed out.');
+      }, timeout);
+      const done = () => {
+        clearTimeout(timeoutID);
+        resolve(true);
+      };
+      const handleError = error => {
+        if(error === 'connected') {
+          done();
+        } else {
+          clearTimeout(timeoutID);
+          reject(error);
+        }
+      };
+
       try {
         if(network) {
-          this.source.join(this.direct(this.source, network)).then(() => {
-            this.emit('connected');
-          }).catch(error => {
-            if(error === 'connected') {
-              this.emit('connected');
-            } else {
-              reject(error);
-            }
-          });
+          this._source.join(this.direct(this._source, network)).then(() => {
+            done();
+          }).catch(handleError);
         } else {
           debug('Connecting to the room ' + this.options.room + '...');
-          this.signaling.emit('joinRoom', { room: this.options.room  });
+          this._socket.emit('joinRoom', { room: this.options.room  });
 
-          this.signaling.on('joinedRoom', () => {
+          this._socket.on('joinedRoom', () => {
             debug('Connected to the room: ' + this.options.room);
-            this.source.join(this._signalingInit()).then(() => {
-              this.signaling.emit('connected', { room: this.options.room });
-            }).catch(error => {
-              if(error === 'connected') {
-                this.emit('connected');
-              } else {
-                reject(error);
-              }
-            });
+            this._source.join(this._signalingInit()).then(() => {
+              done();
+              // this._socket.emit('connected', { room: this.options.room });
+            }).catch(handleError);
           });
         }
-        this.once('connected', () => {
-          resolve(true);
+        this._socket.once('connected', () => {
+          debug('Peer connected.');
+          done();
         });
-        setTimeout(() => {
-          reject('connection timed out.');
-        }, timeout);
+        // this.once('connected', () => {
+        //   console.log('receive connected');
+        //   resolve(true);
+        // });
       } catch (error) {
         reject(error);
       }
@@ -116,25 +139,7 @@ class Signaling extends EventEmitter {
   * @return {void}
   */
   signaling () {
-    //	Connection to the signaling server
-    this.signaling = io.connect(this.options.address, {origins: this.options.origins});
-
-    this.signaling.on('new_spray', (data) => {
-      const signalingAccept = (offer) => {
-        debug('Emit the accepted offer: ', offer);
-        this.signaling.emit('accept', { offer, room: this.options.room });
-      };
-      debug('Receive a new offer: ', data);
-      this.source.connect(signalingAccept, data);
-    });
-    this.signaling.on('accept_spray', (data) => {
-      debug('Receive an accepted offer: ', data);
-      this.source.connect(data);
-    });
-    this.signaling.on('connected', () => {
-      debug('Peer connected.');
-      this.emit('connected');
-    });
+    this._socket.open();
   }
 
   /**
@@ -142,12 +147,11 @@ class Signaling extends EventEmitter {
   * @return {void}
   */
   unsignaling () {
-    this.signaling.emit('disconnect');
-    this.signaling.removeAllListeners('new_spray');
-    this.signaling.removeAllListeners('accept_spray');
-    this.signaling.removeAllListeners('connected');
+    this._socket.emit('disconnect');
+    this._socket.removeAllListeners('connected');
+    this._socket.removeAllListeners('joinedRoom');
+    this._socket.close();
   }
-
 
   /**
    * Enable direct connection between 2 peers
@@ -157,8 +161,8 @@ class Signaling extends EventEmitter {
    * @return {function} Function that connect the source to the destination
    */
   direct (src, dest) {
-    return (offer) => {
-      dest.connect( (answer) => {
+    return offer => {
+      dest.connect( answer => {
         src.connect(answer);
       }, offer);
     };
@@ -172,7 +176,7 @@ class Signaling extends EventEmitter {
   _signalingInit () {
     return offer => {
       debug('Emit a new offer.');
-      this.signaling.emit('new', {offer, room: this.options.room});
+      this._socket.emit('new', {offer, room: this.options.room});
     };
   }
 }
