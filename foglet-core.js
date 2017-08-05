@@ -25,8 +25,17 @@ SOFTWARE.
 
 const Foglet = require('./src/foglet.js');
 const protocol = require('./src/fprotocol/protocol-builder.js');
+// abstracts
+const AbstractNetwork = require('./src/network/abstract/abstract-network.js');
+const AbstractOverlay = require('./src/network/abstract/abstract-overlay.js');
+const TManOverlay = require('./src/network/abstract/tman-overlay.js');
 
 module.exports = {
   Foglet,
-  protocol
+  protocol,
+  abstract: {
+    rps: AbstractNetwork,
+    overlay: AbstractOverlay,
+    tman: TManOverlay
+  }
 };
