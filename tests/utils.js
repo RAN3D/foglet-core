@@ -49,8 +49,8 @@ const pathConnect = (peers, duplex = false) => {
 const overlayConnect = (index, ...peers) => {
   return peers.reduce((prev, peer) => {
     return prev.then(() => {
-      peer.getNetwork(index).signaling.signaling();
-      return peer.getNetwork(index).signaling.connection();
+      peer.share(index);
+      return peer.connection(null, index);
     });
   }, Promise.resolve());
 };

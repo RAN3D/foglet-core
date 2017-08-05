@@ -224,45 +224,62 @@ class Foglet extends EventEmitter {
   *
   * Otherwise, it uses the signaling server to perform the connection.
   * In this case, one must call {@link Foglet#share} before, to connect the foglet to the signaling server first.
-  * @param {Foglet} foglet - (optional) Foglet to connect with. If omitted, rely on the signaling server.
-  * @param {number} [timeout=6000] - (optional)Connection timeout. Default to 6.0s
+  *
+  * By default, connect the foglet to the base RPS. Use the `index` parameter to select which network (rps or overlay) to connect with.
+  * The RPS is always the first network, at `index = 0`.
+  * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
+  * for the first overlay.
+  * @param {Foglet} [foglet=null] - (optional) Foglet to connect with. Leav to `null` rely on the signaling server.
+  * @param {integer} [index=0] - (optional) Index of the network to connect. Default to the RPS.
+  * @param {number} [timeout=6000] - (optional) Connection timeout. Default to 6.0s
   * @return {Promise} A Promise fullfilled when the foglet is connected
   * @example
   * const foglet = new Foglet({
   *   // some options...
   * });
+  * foglet.share();
   * foglet.connection().then(console.log).catch(console.err);
   */
-  connection (foglet = undefined, timeout = 60000) {
-    if(foglet) {
+  connection (foglet = null, index = 0, timeout = 60000) {
+    if(foglet !== null)
       // console.log('dest: ', foglet._defaultOverlay().rps, 'src: ', this._defaultOverlay().rps);
-      return this.getNetwork().signaling.connection(foglet.getNetwork().network.rps, timeout);
-    } else {
-      return this.getNetwork().signaling.connection(foglet, timeout);
-    }
+      return this.getNetwork(index).signaling.connection(foglet.getNetwork().network.rps, timeout);
+    return this.getNetwork(index).signaling.connection(foglet, timeout);
   }
 
   /**
-   * Connect the foglet to the signaling server
+   * Connect the foglet to the signaling server.
+   *
+   * By default, connect the RPS to the signaling server. Use the `index` parameter to select which network (rps or overlay) to connect.
+   * he RPS is always the first network, at `index = 0`.
+   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
+   * for the first overlay.
+   * @param  {integer} [index=0] - (optional) Index of the network to connect to the signaling server. Default to the RPS.
    * @return {void}
    */
-  share () {
-    this.getNetwork().signaling.signaling();
+  share (index = 0) {
+    this.getNetwork(index).signaling.signaling();
   }
 
   /**
-   * Revoke the connection with the signaling server
+   * Revoke the connection with the signaling server.
+   *
+   * By default, disconnect the RPS from the signaling server. Use the `index` parameter to select which network (rps or overlay) to connect.
+   * he RPS is always the first network, at `index = 0`.
+   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
+   * for the first overlay.
+   * @param  {integer} [index=0] - (optional) Index of the network to disconnect from the signaling server. Default to the RPS.
    * @return {void}
    */
-  unshare () {
-    this.getNetwork().signaling.unsignaling();
+  unshare (index = 0) {
+    this.getNetwork(index).signaling.unsignaling();
   }
 
   /**
-    * Select and get an overlay to use for communication using its index.
-    * The RPS is always the first network, at `index = 0`.
-    * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
-    * for the first overlay.
+   * Select and get an overlay to use for communication using its index.
+   * The RPS is always the first network, at `index = 0`.
+   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
+   * for the first overlay.
    * @param  {integer} [index=0] - (optional) Index of the network to get. Default to the RPS.
    * @return {Network} Return the network for the given ID.
    * @example
