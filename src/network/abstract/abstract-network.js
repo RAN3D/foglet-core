@@ -33,7 +33,6 @@ const EventEmitter = require ('events');
 class AbstractNetwork extends EventEmitter {
   /**
    * Constructor
-   * @param {*} rps - The Random Peer Sampling used by the network
    * @param {Object} options - Additional options used to build the network
    */
   constructor (options) {
@@ -70,6 +69,7 @@ class AbstractNetwork extends EventEmitter {
    * Build the RPS for this network.
    * Subclasses of {@link AbstractNetwork} **must** implement this method.
    * @param {Object} options - Options used to build the RPS
+   * @return {*} The network used as RPS/overlay
    */
   _buildRPS (options) {
     throw new Error('A valid network must implement a _buildRPS method using options', options);

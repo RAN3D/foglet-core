@@ -51,6 +51,7 @@ class SprayAdapter extends AbstractNetwork {
   /**
    * Build a Spray RPS
    * @param {Object} options - Options used to build the RPS
+   * @return {Spray} The Spray network
    */
   _buildRPS (options) {
     // if webrtc options specified: create object config for Spray

@@ -46,6 +46,7 @@ class fcnAdapter extends AbstractNetwork {
   /**
    * Build a Fully connected network.
    * @param {Object} options - Options used to build the RPS
+   * @return {Fcn} The Fcn network
    */
   _buildRPS (options) {
     // if webrtc options specified: create object config for Spray
