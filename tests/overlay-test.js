@@ -9,15 +9,19 @@ const utils = require('./utils.js');
 // This simple overlay is a basic spray adapter
 class TestOverlay extends AbstractOverlay {
   constructor (options) {
-    let sprayOptions = lmerge({
+    super(lmerge({
       webrtc:	{ // add WebRTC options
         trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
         iceServers : [] // define iceServers in non local instance
       },
       origins:'*',
-    }, options);
-    sprayOptions = lmerge({config: sprayOptions.webrtc}, sprayOptions);
-    super(new Spray(sprayOptions), sprayOptions);
+    }, options));
+  }
+
+  _buildRPS (options) {
+    // if webrtc options specified: create object config for Spray
+    const sprayOptions = lmerge({config: options.webrtc}, options);
+    return new Spray(sprayOptions);
   }
 
   getNeighbours (limit) {

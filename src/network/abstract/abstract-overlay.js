@@ -32,8 +32,8 @@ const AbstractNetwork = require('./abstract-network.js');
  * @author Grall Arnaud (Folkvir)
  */
 class AbstractOverlay extends AbstractNetwork {
-  constructor (rps, options) {
-    super(rps, options);
+  constructor (options) {
+    super(options);
     if(!options.manager) {
       // NEED A BASE (a RPS or an another overlay)
       throw new SyntaxError('Need the manager to access to other networks.');

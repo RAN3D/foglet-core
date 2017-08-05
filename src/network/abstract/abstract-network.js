@@ -36,9 +36,9 @@ class AbstractNetwork extends EventEmitter {
    * @param {*} rps - The Random Peer Sampling used by the network
    * @param {Object} options - Additional options used to build the network
    */
-  constructor (rps, options) {
+  constructor (options) {
     super();
-    this._rps = rps;
+    this._rps = this._buildRPS(options);
     this._options = options;
   }
 
@@ -67,12 +67,21 @@ class AbstractNetwork extends EventEmitter {
   }
 
   /**
+   * Build the RPS for this network.
+   * Subclasses of {@link AbstractNetwork} **must** implement this method.
+   * @param {Object} options - Options used to build the RPS
+   */
+  _buildRPS (options) {
+    throw new Error('A valid network must implement a _buildRPS method using options', options);
+  }
+
+  /**
    * Get the IDs of all available neighbours
    * @param  {integer} limit - Max number of neighbours to look for
    * @return {string[]} Set of IDs for all available neighbours
    */
   getNeighbours (limit) {
-    throw new Error('A valid network must implement a getNeighbours method');
+    throw new Error('A valid network must implement a getNeighbours method with limit', limit);
   }
 }
 
