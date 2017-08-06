@@ -50,7 +50,7 @@ describe('Overlays', () => {
       }
     ]);
 
-    f2.getNetwork(1).communication.onUnicast((id, msg) => {
+    f1.getNetwork(1).communication.onUnicast((id, msg) => {
       assert.equal(msg, 'hello world!');
       done();
     });
@@ -58,9 +58,9 @@ describe('Overlays', () => {
     utils.overlayConnect(1, f1, f2)
     .then(() => {
       setTimeout(() => {
-        const neighbours = f1.getNetwork(1).network.getNeighbours();
-        assert.isAbove(neighbours.length, 1);
-        f1.getNetwork(1).communication.sendUnicast(neighbours[0], 'hello world!');
+        const neighbours = f2.getNetwork(1).network.getNeighbours();
+        assert.equal(neighbours.length, 1);
+        f2.getNetwork(1).communication.sendUnicast(neighbours[0], 'hello world!');
       }, 2000);
     }).catch(done);
   });
