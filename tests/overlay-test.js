@@ -10,18 +10,25 @@ const utils = require('./utils.js');
 class TestOverlay extends AbstractOverlay {
   constructor (options) {
     super(lmerge({
-      webrtc:	{ // add WebRTC options
-        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-        iceServers : [] // define iceServers in non local instance
+      webrtc:	{
+        trickle: true,
+        iceServers : []
       },
       origins:'*',
     }, options));
   }
 
   _buildRPS (options) {
-    // if webrtc options specified: create object config for Spray
     const sprayOptions = lmerge({config: options.webrtc}, options);
     return new Spray(sprayOptions);
+  }
+
+  get inviewId () {
+    return this._rps.getInviewId();
+  }
+
+  get outviewId () {
+    return this._rps.getOutviewId();
   }
 
   getNeighbours (limit) {
@@ -31,7 +38,7 @@ class TestOverlay extends AbstractOverlay {
 
 describe('Overlays', () => {
   it('should build an overlay', done => {
-    const [ f1, f2, f3 ] = utils.buildFog(Foglet, 3, [
+    const [ f1, f2 ] = utils.buildFog(Foglet, 2, [
       {
         class: TestOverlay,
         options: {
@@ -43,12 +50,18 @@ describe('Overlays', () => {
       }
     ]);
 
-    utils.overlayConnect(1, f1, f2, f3)
-    .then(() => {
-      assert.isAbove(f1.getNetwork(1).network.getNeighbours().length, 0);
-      assert.isAbove(f2.getNetwork(1).network.getNeighbours().length, 0);
-      assert.isAbove(f3.getNetwork(1).network.getNeighbours().length, 0);
+    f2.getNetwork(1).communication.onUnicast((id, msg) => {
+      assert.equal(msg, 'hello world!');
       done();
+    });
+
+    utils.overlayConnect(1, f1, f2)
+    .then(() => {
+      setTimeout(() => {
+        const neighbours = f1.getNetwork(1).network.getNeighbours();
+        assert.isAbove(neighbours.length, 1);
+        f1.getNetwork(1).communication.sendUnicast(neighbours[0], 'hello world!');
+      }, 2000);
     }).catch(done);
   });
 });
