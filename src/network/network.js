@@ -73,6 +73,18 @@ class Network {
   get communication () {
     return this._communication;
   }
+
+  /**
+   * Register a middleware, with an optional priority
+   * @param  {Object} middleware   - The middleware to register
+   * @param  {function} middleware.in - Function applied on middleware input
+   * @param  {function} middleware.out - Function applied on middleware output
+   * @param  {Number} [priority=0] - (optional) The middleware priority
+   * @return {void}
+   */
+  use (middleware, priority = 0) {
+    this.communication.use(middleware, priority);
+  }
 }
 
 module.exports = Network;

@@ -34,9 +34,6 @@ const NetworkManager = require('./network/network-manager.js');
 // SSH Control
 const SSH = require('./utils/ssh.js');
 
-// Middleware
-const MiddlewareRegistry = require('./utils/middleware-registry.js');
-
 // Foglet default options
 const DEFAULT_OPTIONS = {
   verbose: true, // want some logs ? switch to false otherwise
@@ -173,12 +170,7 @@ class Foglet extends EventEmitter {
     super();
     this._id = uuid();
     this._options = lmerge(DEFAULT_OPTIONS, options);
-
-    // add the network part !
     this._networkManager = new NetworkManager(this._options);
-
-    // Middlewares
-    this._middlewares = new MiddlewareRegistry();
 
     // SSH Control
     // currently disabled
@@ -321,7 +313,7 @@ class Foglet extends EventEmitter {
    * foglet.use(middleware);
    */
   use (middleware, priority = 0) {
-    this._middlewares.register(middleware, priority);
+    this._networkManager.registerMiddleware(middleware, priority);
   }
 
   /**
@@ -338,7 +330,7 @@ class Foglet extends EventEmitter {
   * });
   **/
   onBroadcast (callback) {
-    this.getNetwork().communication.onBroadcast((id, msg) => callback(id, this._middlewares.out(msg)));
+    this.getNetwork().communication.onBroadcast(callback);
   }
 
 
@@ -354,7 +346,7 @@ class Foglet extends EventEmitter {
   * foglet.sendBroadcast('Hello everyone!');
   */
   sendBroadcast (message) {
-    return this.getNetwork().communication.sendBroadcast(this._middlewares.in(message));
+    return this.getNetwork().communication.sendBroadcast(message);
   }
 
   /**
@@ -371,7 +363,7 @@ class Foglet extends EventEmitter {
   * });
   **/
   onUnicast (callback) {
-    this.getNetwork().communication.onUnicast((id, msg) => callback(id, this._middlewares.out(msg)));
+    this.getNetwork().communication.onUnicast(callback);
   }
 
   /**
@@ -390,7 +382,7 @@ class Foglet extends EventEmitter {
   * foglet.sendUnicast(id, 'Hi diddly ho neighborino!');
   */
   sendUnicast (id, message) {
-    return this.getNetwork().communication.sendUnicast(id, this._middlewares.in(message));
+    return this.getNetwork().communication.sendUnicast(id, message);
   }
 
   /**
@@ -410,7 +402,7 @@ class Foglet extends EventEmitter {
   * foglet.sendMulticast(ids, 'Everyone, get in here!');
   */
   sendMulticast (ids = [], message) {
-    return this.getNetwork().communication.sendMulticast(ids, this._middlewares.in(message));
+    return this.getNetwork().communication.sendMulticast(ids, message);
   }
 
   /**

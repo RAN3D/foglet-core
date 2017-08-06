@@ -26,6 +26,7 @@ SOFTWARE.
 // const debug = require('debug')('foglet-core:communication');
 const Unicast = require('./unicast/unicast.js');
 const Broadcast = require('./broadcast/broadcast.js');
+const MiddlewareRegistry = require('../../utils/middleware-registry.js');
 
 /**
  * Communication is a facade to send messages to peers in a network using unicast or broadcast channels.
@@ -36,6 +37,19 @@ class Communication {
     this.network = source;
     this.unicast = new Unicast(this.network, protocol);
     this.broadcast = new Broadcast(this.network, protocol);
+    this._middlewares = new MiddlewareRegistry();
+  }
+
+  /**
+   * Register a middleware, with an optional priority
+   * @param  {Object} middleware   - The middleware to register
+   * @param  {function} middleware.in - Function applied on middleware input
+   * @param  {function} middleware.out - Function applied on middleware output
+   * @param  {Number} [priority=0] - (optional) The middleware priority
+   * @return {void}
+   */
+  use (middleware, priority = 0) {
+    this._middlewares.register(middleware, priority);
   }
 
   /**
@@ -45,7 +59,7 @@ class Communication {
    * @return {Promise} Promise fulfilled when the message is sent
    */
   sendUnicast (id, message) {
-    return this.unicast.send(id, message);
+    return this.unicast.send(id, this._middlewares.in(message));
   }
 
   /**
@@ -56,7 +70,7 @@ class Communication {
    * @return {Promise} Promise fulfilled when all message are sent
    */
   sendMulticast (ids, message) {
-    return this.unicast.sendMultiple(ids, message);
+    return this.unicast.sendMultiple(ids, this._middlewares.in(message));
   }
 
   /**
@@ -66,7 +80,7 @@ class Communication {
   * @return {Object}  id of the message sent
   */
   sendBroadcast (message, isReady = undefined) {
-    return this.broadcast.send(message, isReady);
+    return this.broadcast.send(this._middlewares.in(message), isReady);
   }
 
   /**
@@ -76,7 +90,7 @@ class Communication {
   */
   onUnicast (callback) {
     this.unicast.on('receive', (id, message) => {
-      callback(id, message);
+      callback(id, this._middlewares.out(message));
     });
   }
 
@@ -87,7 +101,7 @@ class Communication {
   */
   onOnceUnicast (callback) {
     this.unicast.once('receive', (id, message) => {
-      callback(id, message);
+      callback(id, this._middlewares.out(message));
     });
   }
 
@@ -97,7 +111,7 @@ class Communication {
    * @return {void}
    */
   onBroadcast (callback) {
-    this.broadcast.on('receive', (id, message) => callback(id, message));
+    this.broadcast.on('receive', (id, message) => callback(id, this._middlewares.out(message)));
   }
 
   /**
@@ -106,7 +120,7 @@ class Communication {
    * @return {void}
    */
   onOnceBroadcast (callback) {
-    this.broadcast.once('receive', (id, message) => callback(id, message));
+    this.broadcast.once('receive', (id, message) => callback(id, this._middlewares.out(message)));
   }
 
   /**

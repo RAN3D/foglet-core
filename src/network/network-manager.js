@@ -101,6 +101,19 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
+   * Register a middleware, with an optional priority
+   * @param  {Object} middleware   - The middleware to register
+   * @param  {function} middleware.in - Function applied on middleware input
+   * @param  {function} middleware.out - Function applied on middleware output
+   * @param  {Number} [priority=0] - (optional) The middleware priority
+   * @return {void}
+   */
+  registerMiddleware (middleware, priority = 0) {
+    this._rps.use(middleware, priority);
+    this._overlays.forEach(overlay => overlay.use(middleware, priority));
+  }
+
+  /**
    * Construct the RPS by its type and options
    * @private
    * @param  {string} type    - Type of the RPS (spray-wrtc/fcn-wrtc/...)
