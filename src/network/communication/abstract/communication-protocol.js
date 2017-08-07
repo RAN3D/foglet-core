@@ -23,28 +23,43 @@ SOFTWARE.
 */
 'use strict';
 
-const CommunicationProtocol = require('./communication-protocol.js');
-const Unicast = require('./../unicast/unicast.js');
+const EventEmitter = require('events');
 
 /**
- * AbstractBroadcast represents an abstract broadcast protocol.
+ * CommunicationProtocol represents an abstract communication protocol.
  * @abstract
- * @extends CommunicationProtocol
+ * @extends EventEmitter
  * @author Thomas Minier
  */
-class AbstractBroadcast extends CommunicationProtocol {
+class CommunicationProtocol extends EventEmitter {
   /**
    * Constructor
    * @param  {AbstractNetwork} source - The source RPS/overlay
    * @param  {string} protocol - The name of the broadcast protocol
    */
   constructor (source, protocol) {
-    super(source, `foglet-broadcast-protocol-${protocol}`);
-    this._unicast = new Unicast(this._source, this._protocol);
-    this._unicast.on('receive', (id, message) => {
-      this._receive(id, message);
-    });
+    super();
+    this._source = source;
+    this._protocol = protocol;
+  }
+  /**
+   * Send a message
+   * @param  {Object}  message  - The message to send
+   * @return {boolean}
+   */
+  send (message) {
+    throw new Error('A valid communication protocol should implement a send method');
+  }
+
+  /**
+   * Handler executed when a message is recevied
+   * @param  {string} id  - Message issuer's ID
+   * @param  {Object} message - The message received
+   * @return {void}
+   */
+  _receive (id, message) {
+    throw new Error('A valid communication protocol should implement a _receiveMessage method');
   }
 }
 
-module.exports = AbstractBroadcast;
+module.exports = CommunicationProtocol;
