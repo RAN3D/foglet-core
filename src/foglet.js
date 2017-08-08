@@ -333,6 +333,23 @@ class Foglet extends EventEmitter {
     this.getNetwork().communication.onBroadcast(callback);
   }
 
+  /**
+  * Listen on incoming unicasted streams
+  * @param  {MessageCallback} callback - Callback invoked with a {@link StreamMessage} as message
+  * @return {void}
+  * @example
+  * const foglet = getSomeFoglet();
+  *
+  * foglet.onStreamBroadcast((id, stream) => {
+  *  console.log('a peer with id = ', id, ' is streaming data to me');
+  *  stream.on('data', data => console.log(data));
+  *  stream.on('end', () => console.log('no more data available from the stream'));
+  * });
+  */
+  onStreamBroadcast (callback) {
+    this.getNetwork().communication.onStreamBroadcast(callback);
+  }
+
 
   /**
   * Send a broadcast message to all connected peers in the network.
@@ -347,6 +364,22 @@ class Foglet extends EventEmitter {
   */
   sendBroadcast (message) {
     return this.getNetwork().communication.sendBroadcast(message);
+  }
+
+  /**
+  * Begin the streaming of a message to all peers (using broadcast)
+  * @param  {VersionVector} [isReady=undefined] - Id of the message to wait before this message is received
+  * @return {StreamRequest} Stream used to transmit data to all peers
+  * @example
+  * const foglet = getSomeFoglet();
+  *
+  * const stream = foglet.sendBroadcast();
+  * stream.write('Hello');
+  * stream.write(' world!');
+  * stream.end();
+  */
+  streamBroadcast (isReady = undefined) {
+    return this.getNetwork().communication.streamBroadcast(isReady);
   }
 
   /**
@@ -367,6 +400,23 @@ class Foglet extends EventEmitter {
   }
 
   /**
+  * Listen on incoming unicasted streams
+  * @param  {MessageCallback} callback - Callback invoked with a {@link StreamMessage} as message
+  * @return {void}
+  * @example
+  * const foglet = getSomeFoglet();
+  *
+  * foglet.onStreamUnicast((id, stream) => {
+  *  console.log('a peer with id = ', id, ' is streaming data to me');
+  *  stream.on('data', data => console.log(data));
+  *  stream.on('end', () => console.log('no more data available from the stream'));
+  * });
+  */
+  onStreamUnicast (callback) {
+    this.getNetwork().communication.onStreamUnicast(callback);
+  }
+
+  /**
   * Send a message to a specific neighbour (in a **unicast** way).
   * @param {string} id - The ID of the targeted neighbour
   * @param {object} message - The message to send
@@ -383,6 +433,23 @@ class Foglet extends EventEmitter {
   */
   sendUnicast (id, message) {
     return this.getNetwork().communication.sendUnicast(id, message);
+  }
+
+  /**
+  * Begin the streaming of a message to another peer (using unicast)
+  * @param  {string} id - Id of the peer
+  * @return {StreamRequest} Stream used to transmit data to another peer
+  * @example
+  * const foglet = getSomeFoglet();
+  * const peerID = getSomePeerID();
+  *
+  * const stream = foglet.streamUnicast(peerID);
+  * stream.write('Hello');
+  * stream.write(' world!');
+  * stream.end();
+  */
+  streamUnicast (id) {
+    return this.getNetwork().communication.streamUnicast(id);
   }
 
   /**
