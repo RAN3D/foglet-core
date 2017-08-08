@@ -228,14 +228,13 @@ class Communication {
    * @return {void}
    */
   _handleStreamMessage (id, message, callback) {
+    // create responses objects for new streams
+    if (!this._activeStreams.has(message.id)) {
+      this._activeStreams.set(message.id, new StreamMessage());
+      callback(id, this._activeStreams.get(message.id));
+    }
     switch (message.type) {
     case 'chunk': {
-      // create responses objects for new streams
-      if (!this._activeStreams.has(message.id)) {
-        this._activeStreams.set(message.id, new StreamMessage());
-        // hand over the response stream to the main loop
-        callback(id, this._activeStreams.get(message.id));
-      }
       this._activeStreams.get(message.id).push(message.payload);
       break;
     }
@@ -246,14 +245,32 @@ class Communication {
       break;
     }
     case 'end': {
+      this._closeStream(message.id);
+      break;
+    }
+    case 'error': {
       if (!this._activeStreams.has(message.id))
-        throw new Error(`Cannot close an unkown stream with id = ${message.id}`);
-      this._activeStreams.get(message.id).push(null);
+        throw new Error(`Cannot transmit an error to an unkown stream with id = ${message.id}`);
+      this._activeStreams.get(message.id).emit('error', message.payload);
+      this._closeStream(message.id);
       break;
     }
     default:
       throw new Error(`Unknown StreamMessage type found in incoming stream message: ${message.type}`);
     }
+  }
+
+  /**
+   * Close an open stream
+   * @private
+   * @param {string} id - The ID of the stream to close
+   * @return {void}
+   */
+  _closeStream (id) {
+    if (!this._activeStreams.has(id))
+      throw new Error(`Cannot close an unkown stream with id = ${id}`);
+    this._activeStreams.get(id).push(null);
+    this._activeStreams.delete(id);
   }
 }
 

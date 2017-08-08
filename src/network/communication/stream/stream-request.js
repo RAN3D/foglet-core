@@ -66,6 +66,17 @@ class StreamRequest extends Writable {
   }
 
   /**
+   * Destroy the stream and emit an error on the `error` event.
+   * This error will be propagated to peer(s) that which data was streamed, and the associated output stream
+   * will also be destroyed.
+   * @param {string} error - The error responsible for the stream's destruction
+   */
+  destroy (error) {
+    this._send(messages.StreamMessageError(this._id, error));
+    super.destroy(error);
+  }
+
+  /**
    * @private
    */
   _write (msg, encoding, callback) {

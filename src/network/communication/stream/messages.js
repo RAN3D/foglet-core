@@ -56,8 +56,15 @@ const StreamMessageTrailers = StreamMessage('trailers');
  */
 const StreamMessageEnd = StreamMessage('end');
 
+/**
+ * A message that signal an error
+ * @private
+ */
+const StreamMessageError = StreamMessage('error');
+
 module.exports = {
   StreamMessageChunk,
   StreamMessageTrailers,
-  StreamMessageEnd
+  StreamMessageEnd,
+  StreamMessageError
 };
