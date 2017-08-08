@@ -30,7 +30,7 @@ module.exports = function (config) {
     },
     // list of files to exclude
     exclude: [
-      // overlays are currenlty unstable
+      // overlays are currently unstable
       'tests/overlay-test.js'
     ],
     // browserify with babelify

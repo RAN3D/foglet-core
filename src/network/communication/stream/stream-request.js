@@ -24,7 +24,7 @@ SOFTWARE.
 'use strict';
 
 const uuid = require('uuid/v4');
-const Writable = require('stream').Writable;
+const Writable = require('readable-stream').Writable;
 const messages = require('./messages.js');
 
 /**
@@ -52,7 +52,6 @@ class StreamRequest extends Writable {
     this._id = uuid();
     this._send = send;
     this._trailers = [];
-    this.on('finish', this._end);
   }
 
   /**
@@ -78,10 +77,11 @@ class StreamRequest extends Writable {
    * Send trailers if presents & close the transmission
    * @private
    */
-  _end () {
+  _final (callback) {
     if (this._trailers.length > 0)
       this._send(messages.StreamMessageTrailers(this._id, this._trailers));
     this._send(messages.StreamMessageEnd(this._id));
+    callback();
   }
 }
 

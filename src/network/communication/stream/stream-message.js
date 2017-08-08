@@ -23,7 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
-const PassThrough = require('stream').PassThrough;
+const PassThrough = require('readable-stream').PassThrough;
 
 /**
  * A StreamMessage enable to receive data streamed using a {@link StreamRequest}.

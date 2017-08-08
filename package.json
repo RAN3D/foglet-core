@@ -40,6 +40,7 @@
     "debug": "^2.6.8",
     "fcn-wrtc": "^2.0.4",
     "lodash": "^4.17.4",
+    "readable-stream": "^2.3.3",
     "socket.io-client": "^1.7.4",
     "spray-wrtc": "^2.0.2",
     "tman-wrtc": "0.0.8",
