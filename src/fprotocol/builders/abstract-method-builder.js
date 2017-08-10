@@ -23,8 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
-const camelCase = require('lodash/camelCase');
-const capitalize = require('lodash/capitalize');
+const utils = require('../utils.js');
 
 /**
  * Apply hooks on a message in reduce fashion.
@@ -61,8 +60,8 @@ class AbstractMethodBuilder {
    */
   constructor (serviceName) {
     this._serviceName = serviceName;
-    this._camelCasedName = camelCase(this._serviceName);
-    this._capitalizedCamelCase = capitalize(this._camelCasedName);
+    this._camelCasedName = utils.camelCase(this._serviceName);
+    this._capitalizedCamelCase = utils.capitalize(this._camelCasedName);
   }
 
   get methodName () {

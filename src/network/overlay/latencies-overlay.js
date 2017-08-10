@@ -35,7 +35,7 @@ const TMan = require('tman-wrtc');
 const Communication = require('./../communication/communication.js');
 
 // utils
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 const uuid = require('uuid/v4');
 
 class LatenciesOverlay extends AbstractOverlay {

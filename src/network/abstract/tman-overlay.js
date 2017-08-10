@@ -25,7 +25,7 @@ SOFTWARE.
 
 const AbstractOverlay = require('./../abstract/abstract-overlay.js');
 const TMan = require('tman-wrtc');
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 
 /**
  * A TManOverlay is an abstract network used to build overlay based on the TMan network over WebRTC.

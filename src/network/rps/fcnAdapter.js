@@ -23,7 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 const Fcn = require('fcn-wrtc').Fcn;
 const AbstractNetwork = require('./../abstract/abstract-network.js');
 

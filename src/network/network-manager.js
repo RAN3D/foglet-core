@@ -26,7 +26,7 @@ SOFTWARE.
 const EventEmitter = require('events');
 
 // lodash utils
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 
 // Networks
 const Network = require('./network.js');

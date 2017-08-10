@@ -26,7 +26,7 @@ SOFTWARE.
 const AbstractNetwork = require('./../abstract/abstract-network.js');
 // const lremove = require('lodash/remove');
 const Spray = require('spray-wrtc');
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 
 /**
  * SprayAdapter adapts the usage of a Spray RPS in the foglet library.

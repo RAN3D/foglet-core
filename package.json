@@ -11,9 +11,9 @@
     "test": "npm run karma",
     "karma": "karma start karma.config.js",
     "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
-    "build:foglet": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ es2015 ] ]  > ./dist/foglet.bundle.js",
-    "build:watch": "mkdir -p dist/ && watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ es2015 ] ]  -o ./dist/foglet.bundle.js -v -d ",
-    "build:foglet-min": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ es2015 ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
+    "build:foglet": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  > ./dist/foglet.bundle.js",
+    "build:watch": "mkdir -p dist/ && watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  -o ./dist/foglet.bundle.js -v -d ",
+    "build:foglet-min": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
   },
   "repository": {
     "type": "git",
@@ -39,7 +39,8 @@
   "dependencies": {
     "debug": "^2.6.8",
     "fcn-wrtc": "^2.0.4",
-    "lodash": "^4.17.4",
+    "lodash.merge": "^4.6.0",
+    "lodash.sortedindexby": "^4.6.0",
     "readable-stream": "^2.3.3",
     "socket.io-client": "^1.7.4",
     "spray-wrtc": "^2.0.2",
@@ -48,7 +49,7 @@
     "uuid": "^3.0.1"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.24.0",
+    "babel-preset-env": "^1.6.0",
     "babelify": "^7.3.0",
     "browserify": "^13.1.0",
     "browserify-istanbul": "^2.0.0",
@@ -73,7 +74,9 @@
   "bundledDependencies": [
     "debug",
     "fcn-wrtc",
-    "lodash",
+    "lodash.merge",
+    "lodash.sortedindexby",
+    "readable-stream",
     "socket.io-client",
     "spray-wrtc",
     "fcn-wrtc",

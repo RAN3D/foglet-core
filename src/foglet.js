@@ -25,7 +25,7 @@ SOFTWARE.
 
 const EventEmitter = require('events');
 const uuid = require('uuid/v4');
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 // const debug = require('debug')('foglet-core:main');
 
 // NetworkManager

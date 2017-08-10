@@ -23,8 +23,15 @@ SOFTWARE.
 */
 'use strict';
 
-const camelCase = require('lodash/camelCase');
-const capitalize = require('lodash/capitalize');
+const camelCase = str => {
+  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => {
+    return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
+  }).replace(/\s+/g, '');
+};
+
+const capitalize = str => {
+  return str[0].toUpperCase() + str.slice(1);
+};
 
 /**
  * Get the name of a service method
@@ -75,6 +82,8 @@ const afterReceiveName = method => {
 };
 
 module.exports = {
+  camelCase,
+  capitalize,
   methodName,
   handlerName,
   beforeSendName,

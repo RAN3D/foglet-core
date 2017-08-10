@@ -27,9 +27,9 @@ const AbstractBroadcast = require('./../abstract/abstract-broadcast.js');
 const VV = require('../utils/vv.js'); // Version-Vector
 const messages = require('./messages.js');
 
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 const uuid = require('uuid/v4');
-const sortedIndexBy = require('lodash/sortedIndexBy');
+const sortedIndexBy = require('lodash.sortedindexby');
 const debug = require('debug')('foglet-core:broadcast');
 
 /**

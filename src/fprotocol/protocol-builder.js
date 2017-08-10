@@ -23,7 +23,6 @@ SOFTWARE.
 */
 'use strict';
 
-const compact = require('lodash/compact');
 const FogletProtocol = require('./foglet-protocol.js');
 const ServiceBuilder = require('./builders/service-builder.js');
 const InitBuilder = require('./builders/init-builder.js');
@@ -62,7 +61,8 @@ function define (protocolName) {
       }
     };
     // clean services names before building
-    compact(services.map(str => str.trim()))
+    services.map(str => str.trim())
+    .filter(str => str.length > 0)
     .forEach((name, index) => {
       if (name === 'init' || name === 'constructor') {
         builder = new InitBuilder(callbacks[index]);
