@@ -13,7 +13,10 @@
     "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
     "build:foglet": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  > ./dist/foglet.bundle.js",
     "build:watch": "mkdir -p dist/ && watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  -o ./dist/foglet.bundle.js -v -d ",
-    "build:foglet-min": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
+    "build:foglet-min": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js",
+    "wbuild:foglet" : "browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  > ./dist/foglet.bundle.js",
+    "wbuild:watch": "watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  -o ./dist/foglet.bundle.js -v -d ",
+    "wbuild:foglet-min": "browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
   },
   "repository": {
     "type": "git",

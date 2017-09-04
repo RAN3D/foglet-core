@@ -67,12 +67,12 @@ const redrawMain = () => {
   $('#mainGraph').append(`<div id='mainGraphBis' style='border: 1px solid black;'></div>`);
   graph = new P2PGraph('#mainGraphBis');
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].networkManager.rps.network.inviewId
+    let id = o[i]._networkManager._rps.network.inviewId
     graph.add({id, me: false, name: id});
   }
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].networkManager.rps.network.inviewId
-    o[i].networkManager.rps.network.getNeighbours().forEach(peer => {
+    let id = o[i]._networkManager._rps.network.inviewId
+    o[i]._networkManager._rps.network.getNeighbours().forEach(peer => {
       // console.log('Main: ', id, 'Neighbor: ', peer);
       graph.connect(peer, id);
     });
@@ -86,12 +86,12 @@ const redrawBis = () => {
   graphBis = new P2PGraph('#bisGraphBis');
 
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].networkManager.use().network.inviewId;
+    let id = o[i]._networkManager.use().network.inviewId;
     graphBis.add({id, me: false, name: id});
   }
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i].networkManager.use().network.inviewId;
-    o[i].networkManager.use().network.getNeighbours().forEach(peer => {
+    let id = o[i]._networkManager.use().network.inviewId;
+    o[i]._networkManager.use().network.getNeighbours().forEach(peer => {
       // console.log('Main: ', id, 'Neighbor: ', peer);
       graphBis.connect(peer, id);
     });
