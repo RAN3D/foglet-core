@@ -31,9 +31,28 @@ function init () {
           }
         }
       },
-      overlay:{ // overlay options
-        enable:true, // want to activate overlay ? switch to false otherwise
-        type: [ {class: 'latencies', options: {} } ] // add an latencies overlay
+      overlay: { // overlay options
+        options: { // these options will be propagated to all components, but overrided if same options are listed in the list of overlays
+          webrtc:	{ // add WebRTC options
+            trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
+            iceServers : [] // define iceServers in non local instance
+          },
+          timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+          delta: 10 * 1000 // spray-wrtc shuffle interval
+        }, // options wiil be passed to all components of the overlay
+        overlays: [
+          {
+            class: 'latencies',
+            options: {
+              protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
+              signaling: {
+                address: 'https://signaling.herokuapp.com/',
+                // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+                room: 'best-room-for-foglet-overlay' // room to join
+              }
+            }
+          }
+        ] // add an latencies overlay
       },
     });
   }
@@ -84,14 +103,16 @@ const redrawBis = () => {
   $('#bisGraph').empty();
   $('#bisGraph').append(`<div id='bisGraphBis' style='border: 1px solid black;'></div>`);
   graphBis = new P2PGraph('#bisGraphBis');
-
+  const overlaysNumber = o[0]._networkManager._overlays.length;
+  let indexOverlay = 0; // means RPS
+  if(overlaysNumber > 0) indexOverlay = overlaysNumber;
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i]._networkManager.use().network.inviewId;
+    let id = o[i]._networkManager.use(indexOverlay).network.inviewId;
     graphBis.add({id, me: false, name: id});
   }
   for(let i = 0; i < o.length; ++i) {
-    let id = o[i]._networkManager.use().network.inviewId;
-    o[i]._networkManager.use().network.getNeighbours().forEach(peer => {
+    let id = o[i]._networkManager.use(indexOverlay).network.inviewId;
+    o[i]._networkManager.use(indexOverlay).network.getNeighbours().forEach(peer => {
       // console.log('Main: ', id, 'Neighbor: ', peer);
       graphBis.connect(peer, id);
     });

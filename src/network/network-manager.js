@@ -88,7 +88,7 @@ class NetworkManager extends EventEmitter {
   /**
    * Select and get an overlay to use for communication using its index.
    * The RPS is always the first network, at `index = 0`.
-   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
+   * Then, overlays are indexed by the order in which they were declared in the options, starting from `index = 1`
    * for the first overlay.
    * @param  {integer} [index=0] - (optional) Index of the network to get. Default to the RPS.
    * @return {Network} Return the selected network to use.

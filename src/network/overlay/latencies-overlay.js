@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016 Grall Arnaud
+Copyright (c) 2016-2017 Grall Arnaud & Minier Thomas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,60 +23,24 @@ SOFTWARE.
 */
 'use strict';
 
-const debug = require('debug')('foglet-core:network-overlay:latencies');
-
-// abstract
 const AbstractOverlay = require('./../abstract/abstract-overlay.js');
-
-// network
-const TMan = require('tman-wrtc');
-
-// overlay internal communication
 const Communication = require('./../communication/communication.js');
-
-// utils
+const TMan = require('tman-wrtc');
 const lmerge = require('lodash.merge');
 const uuid = require('uuid/v4');
+const debug = require('debug')('foglet-core:latencies-overlay');
 
-class LatenciesOverlay extends AbstractOverlay {
-  constructor (options = {}) {
+/**
+ * A TManOverlay is an abstract network used to build overlay based on the TMan network over WebRTC.
+ * @see https://github.com/RAN3D/tman-wrtc for more informations on TMan.
+ * @abstract
+ * @extends AbstractOverlay
+ * @author Thomas Minier & Grall Arnaud
+ */
+class TManLatenciesOverlay extends AbstractOverlay {
+
+  constructor (options) {
     super(options);
-    // merge previous overlay/rps options with default options for the overlay.
-    this.options = lmerge({
-      descriptor: {}, // no need for a descriptor because we compute a ping every delta milliseconds in the ranking functions
-      descriptorTimeout: 10 * 1000,
-      ranking: (peer, foglet = this) => (a, b) => {
-        foglet._ping(a.peer).then((timeA) => {
-          return foglet._ping(b.peer).then((timeB) => {
-            debug('Ping: ', timeA, timeB);
-            if(timeA < timeB) return 1;
-            if(timeA > timeB) return -1;
-            return 0;
-          }).catch(e => {
-            debug(e, 'Ping: one peer is unreachable peer', a.peer, ' win with ', timeA);
-            return 1;
-          });
-        }).catch(e => {
-          return foglet._ping(b.peer).then((timeB) => {
-            debug(e, 'Ping: one peer is unreachable peer', b.peer, ' win with', timeB);
-            return -1;
-          }).catch(e => {
-            debug(e, 'Ping: peers are unreachable. No one win.');
-            return 0;
-          });
-        });
-      }
-    }, this.options);
-
-    // if webrtc options specified: create object config for Spray
-    this.options = lmerge({config: this.options.webrtc}, this.options);
-
-    // need at least a descriptor and a ranking function
-    if(!this.options.descriptor || !this.options.ranking || typeof this.options.descriptor !== 'object' || typeof this.options.ranking !== 'function' )
-      throw new SyntaxError('Need at least a descriptor (object) and a ranking function (function).');
-
-    this.rps = new TMan(this.options, this.manager.rps.network.rps);
-
     // initialize listeners for incoming pong requests
     this.communication = new Communication(this, this.options.protocol + '-internal-communication');
     this.communication.onUnicast((id, msg) => {
@@ -96,24 +60,133 @@ class LatenciesOverlay extends AbstractOverlay {
         this.emit('pong-'+msg.id, msg);
       }
     });
-
+    console.log('Latencies Overlay options:', this.options);
+    this._rps._start(this.options.delta);
     debug('Latencies Overlay initialized.');
   }
 
+  /**
+   * The in-view ID of the peer in the network
+   * @return {string} The in-view ID of the peer
+   */
   get inviewId () {
     return this.rps.getInviewId();
   }
 
+  /**
+   * The out-view ID of the peer in the network
+   * @return {string} The out-view ID of the peer
+   */
   get outviewId () {
     return this.rps.getOutviewId();
   }
 
   /**
-   * Ping the specified id
+   * Build a TMan network
+   * @param {Object} options - Options used to build the TMan
+   * @return {TMan} The TMan network
+   */
+  _buildRPS (options) {
+    let globalOptions = options.manager._options.overlay.options;
+
+    // if webrtc options specified: create object config for Spray
+    this.options = lmerge({config: globalOptions.webrtc}, this.options);
+    // now merge of all options
+    this.options = lmerge(globalOptions, this.options);
+
+    const tmanOptions = lmerge({
+      descriptor: this._descriptor(),
+      descriptorTimeout: this._descriptorTimeout(),
+      ranking: this._rankingFunction()
+    }, this.options);
+
+    return new TMan(tmanOptions, options.manager._rps._network._rps);
+  }
+
+  /**
+   * Gives the start descriptor used by the TMan overlay (can be an empty object).
+   * Subclasses of {@link TManOverlay} **must** implement this method.
+   * @return {Object} The start descriptor used by the TMan overlay
+   */
+  _descriptor () {
+    // throw new Error('A valid TMan based overlay must implement a _descriptor method to generate a base descriptor');
+    return {};
+  }
+
+  /**
+   * Give the delay **in milliseconds** after which the descriptor must be recomputed.
+   * Subclasses of {@link TManOverlay} **must** implement this method.
+   * @return {number} The delay **in milliseconds** after which the descriptor must be recomputed
+   */
+  _descriptorTimeout () {
+    // throw new Error('A valid TMan based overlay must implement a _descriptorTimeout method to give the timeout on descriptors');
+    return 10 * 1000;
+  }
+
+  /**
+   * Compare two peers and rank them according to a ranking function.
+   * This function must return `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB`.
+   *
+   * Subclasses of {@link TManOverlay} **must** implement this method.
+   * @param {*} self - The current peer that perform the evaluation
+   * @param {*} peerA - The first peer
+   * @param {*} peerB - The second peer
+   * @return {integer} `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB` (according to the ranking algorithm)
+   */
+  _rankPeers (self, foglet, peerA, peerB) {
+    foglet._ping(peerA.peer).then((timeA) => {
+      return foglet._ping(peerB.peer).then((timeB) => {
+        //debug('Ping: ', timeA, timeB);
+        if(timeA < timeB) return 1;
+        if(timeA > timeB) return -1;
+        return 0;
+      }).catch(e => {
+        //debug(e, 'Ping: one peer is unreachable peer', peerA.peer, ' win with ', timeA);
+        return 1;
+      });
+    }).catch(e => {
+      return foglet._ping(peerB.peer).then((timeB) => {
+        return foglet._ping(peerB.peer).then((timeB) => {
+          //debug(e, 'Ping: one peer is unreachable peer', peerB.peer, ' win with', timeB);
+          return -1;
+        }).catch(e => {
+          //debug(e, 'Ping: peers are unreachable. No one win.');
+          return 0;
+        });
+      });
+    });
+  }
+
+  /**
+   * Utility to rank two peers
+   * @private
+   */
+  _rankingFunction () {
+    return peer => (a, b) => this._rankPeers(peer, this, a, b);
+  }
+
+  /**
+   * Get the IDs of all available neighbours
+   * @param  {integer} limit - Max number of neighbours to look for
+   * @return {string[]} Set of IDs for all available neighbours
+   */
+  getNeighbours (limit) {
+    // BUG, sometimes our id is in our partial view.
+    // Tempory fix by removing this element if in results
+    let result = this.rps.getPeers(limit);
+    // lremove(result, (elem) => {
+    //   return elem === this.inviewId;
+    // })
+    return result;
+  }
+
+  /**
+   * Utility: Ping the specified id
    * @param  {string} id id of the peer to ping
    * @return {Promise} Return a promise with the specified {Time} representing the ping between {this} and the peer {id}
    */
   _ping (id) {
+    debug('Initiate a ping with '+ id);
     return new Promise((resolve, reject) => {
       try {
         let index = this.getNeighbours().indexOf(id);
@@ -142,20 +215,6 @@ class LatenciesOverlay extends AbstractOverlay {
       }
     });
   }
-
-  /**
-   * Get the list of neighbours
-   * @return {array}
-   */
-  getNeighbours (k = undefined) {
-    // BUG, sometimes our id is in our partial view.
-    // Tempory fix by removing this element if in results
-    let result = this.rps.getPeers(k);
-    // lremove(result, (elem) => {
-    //   return elem === this.inviewId;
-    // })
-    return result;
-  }
 }
 
-module.exports = LatenciesOverlay;
+module.exports = TManLatenciesOverlay;
