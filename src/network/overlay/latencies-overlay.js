@@ -51,7 +51,7 @@ class TManLatenciesOverlay extends AbstractOverlay {
         msg.type = 'pong';
         let index = this.getNeighbours(Infinity).indexOf(id);
         if(index === -1) {
-          debug('Cant send a response, unreachable source');
+          // debug('Cant send a response, unreachable source');
         } else {
           this.communication.sendUnicast(id, msg);
         }
@@ -146,13 +146,11 @@ class TManLatenciesOverlay extends AbstractOverlay {
       });
     }).catch(e => {
       return foglet._ping(peerB.peer).then((timeB) => {
-        return foglet._ping(peerB.peer).then((timeB) => {
-          //debug(e, 'Ping: one peer is unreachable peer', peerB.peer, ' win with', timeB);
-          return -1;
-        }).catch(e => {
-          //debug(e, 'Ping: peers are unreachable. No one win.');
-          return 0;
-        });
+        //debug(e, 'Ping: one peer is unreachable peer', peerB.peer, ' win with', timeB);
+        return -1;
+      }).catch(e => {
+        //debug(e, 'Ping: peers are unreachable. No one win.');
+        return 0;
       });
     });
   }
@@ -186,7 +184,6 @@ class TManLatenciesOverlay extends AbstractOverlay {
    * @return {Promise} Return a promise with the specified {Time} representing the ping between {this} and the peer {id}
    */
   _ping (id) {
-    debug('Initiate a ping with '+ id);
     return new Promise((resolve, reject) => {
       try {
         let index = this.getNeighbours().indexOf(id);
