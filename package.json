@@ -38,7 +38,6 @@
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
     "debug": "^2.6.8",
-    "fcn-wrtc": "^2.0.4",
     "lodash.merge": "^4.6.0",
     "lodash.sortedindexby": "^4.6.0",
     "readable-stream": "^2.3.3",
@@ -73,7 +72,6 @@
   },
   "bundledDependencies": [
     "debug",
-    "fcn-wrtc",
     "lodash.merge",
     "lodash.sortedindexby",
     "readable-stream",

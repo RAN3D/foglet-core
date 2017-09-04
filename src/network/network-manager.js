@@ -30,7 +30,6 @@ const lmerge = require('lodash.merge');
 
 // Networks
 const Network = require('./network.js');
-const FcnAdapter = require('./rps/fcnAdapter.js');
 const SprayAdapter = require('./rps/sprayAdapter.js');
 const LatenciesOverlay = require('./overlay/latencies-overlay.js');
 
@@ -139,9 +138,6 @@ class NetworkManager extends EventEmitter {
   _chooseRps (type) {
     let rps = null;
     switch(type) {
-    case 'fcn-wrtc':
-      rps = FcnAdapter;
-      break;
     case 'spray-wrtc':
       rps = SprayAdapter;
       break;
