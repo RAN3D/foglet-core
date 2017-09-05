@@ -6,7 +6,16 @@
 # foglet-core  [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core)
 Core of the foglet library
 
-This project aims to provide a solid core infrastructure for developping fog computing applications built with spray-wrtc (see references).
+This project aims to provide a solid core infrastructure for developping **fog computing applications**.
+
+Nowadays, more and more applications interact with a server (private or in the cloud). These interactions cost a lot, especially if you make an application for a huge number of clients. 
+
+Fog applications communicate to a direct peer of the network instead of relying on a server to forward data to this peer.
+
+There is a huge number of applications and a lot of pros and cons of why and how create a Fog application. We are not here to convince you to absolutely use Fog applications. 
+
+But foglet-core is made to ease your development in that way. 
+So **try it** by your-self and **give us your feedback**, we will be happy to answer to your questions ! 
 
 ## Installation
 
@@ -21,9 +30,9 @@ The foglet library is distributed as a browserified bundle.
 ## Buliding fog computing applications
 
 [**The foglet cookbook**](https://github.com/RAN3D/foglet-cookbook/) contains tutorials on build complex fog computing application using
-`foglet-core`.
+`foglet-core`. (**incoming**)
 
-You can also check out [the documentation online](https://ran3d.github.io/foglet-core/)
+You can also check out [**the documentation online**](https://ran3d.github.io/foglet-core/)
 
 ## Getting started
 
@@ -84,16 +93,16 @@ You should see that your foglet has been connected to the RPS.
 
 ## Signaling server
 
-In order to run this library, you have to provide the address of a **signaling server** using the `signalingAdress` option.
-This server must be compatible with the foglet library.
+In order to run this library, you have to provide the address of a **signaling server** using the `signaling.address` option and a `signaling.room` in order to create a private network. This server will be used to establish the first connection between the new peer and the the network.
 
+This server must be compatible with the foglet library.
 The library [foglet-signaling-server](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
 
 ## Contributors:
 
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
-* [Chat-Wane](https://github.com/Chat-Wane/)
 * [T. Minier (Callidon)](https://github.com/Callidon)
+* [Chat-Wane](https://github.com/Chat-Wane/)
 
 ## References
 
