@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "2.9.9",
+  "version": "3.0.0",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
