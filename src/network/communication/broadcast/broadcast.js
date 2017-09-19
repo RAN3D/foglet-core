@@ -1,30 +1,11 @@
 /*
-MIT License
-
-Copyright (c) 2016-2017 Grall Arnaud
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the 'Software'), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This broadcast implementation  is clearly inspired from https://github.com/Chat-Wane/CausalBroadcastDefinition
+This is a causal broadcast customizable, if you want to specifiy
 */
 'use strict';
 
 const AbstractBroadcast = require('./../abstract/abstract-broadcast.js');
-const VV = require('../utils/vv.js'); // Version-Vector
+const VVwE = require('version-vector-with-exceptions'); // Version-Vector With Exceptions
 const messages = require('./messages.js');
 
 const lmerge = require('lodash.merge');
@@ -56,16 +37,17 @@ class Broadcast extends AbstractBroadcast {
     super(source, protocol);
     if(source && protocol) {
       this.options = lmerge({
-        delta: 1000 * 60 * 1 / 2,
-        timeBeforeStart: 2 * 1000
+        delta: 1000 * 30,
       }, this.options);
       this.uid = uuid();
-      this._causality = new VV(this.uid);
-      this._causality.incrementFrom({ _e: this.uid, _c: 0 });
+      this._causality = new VVwE(this.uid);
+      // this._causality.incrementFrom({ _e: this.uid, _c: 0 });
       // buffer of received messages
       this._buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
       this._bufferAntiEntropy = messages.MAntiEntropyResponse('init');
+
+      this.startAntiEntropy(this.options.delta);
     } else {
       return new Error('Not enough parameters', 'fbroadcast.js');
     }
@@ -85,18 +67,44 @@ class Broadcast extends AbstractBroadcast {
   /**
    * Send a message in broadcast
    * @param  {Object}  message  - The message to send
-   * @param  {Boolean} [isReady=undefined]
+   * @param  {Object} [id] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation
+   * @param  {Object} [isReady] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
    * @return {boolean}
    */
-  send (message, isReady = undefined) {
-    const a = this._causality.increment();
-    const broadcastMessage = messages.BroadcastMessage(this._protocol, a, isReady || this._causality.clone(), message);
+  send (message, id, isReady = undefined) {
+    const a = id || this._causality.increment();
+    const broadcastMessage = messages.BroadcastMessage(this._protocol, a, isReady, message);
     // #2 register the message in the structure
     this._causality.incrementFrom(a);
 
     // #3 send the message to the neighborhood
     this._sendAll(broadcastMessage);
     return broadcastMessage.isReady;
+  }
+
+  /**
+   * We started Antientropy mechanism in order to retreive old missed files
+   */
+  startAntiEntropy (delta) {
+    this._intervalAntiEntropy= setInterval(() => {
+      this._source.getNeighbours().forEach(peer => this._unicast.send(peer, messages.MAntiEntropyRequest(this._causality)));
+    }, delta);
+
+    this.on('antiEntropy', (id, messageCausality, ourCausality) => this._defaultBehaviorAntiEntropy(id, messageCausality, ourCausality));
+  }
+
+  /**
+   * This callback depends on the type of the applications, this is the default behavior when you receive old missed files
+   */
+  _defaultBehaviorAntiEntropy (id, messageCausality, ourCausality) {
+    debug('(Warning) You should modify this, AntiEntropy default behavior: ', id, messageCausality, ourCausality);
+  }
+
+  /**
+   * Clear the AntiEntropy mechanism
+   */
+  clearAntiEntropy () {
+    if(this._intervalAntiEntropy) clearInterval(this._intervalAntiEntropy);
   }
 
   /**
@@ -126,6 +134,43 @@ class Broadcast extends AbstractBroadcast {
    */
   _receive (id, message) {
     switch (message.type) {
+    case 'MAntiEntropyRequest': {
+      debug(id, message);
+      this.emit('antiEntropy', id, message.causality, this._causality.clone());
+      break;
+
+    }
+    case 'MAntiEntropyResponse': {
+      // #A replace the buffered message
+      if (this._bufferAntiEntropy.id !== message.id) {
+        this._bufferAntiEntropy = message;
+      }
+      // #B add the new element to the buffer
+      if (message.element) {
+        this._bufferAntiEntropy.elements.push(message.element);
+      }
+      // #C add causality metadata
+      if (message.causality) {
+        this._bufferAntiEntropy.causality = message.causality;
+      }
+      // #D the buffered message is fully arrived, deliver
+      if (this._bufferAntiEntropy.elements.length ===
+          this._bufferAntiEntropy.nbElements) {
+          // #1 considere each message in the response independantly
+        for (let i = 0; i<this._bufferAntiEntropy.elements.length; ++i) {
+          let element = this._bufferAntiEntropy.elements[i];
+          // #2 only check if the message has not been received yet
+          if (!this._shouldStopPropagation(element)) {
+            this._causality.incrementFrom(element.id);
+            this.emit('receive', element.payload);
+          }
+        }
+        // #3 merge causality structures
+        this.causality.merge(this.bufferAntiEntropy.causality);
+      }
+      break;
+    }
+
     default: {
       if (!this._shouldStopPropagation(message)) {
         // if not present, add the issuer of the message in the message
@@ -196,10 +241,13 @@ class Broadcast extends AbstractBroadcast {
       if (this._causality.isLower(message.id)) {
         this._buffer.splice(index, 1);
       } else {
-        found = true;
-        this._causality.incrementFrom(message.id);
-        this._buffer.splice(index, 1);
-        this.emit('receive', message.issuer, message.payload);
+        // console.log(message, this._causality.isReady(message.isReady), this._causality);
+        if(this._causality.isReady(message.isReady)) {
+          found = true;
+          this._causality.incrementFrom(message.id);
+          this._buffer.splice(index, 1);
+          this.emit('receive', message.issuer, message.payload);
+        }
       }
     }
     if (found) {
