@@ -101,13 +101,14 @@ class Communication {
   }
 
   /**
-  * Send a message to all peers using broadcast
+  * Send a message to all peers using broadcast, (optionnal: specify uniq message id and the id to wait, see: broadcast.js)
   * @param  {Object} message - Message to broadcast over the network
-  * @param  {VersionVector} isReady - Id of the message to wait before this message is received
+  * @param  {Object} [id] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation
+  * @param  {Object} [isReady] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
   * @return {Object}  id of the message sent
   */
-  sendBroadcast (message, isReady = undefined) {
-    return this.broadcast.send(this._middlewares.in(message), isReady);
+  sendBroadcast (message, id, isReady = undefined) {
+    return this.broadcast.send(this._middlewares.in(message), id, isReady);
   }
 
   /**

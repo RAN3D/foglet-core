@@ -73,7 +73,7 @@ describe('Foglet High-level communication', function () {
     }).catch(done);
   });
 
-  it('should send messages to all peers using broadcast in a network with 3 peers', function (done) {
+  it('should simply send messages to all peers using broadcast in a 3 peers network', function (done) {
     const foglets = utils.buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
@@ -103,6 +103,73 @@ describe('Foglet High-level communication', function () {
         f1.sendBroadcast('2');
         f1.sendBroadcast('3');
         f1.sendBroadcast('4');
+      }, 2000);
+    }).catch(done);
+  });
+
+  it('should receive broadcasted classically ordered messages in a 3 peers network (1-2-3-4)', function (done) {
+    const foglets = utils.buildFog(Foglet, 3);
+    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+
+    let cptA = 0;
+    let cptB = 0;
+    const results = [ '1', '2', '3', '4' ];
+    const totalResult = 8;
+    const check = utils.doneAfter(totalResult, done);
+
+    utils.pathConnect(foglets).then(() => {
+      f2.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID);
+        assert.equal(message, results[cptA]);
+        cptA++;
+        check();
+      });
+
+      f3.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID);
+        assert.equal(message, results[cptB]);
+        cptB++;
+        check();
+      });
+
+      setTimeout(() => {
+        f1.getNetwork().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
+        f1.getNetwork().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 1});
+        f1.getNetwork().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 2});
+        f1.getNetwork().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 3});
+      }, 2000);
+    }).catch(done);
+  });
+  it('should receive broadcasted weirdly ordered messages in a 3 peers network (1-3-2-4)', function (done) {
+    const foglets = utils.buildFog(Foglet, 3);
+    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+
+    let cptA = 0;
+    let cptB = 0;
+    const results = [ '1', '3', '2', '4' ];
+    const totalResult = 8;
+    const check = utils.doneAfter(totalResult, done);
+
+    utils.pathConnect(foglets).then(() => {
+      f2.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID);
+        assert.equal(message, results[cptA]);
+        cptA++;
+        check();
+      });
+
+      f3.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID);
+        assert.equal(message, results[cptB]);
+        cptB++;
+        check();
+      });
+
+      setTimeout(() => {
+        f1.getNetwork().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
+        f1.getNetwork().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 3});
+        f1.getNetwork().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 1});
+        f1.getNetwork().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 2});
       }, 2000);
     }).catch(done);
   });
