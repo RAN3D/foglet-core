@@ -36,9 +36,9 @@ class Broadcast extends AbstractBroadcast {
   constructor (source, protocol) {
     super(source, protocol);
     if(source && protocol) {
-      this.options = lmerge({
+      this.options = {
         delta: 1000 * 30,
-      }, this.options);
+      };
       this.uid = uuid();
       this._causality = new VVwE(this.uid);
       // this._causality.incrementFrom({ _e: this.uid, _c: 0 });
@@ -46,8 +46,6 @@ class Broadcast extends AbstractBroadcast {
       this._buffer = [];
       // buffer of anti-entropy messages (chunkified because of large size)
       this._bufferAntiEntropy = messages.MAntiEntropyResponse('init');
-
-      this.startAntiEntropy(this.options.delta);
     } else {
       return new Error('Not enough parameters', 'fbroadcast.js');
     }
@@ -85,7 +83,7 @@ class Broadcast extends AbstractBroadcast {
   /**
    * We started Antientropy mechanism in order to retreive old missed files
    */
-  startAntiEntropy (delta) {
+  startAntiEntropy (delta = this.options.delta) {
     this._intervalAntiEntropy= setInterval(() => {
       this._source.getNeighbours().forEach(peer => this._unicast.send(peer, messages.MAntiEntropyRequest(this._causality)));
     }, delta);
