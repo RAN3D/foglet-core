@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
@@ -83,6 +83,7 @@
     "spray-wrtc",
     "fcn-wrtc",
     "unicast-definition",
-    "uuid"
+    "uuid",
+    "version-vector-with-exceptions"
   ]
 }
