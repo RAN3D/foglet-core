@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
@@ -85,5 +85,17 @@
     "unicast-definition",
     "uuid",
     "version-vector-with-exceptions"
-  ]
+  ],
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "env"
+          ]
+        }
+      ]
+    ]
+  }
 }
