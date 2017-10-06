@@ -8,7 +8,7 @@
     "esdoc": "esdoc && npm run esdoc:example",
     "esdoc:example": "cp -R ./dist ./example ./docs",
     "all": "npm run build:foglet && npm run build:foglet-min && npm test && npm run esdoc",
-    "test": "npm run karma",
+    "test": "foglet-scripts test",
     "karma": "karma start karma.config.js",
     "server": "node node_modules/foglet-signaling-server/express-signaling-server.js",
     "build:foglet": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  > ./dist/foglet.bundle.js",
@@ -38,6 +38,15 @@
   "bugs": {
     "url": "https://github.com/ran3d/foglet-core/issues"
   },
+  "foglet-scripts": {
+    "browsers": [
+      "Firefox"
+    ],
+    "exclude": [
+      "tests/overlay-test.js"
+    ],
+    "lint": false
+  },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
     "debug": "^2.6.8",
@@ -55,22 +64,11 @@
     "babel-preset-env": "^1.6.0",
     "babelify": "^7.3.0",
     "browserify": "^13.1.0",
-    "browserify-istanbul": "^2.0.0",
-    "chai": "^3.5.0",
     "esdoc": "^0.5.2",
     "esdoc-node": "^1.0.1",
     "eslint": "^3.13.1",
-    "foglet-signaling-server": "^0.3.1",
-    "istanbul": "^0.4.5",
-    "karma": "^1.3.0",
-    "karma-browserify": "^5.1.0",
-    "karma-chai": "^0.1.0",
-    "karma-coverage": "^1.1.1",
-    "karma-express-http-server": "0.0.1",
+    "foglet-scripts": "git+https://github.com/RAN3D/foglet-scripts.git",
     "karma-firefox-launcher": "^1.0.0",
-    "karma-mocha": "^1.2.0",
-    "karma-mocha-reporter": "^2.2.0",
-    "mocha": "^3.4.1",
     "uglify-es": "github:mishoo/UglifyJS2#harmony",
     "watchify": "^3.7.0"
   },
