@@ -52,7 +52,10 @@ To be begin with, let's write a simple piece of JS code:
 ```html
 <script type="text/javascript">
   'use strict';
-  const Foglet = require('foglet');
+  
+  localStorage.debug = 'foglet-core:*';
+
+  const Foglet = require('foglet').Foglet;
 
   // let's create a simple application that send message in broadcast
   const foglet = new Foglet({
