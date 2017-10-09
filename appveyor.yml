@@ -17,7 +17,9 @@ before_test:
 
 
 test_script:
-  - npm run all
+  - npm run wbuild:foglet
+  - npm run wbuild:foglet-min
+  - npm test
 
 # Don't actually build.
 build: off
