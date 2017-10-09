@@ -79,7 +79,6 @@
     "readable-stream",
     "socket.io-client",
     "spray-wrtc",
-    "fcn-wrtc",
     "unicast-definition",
     "uuid",
     "version-vector-with-exceptions"
