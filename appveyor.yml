@@ -1,0 +1,23 @@
+version: 1.0.{build}
+configuration: Release
+platform: x64
+
+
+# Install scripts. (runs after repo cloning)
+install:
+  - choco install firefox
+  # Get the latest stable version of Node.js
+  - ps: Install-Product node ''
+  - node --version
+  - npm --version
+  # install modules
+  - npm install
+
+before_test:
+
+
+test_script:
+  - npm run all
+
+# Don't actually build.
+build: off
