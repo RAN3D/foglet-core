@@ -12,6 +12,7 @@ install:
   - npm --version
   # install modules
   - npm install
+  - ps: mkdir dist
   - cmd: dir
 
 before_test:
