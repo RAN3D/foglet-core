@@ -179,7 +179,6 @@ class Foglet extends EventEmitter {
         foglet: this,
         address: this._options.ssh.address
       });
-      this._ssh.on('logs', (message, data) => this._log(data));
     }
 
   }
