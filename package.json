@@ -9,7 +9,6 @@
     "esdoc:example": "cp -R ./dist ./example ./docs",
     "all": "npm run build:foglet && npm run build:foglet-min && npm test && npm run esdoc",
     "test": "foglet-scripts test",
-    "karma": "karma start karma.config.js",
     "server": "foglet-scripts start",
     "build:foglet": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  > ./dist/foglet.bundle.js",
     "build:watch": "mkdir -p dist/ && watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  -o ./dist/foglet.bundle.js -v -d ",
@@ -67,7 +66,7 @@
     "esdoc": "^0.5.2",
     "esdoc-node": "^1.0.1",
     "eslint": "^3.13.1",
-    "foglet-scripts": "^0.1.1",
+    "foglet-scripts": "^0.2.0",
     "karma-firefox-launcher": "^1.0.0",
     "uglify-es": "github:mishoo/UglifyJS2#harmony",
     "watchify": "^3.7.0"
