@@ -23,7 +23,7 @@ SOFTWARE.
 */
 'use strict';
 
-const AbstractOverlay = require('./../abstract/abstract-overlay.js');
+const AbstractNetwork = require('./abstract-network.js');
 const TMan = require('tman-wrtc');
 const lmerge = require('lodash.merge');
 
@@ -34,7 +34,19 @@ const lmerge = require('lodash.merge');
  * @extends AbstractOverlay
  * @author Thomas Minier
  */
-class TManOverlay extends AbstractOverlay {
+class TManOverlay extends AbstractNetwork {
+  /**
+   * Constructor
+   * @param {Object} options - Additional options used to build the network
+   * @return {NetworkManager} networkManager - Network manager used as root for the overlay
+   */
+  constructor (networkManager, options) {
+    options.manager = networkManager;
+    super(options);
+    this._manager = networkManager;
+    this._rps.start(this.options.delta);
+  }
+
   /**
    * The in-view ID of the peer in the network
    * @return {string} The in-view ID of the peer
@@ -52,17 +64,42 @@ class TManOverlay extends AbstractOverlay {
   }
 
   /**
+   * Get our current descriptor
+   * @return {Object} The peer current descriptor
+   */
+  get descriptor () {
+    return this._rps.options.descriptor;
+  }
+
+  /**
+   * Update the peer descriptor
+   * @param  {Object} newDescriptor - The new descriptor
+   * @return {void}
+   */
+  set descriptor (newDescriptor) {
+    this._rps.options.descriptor = newDescriptor;
+  }
+
+  /**
    * Build a TMan network
    * @param {Object} options - Options used to build the TMan
    * @return {TMan} The TMan network
    */
   _buildRPS (options) {
+    let globalOptions = options._options.overlay.options;
+
+    // if webrtc options specified: create object config for Spray
+    this.options = lmerge({config: globalOptions.webrtc}, this.options);
+    // now merge of all options
+    this.options = lmerge(globalOptions, this.options);
+
     const tmanOptions = lmerge({
-      descriptor: this._descriptor(),
+      descriptor: this._startDescriptor(),
       descriptorTimeout: this._descriptorTimeout(),
       ranking: this._rankingFunction()
-    }, options);
-    return new TMan(tmanOptions);
+    }, this.options);
+
+    return new TMan(tmanOptions, options.manager._rps._network._rps);
   }
 
   /**
@@ -70,7 +107,7 @@ class TManOverlay extends AbstractOverlay {
    * Subclasses of {@link TManOverlay} **must** implement this method.
    * @return {Object} The start descriptor used by the TMan overlay
    */
-  _descriptor () {
+  _startDescriptor () {
     throw new Error('A valid TMan based overlay must implement a _descriptor method to generate a base descriptor');
   }
 
@@ -88,12 +125,14 @@ class TManOverlay extends AbstractOverlay {
    * This function must return `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB`.
    *
    * Subclasses of {@link TManOverlay} **must** implement this method.
-   * @param {*} self - The current peer that perform the evaluation
-   * @param {*} peerA - The first peer
-   * @param {*} peerB - The second peer
+   * @param {*} neighbour - The neighbour to rank with
+   * @param {Object} descriptorA - Descriptor of the first peer
+   * @param {Object} descriptorB - Descriptor of the second peer
+   * @param {TManOverlay} peerA - (optional) The overlay of the first peer
+   * @param {TManOverlay} peerB - (optional) The overlay of the second peer
    * @return {integer} `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB` (according to the ranking algorithm)
    */
-  _rankPeers (self, peerA, peerB) {
+  _rankPeers (neighbour, descriptorA, descriptorB, peerA, peerB) {
     throw new Error('A valid TMan based overlay must implement a _rankPeers method to rank two peers');
   }
 
@@ -102,7 +141,7 @@ class TManOverlay extends AbstractOverlay {
    * @private
    */
   _rankingFunction () {
-    return peer => (a, b) => this._rankPeers(peer, a, b);
+    return peer => (a, b) => this._rankPeers(peer, a.descriptor, b.descriptor, a, b);
   }
 
   /**
