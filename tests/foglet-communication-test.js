@@ -133,10 +133,10 @@ describe('Foglet High-level communication', function () {
       });
 
       setTimeout(() => {
-        f1.getNetwork().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
-        f1.getNetwork().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 1});
-        f1.getNetwork().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 2});
-        f1.getNetwork().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 3});
+        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
+        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 1});
+        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 2});
+        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 3});
       }, 2000);
     }).catch(done);
   });
@@ -166,10 +166,10 @@ describe('Foglet High-level communication', function () {
       });
 
       setTimeout(() => {
-        f1.getNetwork().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
-        f1.getNetwork().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 3});
-        f1.getNetwork().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 1});
-        f1.getNetwork().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 2});
+        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
+        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 3});
+        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 1});
+        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 2});
       }, 2000);
     }).catch(done);
   });

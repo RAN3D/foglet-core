@@ -37,6 +37,26 @@ const LatenciesOverlay = require('./overlay/latencies-overlay.js');
 const debug = require('debug')('foglet-core:network-manager');
 
 /**
+ * A configuration object used to build an overlay
+ * @typedef {Object} OverlayConfig
+ * @property {string} name - Name of the overlay, used to access it with {@link NetworkManager#overlay}
+ * @property {function} constructor - function used to instanciate the constructor with `new`
+ * @property {Object} options - Dedicated options used to build the overlay
+ * @property {string} options.protocol - Name of the protocol run by the overlay
+ * @property {Object} options.signaling - Options used to configure the interactions with the signaling server
+ * @property {string} options.signaling.address - URL of the signaling server
+ * @property {string} options.signaling.room - Name of the room in which the application run
+ * @example
+ * {
+ *  name: 'latencies-overlay',
+ *  constructor: LatenciesOverlay,
+ *  options: {
+ *    protocol: 'foglet-latencies-overlay'
+ *  }
+ * }
+ */
+
+/**
  * A NetworkManager manage several distinct {@link Network} instances, i.e. a RPS and a set of overlays,
  * and allow peers to choose which network they want to interact with.
  * @extends EventEmitter
@@ -69,34 +89,29 @@ class NetworkManager extends EventEmitter {
           protocol: 'spray-wrtc-communication'
         }
       },
-      overlay: {
-        overlays: [], // string id or your overlay class reference
-        options: {} // options will be passed to all components of the overlay
-      }
+      overlays: []
     }, options);
 
     // construct the rps => this._rps = ....
     this._rps = this._constructRps(this._options.rps.type, this._options.rps.options);
 
     // construct overlay(s)
-    this._overlays = [];
-    this._constructOverlays(this._options.overlay.overlays, this._options.overlay.options);
+    this._overlays = new Map();
+    this._constructOverlays(this._options.overlays);
 
     debug('Networks (Rps and overlays) initialized.');
   }
 
   /**
-   * Select and get an overlay to use for communication using its index.
-   * The RPS is always the first network, at `index = 0`.
-   * Then, overlays are indexed by the order in which they were declared in the options, starting from `index = 1`
-   * for the first overlay.
-   * @param  {integer} [index=0] - (optional) Index of the network to get. Default to the RPS.
-   * @return {Network} Return the selected network to use.
+   * Select and get an overlay to use for communication using its name.
+   * If no name is specified, the base RPS will be returned.
+   * @param  {string} [name=null] - (optional) Name of the overlay to get. Default to the RPS.
+   * @return {Network} Return the selected overlay/rps.
    */
-  use (index = 0) {
-    if(index === 0 || index < this._overlays.length)
+  overlay (name = null) {
+    if(name === null)
       return this._rps;
-    return this._overlays[index - 1];
+    return this._overlays.get(name);
   }
 
   /**
@@ -149,25 +164,22 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
-   * Construct all overlays specified
+   * Construct all overlays
    * @private
-   * @param  {OverlayConfig[]} overlays - Set of objects describing the overlays to build
-   * @param  {Object} options - Options propagated to all overlays, same as the options field used to configure the RPS.
+   * @param  {OverlayConfig[]} overlays - Set of overlay config objetcs
    * @return {void}
    */
-  _constructOverlays (overlays, options) {
-    if(overlays.length > 0) {
-      overlays.forEach(config => {
-        this._addOverlay(config, options.options);
-      });
-    } else {
-      debug('No overlays added, only the base RPS is available');
-    }
+  _constructOverlays (overlays) {
+    if(overlays.length === 0) debug('No overlays added, only the base RPS is available');
+    overlays.forEach(config => {
+      this._addOverlay(config);
+    });
   }
 
   /**
    * Get an Overlay constructor given its type in string format
    * @private
+   * @deprecated
    * @param  {string} type - Overlay type
    * @return {function} The Overlay constructor
    */
@@ -182,40 +194,46 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
-   * Add an overlay to the our list of overlays: construct the overlay, and connect it to the network by using the connection() Promise.
-   * Return the overlay id after its initialization
+   * Build and add an overlay
    * @private
-   * @param {Overlay|string} overlay Class Overlay, THIS IS NOT AN OBJECT ALREADY INITIALIZED ! THIS A REFERENCE TO THE CLASS Overlay, Or it can be a string representing the id of a default Implemented overlay
+   * @param {Overlay} overlay Class Overlay, THIS IS NOT AN OBJECT ALREADY INITIALIZED ! THIS A REFERENCE TO THE CLASS Overlay, Or it can be a string representing the id of a default Implemented overlay
    * @return {Promise<string>} A Promise resolved with the ID of the new overlay
    */
-  _addOverlay (overlay, globalOptions) {
-    debug(overlay, globalOptions);
-    if(typeof overlay !== 'object')
-      throw new SyntaxError('An overlay is an object {class: ..., options: {...}}');
-    let objNetwork = undefined;
-    // override and merge of global options with specified options
-    let options = lmerge(globalOptions, overlay.options);
-    options.manager = this;
-    if(typeof overlay.class === 'function') {
-      let net = new overlay.class(options);
-      objNetwork = new Network(net, options.signaling, options.protocol);
-    } else if( typeof overlay.class === 'string' ) {
-      let overlord = this._chooseOverlay(overlay.class);
-      if(!overlord)
-        throw new Error('No overlay available for this string id.');
-      try {
-        // initialization of the the overlay.
-        let net = new overlord(options);
-        objNetwork = new Network(net, options.signaling, options.protocol);
-        // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
-      } catch (e) {
-        throw e;
-      }
-    } else {
-      // push this overlay to our list
-      throw new Error('overlay have to class reference or an available string id');
-    }
-    this._overlays.push(objNetwork);
+  _addOverlay (overlayConfig) {
+    if (typeof overlay !== 'object' || !('name' in overlayConfig) || !('constructor' in overlayConfig))
+      throw new SyntaxError('An overlay is a configuration object {name: [string], constructor: [function], options: [Object]}');
+    const options = overlayConfig.options || {};
+    if (!('protocol' in options))
+      throw new SyntaxError('An overlay configuration requires a protocol name, e;g. { protocol: [string] }');
+
+    if (!('signaling' in options))
+      debug(`[WARNING] no signaling server given for overlay "${overlayConfig.name}"! Only connections from inside the same app will be allowed!`);
+
+    if (this._overlays.has(overlayConfig.name))
+      throw new Error(`AN overlay with the name "${overlayConfig.name}" has already been registered!`);
+    const overlay = new overlayConfig.constructor(this, options);
+    this._overlays.set(overlayConfig.name, new Network(overlay, options.signaling, options.protocol));
+
+    // if(typeof overlay.class === 'function') {
+    //   let net = new overlay.class(options);
+    //   objNetwork = new Network(net, options.signaling, options.protocol);
+    // } else if( typeof overlay.class === 'string' ) {
+    //   let overlord = this._chooseOverlay(overlay.class);
+    //   if(!overlord)
+    //     throw new Error('No overlay available for this string id.');
+    //   try {
+    //     // initialization of the the overlay.
+    //     let net = new overlord(options);
+    //     objNetwork = new Network(net, options.signaling, options.protocol);
+    //     // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
+    //   } catch (e) {
+    //     throw e;
+    //   }
+    // } else {
+    //   // push this overlay to our list
+    //   throw new Error('overlay have to class reference or an available string id');
+    // }
+    // this._overlays.push(objNetwork);
   }
 }
 

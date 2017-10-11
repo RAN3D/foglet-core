@@ -82,17 +82,6 @@ const DEFAULT_OPTIONS = {
   }*/
 };
 
-/**
- * A configuration object used to build an overlay
- * @typedef {Object} OverlayConfig
- * @property {string} class - Name of the overlay
- * @property {Object} options - Dedicated options used to build the overlay
- * @property {string} options.protocol - Name of the protocol run by the overlay
- * @property {Object} options.protocolsignaling - Options used to configure the interactions with the signaling server
- * @property {string} options.protocol.signaling.address - URL of the signaling server
- * @property {string} options.protocol.signaling.room - Name of the room in which the application run
- */
-
  /**
  * A callback invoked when a message is received (either by unicast or broadcast)
  * @callback MessageCallback
@@ -198,7 +187,7 @@ class Foglet extends EventEmitter {
    * @return {string} The in-view ID of the foglet
    */
   get inViewID () {
-    return this.getNetwork().network.inviewId;
+    return this.overlay().network.inviewId;
   }
 
   /**
@@ -206,7 +195,7 @@ class Foglet extends EventEmitter {
    * @return {string} The out-view ID of the foglet
    */
   get outViewID () {
-    return this.getNetwork().network.outviewId;
+    return this.overlay().network.outviewId;
   }
 
   /**
@@ -216,12 +205,9 @@ class Foglet extends EventEmitter {
   * Otherwise, it uses the signaling server to perform the connection.
   * In this case, one must call {@link Foglet#share} before, to connect the foglet to the signaling server first.
   *
-  * By default, connect the foglet to the base RPS. Use the `index` parameter to select which network (rps or overlay) to connect with.
-  * The RPS is always the first network, at `index = 0`.
-  * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
-  * for the first overlay.
+  * By default, connect the foglet to the base RPS. Use the `name` parameter to select which overlay to connect with.
   * @param {Foglet} [foglet=null] - (optional) Foglet to connect with. Leav to `null` rely on the signaling server.
-  * @param {integer} [index=0] - (optional) Index of the network to connect. Default to the RPS.
+  * @param {string} [name=null] - (optional) Name of the overlay to connect. Default to the RPS.
   * @param {number} [timeout=6000] - (optional) Connection timeout. Default to 6.0s
   * @return {Promise} A Promise fullfilled when the foglet is connected
   * @example
@@ -231,39 +217,33 @@ class Foglet extends EventEmitter {
   * foglet.share();
   * foglet.connection().then(console.log).catch(console.err);
   */
-  connection (foglet = null, index = 0, timeout = 60000) {
+  connection (foglet = null, name = null, timeout = 60000) {
     if(foglet !== null)
       // console.log('dest: ', foglet._defaultOverlay().rps, 'src: ', this._defaultOverlay().rps);
-      return this.getNetwork(index).signaling.connection(foglet.getNetwork().network.rps, timeout);
-    return this.getNetwork(index).signaling.connection(foglet, timeout);
+      return this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout);
+    return this.overlay(name).signaling.connection(foglet, timeout);
   }
 
   /**
    * Connect the foglet to the signaling server.
    *
-   * By default, connect the RPS to the signaling server. Use the `index` parameter to select which network (rps or overlay) to connect.
-   * he RPS is always the first network, at `index = 0`.
-   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
-   * for the first overlay.
-   * @param  {integer} [index=0] - (optional) Index of the network to connect to the signaling server. Default to the RPS.
+   * By default, connect the RPS to the signaling server. Use the `name` parameter to select which overlay to connect.
+   * @param  {string} [name=null] - (optional) Name of the overlay to connect to the signaling server. Default to the RPS.
    * @return {void}
    */
-  share (index = 0) {
-    this.getNetwork(index).signaling.signaling();
+  share (name = null) {
+    this.overlay(name).signaling.signaling();
   }
 
   /**
    * Revoke the connection with the signaling server.
    *
-   * By default, disconnect the RPS from the signaling server. Use the `index` parameter to select which network (rps or overlay) to connect.
-   * he RPS is always the first network, at `index = 0`.
-   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
-   * for the first overlay.
-   * @param  {integer} [index=0] - (optional) Index of the network to disconnect from the signaling server. Default to the RPS.
+   * By default, disconnect the RPS from the signaling server. Use the `name` parameter to select which overlay to connect.
+   * @param  {integer} [name=null] - (optional) Name of the overlay to disconnect from the signaling server. Default to the RPS.
    * @return {void}
    */
-  unshare (index = 0) {
-    this.getNetwork(index).signaling.unsignaling();
+  unshare (name = null) {
+    this.overlay(name).signaling.unsignaling();
   }
 
   /**
@@ -271,21 +251,18 @@ class Foglet extends EventEmitter {
    * The RPS is always the first network, at `index = 0`.
    * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
    * for the first overlay.
-   * @param  {integer} [index=0] - (optional) Index of the network to get. Default to the RPS.
+   * @param  {string} [name=null] - (optional) Name of the overlay to get. Default to the RPS.
    * @return {Network} Return the network for the given ID.
    * @example
    * const foglet = new Foglet({
    *  // some options...
    * });
    *
-   * // Get the RPS
-   * const rps = foglet.getNetwork();
-   *
-   * // Get the third overlay
-   * const thirdOverlay = foglet.getNetwork(3);
+   * // Get the 'latencies' overlay
+   * const overlay = foglet.overlay('latencies');
    */
-  getNetwork (index = 0) {
-    return this._networkManager.use(index);
+  overlay (name = null) {
+    return this._networkManager.overlay(name);
   }
 
   /**
@@ -329,7 +306,7 @@ class Foglet extends EventEmitter {
   * });
   **/
   onBroadcast (callback) {
-    this.getNetwork().communication.onBroadcast(callback);
+    this.overlay().communication.onBroadcast(callback);
   }
 
   /**
@@ -346,7 +323,7 @@ class Foglet extends EventEmitter {
   * });
   */
   onStreamBroadcast (callback) {
-    this.getNetwork().communication.onStreamBroadcast(callback);
+    this.overlay().communication.onStreamBroadcast(callback);
   }
 
 
@@ -362,7 +339,7 @@ class Foglet extends EventEmitter {
   * foglet.sendBroadcast('Hello everyone!');
   */
   sendBroadcast (message) {
-    return this.getNetwork().communication.sendBroadcast(message);
+    return this.overlay().communication.sendBroadcast(message);
   }
 
   /**
@@ -378,7 +355,7 @@ class Foglet extends EventEmitter {
   * stream.end();
   */
   streamBroadcast (isReady = undefined) {
-    return this.getNetwork().communication.streamBroadcast(isReady);
+    return this.overlay().communication.streamBroadcast(isReady);
   }
 
   /**
@@ -395,7 +372,7 @@ class Foglet extends EventEmitter {
   * });
   **/
   onUnicast (callback) {
-    this.getNetwork().communication.onUnicast(callback);
+    this.overlay().communication.onUnicast(callback);
   }
 
   /**
@@ -412,7 +389,7 @@ class Foglet extends EventEmitter {
   * });
   */
   onStreamUnicast (callback) {
-    this.getNetwork().communication.onStreamUnicast(callback);
+    this.overlay().communication.onStreamUnicast(callback);
   }
 
   /**
@@ -431,7 +408,7 @@ class Foglet extends EventEmitter {
   * foglet.sendUnicast(id, 'Hi diddly ho neighborino!');
   */
   sendUnicast (id, message) {
-    return this.getNetwork().communication.sendUnicast(id, message);
+    return this.overlay().communication.sendUnicast(id, message);
   }
 
   /**
@@ -448,7 +425,7 @@ class Foglet extends EventEmitter {
   * stream.end();
   */
   streamUnicast (id) {
-    return this.getNetwork().communication.streamUnicast(id);
+    return this.overlay().communication.streamUnicast(id);
   }
 
   /**
@@ -468,7 +445,7 @@ class Foglet extends EventEmitter {
   * foglet.sendMulticast(ids, 'Everyone, get in here!');
   */
   sendMulticast (ids = [], message) {
-    return this.getNetwork().communication.sendMulticast(ids, message);
+    return this.overlay().communication.sendMulticast(ids, message);
   }
 
   /**
@@ -476,7 +453,7 @@ class Foglet extends EventEmitter {
   * @return {string|null} The ID of a random neighbour, or `null` if not found
   */
   getRandomNeighbourId () {
-    const peers = this.getNetwork().network.getNeighbours();
+    const peers = this.overlay().network.getNeighbours();
     if(peers.length === 0) {
       return null;
     } else {
@@ -507,7 +484,7 @@ class Foglet extends EventEmitter {
   * console.log(foglet.getNeighbours());
   */
   getNeighbours (limit = undefined) {
-    return this.getNetwork().network.getNeighbours(limit);
+    return this.overlay().network.getNeighbours(limit);
   }
 
 }
