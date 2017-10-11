@@ -44,7 +44,7 @@ class TManOverlay extends AbstractNetwork {
     options.manager = networkManager;
     super(options);
     this._manager = networkManager;
-    this._rps.start(this.options.delta);
+    // this.rps.start(this.options.delta);
   }
 
   /**
@@ -86,7 +86,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {TMan} The TMan network
    */
   _buildRPS (options) {
-    let globalOptions = options._options.overlay.options;
+    let globalOptions = options.rps;
 
     // if webrtc options specified: create object config for Spray
     this.options = lmerge({config: globalOptions.webrtc}, this.options);

@@ -3,9 +3,6 @@
 const Foglet = require('../src/foglet.js');
 const utils = require('./utils.js');
 
-localStorage.debug = 'foglet-core:*';
-
-
 describe('Foglet streaming communication', function () {
   it('should stream data to a neighbour using unicast', function (done) {
     const foglets = utils.buildFog(Foglet, 2);

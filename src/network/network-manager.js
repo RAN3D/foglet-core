@@ -40,7 +40,7 @@ const debug = require('debug')('foglet-core:network-manager');
  * A configuration object used to build an overlay
  * @typedef {Object} OverlayConfig
  * @property {string} name - Name of the overlay, used to access it with {@link NetworkManager#overlay}
- * @property {function} constructor - function used to instanciate the constructor with `new`
+ * @property {function} class - function used to instanciate the constructor with `new`
  * @property {Object} options - Dedicated options used to build the overlay
  * @property {string} options.protocol - Name of the protocol run by the overlay
  * @property {Object} options.signaling - Options used to configure the interactions with the signaling server
@@ -49,7 +49,7 @@ const debug = require('debug')('foglet-core:network-manager');
  * @example
  * {
  *  name: 'latencies-overlay',
- *  constructor: LatenciesOverlay,
+ *  class: LatenciesOverlay,
  *  options: {
  *    protocol: 'foglet-latencies-overlay'
  *  }
@@ -200,9 +200,9 @@ class NetworkManager extends EventEmitter {
    * @return {Promise<string>} A Promise resolved with the ID of the new overlay
    */
   _addOverlay (overlayConfig) {
-    if (typeof overlay !== 'object' || !('name' in overlayConfig) || !('constructor' in overlayConfig))
-      throw new SyntaxError('An overlay is a configuration object {name: [string], constructor: [function], options: [Object]}');
-    const options = overlayConfig.options || {};
+    if (typeof overlayConfig !== 'object' || !('name' in overlayConfig) || !('class' in overlayConfig))
+      throw new SyntaxError('An overlay is a configuration object {name: [string], class: [function], options: [Object]}');
+    const options = lmerge(overlayConfig.options, this._options);
     if (!('protocol' in options))
       throw new SyntaxError('An overlay configuration requires a protocol name, e;g. { protocol: [string] }');
 
@@ -211,7 +211,7 @@ class NetworkManager extends EventEmitter {
 
     if (this._overlays.has(overlayConfig.name))
       throw new Error(`AN overlay with the name "${overlayConfig.name}" has already been registered!`);
-    const overlay = new overlayConfig.constructor(this, options);
+    const overlay = new overlayConfig.class(this, options);
     this._overlays.set(overlayConfig.name, new Network(overlay, options.signaling, options.protocol));
 
     // if(typeof overlay.class === 'function') {

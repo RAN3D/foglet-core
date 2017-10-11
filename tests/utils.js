@@ -24,9 +24,7 @@ const buildFog = (Foglet, size, overlays = []) => {
           }
         }
       },
-      overlay: {
-        overlays
-      }
+      overlays
     }));
   return fog;
 };

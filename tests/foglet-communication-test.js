@@ -3,9 +3,6 @@
 const Foglet = require('../src/foglet.js');
 const utils = require('./utils.js');
 
-localStorage.debug = 'foglet-core:*';
-
-
 describe('Foglet High-level communication', function () {
   it('should send messages to a neighbour using unicast', function (done) {
     const foglets = utils.buildFog(Foglet, 2);

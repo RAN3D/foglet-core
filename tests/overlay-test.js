@@ -1,38 +1,21 @@
 'use strict';
 
 const Foglet = require('../src/foglet.js');
-const AbstractOverlay = require('../src/network/abstract/abstract-overlay.js');
-const Spray = require('spray-wrtc');
-const lmerge = require('lodash/merge');
+const TManOverlay = require('../src/network/abstract/tman-overlay.js');
 const utils = require('./utils.js');
 
 // This simple overlay is a basic spray adapter
-class TestOverlay extends AbstractOverlay {
-  constructor (options) {
-    super(lmerge({
-      webrtc:	{
-        trickle: true,
-        iceServers : []
-      },
-      origins:'*',
-    }, options));
+class TestOverlay extends TManOverlay {
+  _startDescriptor () {
+    return { x: 5 };
   }
 
-  _buildRPS (options) {
-    const sprayOptions = lmerge({config: options.webrtc}, options);
-    return new Spray(sprayOptions);
+  _descriptorTimeout () {
+    return 3 * 60 * 1000;
   }
 
-  get inviewId () {
-    return this._rps.getInviewId();
-  }
-
-  get outviewId () {
-    return this._rps.getOutviewId();
-  }
-
-  getNeighbours (limit) {
-    return this.rps.getPeers(limit);
+  _rankPeers (neighbours, descriptorA, descriptorB) {
+    return descriptorA.x <= descriptorB.x;
   }
 }
 
@@ -40,27 +23,29 @@ describe('Overlays', () => {
   it('should build an overlay', done => {
     const [ f1, f2 ] = utils.buildFog(Foglet, 2, [
       {
+        name: 'test-overlay',
         class: TestOverlay,
         options: {
+          protocol: 'foglet-test-overlay',
           signaling: {
             address: 'http://localhost:3000',
-            room: 'test-room-overlay'
+            room: 'foglet-test-overlay-room'
           }
         }
       }
     ]);
 
-    f1.getNetwork(1).communication.onUnicast((id, msg) => {
+    f1.overlay('test-overlay').communication.onUnicast((id, msg) => {
       assert.equal(msg, 'hello world!');
       done();
     });
 
-    utils.overlayConnect(1, f1, f2)
+    utils.overlayConnect('test-overlay', f1, f2)
     .then(() => {
       setTimeout(() => {
-        const neighbours = f2.getNetwork(1).network.getNeighbours();
+        const neighbours = f2.overlay('test-overlay').network.getNeighbours();
         assert.equal(neighbours.length, 1);
-        f2.getNetwork(1).communication.sendUnicast(neighbours[0], 'hello world!');
+        f2.overlay('test-overlay').communication.sendUnicast(neighbours[0], 'hello world!');
       }, 2000);
     }).catch(done);
   });
