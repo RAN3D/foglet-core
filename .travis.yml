@@ -2,7 +2,7 @@ language: node_js
 node_js: node
 
 addons:
-  firefox: 'latest'
+  firefox: '49.0'
 
 env:
   global:
