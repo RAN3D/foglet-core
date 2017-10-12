@@ -92,12 +92,11 @@ class NetworkManager extends EventEmitter {
       overlays: []
     }, options);
 
-    // construct the rps => this._rps = ....
-    this._rps = this._constructRps(this._options.rps.type, this._options.rps.options);
+    this._rps = this._buildRPS(this._options.rps.type, this._options.rps.options);
 
-    // construct overlay(s)
+    // build overlay(s)
     this._overlays = new Map();
-    this._constructOverlays(this._options.overlays);
+    this._buildOverlays(this._options.overlays);
 
     debug('Networks (Rps and overlays) initialized.');
   }
@@ -138,15 +137,16 @@ class NetworkManager extends EventEmitter {
    * @param  {string} options.signaling.room - Name of the room in which the application run
    * @return {Network} The constructed RPS
    */
-  _constructRps (type, options) {
-    const rpsClass = this._chooseRps(type);
-    const rps = new rpsClass(options);
+  _buildRPS (type, options) {
+    // const rpsClass = this._chooseRps(type);
+    const rps = new SprayAdapter(options);
     return new Network(rps, options.signaling, options.protocol);
   }
 
   /**
    * Get a RPS constructor given its type in string format
    * @private
+   * @deprecated As only Spray is available as RPS, there is only one possible choice...
    * @param  {string} type - RPS type
    * @return {function} The RPS constructor
    */
@@ -169,10 +169,10 @@ class NetworkManager extends EventEmitter {
    * @param  {OverlayConfig[]} overlays - Set of overlay config objetcs
    * @return {void}
    */
-  _constructOverlays (overlays) {
+  _buildOverlays (overlays) {
     if(overlays.length === 0) debug('No overlays added, only the base RPS is available');
     overlays.forEach(config => {
-      this._addOverlay(config);
+      this._buildOverlay(config);
     });
   }
 
@@ -196,10 +196,12 @@ class NetworkManager extends EventEmitter {
   /**
    * Build and add an overlay
    * @private
-   * @param {Overlay} overlay Class Overlay, THIS IS NOT AN OBJECT ALREADY INITIALIZED ! THIS A REFERENCE TO THE CLASS Overlay, Or it can be a string representing the id of a default Implemented overlay
-   * @return {Promise<string>} A Promise resolved with the ID of the new overlay
+   * @throws {SyntaxError} Overlay configuration object must be a valid
+   * @throws {Error} An overlay with the same name has laready been registered
+   * @param {OverlayConfig} overlayConfig - Overlay configuration object
+   * @return {void}
    */
-  _addOverlay (overlayConfig) {
+  _buildOverlay (overlayConfig) {
     if (typeof overlayConfig !== 'object' || !('name' in overlayConfig) || !('class' in overlayConfig))
       throw new SyntaxError('An overlay is a configuration object {name: [string], class: [function], options: [Object]}');
     const options = lmerge(overlayConfig.options, this._options);
@@ -210,30 +212,9 @@ class NetworkManager extends EventEmitter {
       debug(`[WARNING] no signaling server given for overlay "${overlayConfig.name}"! Only connections from inside the same app will be allowed!`);
 
     if (this._overlays.has(overlayConfig.name))
-      throw new Error(`AN overlay with the name "${overlayConfig.name}" has already been registered!`);
+      throw new Error(`An overlay with the name "${overlayConfig.name}" has already been registered!`);
     const overlay = new overlayConfig.class(this, options);
     this._overlays.set(overlayConfig.name, new Network(overlay, options.signaling, options.protocol));
-
-    // if(typeof overlay.class === 'function') {
-    //   let net = new overlay.class(options);
-    //   objNetwork = new Network(net, options.signaling, options.protocol);
-    // } else if( typeof overlay.class === 'string' ) {
-    //   let overlord = this._chooseOverlay(overlay.class);
-    //   if(!overlord)
-    //     throw new Error('No overlay available for this string id.');
-    //   try {
-    //     // initialization of the the overlay.
-    //     let net = new overlord(options);
-    //     objNetwork = new Network(net, options.signaling, options.protocol);
-    //     // Each default overlay has a specific id, fits this id to ids overlays/rps id in our list of overlay
-    //   } catch (e) {
-    //     throw e;
-    //   }
-    // } else {
-    //   // push this overlay to our list
-    //   throw new Error('overlay have to class reference or an available string id');
-    // }
-    // this._overlays.push(objNetwork);
   }
 }
 

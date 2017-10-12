@@ -28,6 +28,7 @@ const AbstractNetwork = require('./abstract-network.js');
 /**
  * AbstractOverlay represents an abstract overlay
  * @abstract
+ * @deprecated This class is awaiting imminent DOOOM, please use {@link TManOverlay} instead
  * @extends AbstractNetwork
  * @author Grall Arnaud (Folkvir)
  */

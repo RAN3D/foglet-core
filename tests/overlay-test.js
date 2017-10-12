@@ -4,7 +4,7 @@ const Foglet = require('../src/foglet.js');
 const TManOverlay = require('../src/network/abstract/tman-overlay.js');
 const utils = require('./utils.js');
 
-// This simple overlay is a basic spray adapter
+// Very simple TMan based overlay
 class TestOverlay extends TManOverlay {
   _startDescriptor () {
     return { x: 5 };
@@ -20,7 +20,7 @@ class TestOverlay extends TManOverlay {
 }
 
 describe('Overlays', () => {
-  it('should build an overlay', done => {
+  it('should build a simple TMan-based overlay', done => {
     const [ f1, f2 ] = utils.buildFog(Foglet, 2, [
       {
         name: 'test-overlay',
