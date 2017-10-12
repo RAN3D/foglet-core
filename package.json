@@ -41,7 +41,7 @@
     "browsers": [
       "Firefox"
     ],
-    "eclude":  [
+    "exclude":  [
       "test/overlay-test.js"
     ],
     "lint": false
