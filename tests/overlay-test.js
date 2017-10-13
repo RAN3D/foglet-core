@@ -1,11 +1,19 @@
 'use strict';
 
-const Foglet = require('../src/foglet.js');
-const TManOverlay = require('../src/network/abstract/tman-overlay.js');
+const FogletAll = require('../foglet-core.js');
+const Foglet = FogletAll.Foglet;
+const TManOverlay = FogletAll.abstract.tman;
+const Communication = FogletAll.communication;
+
 const utils = require('./utils.js');
 
 // Very simple TMan based overlay
 class TestOverlay extends TManOverlay {
+  constructor (...args) {
+    super(...args);
+    this.communication = new Communication(this, 'internal-'+this._options.protocol);
+  }
+
   _startDescriptor () {
     return { x: 5 };
   }
@@ -46,6 +54,36 @@ describe('Overlays', () => {
         const neighbours = f2.overlay('test-overlay').network.getNeighbours();
         assert.equal(neighbours.length, 1);
         f2.overlay('test-overlay').communication.sendUnicast(neighbours[0], 'hello world!');
+      }, 2000);
+    }).catch(done);
+  });
+
+  it('should create a internal communication channel correctly', done => {
+    const [ f1, f2 ] = utils.buildFog(Foglet, 2, [
+      {
+        name: 'test-overlay-communication',
+        class: TestOverlay,
+        options: {
+          protocol: 'foglet-test-overlay-communication',
+          signaling: {
+            address: 'http://localhost:3000',
+            room: 'foglet-test-overlay-communication-room'
+          }
+        }
+      }
+    ]);
+
+    f1.overlay('test-overlay-communication').network.communication.onUnicast((id, msg) => {
+      assert.equal(msg, 'hello world!');
+      done();
+    });
+
+    utils.overlayConnect('test-overlay-communication', f1, f2)
+    .then(() => {
+      setTimeout(() => {
+        const neighbours = f2.overlay('test-overlay-communication').network.getNeighbours();
+        assert.equal(neighbours.length, 1);
+        f2.overlay('test-overlay-communication').network.communication.sendUnicast(neighbours[0], 'hello world!');
       }, 2000);
     }).catch(done);
   });
