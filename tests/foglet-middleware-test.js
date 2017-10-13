@@ -10,7 +10,7 @@ const simpleMiddleware = {
 
 describe('Middlewares', function () {
   it('should use middleware on broadcast', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
+    let foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     f1.use(simpleMiddleware);
@@ -18,7 +18,7 @@ describe('Middlewares', function () {
 
     f2.onBroadcast((id, data) => {
       assert.equal(data, 'So Long and Thanks for all the Fish');
-      done();
+      utils.clearFoglets(foglets).then(() => done());
     });
 
     utils.pathConnect(foglets).then( () => {
@@ -29,7 +29,7 @@ describe('Middlewares', function () {
   });
 
   it('should use middleware on unicast', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
+    let foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     f1.use(simpleMiddleware);
@@ -37,7 +37,7 @@ describe('Middlewares', function () {
 
     f2.onUnicast((id, message) => {
       assert.equal(message, 'So Long and Thanks for all the Fish');
-      done();
+      utils.clearFoglets(foglets).then(() => done());
     });
 
     utils.pathConnect(foglets).then( () => {
