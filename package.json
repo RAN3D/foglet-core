@@ -35,10 +35,7 @@
     "browsers": [
       "Firefox"
     ],
-    "exclude": [
-      "tests/foglet-streams-test.js",
-      "tests/overlay-test.js"
-    ],
+    "timeout": 20000, 
     "lint": false
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
