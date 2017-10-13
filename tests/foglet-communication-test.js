@@ -5,18 +5,19 @@ const utils = require('./utils.js');
 
 describe('Foglet High-level communication', function () {
   it('should send messages to a neighbour using unicast', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
+    let foglets = utils.buildFog(Foglet, 2);
     let f1 = foglets[0], f2 = foglets[1];
 
     f2.onUnicast((id, message) => {
       assert.equal(id, f1.outViewID);
       assert.equal(message, 'hello');
-      done();
+      utils.clearFoglets(foglets).then(() => done());
     });
 
     utils.pathConnect(foglets).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
+        console.log(peers);
         assert.equal(peers.length, 1);
         console.log(peers);
         for(let i = 0; i < peers.length; i++) {
@@ -27,7 +28,7 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should send messages to several neighbours using multicast', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
+    let foglets = utils.buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let wanted = 0, received = 0;
@@ -35,8 +36,9 @@ describe('Foglet High-level communication', function () {
       received++;
       assert.equal(id, f1.outViewID);
       assert.equal(message, 'hello');
-      if(received >= wanted)
-        done();
+      if(received >= wanted) {
+        utils.clearFoglets(foglets).then(() => done());
+      }
     }
 
     f2.onUnicast(receive);
@@ -52,14 +54,14 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should send messages to all peers using broadcast in a network with 2 peers', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
+    let foglets = utils.buildFog(Foglet, 2);
     let neighbourID = null;
     let f1 = foglets[0], f2 = foglets[1];
 
     f2.onBroadcast((id, data) => {
       assert.equal(id, neighbourID);
       assert.equal(data, 'hello');
-      done();
+      utils.clearFoglets(foglets).then(() => done());
     });
 
     utils.pathConnect(foglets).then(() => {
@@ -71,14 +73,16 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should simply send messages to all peers using broadcast in a 3 peers network', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
+    let foglets = utils.buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
     let cptB = 0;
     const results = [ '1', '2', '3', '4' ];
     const totalResult = 8;
-    const check = utils.doneAfter(totalResult, done);
+    const check = utils.doneAfter(totalResult, () => {
+      utils.clearFoglets(foglets).then(() => done());
+    });
 
     utils.pathConnect(foglets).then(() => {
       f2.onBroadcast((id, message) => {
@@ -105,14 +109,16 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should receive broadcasted classically ordered messages in a 3 peers network (1-2-3-4)', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
+    let foglets = utils.buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
     let cptB = 0;
     const results = [ '1', '2', '3', '4' ];
     const totalResult = 8;
-    const check = utils.doneAfter(totalResult, done);
+    const check = utils.doneAfter(totalResult, () => {
+      utils.clearFoglets(foglets).then(() => done());
+    });
 
     utils.pathConnect(foglets).then(() => {
       f2.onBroadcast((id, message) => {
@@ -138,14 +144,16 @@ describe('Foglet High-level communication', function () {
     }).catch(done);
   });
   it('should receive broadcasted weirdly ordered messages in a 3 peers network (1-3-2-4)', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
+    let foglets = utils.buildFog(Foglet, 3);
     let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
     let cptB = 0;
     const results = [ '1', '3', '2', '4' ];
     const totalResult = 8;
-    const check = utils.doneAfter(totalResult, done);
+    const check = utils.doneAfter(totalResult, () => {
+      utils.clearFoglets(foglets).then(() => done());
+    });
 
     utils.pathConnect(foglets).then(() => {
       f2.onBroadcast((id, message) => {
