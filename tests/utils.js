@@ -29,6 +29,23 @@ const buildFog = (Foglet, size, overlays = []) => {
   return fog;
 };
 
+const signalingConnect = (peers) => {
+  return Promise.all(peers.map(peer => {
+    peer.share();
+    return peer.connection();
+  }));
+}
+
+const clearFoglets = (peers) => {
+  return new Promise((resolve, reject) => {
+    try{
+      resolve(peers.map(p => undefined));
+    }catch(e){
+      reject(e)
+    }
+  });
+}
+
 const pathConnect = (peers, duplex = false) => {
   const pairs = [];
   for(let ind = 0; ind < peers.length - 1; ind++) {
@@ -65,6 +82,8 @@ const doneAfter = (limit, done) => {
 module.exports = {
   buildFog,
   pathConnect,
+  signalingConnect,
   overlayConnect,
+  clearFoglets,
   doneAfter
 };
