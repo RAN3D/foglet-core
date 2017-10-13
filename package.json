@@ -41,6 +41,7 @@
     "browsers": [
       "Firefox"
     ],
+    "timeout": 20000, 
     "lint": false
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
