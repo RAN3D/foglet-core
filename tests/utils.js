@@ -16,7 +16,7 @@ const buildFog = (Foglet, size, overlays = []) => {
             trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
             iceServers : [] // define iceServers in non local instance
           },
-          timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+          timeout: 10 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
           delta: 10 * 1000, // spray-wrtc shuffle interval
           signaling: {
             address: 'http://localhost:3000',
