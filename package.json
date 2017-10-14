@@ -33,9 +33,9 @@
   },
   "foglet-scripts": {
     "browsers": [
-      "Firefox"
+      "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox"
     ],
-    "timeout": 20000, 
+    "timeout": 20000,
     "lint": false
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
