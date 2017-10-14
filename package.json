@@ -33,7 +33,7 @@
   },
   "foglet-scripts": {
     "browsers": [
-      "Firefox"
+      "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox"
     ],
     "timeout": 20000,
     "lint": false,
