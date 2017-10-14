@@ -41,6 +41,10 @@
     "browsers": [
       "Firefox"
     ],
+    "exclude": [
+      "tests/foglet-streams-test.js",
+      "tests/overlay-test.js"
+    ],
     "lint": false
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
