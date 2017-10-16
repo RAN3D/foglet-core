@@ -1,22 +1,22 @@
 'use strict';
-
+// const assert = require('chai').assert;
 const Foglet = require('../src/foglet.js');
 const utils = require('./utils.js');
 
 describe('[SIGNALING] Direct/Signaling connections', function () {
-  this.timeout(30000);
+  this.timeout(20000);
   it('direct connection, return true when connected', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
 
-    utils.pathConnect(foglets).then( (status) => {
+    utils.pathConnect(foglets, 2000).then( (status) => {
       assert.isOk(status, 'Status Must be true.');
       utils.clearFoglets(foglets);
       done();
     }).catch(done);
   });// END IT
   it('signaling connection alone, return true when connected', function (done) {
-    let foglets = utils.buildFog(Foglet, 1);
-    let f1 = foglets[0];
+    const foglets = utils.buildFog(Foglet, 1);
+    const f1 = foglets[0];
     f1.share();
     f1.connection().then( (status) => {
       assert.isOk(status, 'Status Must be true.');
@@ -25,8 +25,8 @@ describe('[SIGNALING] Direct/Signaling connections', function () {
     }).catch(done);
   });// END IT
   it('signaling connection (2 peers network), return true when connected', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
-    let f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2);
+    const f1 = foglets[0], f2 = foglets[1];
     f1.onUnicast((id, msg) => {
       assert.equal(msg, 'ping');
       utils.clearFoglets(foglets);

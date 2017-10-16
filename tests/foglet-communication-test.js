@@ -1,12 +1,14 @@
 'use strict';
-
+// const assert = require('chai').assert;
 const Foglet = require('../src/foglet.js');
 const utils = require('./utils.js');
 
 describe('Foglet High-level communication', function () {
+  this.timeout(20000);
+
   it('should send messages to a neighbour using unicast', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
-    let f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2);
+    const f1 = foglets[0], f2 = foglets[1];
 
     f2.onUnicast((id, message) => {
       assert.equal(id, f1.outViewID);
@@ -14,7 +16,7 @@ describe('Foglet High-level communication', function () {
       utils.clearFoglets(foglets).then(() => done());
     });
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 2000).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
         console.log(peers);
@@ -28,8 +30,8 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should send messages to several neighbours using multicast', function (done) {
-    let foglets = utils.buildFog(Foglet, 3);
-    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3);
+    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let wanted = 0, received = 0;
     function receive (id, message) {
@@ -44,7 +46,7 @@ describe('Foglet High-level communication', function () {
     f2.onUnicast(receive);
     f3.onUnicast(receive);
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 2000).then( () => {
       setTimeout(() => {
         const peers = f1.getNeighbours();
         wanted = peers.length;
@@ -54,9 +56,9 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should send messages to all peers using broadcast in a network with 2 peers', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
     let neighbourID = null;
-    let f1 = foglets[0], f2 = foglets[1];
+    const f1 = foglets[0], f2 = foglets[1];
 
     f2.onBroadcast((id, data) => {
       assert.equal(id, neighbourID);
@@ -64,7 +66,7 @@ describe('Foglet High-level communication', function () {
       utils.clearFoglets(foglets).then(() => done());
     });
 
-    utils.pathConnect(foglets).then(() => {
+    utils.pathConnect(foglets, 2000).then(() => {
       neighbourID = f1.outViewID;
       setTimeout(function () {
         f1.sendBroadcast('hello');
@@ -73,8 +75,8 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should simply send messages to all peers using broadcast in a 3 peers network', function (done) {
-    let foglets = utils.buildFog(Foglet, 3);
-    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3);
+    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
     let cptB = 0;
@@ -84,7 +86,7 @@ describe('Foglet High-level communication', function () {
       utils.clearFoglets(foglets).then(() => done());
     });
 
-    utils.pathConnect(foglets).then(() => {
+    utils.pathConnect(foglets, 2000).then(() => {
       f2.onBroadcast((id, message) => {
         assert.equal(id, f1.outViewID);
         assert.equal(message, results[cptA]);
@@ -109,8 +111,8 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should receive broadcasted classically ordered messages in a 3 peers network (1-2-3-4)', function (done) {
-    let foglets = utils.buildFog(Foglet, 3);
-    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3);
+    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
     let cptB = 0;
@@ -120,7 +122,7 @@ describe('Foglet High-level communication', function () {
       utils.clearFoglets(foglets).then(() => done());
     });
 
-    utils.pathConnect(foglets).then(() => {
+    utils.pathConnect(foglets, 2000).then(() => {
       f2.onBroadcast((id, message) => {
         assert.equal(id, f1.outViewID);
         assert.equal(message, results[cptA]);
@@ -144,8 +146,8 @@ describe('Foglet High-level communication', function () {
     }).catch(done);
   });
   it('should receive broadcasted weirdly ordered messages in a 3 peers network (1-3-2-4)', function (done) {
-    let foglets = utils.buildFog(Foglet, 3);
-    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3);
+    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
 
     let cptA = 0;
     let cptB = 0;
@@ -155,7 +157,7 @@ describe('Foglet High-level communication', function () {
       utils.clearFoglets(foglets).then(() => done());
     });
 
-    utils.pathConnect(foglets).then(() => {
+    utils.pathConnect(foglets, 2000).then(() => {
       f2.onBroadcast((id, message) => {
         assert.equal(id, f1.outViewID);
         assert.equal(message, results[cptA]);

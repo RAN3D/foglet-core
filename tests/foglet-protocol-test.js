@@ -1,5 +1,5 @@
 'use strict';
-
+// const assert = require('chai').assert;
 const Foglet = require('../src/foglet.js');
 const defineProtocol = require('../src/fprotocol/protocol-builder.js');
 const utils = require('./utils.js');
@@ -35,19 +35,22 @@ const BroadcastProtocol = defineProtocol('sample-broadcast-protocol')`
   }}
 `;
 
-describe('FogletProtocol', () => {
+describe('FogletProtocol', function () {
+  this.timeout(20000);
   describe('#unicast', () => {
     describe('#communication', () => {
       it('should receive messages from remote services', done => {
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const expected = 'Hello world!';
         const p1 = new UnicastProtocol(f1),
           p2 = new UnicastProtocol(f2, (id, msg) => {
             assert.equal(msg, expected);
-          }, () => { utils.clearFoglets(foglets).then(() => done());});
+          }, () => {
+            utils.clearFoglets(foglets).then(() => done());
+          });
 
-        utils.pathConnect(foglets, true).then(() => {
+        utils.pathConnect(foglets, 2000, true).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
           setTimeout(function () {
@@ -57,14 +60,14 @@ describe('FogletProtocol', () => {
       });
 
       it('should allow peers to reply to service calls', done => {
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastProtocol(f1),
           p2 = new UnicastProtocol(f2, (id, msg, reply) => {
             reply(msg + ' world!');
           });
 
-        utils.pathConnect(foglets, true).then(() => {
+        utils.pathConnect(foglets, 2000, true).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
           setTimeout(function () {
@@ -73,20 +76,22 @@ describe('FogletProtocol', () => {
               assert.equal(msg, 'Hello world!');
               utils.clearFoglets(foglets).then(() => done());
             })
-            .catch(() => { utils.clearFoglets(foglets).then(() => done());});
+            .catch(() => {
+              utils.clearFoglets(foglets).then(() => done());
+            });
           }, 1000);
         });
       });
 
       it('should allow peers to reject service calls', done => {
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastProtocol(f1),
           p2 = new UnicastProtocol(f2, (id, msg, reply, reject) => {
             reject(msg + ' world!');
           });
 
-        utils.pathConnect(foglets, true).then(() => {
+        utils.pathConnect(foglets, 2000, true).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
           setTimeout(function () {
@@ -125,14 +130,16 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastHookProtocol(f1),
           p2 = new UnicastHookProtocol(f2, (id, msg) => {
             assert.equal(msg, 'So Long and Thanks for all the Fish');
-          }, () => { utils.clearFoglets(foglets).then(() => done());});
+          }, () => {
+            utils.clearFoglets(foglets).then(() => done());
+          });
 
-        utils.pathConnect(foglets, true).then(() => {
+        utils.pathConnect(foglets, 2000, true).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
           setTimeout(function () {
@@ -142,7 +149,9 @@ describe('FogletProtocol', () => {
       });
 
       it('should allow after hooks on send & receive', done => {
-        const check = utils.doneAfter(2, () => { utils.clearFoglets(foglets).then(() => done());});
+        const check = utils.doneAfter(2, () => {
+          utils.clearFoglets(foglets).then(() => done());
+        });
         UnicastHookProtocol = defineProtocol('unicast-protocol-with-hooks')`
           get
           ${function (service) {
@@ -159,12 +168,12 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const p1 = new UnicastHookProtocol(f1),
           p2 = new UnicastHookProtocol(f2);
 
-        utils.pathConnect(foglets, true).then(() => {
+        utils.pathConnect(foglets, 2000, true).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
           setTimeout(function () {
@@ -178,15 +187,17 @@ describe('FogletProtocol', () => {
   describe('#broadcast', () => {
     describe('#communication', () => {
       it('should receive messages from remote services', done => {
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const expected = 'Hello world!';
         const p1 = new BroadcastProtocol(f1),
           p2 = new BroadcastProtocol(f2, (id, msg) => {
             assert.equal(msg, expected);
-          }, () => { utils.clearFoglets(foglets).then(() => done());});
+          }, () => {
+            utils.clearFoglets(foglets).then(() => done());
+          });
 
-        utils.pathConnect(foglets).then(() => {
+        utils.pathConnect(foglets, 2000).then(() => {
           setTimeout(function () {
             p1.get(expected);
           }, 1000);
@@ -216,14 +227,16 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const p1 = new BroadcastHookProtocol(f1),
           p2 = new BroadcastHookProtocol(f2, (id, msg) => {
             assert.equal(msg, 'So Long and Thanks for all the Fish');
-          }, () => { utils.clearFoglets(foglets).then(() => done());});
+          }, () => {
+            utils.clearFoglets(foglets).then(() => done());
+          });
 
-        utils.pathConnect(foglets, true).then(() => {
+        utils.pathConnect(foglets, 2000, true).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
           setTimeout(function () {
@@ -233,7 +246,9 @@ describe('FogletProtocol', () => {
       });
 
       it('should allow after hooks on send & receive', done => {
-        const check = utils.doneAfter(2, () => { utils.clearFoglets(foglets).then(() => done());});
+        const check = utils.doneAfter(2, () => {
+          utils.clearFoglets(foglets).then(() => done());
+        });
         BroadcastHookProtocol = defineProtocol('broadcast-protocol-with-hooks')`
           get
           ${function (service) {
@@ -250,12 +265,12 @@ describe('FogletProtocol', () => {
           }}
         `;
 
-        let foglets = utils.buildFog(Foglet, 2);
-        let f1 = foglets[0], f2 = foglets[1];
+        const foglets = utils.buildFog(Foglet, 2);
+        const f1 = foglets[0], f2 = foglets[1];
         const p1 = new BroadcastHookProtocol(f1),
           p2 = new BroadcastHookProtocol(f2);
 
-        utils.pathConnect(foglets, true).then(() => {
+        utils.pathConnect(foglets, 2000, true).then(() => {
           const peers = f1.getNeighbours();
           assert.equal(peers.length, 1);
           setTimeout(function () {
