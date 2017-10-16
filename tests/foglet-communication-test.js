@@ -56,7 +56,7 @@ describe('Foglet High-level communication', function () {
   });
 
   it('should send messages to all peers using broadcast in a network with 2 peers', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
     let neighbourID = null;
     const f1 = foglets[0], f2 = foglets[1];
 
