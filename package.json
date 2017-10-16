@@ -39,7 +39,7 @@
   },
   "foglet-scripts": {
     "browsers": [
-      "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox"
+      "Firefox"
     ],
     "exclude": [
       "tests/foglet-streams-test.js",
@@ -49,28 +49,29 @@
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
-    "debug": "^2.6.8",
+    "debug": "^3.1.0",
+    "foglet-scripts": "^0.2.3",
     "lodash.merge": "^4.6.0",
     "lodash.sortedindexby": "^4.6.0",
     "readable-stream": "^2.3.3",
-    "socket.io-client": "^1.7.4",
+    "socket.io-client": "^2.0.3",
     "spray-wrtc": "^2.0.2",
     "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.0.1",
-    "version-vector-with-exceptions": "^0.1.0"
+    "version-vector-with-exceptions": "^0.1.0",
+    "zuul": "^3.11.1"
   },
   "devDependencies": {
     "babel-preset-env": "^1.6.0",
     "babelify": "^7.3.0",
-    "browserify": "^13.1.0",
-    "esdoc": "^0.5.2",
+    "browserify": "^14.4.0",
+    "esdoc": "^1.0.3",
     "esdoc-node": "^1.0.1",
-    "eslint": "^3.13.1",
-    "foglet-scripts": "git+https://github.com/ran3d/foglet-scripts.git",
+    "eslint": "^4.9.0",
     "karma-firefox-launcher": "^1.0.0",
     "uglify-es": "github:mishoo/UglifyJS2#harmony",
-    "watchify": "^3.7.0"
+    "watchify": "^3.9.0"
   },
   "bundledDependencies": [
     "debug",

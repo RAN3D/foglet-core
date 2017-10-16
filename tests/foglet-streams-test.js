@@ -1,12 +1,13 @@
 'use strict';
-
+// const assert = require('chai').assert;
 const Foglet = require('../src/foglet.js');
 const utils = require('./utils.js');
 
 describe('Foglet streaming communication', function () {
+  this.timeout(20000);
   it('should stream data to a neighbour using unicast', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
-    let f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2);
+    const f1 = foglets[0], f2 = foglets[1];
     let acc = '';
 
     f2.onStreamUnicast((id, message) => {
@@ -19,7 +20,7 @@ describe('Foglet streaming communication', function () {
       });
     });
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 2000).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
         assert.equal(peers.length, 1);
@@ -32,8 +33,8 @@ describe('Foglet streaming communication', function () {
   });
 
   it('should stream trailing data to a neighbour using unicast', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
-    let f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2);
+    const f1 = foglets[0], f2 = foglets[1];
 
     f2.onStreamUnicast((id, message) => {
       assert.equal(id, f1.outViewID);
@@ -46,7 +47,7 @@ describe('Foglet streaming communication', function () {
       });
     });
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 2000).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
         assert.equal(peers.length, 1);
@@ -59,8 +60,8 @@ describe('Foglet streaming communication', function () {
   });
 
   it('should transmit an error through a stream when using unicast', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
-    let f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2);
+    const f1 = foglets[0], f2 = foglets[1];
     const check = utils.doneAfter(2, () => {
       utils.clearFoglets(foglets);
       done();
@@ -74,7 +75,7 @@ describe('Foglet streaming communication', function () {
       });
     });
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 2000).then( () => {
       setTimeout(function () {
         const peers = f1.getNeighbours();
         assert.equal(peers.length, 1);
@@ -87,8 +88,8 @@ describe('Foglet streaming communication', function () {
   });
 
   it('should stream data to all peers using broadcast in a network with 2 peers', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
-    let f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2);
+    const f1 = foglets[0], f2 = foglets[1];
     let acc = '';
 
     f2.onStreamBroadcast((id, message) => {
@@ -101,7 +102,7 @@ describe('Foglet streaming communication', function () {
       });
     });
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 2000).then( () => {
       setTimeout(function () {
         const stream = f1.streamBroadcast();
         stream.write('Hello ');
@@ -112,8 +113,8 @@ describe('Foglet streaming communication', function () {
   });
 
   it('should stream data to all peers using broadcast in a network with 3 peers', function (done) {
-    let foglets = utils.buildFog(Foglet, 3);
-    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3);
+    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
     let accA = '';
     let accB = '';
     const check = utils.doneAfter(2, () => {
@@ -139,7 +140,7 @@ describe('Foglet streaming communication', function () {
       });
     });
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 1000).then( () => {
       setTimeout(function () {
         const stream = f1.streamBroadcast();
         stream.write('Hello ');
@@ -150,8 +151,8 @@ describe('Foglet streaming communication', function () {
   });
 
   it('should transmit an error through a stream when using broadcast', function (done) {
-    let foglets = utils.buildFog(Foglet, 3);
-    let f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3);
+    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
     const check = utils.doneAfter(3, () => {
       utils.clearFoglets(foglets);
       done();
@@ -173,7 +174,7 @@ describe('Foglet streaming communication', function () {
       });
     });
 
-    utils.pathConnect(foglets).then( () => {
+    utils.pathConnect(foglets, 1000).then( () => {
       setTimeout(function () {
         const stream = f1.streamBroadcast();
         stream.on('error', () => check());

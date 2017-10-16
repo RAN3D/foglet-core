@@ -1,5 +1,5 @@
 'use strict';
-
+// const assert = require('chai').assert;
 const FogletAll = require('../foglet-core.js');
 const Foglet = FogletAll.Foglet;
 const TManOverlay = FogletAll.abstract.tman;
@@ -27,7 +27,8 @@ class TestOverlay extends TManOverlay {
   }
 }
 
-describe('Overlays', () => {
+describe('Overlays', function () {
+  this.timeout(20000);
   it('should build a simple TMan-based overlay', done => {
     const [ f1, f2 ] = utils.buildFog(Foglet, 2, [
       {
@@ -48,7 +49,7 @@ describe('Overlays', () => {
       done();
     });
 
-    utils.overlayConnect('test-overlay', f1, f2)
+    utils.overlayConnect('test-overlay', 2000, f1, f2)
     .then(() => {
       setTimeout(() => {
         const neighbours = f2.overlay('test-overlay').network.getNeighbours();
@@ -78,7 +79,7 @@ describe('Overlays', () => {
       done();
     });
 
-    utils.overlayConnect('test-overlay-communication', f1, f2)
+    utils.overlayConnect('test-overlay-communication', 2000, f1, f2)
     .then(() => {
       setTimeout(() => {
         const neighbours = f2.overlay('test-overlay-communication').network.getNeighbours();

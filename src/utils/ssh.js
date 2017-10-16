@@ -1,7 +1,7 @@
 'use strict';
 
 const EventEmitter = require ('events');
-const lmerge = require('lodash/merge');
+const lmerge = require('lodash.merge');
 const io = require('socket.io-client');
 
 class SshControl extends EventEmitter {

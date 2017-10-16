@@ -16,8 +16,8 @@ const buildFog = (Foglet, size, overlays = []) => {
             trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
             iceServers : [] // define iceServers in non local instance
           },
-          timeout: 10 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-          delta: 10 * 1000, // spray-wrtc shuffle interval
+          timeout: 30 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+          delta: 30 * 1000, // spray-wrtc shuffle interval
           signaling: {
             address: 'http://localhost:3000',
             room: `test-room-generated-${id}`
@@ -34,38 +34,57 @@ const signalingConnect = (peers) => {
     peer.share();
     return peer.connection();
   }));
-}
+};
 
 const clearFoglets = (peers) => {
   return new Promise((resolve, reject) => {
     try{
-      resolve(peers.map(p => undefined));
-    }catch(e){
-      reject(e)
+      resolve(peers.map(p => {
+        p._networkManager._rps._network.rps.disconnect();
+        p._networkManager._overlays.forEach(overlay => {
+          console.log(overlay);
+          overlay._network._rps.disconnect();
+        });
+        return undefined;
+      }));
+    }catch(e) {
+      reject(e);
     }
   });
-}
+};
 
-const pathConnect = (peers, duplex = false) => {
+const pathConnect = (peers, timeout, duplex = false) => {
   const pairs = [];
   for(let ind = 0; ind < peers.length - 1; ind++) {
     pairs.push([ peers[ind ], peers[ind + 1] ]);
   }
   return Promise.all(pairs.map(pair => {
     return pair[0].connection(pair[1])
-    .then(() => {
-      if (duplex)
-        return pair[1].connection(pair[0]);
-      return Promise.resolve();
-    });
+      .then(() => {
+        setTimeout(() => {
+          if (duplex) {
+            return pair[1].connection(pair[0]).then(() => {
+              setTimeout(() => {
+                return Promise.resolve();
+              }, timeout);
+            });
+          } else {
+            return Promise.resolve();
+          }
+        }, timeout);
+      });
   }));
 };
 
-const overlayConnect = (index, ...peers) => {
+const overlayConnect = (index, timeout,  ...peers) => {
   return peers.reduce((prev, peer) => {
     return prev.then(() => {
       peer.share(index);
-      return peer.connection(null, index);
+      return peer.connection(null, index).then((...res) => {
+        setTimeout(() => {
+          return Promise.resolve(...res);
+        }, timeout);
+      });
     });
   }, Promise.resolve());
 };
