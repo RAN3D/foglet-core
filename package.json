@@ -1,21 +1,15 @@
 {
   "name": "foglet-core",
-  "version": "3.1.1",
+  "version": "4.0.0",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
     "lint": "eslint src/",
-    "esdoc": "esdoc  && npm run esdoc:example",
-    "esdoc:example": "cp -R ./dist ./docs",
-    "all": "npm run build:foglet && npm run build:foglet-min && npm test && npm run esdoc",
+    "esdoc": "esdoc",
+    "all": "npm run build && npm test && npm run esdoc",
     "test": "foglet-scripts test",
     "server": "foglet-scripts start",
-    "build:foglet": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  > ./dist/foglet.bundle.js",
-    "build:watch": "mkdir -p dist/ && watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  -o ./dist/foglet.bundle.js -v -d ",
-    "build:foglet-min": "mkdir -p dist/ && browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js",
-    "wbuild:foglet": "browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  > ./dist/foglet.bundle.js",
-    "wbuild:watch": "watchify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ]  -o ./dist/foglet.bundle.js -v -d ",
-    "wbuild:foglet-min": "browserify -r ./foglet-core.js:foglet -t [ babelify --presets [ env ] ] | uglifyjs -c > ./dist/foglet.bundle.min.js"
+    "build": "foglet-scripts build"
   },
   "repository": {
     "type": "git",
@@ -41,9 +35,17 @@
     "browsers": [
       "Firefox"
     ],
-    "sharding": false,
     "timeout": 20000,
-    "lint": false
+    "lint": false,
+    "build": {
+      "entry": "./foglet-core.js",
+      "output": {
+        "filename": "foglet.bundle.js",
+        "library": "foglet", 
+        "libraryTarget": "umd",
+        "umdNamedDefine": true
+      }
+    }
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
