@@ -41,9 +41,9 @@ Creates a new HTML file and insert the **foglet bundle** in it:
 <script src="node_modules/foglet-core/dist/foglet.bundle.js" type="text/javascript"></script>
 ```
 
-Then, requires the Foglet library:
+Then, foglet library is available in the variable `foglet` :
 ```javascript
-const Foglet = require("foglet").Foglet
+const FogletClass = foglet.Foglet;
 ```
 
 If you do not provide a list of **ice servers**, your example will work in localhost but not on the Web.
@@ -55,10 +55,10 @@ To be begin with, let's write a simple piece of JS code:
   
   localStorage.debug = 'foglet-core:*';
 
-  const Foglet = require('foglet').Foglet;
+  const Foglet = foglet.Foglet;
 
   // let's create a simple application that send message in broadcast
-  const foglet = new Foglet({
+  const fog = new Foglet({
     rps: {
       type: 'spray-wrtc', // we choose Spray as a our RPS
       options: {
@@ -76,17 +76,17 @@ To be begin with, let's write a simple piece of JS code:
   });
 
   // connect the foglet to the signaling server
-  foglet.share();
+  fog.share();
 
   // Connect the foglet to our network
-  foglet.connection().then(() => {
+  fog.connection().then(() => {
     // listen for broadcast messages
-    foglet.onBroadcast((id, message) => {
+    fog.onBroadcast((id, message) => {
       console.log('The peer', id, 'just sent me by broadcast:', message);
     });
 
     // send a message in broadcast
-    foglet.sendBroadcast('Hello World !');
+    fog.sendBroadcast('Hello World !');
   });
 </script>
 ```

@@ -19,7 +19,8 @@ before_test:
 
 
 test_script:
-  - npm test
+  - npm run build
+  - npm run test
 
 # Don't actually build.
 build: off
