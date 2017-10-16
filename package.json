@@ -35,7 +35,6 @@
     "browsers": [
       "Firefox"
     ],
-    "sharding": false,
     "timeout": 20000,
     "lint": false,
     "build": {
