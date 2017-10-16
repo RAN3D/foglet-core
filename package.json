@@ -41,7 +41,7 @@
       "entry": "./foglet-core.js",
       "output": {
         "filename": "foglet.bundle.js",
-        "library": "foglet", 
+        "library": "foglet",
         "libraryTarget": "umd",
         "umdNamedDefine": true
       }
@@ -70,7 +70,6 @@
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^4.9.0",
     "karma-firefox-launcher": "^1.0.0",
-    "uglify-es": "github:mishoo/UglifyJS2#harmony",
     "watchify": "^3.9.0"
   },
   "bundledDependencies": [
@@ -83,17 +82,5 @@
     "unicast-definition",
     "uuid",
     "version-vector-with-exceptions"
-  ],
-  "browserify": {
-    "transform": [
-      [
-        "babelify",
-        {
-          "presets": [
-            "env"
-          ]
-        }
-      ]
-    ]
-  }
+  ]
 }
