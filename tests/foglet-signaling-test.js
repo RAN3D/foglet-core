@@ -6,7 +6,7 @@ const utils = require('./utils.js');
 describe('[SIGNALING] Direct/Signaling connections', function () {
   this.timeout(20000);
   it('direct connection, return true when connected', function (done) {
-    let foglets = utils.buildFog(Foglet, 2);
+    const foglets = utils.buildFog(Foglet, 2);
 
     utils.pathConnect(foglets, 2000).then( (status) => {
       assert.isOk(status, 'Status Must be true.');
