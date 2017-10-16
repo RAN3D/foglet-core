@@ -33,7 +33,7 @@
   },
   "foglet-scripts": {
     "browsers": [
-      "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox", "Firefox"
+      "Firefox"
     ],
     "timeout": 20000,
     "lint": false,
@@ -59,7 +59,8 @@
     "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.0.1",
-    "version-vector-with-exceptions": "^0.1.0"
+    "version-vector-with-exceptions": "^0.1.0",
+    "zuul": "^3.11.1"
   },
   "devDependencies": {
     "babel-preset-env": "^1.6.0",
