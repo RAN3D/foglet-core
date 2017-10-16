@@ -59,8 +59,7 @@
     "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.0.1",
-    "version-vector-with-exceptions": "^0.1.0",
-    "zuul": "^3.11.1"
+    "version-vector-with-exceptions": "^0.1.0"
   },
   "devDependencies": {
     "babel-preset-env": "^1.6.0",
