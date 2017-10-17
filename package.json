@@ -50,7 +50,6 @@
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
     "debug": "^3.1.0",
-    "foglet-scripts": "^0.2.3",
     "lodash.merge": "^4.6.0",
     "lodash.sortedindexby": "^4.6.0",
     "readable-stream": "^2.3.3",
@@ -62,15 +61,13 @@
     "version-vector-with-exceptions": "^0.1.0"
   },
   "devDependencies": {
-    "babel-preset-env": "^1.6.0",
-    "babelify": "^7.3.0",
-    "browserify": "^14.4.0",
+    "babel-core": "^6.26.0",
     "esdoc": "^1.0.3",
     "esdoc-node": "^1.0.2",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^4.9.0",
-    "karma-firefox-launcher": "^1.0.0",
-    "watchify": "^3.9.0"
+    "foglet-scripts": "^0.2.3",
+    "karma-firefox-launcher": "^1.0.0"
   },
   "bundledDependencies": [
     "debug",
