@@ -101,6 +101,25 @@ In order to run this library, you have to provide the address of a **signaling s
 This server must be compatible with the foglet library.
 The library [foglet-signaling-server](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
 
+## Developpment 
+
+We offer another library which lets you to build/test/run your own application with a signaling server: https://github.com/ran3d/foglet-scripts.git
+
+```bash
+# Clone and install
+git clone https://github.com/ran3d/foglet-core.git
+npm install
+
+# Build the bundle with foglet-scripts (webpack/karma/babel stack)
+npm run build
+
+# Test the lib with foglet-scripts (webpack/karma/babel stack)
+npm run test
+
+# Run the signaling server
+npm run server
+```
+
 ## Contributors:
 
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
