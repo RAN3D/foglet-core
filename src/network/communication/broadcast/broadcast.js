@@ -8,7 +8,6 @@ const AbstractBroadcast = require('./../abstract/abstract-broadcast.js');
 const VVwE = require('version-vector-with-exceptions'); // Version-Vector With Exceptions
 const messages = require('./messages.js');
 
-const lmerge = require('lodash.merge');
 const uuid = require('uuid/v4');
 const sortedIndexBy = require('lodash.sortedindexby');
 const debug = require('debug')('foglet-core:broadcast');
@@ -154,7 +153,7 @@ class Broadcast extends AbstractBroadcast {
       // #D the buffered message is fully arrived, deliver
       if (this._bufferAntiEntropy.elements.length ===
           this._bufferAntiEntropy.nbElements) {
-          // #1 considere each message in the response independantly
+        // #1 considere each message in the response independantly
         for (let i = 0; i<this._bufferAntiEntropy.elements.length; ++i) {
           let element = this._bufferAntiEntropy.elements[i];
           // #2 only check if the message has not been received yet

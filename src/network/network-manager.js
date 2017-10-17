@@ -31,7 +31,6 @@ const lmerge = require('lodash.merge');
 // Networks
 const Network = require('./network.js');
 const SprayAdapter = require('./rps/sprayAdapter.js');
-const LatenciesOverlay = require('./overlay/latencies-overlay.js');
 
 // debug
 const debug = require('debug')('foglet-core:network-manager');
@@ -127,7 +126,7 @@ class NetworkManager extends EventEmitter {
   }
 
   /**
-   * Construct the RPS by its type and options
+   * Construct the RPS by its type and options For the moment(spray-wrtc as default)
    * @private
    * @param  {string} type    - Type of the RPS (spray-wrtc/fcn-wrtc/...)
    * @param  {Object} options - Options of the RPS
@@ -138,8 +137,8 @@ class NetworkManager extends EventEmitter {
    * @return {Network} The constructed RPS
    */
   _buildRPS (type, options) {
-    // const rpsClass = this._chooseRps(type);
-    const rps = new SprayAdapter(options);
+    const rpsClass = this._chooseRps(type);
+    const rps = new rpsClass(options);
     return new Network(rps, options.signaling, options.protocol);
   }
 
@@ -174,23 +173,6 @@ class NetworkManager extends EventEmitter {
     overlays.forEach(config => {
       this._buildOverlay(config);
     });
-  }
-
-  /**
-   * Get an Overlay constructor given its type in string format
-   * @private
-   * @deprecated
-   * @param  {string} type - Overlay type
-   * @return {function} The Overlay constructor
-   */
-  _chooseOverlay (type) {
-    let overlay = null;
-    switch(type) {
-    case 'latencies':
-      overlay = LatenciesOverlay;
-      break;
-    }
-    return overlay;
   }
 
   /**

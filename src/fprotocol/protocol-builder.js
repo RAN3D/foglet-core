@@ -62,16 +62,16 @@ function define (protocolName) {
     };
     // clean services names before building
     services.map(str => str.trim())
-    .filter(str => str.length > 0)
-    .forEach((name, index) => {
-      if (name === 'init' || name === 'constructor') {
-        builder = new InitBuilder(callbacks[index]);
-      } else {
-        builder = new ServiceBuilder(name);
-        callbacks[index](builder);
-      }
-      builder.apply(protocolClass);
-    });
+      .filter(str => str.length > 0)
+      .forEach((name, index) => {
+        if (name === 'init' || name === 'constructor') {
+          builder = new InitBuilder(callbacks[index]);
+        } else {
+          builder = new ServiceBuilder(name);
+          callbacks[index](builder);
+        }
+        builder.apply(protocolClass);
+      });
     return protocolClass;
   };
 }

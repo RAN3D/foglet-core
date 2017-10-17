@@ -162,7 +162,7 @@ class FogletProtocol {
       const beforeReceive = utils.beforeReceiveName(msg.method);
       if (beforeReceive in this)
         msg.payload = this[beforeReceive].call(this, msg.payload);
-        // call handler
+      // call handler
       this[handlerName].call(this, senderID, msg.payload);
       // apply after receive hook
       const afterReceive = utils.afterReceiveName(msg.method);

@@ -82,7 +82,7 @@ const DEFAULT_OPTIONS = {
   }*/
 };
 
- /**
+/**
  * A callback invoked when a message is received (either by unicast or broadcast)
  * @callback MessageCallback
  * @param {string} id - The ID of the peer who send the message

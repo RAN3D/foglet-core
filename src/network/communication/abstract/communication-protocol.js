@@ -48,7 +48,7 @@ class CommunicationProtocol extends EventEmitter {
    * @return {boolean}
    */
   send (message) {
-    throw new Error('A valid communication protocol should implement a send method');
+    throw new Error('A valid communication protocol should implement a send method, message:' + message.toString());
   }
 
   /**
@@ -58,7 +58,7 @@ class CommunicationProtocol extends EventEmitter {
    * @return {void}
    */
   _receive (id, message) {
-    throw new Error('A valid communication protocol should implement a _receiveMessage method');
+    throw new Error('A valid communication protocol should implement a _receiveMessage method; '+ `(id, message)=(${id.toString()},${message.toString()})`);
   }
 }
 

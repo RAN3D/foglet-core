@@ -133,7 +133,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {integer} `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB` (according to the ranking algorithm)
    */
   _rankPeers (neighbour, descriptorA, descriptorB, peerA, peerB) {
-    throw new Error('A valid TMan based overlay must implement a _rankPeers method to rank two peers');
+    throw new Error('A valid TMan based overlay must implement a _rankPeers method to rank two peers' + `variable: ${neighbour.toString()}${descriptorA.toString()}${descriptorB.toString()}${peerA.toString()}${peerB.toString()}`);
   }
 
   /**
