@@ -54,29 +54,20 @@ const DEFAULT_OPTIONS = {
       }
     }
   },
-  overlay: { // overlay options
-    options: { // these options will be propagated to all components, but overrided if same options are listed in the list of overlays
-      webrtc:	{ // add WebRTC options
-        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-        iceServers : [] // define iceServers in non local instance
-      },
-      timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-      delta: 10 * 1000 // spray-wrtc shuffle interval
-    }, // options wiil be passed to all components of the overlay
-    overlays: [
-      // {
-      //   class: 'latencies',
-      //   options: {
-      //     protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
-      //     signaling: {
-      //       address: 'https://signaling.herokuapp.com/',
-      //       // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
-      //       room: 'best-room-for-foglet-overlay' // room to join
-      //     }
-      //   }
-      // }
-    ] // add an latencies overlay
-  },
+  overlays: [
+    // {
+    //   class: YourOverlayClass,
+    //   options: {
+    //     delta: 10 * 1000,
+    //     protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
+    //     signaling: {
+    //       address: 'https://signaling.herokuapp.com/',
+    //       // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+    //       room: 'best-room-for-foglet-overlay' // room to join
+    //     }
+    //   }
+    // }
+  ],
   ssh: undefined  /* {
     address: 'http://localhost:4000/'
   }*/

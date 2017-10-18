@@ -90,7 +90,6 @@ class NetworkManager extends EventEmitter {
       },
       overlays: []
     }, options);
-
     this._rps = this._buildRPS(this._options.rps.type, this._options.rps.options);
 
     // build overlay(s)
@@ -186,7 +185,7 @@ class NetworkManager extends EventEmitter {
   _buildOverlay (overlayConfig) {
     if (typeof overlayConfig !== 'object' || !('name' in overlayConfig) || !('class' in overlayConfig))
       throw new SyntaxError('An overlay is a configuration object {name: [string], class: [function], options: [Object]}');
-    const options = lmerge(overlayConfig.options, this._options);
+    const options = overlayConfig.options;
     if (!('protocol' in options))
       throw new SyntaxError('An overlay configuration requires a protocol name, e;g. { protocol: [string] }');
 
