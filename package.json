@@ -8,7 +8,7 @@
     "esdoc": "esdoc",
     "all": "npm run build && npm test && npm run esdoc",
     "test": "foglet-scripts test",
-    "server": "foglet-scripts start",
+    "start": "foglet-scripts start",
     "build": "foglet-scripts build"
   },
   "repository": {
@@ -65,7 +65,7 @@
     "esdoc-node": "^1.0.2",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^4.9.0",
-    "foglet-scripts": "git+https://github.com/ran3d/foglet-scripts.git#webpack-external",
+    "foglet-scripts": "^0.2.4",
     "karma-firefox-launcher": "^1.0.0"
   },
   "bundledDependencies": [
@@ -75,6 +75,7 @@
     "readable-stream",
     "socket.io-client",
     "spray-wrtc",
+    "tman-wrtc",
     "unicast-definition",
     "uuid",
     "version-vector-with-exceptions"
