@@ -21,12 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const AbstractNetwork = require('./../abstract/abstract-network.js');
+const AbstractNetwork = require('./../abstract/abstract-network.js')
 // const lremove = require('lodash/remove');
-const Spray = require('spray-wrtc');
-const lmerge = require('lodash.merge');
+const Spray = require('spray-wrtc')
+const lmerge = require('lodash.merge')
 
 /**
  * SprayAdapter adapts the usage of a Spray RPS in the foglet library.
@@ -37,15 +37,15 @@ const lmerge = require('lodash.merge');
 class SprayAdapter extends AbstractNetwork {
   constructor (options) {
     super(lmerge({
-      webrtc:	{ // add WebRTC options
+      webrtc: { // add WebRTC options
         trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-        iceServers : [] // define iceServers in non local instance
+        iceServers: [] // define iceServers in non local instance
       },
-      origins:'*',
-    }, options));
+      origins: '*'
+    }, options))
 
     // make a unique id of this network
-    this.id = this._rps.PEER;
+    this.id = this._rps.PEER
   }
 
   /**
@@ -55,8 +55,8 @@ class SprayAdapter extends AbstractNetwork {
    */
   _buildRPS (options) {
     // if webrtc options specified: create object config for Spray
-    const sprayOptions = lmerge({config: options.webrtc}, options);
-    return new Spray(sprayOptions);
+    const sprayOptions = lmerge({config: options.webrtc}, options)
+    return new Spray(sprayOptions)
   }
 
   /**
@@ -64,7 +64,7 @@ class SprayAdapter extends AbstractNetwork {
    * @return {string} The in-view ID of the peer
    */
   get inviewId () {
-    return this._rps.getInviewId();
+    return this._rps.getInviewId()
   }
 
   /**
@@ -72,7 +72,7 @@ class SprayAdapter extends AbstractNetwork {
    * @return {string} The out-view ID of the peer
    */
   get outviewId () {
-    return this._rps.getOutviewId();
+    return this._rps.getOutviewId()
   }
 
   /**
@@ -83,7 +83,7 @@ class SprayAdapter extends AbstractNetwork {
   getNeighbours (limit) {
     // BUG, sometimes our id is in our partial view.
     // Tempory fix by removing this element if in results
-    return this._rps.getPeers(limit);
+    return this._rps.getPeers(limit)
     // lremove(result, (elem) => {
     //   return elem === this.inviewId;
     // })
@@ -91,4 +91,4 @@ class SprayAdapter extends AbstractNetwork {
   }
 }
 
-module.exports = SprayAdapter;
+module.exports = SprayAdapter

@@ -1,5 +1,5 @@
-'use strict';
-const path = require('path');
+'use strict'
+const path = require('path')
 module.exports = {
   browsers: [ 'Firefox' ],
   timeout: 20000,
@@ -18,7 +18,7 @@ module.exports = {
         {
           test: /\.js$/,
           exclude: () => {
-            return true;
+            return true
           },
           use: {
             loader: 'babel-loader',
@@ -31,4 +31,4 @@ module.exports = {
     },
     devtool: 'source-map'
   }
-};
+}

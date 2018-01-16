@@ -21,11 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const AbstractNetwork = require('./abstract-network.js');
-const TMan = require('tman-wrtc');
-const lmerge = require('lodash.merge');
+const AbstractNetwork = require('./abstract-network.js')
+const TMan = require('tman-wrtc')
+const lmerge = require('lodash.merge')
 
 /**
  * A TManOverlay is an abstract network used to build overlay based on the TMan network over WebRTC.
@@ -41,12 +41,12 @@ class TManOverlay extends AbstractNetwork {
    * @return {NetworkManager} networkManager - Network manager used as root for the overlay
    */
   constructor (networkManager, options) {
-    options.manager = networkManager;
-    super(options);
-    this._manager = networkManager;
+    options.manager = networkManager
+    super(options)
+    this._manager = networkManager
     this._rps.parent.once('open', () => {
-      this._rps._start();
-    });
+      this._rps._start()
+    })
   }
 
   /**
@@ -54,7 +54,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {string} The in-view ID of the peer
    */
   get inviewId () {
-    return this.rps.getInviewId();
+    return this.rps.getInviewId()
   }
 
   /**
@@ -62,7 +62,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {string} The out-view ID of the peer
    */
   get outviewId () {
-    return this.rps.getOutviewId();
+    return this.rps.getOutviewId()
   }
 
   /**
@@ -70,7 +70,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {Object} The peer current descriptor
    */
   get descriptor () {
-    return this._rps.options.descriptor;
+    return this._rps.options.descriptor
   }
 
   /**
@@ -79,7 +79,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {void}
    */
   set descriptor (newDescriptor) {
-    this._rps.options.descriptor = newDescriptor;
+    this._rps.options.descriptor = newDescriptor
   }
 
   /**
@@ -89,13 +89,13 @@ class TManOverlay extends AbstractNetwork {
    */
   _buildRPS (options) {
     // if webrtc options specified: create object config for Spray
-    this.options = lmerge({config: options.webrtc}, options);
+    this.options = lmerge({config: options.webrtc}, options)
     const tmanOptions = lmerge({
       descriptor: this._startDescriptor(),
       descriptorTimeout: this._descriptorTimeout(),
       ranking: this._rankingFunction()
-    }, this.options);
-    return new TMan(tmanOptions, options.manager._rps._network._rps);
+    }, this.options)
+    return new TMan(tmanOptions, options.manager._rps._network._rps)
   }
 
   /**
@@ -104,7 +104,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {Object} The start descriptor used by the TMan overlay
    */
   _startDescriptor () {
-    throw new Error('A valid TMan based overlay must implement a _descriptor method to generate a base descriptor');
+    throw new Error('A valid TMan based overlay must implement a _descriptor method to generate a base descriptor')
   }
 
   /**
@@ -113,7 +113,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {number} The delay **in milliseconds** after which the descriptor must be recomputed
    */
   _descriptorTimeout () {
-    throw new Error('A valid TMan based overlay must implement a _descriptorTimeout method to give the timeout on descriptors');
+    throw new Error('A valid TMan based overlay must implement a _descriptorTimeout method to give the timeout on descriptors')
   }
 
   /**
@@ -129,7 +129,7 @@ class TManOverlay extends AbstractNetwork {
    * @return {integer} `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB` (according to the ranking algorithm)
    */
   _rankPeers (neighbour, descriptorA, descriptorB, peerA, peerB) {
-    throw new Error('A valid TMan based overlay must implement a _rankPeers method to rank two peers' + `variable: ${neighbour.toString()}${descriptorA.toString()}${descriptorB.toString()}${peerA.toString()}${peerB.toString()}`);
+    throw new Error('A valid TMan based overlay must implement a _rankPeers method to rank two peers' + `variable: ${neighbour.toString()}${descriptorA.toString()}${descriptorB.toString()}${peerA.toString()}${peerB.toString()}`)
   }
 
   /**
@@ -137,7 +137,7 @@ class TManOverlay extends AbstractNetwork {
    * @private
    */
   _rankingFunction () {
-    return peer => (a, b) => this._rankPeers(peer, a.descriptor, b.descriptor, a, b);
+    return peer => (a, b) => this._rankPeers(peer, a.descriptor, b.descriptor, a, b)
   }
 
   /**
@@ -146,8 +146,8 @@ class TManOverlay extends AbstractNetwork {
    * @return {string[]} Set of IDs for all available neighbours
    */
   getNeighbours (limit) {
-    return this.rps.getPeers(limit);
+    return this.rps.getPeers(limit)
   }
 }
 
-module.exports = TManOverlay;
+module.exports = TManOverlay

@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const CommunicationProtocol = require('./communication-protocol.js');
+const CommunicationProtocol = require('./communication-protocol.js')
 
 /**
  * AbstractUnicast represents an abstract unicast protocol.
@@ -38,8 +38,8 @@ class AbstractUnicast extends CommunicationProtocol {
    * @param  {string} protocol - The name of the unicast protocol
    */
   constructor (source, protocol) {
-    super(source, `foglet-unicast-protocol-${protocol}`);
+    super(source, `foglet-unicast-protocol-${protocol}`)
   }
 }
 
-module.exports = AbstractUnicast;
+module.exports = AbstractUnicast

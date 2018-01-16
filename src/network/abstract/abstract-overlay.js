@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const AbstractNetwork = require('./abstract-network.js');
+const AbstractNetwork = require('./abstract-network.js')
 
 /**
  * AbstractOverlay represents an abstract overlay
@@ -34,14 +34,13 @@ const AbstractNetwork = require('./abstract-network.js');
  */
 class AbstractOverlay extends AbstractNetwork {
   constructor (options) {
-    super(options);
-    if(!options.manager) {
+    super(options)
+    if (!options.manager) {
       // NEED A BASE (a RPS or an another overlay)
-      throw new SyntaxError('Need the manager to access to other networks.');
+      throw new SyntaxError('Need the manager to access to other networks.')
     }
-    this.manager = options.manager;
+    this.manager = options.manager
   }
-
 }
 
-module.exports = AbstractOverlay;
+module.exports = AbstractOverlay

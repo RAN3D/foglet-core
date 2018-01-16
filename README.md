@@ -8,14 +8,14 @@ Core of the foglet library
 
 This project aims to provide a solid core infrastructure for developping **fog computing applications**.
 
-Nowadays, more and more applications interact with a server (private or in the cloud). These interactions cost a lot, especially if you make an application for a huge number of clients. 
+Nowadays, more and more applications interact with a server (private or in the cloud). These interactions cost a lot, especially if you make an application for a huge number of clients.
 
 Fog applications communicate to a direct peer of the network instead of relying on a server to forward data to this peer.
 
-There is a huge number of applications and a lot of pros and cons of why and how create a Fog application. We are not here to convince you to absolutely use Fog applications. 
+There is a huge number of applications and a lot of pros and cons of why and how create a Fog application. We are not here to convince you to absolutely use Fog applications.
 
-But foglet-core is made to ease your development in that way. 
-So **try it** by your-self and **give us your feedback**, we will be happy to answer to your questions ! 
+But foglet-core is made to ease your development in that way.
+So **try it** by your-self and **give us your feedback**, we will be happy to answer to your questions !
 
 ## Installation
 
@@ -52,7 +52,7 @@ To be begin with, let's write a simple piece of JS code:
 ```html
 <script type="text/javascript">
   'use strict';
-  
+
   localStorage.debug = 'foglet-core:*';
 
   const Foglet = foglet.Foglet;
@@ -101,7 +101,7 @@ In order to run this library, you have to provide the address of a **signaling s
 This server must be compatible with the foglet library.
 The library [foglet-signaling-server](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
 
-## Developpment 
+## Developpment
 
 We offer another library which lets you to build/test/run your own application with a signaling server: https://github.com/ran3d/foglet-scripts.git
 
@@ -113,7 +113,10 @@ npm install
 # Build the bundle with foglet-scripts (webpack/karma/babel stack)
 npm run build
 
-# Test the lib with foglet-scripts (webpack/karma/babel stack)
+# Lint using [standard](https://standardjs.com/)
+npm run lint
+
+# Lint and Test the lib with foglet-scripts (webpack/karma/babel/standard stack)
 npm run test
 
 # Run the signaling server

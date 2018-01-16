@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
 /**
  * A Middleware registry coordintaes middleware in a foglet application
@@ -32,7 +32,7 @@ class MiddlewareRegistry {
    * Constructor
    */
   constructor () {
-    this._middlewares = [];
+    this._middlewares = []
   }
 
   /**
@@ -44,13 +44,12 @@ class MiddlewareRegistry {
    * @return {void}
    */
   register (middleware, priority = 0) {
-    if (!('in' in middleware) && !('out' in middleware))
-      throw new Error('A middleware must contains two functions: "in" and "out"');
+    if (!('in' in middleware) && !('out' in middleware)) { throw new Error('A middleware must contains two functions: "in" and "out"') }
     this._middlewares.push({
       middleware,
       priority
-    });
-    this._middlewares.sort((x, y) => x.priority - y.priority);
+    })
+    this._middlewares.sort((x, y) => x.priority - y.priority)
   }
 
   /**
@@ -59,13 +58,12 @@ class MiddlewareRegistry {
    * @return {*} Input data transformed by successive application of middlewares
    */
   in (data) {
-    let temp;
+    let temp
     return this._middlewares.reduce((input, obj) => {
-      temp = obj.middleware.in(input);
-      if (temp !== undefined || temp !== null)
-        return temp;
-      return input;
-    }, data);
+      temp = obj.middleware.in(input)
+      if (temp !== undefined || temp !== null) { return temp }
+      return input
+    }, data)
   }
 
   /**
@@ -74,14 +72,13 @@ class MiddlewareRegistry {
    * @return {*} Output data transformed by successive application of middlewares
    */
   out (data) {
-    let temp;
+    let temp
     return this._middlewares.reduce((input, obj) => {
-      temp = obj.middleware.out(input);
-      if (temp !== undefined || temp !== null)
-        return temp;
-      return input;
-    }, data);
+      temp = obj.middleware.out(input)
+      if (temp !== undefined || temp !== null) { return temp }
+      return input
+    }, data)
   }
 }
 
-module.exports = MiddlewareRegistry;
+module.exports = MiddlewareRegistry

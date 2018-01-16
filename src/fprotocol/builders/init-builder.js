@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
 /**
  * An InitBuilder build the _init method for a protocol prototype.
@@ -33,7 +33,7 @@ class InitBuilder {
    * @param  {function} callback - The callback executed by the _init method
    */
   constructor (callback) {
-    this._callback = callback;
+    this._callback = callback
   }
 
   /**
@@ -42,8 +42,8 @@ class InitBuilder {
    * @return {void}
    */
   apply (protocol) {
-    protocol.prototype._init = this._callback;
+    protocol.prototype._init = this._callback
   }
 }
 
-module.exports = InitBuilder;
+module.exports = InitBuilder

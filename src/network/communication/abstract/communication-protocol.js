@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const EventEmitter = require('events');
+const EventEmitter = require('events')
 
 /**
  * CommunicationProtocol represents an abstract communication protocol.
@@ -38,9 +38,9 @@ class CommunicationProtocol extends EventEmitter {
    * @param  {string} protocol - The name of the broadcast protocol
    */
   constructor (source, protocol) {
-    super();
-    this._source = source;
-    this._protocol = protocol;
+    super()
+    this._source = source
+    this._protocol = protocol
   }
   /**
    * Send a message
@@ -48,7 +48,7 @@ class CommunicationProtocol extends EventEmitter {
    * @return {boolean}
    */
   send (message) {
-    throw new Error('A valid communication protocol should implement a send method, message:' + message.toString());
+    throw new Error('A valid communication protocol should implement a send method, message:' + message.toString())
   }
 
   /**
@@ -58,8 +58,8 @@ class CommunicationProtocol extends EventEmitter {
    * @return {void}
    */
   _receive (id, message) {
-    throw new Error('A valid communication protocol should implement a _receiveMessage method; '+ `(id, message)=(${id.toString()},${message.toString()})`);
+    throw new Error('A valid communication protocol should implement a _receiveMessage method; ' + `(id, message)=(${id.toString()},${message.toString()})`)
   }
 }
 
-module.exports = CommunicationProtocol;
+module.exports = CommunicationProtocol

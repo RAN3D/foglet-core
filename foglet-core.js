@@ -21,29 +21,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const Foglet = require('./src/foglet.js');
-const Communication = require('./src/network/communication/communication.js');
-const protocol = require('./src/fprotocol/protocol-builder.js');
+const Foglet = require('./src/foglet.js')
+const Communication = require('./src/network/communication/communication.js')
+const protocol = require('./src/fprotocol/protocol-builder.js')
 // abstracts
-const AbstractNetwork = require('./src/network/abstract/abstract-network.js');
-const AbstractOverlay = require('./src/network/abstract/abstract-overlay.js');
-const TManOverlay = require('./src/network/abstract/tman-overlay.js');
+const AbstractNetwork = require('./src/network/abstract/abstract-network.js')
+const AbstractOverlay = require('./src/network/abstract/abstract-overlay.js')
+const TManOverlay = require('./src/network/abstract/tman-overlay.js')
 
 module.exports = {
   Foglet,
   protocol,
   /*
    Externalize Communication Class to enable the creation of a specific communication channel
-   inside the creation of a new network: 
+   inside the creation of a new network:
    eg: create your own overlay or rps and use our communication channel for internal communications
    Warning: use a unique protocol
   */
-  communication: Communication, 
+  communication: Communication,
   abstract: {
     rps: AbstractNetwork,
     overlay: AbstractOverlay,
     tman: TManOverlay
   }
-};
+}

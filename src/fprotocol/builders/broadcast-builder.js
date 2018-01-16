@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const AbstractMethodBuilder = require('./abstract-method-builder.js');
+const AbstractMethodBuilder = require('./abstract-method-builder.js')
 
 /**
  * A builder specialized for broadcast services
@@ -31,7 +31,6 @@ const AbstractMethodBuilder = require('./abstract-method-builder.js');
  * @author Thomas Minier
  */
 class BroadcastBuilder extends AbstractMethodBuilder {
-
   /**
    * Build the service method used to send messages.
    * @override
@@ -39,23 +38,21 @@ class BroadcastBuilder extends AbstractMethodBuilder {
    * @return {void}
    */
   buildService (protocol) {
-    const method = this.methodName;
-    const beforeSendHook = this.beforeSendName;
-    const afterSendHook = this.afterSendName;
+    const method = this.methodName
+    const beforeSendHook = this.beforeSendName
+    const afterSendHook = this.afterSendName
     protocol.prototype[method] = function (payload) {
-      const self = this;
-      if (beforeSendHook in self)
-        payload = self[beforeSendHook].call(self, payload);
+      const self = this
+      if (beforeSendHook in self) { payload = self[beforeSendHook](payload) }
       const msg = {
         protocol: self._name,
         method,
         payload
-      };
-      self._sendBroadcast(msg);
-      if (afterSendHook in self)
-        self[afterSendHook].call(self, payload);
-    };
+      }
+      self._sendBroadcast(msg)
+      if (afterSendHook in self) { self[afterSendHook](payload) }
+    }
   }
 }
 
-module.exports = BroadcastBuilder;
+module.exports = BroadcastBuilder

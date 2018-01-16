@@ -21,18 +21,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const EventEmitter = require('events');
-const uuid = require('uuid/v4');
-const lmerge = require('lodash.merge');
+const EventEmitter = require('events')
+const uuid = require('uuid/v4')
+const lmerge = require('lodash.merge')
 // const debug = require('debug')('foglet-core:main');
 
 // NetworkManager
-const NetworkManager = require('./network/network-manager.js');
+const NetworkManager = require('./network/network-manager.js')
 
 // SSH Control
-const SSH = require('./utils/ssh.js');
+const SSH = require('./utils/ssh.js')
 
 // Foglet default options
 const DEFAULT_OPTIONS = {
@@ -41,9 +41,9 @@ const DEFAULT_OPTIONS = {
     type: 'spray-wrtc',
     options: {
       protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
-      webrtc:	{ // add WebRTC options
+      webrtc: { // add WebRTC options
         trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-        iceServers : [] // define iceServers in non local instance
+        iceServers: [] // define iceServers in non local instance
       },
       timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
       delta: 10 * 1000, // spray-wrtc shuffle interval
@@ -70,8 +70,8 @@ const DEFAULT_OPTIONS = {
   ],
   ssh: undefined  /* {
     address: 'http://localhost:4000/'
-  }*/
-};
+  } */
+}
 
 /**
  * A callback invoked when a message is received (either by unicast or broadcast)
@@ -147,10 +147,10 @@ class Foglet extends EventEmitter {
   * @returns {void}
   */
   constructor (options = {}) {
-    super();
-    this._id = uuid();
-    this._options = lmerge(DEFAULT_OPTIONS, options);
-    this._networkManager = new NetworkManager(this._options);
+    super()
+    this._id = uuid()
+    this._options = lmerge(DEFAULT_OPTIONS, options)
+    this._networkManager = new NetworkManager(this._options)
 
     // SSH Control
     // currently disabled
@@ -158,9 +158,8 @@ class Foglet extends EventEmitter {
       this._ssh = new SSH({
         foglet: this,
         address: this._options.ssh.address
-      });
+      })
     }
-
   }
 
   /**
@@ -170,7 +169,7 @@ class Foglet extends EventEmitter {
    * @return {string} The foglet ID
    */
   get id () {
-    return this._id;
+    return this._id
   }
 
   /**
@@ -178,7 +177,7 @@ class Foglet extends EventEmitter {
    * @return {string} The in-view ID of the foglet
    */
   get inViewID () {
-    return this.overlay().network.inviewId;
+    return this.overlay().network.inviewId
   }
 
   /**
@@ -186,7 +185,7 @@ class Foglet extends EventEmitter {
    * @return {string} The out-view ID of the foglet
    */
   get outViewID () {
-    return this.overlay().network.outviewId;
+    return this.overlay().network.outviewId
   }
 
   /**
@@ -209,10 +208,10 @@ class Foglet extends EventEmitter {
   * foglet.connection().then(console.log).catch(console.err);
   */
   connection (foglet = null, name = null, timeout = 60000) {
-    if(foglet !== null)
-      // console.log('dest: ', foglet._defaultOverlay().rps, 'src: ', this._defaultOverlay().rps);
-      return this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout);
-    return this.overlay(name).signaling.connection(foglet, timeout);
+    if (foglet !== null) {
+      return this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout)
+    }
+    return this.overlay(name).signaling.connection(foglet, timeout)
   }
 
   /**
@@ -223,7 +222,7 @@ class Foglet extends EventEmitter {
    * @return {void}
    */
   share (name = null) {
-    this.overlay(name).signaling.signaling();
+    this.overlay(name).signaling.signaling()
   }
 
   /**
@@ -234,7 +233,7 @@ class Foglet extends EventEmitter {
    * @return {void}
    */
   unshare (name = null) {
-    this.overlay(name).signaling.unsignaling();
+    this.overlay(name).signaling.unsignaling()
   }
 
   /**
@@ -253,7 +252,7 @@ class Foglet extends EventEmitter {
    * const overlay = foglet.overlay('latencies');
    */
   overlay (name = null) {
-    return this._networkManager.overlay(name);
+    return this._networkManager.overlay(name)
   }
 
   /**
@@ -280,7 +279,7 @@ class Foglet extends EventEmitter {
    * foglet.use(middleware);
    */
   use (middleware, priority = 0) {
-    this._networkManager.registerMiddleware(middleware, priority);
+    this._networkManager.registerMiddleware(middleware, priority)
   }
 
   /**
@@ -297,7 +296,7 @@ class Foglet extends EventEmitter {
   * });
   **/
   onBroadcast (callback) {
-    this.overlay().communication.onBroadcast(callback);
+    this.overlay().communication.onBroadcast(callback)
   }
 
   /**
@@ -314,9 +313,8 @@ class Foglet extends EventEmitter {
   * });
   */
   onStreamBroadcast (callback) {
-    this.overlay().communication.onStreamBroadcast(callback);
+    this.overlay().communication.onStreamBroadcast(callback)
   }
-
 
   /**
   * Send a broadcast message to all connected peers in the network.
@@ -330,7 +328,7 @@ class Foglet extends EventEmitter {
   * foglet.sendBroadcast('Hello everyone!');
   */
   sendBroadcast (message) {
-    return this.overlay().communication.sendBroadcast(message);
+    return this.overlay().communication.sendBroadcast(message)
   }
 
   /**
@@ -346,7 +344,7 @@ class Foglet extends EventEmitter {
   * stream.end();
   */
   streamBroadcast (isReady = undefined) {
-    return this.overlay().communication.streamBroadcast(isReady);
+    return this.overlay().communication.streamBroadcast(isReady)
   }
 
   /**
@@ -363,7 +361,7 @@ class Foglet extends EventEmitter {
   * });
   **/
   onUnicast (callback) {
-    this.overlay().communication.onUnicast(callback);
+    this.overlay().communication.onUnicast(callback)
   }
 
   /**
@@ -380,7 +378,7 @@ class Foglet extends EventEmitter {
   * });
   */
   onStreamUnicast (callback) {
-    this.overlay().communication.onStreamUnicast(callback);
+    this.overlay().communication.onStreamUnicast(callback)
   }
 
   /**
@@ -399,7 +397,7 @@ class Foglet extends EventEmitter {
   * foglet.sendUnicast(id, 'Hi diddly ho neighborino!');
   */
   sendUnicast (id, message) {
-    return this.overlay().communication.sendUnicast(id, message);
+    return this.overlay().communication.sendUnicast(id, message)
   }
 
   /**
@@ -416,7 +414,7 @@ class Foglet extends EventEmitter {
   * stream.end();
   */
   streamUnicast (id) {
-    return this.overlay().communication.streamUnicast(id);
+    return this.overlay().communication.streamUnicast(id)
   }
 
   /**
@@ -436,7 +434,7 @@ class Foglet extends EventEmitter {
   * foglet.sendMulticast(ids, 'Everyone, get in here!');
   */
   sendMulticast (ids = [], message) {
-    return this.overlay().communication.sendMulticast(ids, message);
+    return this.overlay().communication.sendMulticast(ids, message)
   }
 
   /**
@@ -444,17 +442,17 @@ class Foglet extends EventEmitter {
   * @return {string|null} The ID of a random neighbour, or `null` if not found
   */
   getRandomNeighbourId () {
-    const peers = this.overlay().network.getNeighbours();
-    if(peers.length === 0) {
-      return null;
+    const peers = this.overlay().network.getNeighbours()
+    if (peers.length === 0) {
+      return null
     } else {
       try {
-        const random = Math.floor(Math.random() * peers.length);
-        const result = peers[random];
-        return result;
+        const random = Math.floor(Math.random() * peers.length)
+        const result = peers[random]
+        return result
       } catch (e) {
-        console.err(e);
-        return null;
+        console.err(e)
+        return null
       }
     }
   }
@@ -475,9 +473,8 @@ class Foglet extends EventEmitter {
   * console.log(foglet.getNeighbours());
   */
   getNeighbours (limit = undefined) {
-    return this.overlay().network.getNeighbours(limit);
+    return this.overlay().network.getNeighbours(limit)
   }
-
 }
 
-module.exports = Foglet;
+module.exports = Foglet

@@ -21,13 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const EventEmitter = require('events');
-const io = require('socket.io-client');
-const debug = require('debug')('foglet-core:signaling');
-const lmerge = require('lodash.merge');
-const uuid = require('uuid/v4');
+const EventEmitter = require('events')
+const io = require('socket.io-client')
+const debug = require('debug')('foglet-core:signaling')
+const lmerge = require('lodash.merge')
+const uuid = require('uuid/v4')
 
 /**
  * Signaling is an interface with a signaling server with the same APi as `foglet-signaling-server` {@see https://github.com/RAN3D/foglet-signaling-server}.
@@ -45,35 +45,35 @@ class Signaling extends EventEmitter {
    * @param {string} options.room - Name of the room in which the application run
    */
   constructor (source, options) {
-    super();
-    if(!source || !options || !options.address || !options.room) {
-      debug(options);
-      throw new SyntaxError('Not enough parameters, need a source an address and a room.');
+    super()
+    if (!source || !options || !options.address || !options.room) {
+      debug(options)
+      throw new SyntaxError('Not enough parameters, need a source an address and a room.')
     }
     this.options = lmerge({
       address: 'http://localhost:3000/',
       origins: '*',
       room: uuid(),
       timeout: 20000
-    }, options);
-    this._network = source;
-    this._source = source.rps;
+    }, options)
+    this._network = source
+    this._source = source.rps
     this._socket = io(this.options.address, {
       autoConnect: false,
       origins: this.options.origins
-    });
+    })
     this._socket.on('new_spray', (data) => {
       const signalingAccept = offer => {
-        debug('Emit the accepted offer: ', offer);
-        this._socket.emit('accept', { offer, room: this.options.room });
-      };
-      debug('Receive a new offer: ', data);
-      this._source.connect(signalingAccept, data);
-    });
+        debug('Emit the accepted offer: ', offer)
+        this._socket.emit('accept', { offer, room: this.options.room })
+      }
+      debug('Receive a new offer: ', data)
+      this._source.connect(signalingAccept, data)
+    })
     this._socket.on('accept_spray', (data) => {
-      debug('Receive an accepted offer: ', data);
-      this._source.connect(data);
-    });
+      debug('Receive an accepted offer: ', data)
+      this._source.connect(data)
+    })
   }
 
   /**
@@ -84,53 +84,52 @@ class Signaling extends EventEmitter {
    * @return {Promise} A promise fullfilled when the connection is established or failed.
    */
   connection (network = null, timeout = this.options.timeout) {
-    if(network === null && this._socket === null)
-      return Promise.reject('There is no available connection to the server. Try to use the function signaling() before.');
+    if (network === null && this._socket === null) { return Promise.reject(new Error('There is no available connection to the server. Try to use the function signaling() before.')) }
     return new Promise((resolve, reject) => {
       const timeoutID = setTimeout(() => {
-        reject('connection timed out.');
-      }, timeout);
+        reject(new Error('connection timed out.'))
+      }, timeout)
       const done = () => {
-        clearTimeout(timeoutID);
-        resolve(true);
-      };
+        clearTimeout(timeoutID)
+        resolve(true)
+      }
       const handleError = error => {
-        if(error === 'connected') {
-          done();
+        if (error === 'connected') {
+          done()
         } else {
-          clearTimeout(timeoutID);
-          reject(error);
+          clearTimeout(timeoutID)
+          reject(error)
         }
-      };
+      }
 
       try {
-        if(network) {
+        if (network) {
           this._source.join(this.direct(this._source, network)).then(() => {
-            done();
-          }).catch(handleError);
+            done()
+          }).catch(handleError)
         } else {
-          debug('Connecting to the room ' + this.options.room + '...');
-          this._socket.emit('joinRoom', { room: this.options.room  });
+          debug('Connecting to the room ' + this.options.room + '...')
+          this._socket.emit('joinRoom', { room: this.options.room })
 
           this._socket.on('joinedRoom', () => {
-            debug('Connected to the room: ' + this.options.room);
+            debug('Connected to the room: ' + this.options.room)
             this._source.join(this._signalingInit()).then(() => {
-              this._socket.emit('connected', { room: this.options.room });
-            }).catch(handleError);
-          });
+              this._socket.emit('connected', { room: this.options.room })
+            }).catch(handleError)
+          })
         }
         this._socket.once('connected', () => {
-          debug('Peer connected.');
-          done();
-        });
+          debug('Peer connected.')
+          done()
+        })
         // this.once('connected', () => {
         //   console.log('receive connected');
         //   resolve(true);
         // });
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -138,7 +137,7 @@ class Signaling extends EventEmitter {
   * @return {void}
   */
   signaling () {
-    this._socket.open();
+    this._socket.open()
   }
 
   /**
@@ -146,10 +145,10 @@ class Signaling extends EventEmitter {
   * @return {void}
   */
   unsignaling () {
-    this._socket.emit('disconnect');
-    this._socket.removeAllListeners('connected');
-    this._socket.removeAllListeners('joinedRoom');
-    this._socket.close();
+    this._socket.emit('disconnect')
+    this._socket.removeAllListeners('connected')
+    this._socket.removeAllListeners('joinedRoom')
+    this._socket.close()
   }
 
   /**
@@ -161,10 +160,10 @@ class Signaling extends EventEmitter {
    */
   direct (src, dest) {
     return offer => {
-      dest.connect( answer => {
-        src.connect(answer);
-      }, offer);
-    };
+      dest.connect(answer => {
+        src.connect(answer)
+      }, offer)
+    }
   }
 
   /**
@@ -174,10 +173,10 @@ class Signaling extends EventEmitter {
    */
   _signalingInit () {
     return offer => {
-      debug('Emit a new offer.');
-      this._socket.emit('new', {offer, room: this.options.room});
-    };
+      debug('Emit a new offer.')
+      this._socket.emit('new', {offer, room: this.options.room})
+    }
   }
 }
 
-module.exports = Signaling;
+module.exports = Signaling

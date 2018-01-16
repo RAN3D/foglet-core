@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const EventEmitter = require ('events');
+const EventEmitter = require('events')
 
 /**
  * AbstractNetwork represents an abstract network layer
@@ -36,9 +36,9 @@ class AbstractNetwork extends EventEmitter {
    * @param {Object} options - Additional options used to build the network
    */
   constructor (options) {
-    super();
-    this._rps = this._buildRPS(options);
-    this._options = options;
+    super()
+    this._rps = this._buildRPS(options)
+    this._options = options
   }
 
   /**
@@ -46,7 +46,7 @@ class AbstractNetwork extends EventEmitter {
    * @return {*} The Random Peer Sampling Network
    */
   get rps () {
-    return this._rps;
+    return this._rps
   }
 
   /**
@@ -54,7 +54,7 @@ class AbstractNetwork extends EventEmitter {
    * @return {string} The in-view ID of the peer
    */
   get inviewId () {
-    throw new Error('A valid network must implement a inviewId getter');
+    throw new Error('A valid network must implement a inviewId getter')
   }
 
   /**
@@ -62,7 +62,7 @@ class AbstractNetwork extends EventEmitter {
    * @return {string} The out-view ID of the peer
    */
   get outviewId () {
-    throw new Error('A valid network must implement a outviewId getter');
+    throw new Error('A valid network must implement a outviewId getter')
   }
 
   /**
@@ -72,7 +72,7 @@ class AbstractNetwork extends EventEmitter {
    * @return {*} The network used as RPS/overlay
    */
   _buildRPS (options) {
-    throw new Error('A valid network must implement a _buildRPS method using options', options);
+    throw new Error('A valid network must implement a _buildRPS method using options', options)
   }
 
   /**
@@ -81,8 +81,8 @@ class AbstractNetwork extends EventEmitter {
    * @return {string[]} Set of IDs for all available neighbours
    */
   getNeighbours (limit) {
-    throw new Error('A valid network must implement a getNeighbours method with limit', limit);
+    throw new Error('A valid network must implement a getNeighbours method with limit', limit)
   }
 }
 
-module.exports = AbstractNetwork;
+module.exports = AbstractNetwork

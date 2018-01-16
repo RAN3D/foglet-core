@@ -21,10 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const CommunicationProtocol = require('./communication-protocol.js');
-const Unicast = require('./../unicast/unicast.js');
+const CommunicationProtocol = require('./communication-protocol.js')
+const Unicast = require('./../unicast/unicast.js')
 
 /**
  * AbstractBroadcast represents an abstract broadcast protocol.
@@ -39,12 +39,12 @@ class AbstractBroadcast extends CommunicationProtocol {
    * @param  {string} protocol - The name of the broadcast protocol
    */
   constructor (source, protocol) {
-    super(source, `foglet-broadcast-protocol-${protocol}`);
-    this._unicast = new Unicast(this._source, this._protocol);
+    super(source, `foglet-broadcast-protocol-${protocol}`)
+    this._unicast = new Unicast(this._source, this._protocol)
     this._unicast.on('receive', (id, message) => {
-      this._receive(id, message);
-    });
+      this._receive(id, message)
+    })
   }
 }
 
-module.exports = AbstractBroadcast;
+module.exports = AbstractBroadcast

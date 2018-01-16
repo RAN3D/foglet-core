@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const PassThrough = require('readable-stream').PassThrough;
+const PassThrough = require('readable-stream').PassThrough
 
 /**
  * A StreamMessage enable to receive data streamed using a {@link StreamRequest}.
@@ -44,8 +44,8 @@ class StreamMessage extends PassThrough {
   constructor () {
     super({
       objectMode: true
-    });
-    this._trailers = null;
+    })
+    this._trailers = null
   }
 
   /**
@@ -54,8 +54,8 @@ class StreamMessage extends PassThrough {
    * @return {Array} Message trailing data
    */
   get trailers () {
-    return this._trailers;
+    return this._trailers
   }
 }
 
-module.exports = StreamMessage;
+module.exports = StreamMessage

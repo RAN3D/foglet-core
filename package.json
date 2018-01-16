@@ -4,7 +4,7 @@
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
-    "lint": "eslint src/",
+    "lint": "standard --verbose | snazzy",
     "esdoc": "esdoc",
     "all": "npm run build && npm test && npm run esdoc",
     "test": "foglet-scripts test",
@@ -31,22 +31,6 @@
   "bugs": {
     "url": "https://github.com/ran3d/foglet-core/issues"
   },
-  "foglet-scripts": {
-    "browsers": [
-      "Firefox"
-    ],
-    "timeout": 20000,
-    "lint": false,
-    "build": {
-      "entry": "./foglet-core.js",
-      "output": {
-        "filename": "foglet.bundle.js",
-        "library": "foglet",
-        "libraryTarget": "umd",
-        "umdNamedDefine": true
-      }
-    }
-  },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
     "debug": "^3.1.0",
@@ -64,9 +48,9 @@
     "esdoc": "^1.0.3",
     "esdoc-node": "^1.0.2",
     "esdoc-standard-plugin": "^1.0.0",
-    "eslint": "^4.9.0",
     "foglet-scripts": "^0.3.0",
-    "karma-firefox-launcher": "^1.0.0"
+    "karma-firefox-launcher": "^1.1.0",
+    "snazzy": "^7.0.0"
   },
   "bundledDependencies": [
     "debug",
@@ -79,5 +63,12 @@
     "unicast-definition",
     "uuid",
     "version-vector-with-exceptions"
-  ]
+  ],
+  "standard": {
+    "globals": [
+      "describe",
+      "it",
+      "assert"
+    ]
+  }
 }

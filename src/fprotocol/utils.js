@@ -21,65 +21,65 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
 const camelCase = str => {
   return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => {
-    return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
-  }).replace(/\s+/g, '');
-};
+    return index === 0 ? letter.toLowerCase() : letter.toUpperCase()
+  }).replace(/\s+/g, '')
+}
 
 const capitalize = str => {
-  return str[0].toUpperCase() + str.slice(1);
-};
+  return str[0].toUpperCase() + str.slice(1)
+}
 
 /**
  * Get the name of a service method
  * @private
  */
 const methodName = method => {
-  return camelCase(method);
-};
+  return camelCase(method)
+}
 
 /**
  * Get the name of a handler
  * @private
  */
 const handlerName = method => {
-  return `_${camelCase(method)}`;
-};
+  return `_${camelCase(method)}`
+}
 
 /**
  * Get the name of a before hook for a service method
  * @private
  */
 const beforeSendName = method => {
-  return `_beforeSend${capitalize(camelCase(method))}`;
-};
+  return `_beforeSend${capitalize(camelCase(method))}`
+}
 
 /**
  * Get the name of a before hook for a handler
  * @private
  */
 const beforeReceiveName = method => {
-  return `_beforeReceive${capitalize(camelCase(method))}`;
-};
+  return `_beforeReceive${capitalize(camelCase(method))}`
+}
 
 /**
  * Get the name of a before hook for a service method
  * @private
  */
 const afterSendName = method => {
-  return `_afterSend${capitalize(camelCase(method))}`;
-};
+  return `_afterSend${capitalize(camelCase(method))}`
+}
 
 /**
  * Get the name of an after hook for a handler
  * @private
  */
 const afterReceiveName = method => {
-  return `_afterReceive${capitalize(camelCase(method))}`;
-};
+  return `_afterReceive${capitalize(camelCase(method))}`
+}
 
 module.exports = {
   camelCase,
@@ -90,4 +90,4 @@ module.exports = {
   beforeReceiveName,
   afterSendName,
   afterReceiveName
-};
+}

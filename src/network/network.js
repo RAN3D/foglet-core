@@ -21,12 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
 // Communication
-const Communication = require('./communication/communication.js');
+const Communication = require('./communication/communication.js')
 // Signaling
-const Signaling = require('./signaling/signaling.js');
+const Signaling = require('./signaling/signaling.js')
 
 /**
  * Network represent a network layer with three main components:
@@ -45,9 +45,9 @@ class Network {
    * @param  {string} protocol - Name of the protocol run by the network
    */
   constructor (network, signaling, protocol) {
-    this._network = network;
-    this._signaling = new Signaling(network, signaling);
-    this._communication = new Communication(network, protocol);
+    this._network = network
+    this._signaling = new Signaling(network, signaling)
+    this._communication = new Communication(network, protocol)
   }
 
   /**
@@ -55,7 +55,7 @@ class Network {
    * @return {AbstractNetwork} The network component
    */
   get network () {
-    return this._network;
+    return this._network
   }
 
   /**
@@ -63,7 +63,7 @@ class Network {
    * @return {Signaling} The signaling component
    */
   get signaling () {
-    return this._signaling;
+    return this._signaling
   }
 
   /**
@@ -71,7 +71,7 @@ class Network {
    * @return {Communication} The communication component
    */
   get communication () {
-    return this._communication;
+    return this._communication
   }
 
   /**
@@ -83,8 +83,8 @@ class Network {
    * @return {void}
    */
   use (middleware, priority = 0) {
-    this.communication.use(middleware, priority);
+    this.communication.use(middleware, priority)
   }
 }
 
-module.exports = Network;
+module.exports = Network

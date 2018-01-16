@@ -21,15 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
 // const debug = require('debug')('foglet-core:communication');
-const Unicast = require('./unicast/unicast.js');
-const Broadcast = require('./broadcast/broadcast.js');
-const MiddlewareRegistry = require('../../utils/middleware-registry.js');
+const Unicast = require('./unicast/unicast.js')
+const Broadcast = require('./broadcast/broadcast.js')
+const MiddlewareRegistry = require('../../utils/middleware-registry.js')
 // streams
-const StreamRequest = require('./stream/stream-request.js');
-const StreamMessage = require('./stream/stream-message.js');
+const StreamRequest = require('./stream/stream-request.js')
+const StreamMessage = require('./stream/stream-message.js')
 
 /**
  * Communication is a facade to send messages to peers in a network using unicast or broadcast channels.
@@ -37,14 +37,14 @@ const StreamMessage = require('./stream/stream-message.js');
  */
 class Communication {
   constructor (source, protocol) {
-    this.network = source;
-    this.unicast = new Unicast(this.network, protocol);
-    this.broadcast = new Broadcast(this.network, protocol);
+    this.network = source
+    this.unicast = new Unicast(this.network, protocol)
+    this.broadcast = new Broadcast(this.network, protocol)
     // channels used for streaming
-    this._unicastStreams = new Unicast(this.network, `${this.protocol}-streams`);
-    this._broadcastStreams = new Broadcast(this.network, `${this.protocol}-streams`);
-    this._activeStreams = new Map();
-    this._middlewares = new MiddlewareRegistry();
+    this._unicastStreams = new Unicast(this.network, `${this.protocol}-streams`)
+    this._broadcastStreams = new Broadcast(this.network, `${this.protocol}-streams`)
+    this._activeStreams = new Map()
+    this._middlewares = new MiddlewareRegistry()
   }
 
   /**
@@ -56,7 +56,7 @@ class Communication {
    * @return {void}
    */
   use (middleware, priority = 0) {
-    this._middlewares.register(middleware, priority);
+    this._middlewares.register(middleware, priority)
   }
 
   /**
@@ -66,7 +66,7 @@ class Communication {
    * @return {Promise} Promise fulfilled when the message is sent
    */
   sendUnicast (id, message) {
-    return this.unicast.send(id, this._middlewares.in(message));
+    return this.unicast.send(id, this._middlewares.in(message))
   }
 
   /**
@@ -84,9 +84,9 @@ class Communication {
   */
   streamUnicast (id) {
     return new StreamRequest(msg => {
-      msg.payload = this._middlewares.in(msg.payload);
-      this._unicastStreams.send(id, msg);
-    });
+      msg.payload = this._middlewares.in(msg.payload)
+      this._unicastStreams.send(id, msg)
+    })
   }
 
   /**
@@ -97,7 +97,7 @@ class Communication {
    * @return {Promise} Promise fulfilled when all message are sent
    */
   sendMulticast (ids, message) {
-    return this.unicast.sendMultiple(ids, this._middlewares.in(message));
+    return this.unicast.sendMultiple(ids, this._middlewares.in(message))
   }
 
   /**
@@ -108,7 +108,7 @@ class Communication {
   * @return {Object}  id of the message sent
   */
   sendBroadcast (message, id, isReady = undefined) {
-    return this.broadcast.send(this._middlewares.in(message), id, isReady);
+    return this.broadcast.send(this._middlewares.in(message), id, isReady)
   }
 
   /**
@@ -125,9 +125,9 @@ class Communication {
   */
   streamBroadcast (isReady = undefined) {
     return new StreamRequest(msg => {
-      msg.payload = this._middlewares.in(msg.payload);
-      this._broadcastStreams.send(msg, isReady);
-    });
+      msg.payload = this._middlewares.in(msg.payload)
+      this._broadcastStreams.send(msg, isReady)
+    })
   }
 
   /**
@@ -137,8 +137,8 @@ class Communication {
   */
   onUnicast (callback) {
     this.unicast.on('receive', (id, message) => {
-      callback(id, this._middlewares.out(message));
-    });
+      callback(id, this._middlewares.out(message))
+    })
   }
 
   /**
@@ -155,7 +155,7 @@ class Communication {
   * });
   */
   onStreamUnicast (callback) {
-    this._unicastStreams.on('receive', (id, message) => this._handleStreamMessage(id, message, callback));
+    this._unicastStreams.on('receive', (id, message) => this._handleStreamMessage(id, message, callback))
   }
 
   /**
@@ -165,8 +165,8 @@ class Communication {
   */
   onOnceUnicast (callback) {
     this.unicast.once('receive', (id, message) => {
-      callback(id, this._middlewares.out(message));
-    });
+      callback(id, this._middlewares.out(message))
+    })
   }
 
   /**
@@ -175,7 +175,7 @@ class Communication {
    * @return {void}
    */
   onBroadcast (callback) {
-    this.broadcast.on('receive', (id, message) => callback(id, this._middlewares.out(message)));
+    this.broadcast.on('receive', (id, message) => callback(id, this._middlewares.out(message)))
   }
 
   /**
@@ -192,7 +192,7 @@ class Communication {
   * });
   */
   onStreamBroadcast (callback) {
-    this._broadcastStreams.on('receive', (id, message) => this._handleStreamMessage(id, message, callback));
+    this._broadcastStreams.on('receive', (id, message) => this._handleStreamMessage(id, message, callback))
   }
 
   /**
@@ -201,7 +201,7 @@ class Communication {
    * @return {void}
    */
   onOnceBroadcast (callback) {
-    this.broadcast.once('receive', (id, message) => callback(id, this._middlewares.out(message)));
+    this.broadcast.once('receive', (id, message) => callback(id, this._middlewares.out(message)))
   }
 
   /**
@@ -209,7 +209,7 @@ class Communication {
    * @return {void}
    */
   removeAllUnicastCallback () {
-    this.unicast.removeAllListeners('receive');
+    this.unicast.removeAllListeners('receive')
   }
 
   /**
@@ -217,7 +217,7 @@ class Communication {
    * @return {void}
    */
   removeAllBroacastCallback () {
-    this.broadcast.removeAllListeners('receive');
+    this.broadcast.removeAllListeners('receive')
   }
 
   /**
@@ -231,33 +231,31 @@ class Communication {
   _handleStreamMessage (id, message, callback) {
     // create responses objects for new streams
     if (!this._activeStreams.has(message.id)) {
-      this._activeStreams.set(message.id, new StreamMessage());
-      callback(id, this._activeStreams.get(message.id));
+      this._activeStreams.set(message.id, new StreamMessage())
+      callback(id, this._activeStreams.get(message.id))
     }
     switch (message.type) {
-    case 'chunk': {
-      this._activeStreams.get(message.id).push(message.payload);
-      break;
-    }
-    case 'trailers': {
-      if (!this._activeStreams.has(message.id))
-        throw new Error(`Cannot add trailers to an unkown stream with id = ${message.id}`);
-      this._activeStreams.get(message.id)._trailers = message.payload;
-      break;
-    }
-    case 'end': {
-      this._closeStream(message.id);
-      break;
-    }
-    case 'error': {
-      if (!this._activeStreams.has(message.id))
-        throw new Error(`Cannot transmit an error to an unkown stream with id = ${message.id}`);
-      this._activeStreams.get(message.id).emit('error', message.payload);
-      this._closeStream(message.id);
-      break;
-    }
-    default:
-      throw new Error(`Unknown StreamMessage type found in incoming stream message: ${message.type}`);
+      case 'chunk': {
+        this._activeStreams.get(message.id).push(message.payload)
+        break
+      }
+      case 'trailers': {
+        if (!this._activeStreams.has(message.id)) { throw new Error(`Cannot add trailers to an unkown stream with id = ${message.id}`) }
+        this._activeStreams.get(message.id)._trailers = message.payload
+        break
+      }
+      case 'end': {
+        this._closeStream(message.id)
+        break
+      }
+      case 'error': {
+        if (!this._activeStreams.has(message.id)) { throw new Error(`Cannot transmit an error to an unkown stream with id = ${message.id}`) }
+        this._activeStreams.get(message.id).emit('error', message.payload)
+        this._closeStream(message.id)
+        break
+      }
+      default:
+        throw new Error(`Unknown StreamMessage type found in incoming stream message: ${message.type}`)
     }
   }
 
@@ -268,11 +266,10 @@ class Communication {
    * @return {void}
    */
   _closeStream (id) {
-    if (!this._activeStreams.has(id))
-      throw new Error(`Cannot close an unkown stream with id = ${id}`);
-    this._activeStreams.get(id).push(null);
-    this._activeStreams.delete(id);
+    if (!this._activeStreams.has(id)) { throw new Error(`Cannot close an unkown stream with id = ${id}`) }
+    this._activeStreams.get(id).push(null)
+    this._activeStreams.delete(id)
   }
 }
 
-module.exports = Communication;
+module.exports = Communication

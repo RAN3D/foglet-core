@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
 /**
  * Get a function thta build a StreamMessage with a specific type
@@ -34,37 +34,37 @@ const StreamMessage = type => {
       id,
       type,
       payload
-    };
-  };
-};
+    }
+  }
+}
 
 /**
  * A message send with a chunk of data
  * @private
  */
-const StreamMessageChunk = StreamMessage('chunk');
+const StreamMessageChunk = StreamMessage('chunk')
 
 /**
  * A message send with trailing data
  * @private
  */
-const StreamMessageTrailers = StreamMessage('trailers');
+const StreamMessageTrailers = StreamMessage('trailers')
 
 /**
  * A message that close a transmission
  * @private
  */
-const StreamMessageEnd = StreamMessage('end');
+const StreamMessageEnd = StreamMessage('end')
 
 /**
  * A message that signal an error
  * @private
  */
-const StreamMessageError = StreamMessage('error');
+const StreamMessageError = StreamMessage('error')
 
 module.exports = {
   StreamMessageChunk,
   StreamMessageTrailers,
   StreamMessageEnd,
   StreamMessageError
-};
+}

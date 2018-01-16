@@ -21,10 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const UnicastBuilder = require('./unicast-builder.js');
-const BroadcastBuilder = require('./broadcast-builder.js');
+const UnicastBuilder = require('./unicast-builder.js')
+const BroadcastBuilder = require('./broadcast-builder.js')
 
 /**
  * Error thrown when a service builder has an invalid configuration
@@ -43,17 +43,17 @@ class ServiceBuilder {
    * @param  {string} serviceName - The name of the service
    */
   constructor (serviceName) {
-    this._serviceName = serviceName;
-    this._builder = null;
-    this._handler = null;
+    this._serviceName = serviceName
+    this._builder = null
+    this._handler = null
     this._beforeHooks = {
       send: [],
       receive: []
-    };
+    }
     this._afterHooks = {
       send: [],
       receive: []
-    };
+    }
   }
 
   /**
@@ -67,9 +67,9 @@ class ServiceBuilder {
    */
   get is () {
     return {
-      unicast: () => this._builder = new UnicastBuilder(this._serviceName),
-      broadcast: () => this._builder = new BroadcastBuilder(this._serviceName)
-    };
+      unicast: () => { this._builder = new UnicastBuilder(this._serviceName) },
+      broadcast: () => { this._builder = new BroadcastBuilder(this._serviceName) }
+    }
   }
 
   /**
@@ -85,8 +85,8 @@ class ServiceBuilder {
    */
   get on () {
     return {
-      receive: callback => this._handler = callback
-    };
+      receive: callback => { this._handler = callback }
+    }
   }
 
   /**
@@ -103,7 +103,7 @@ class ServiceBuilder {
     return {
       send: callback => this._beforeHooks.send.push(callback),
       receive: callback => this._beforeHooks.receive.push(callback)
-    };
+    }
   }
 
   /**
@@ -120,7 +120,7 @@ class ServiceBuilder {
     return {
       send: callback => this._afterHooks.send.push(callback),
       receive: callback => this._afterHooks.receive.push(callback)
-    };
+    }
   }
 
   /**
@@ -131,12 +131,11 @@ class ServiceBuilder {
    * @return {void}
    */
   apply (protocol) {
-    if (!this._validate())
-      throw new ServiceBuildingError('');
-    this._builder.buildService(protocol);
-    this._builder.buildHandler(protocol, this._handler);
-    this._builder.buildBeforeHooks(protocol, this._beforeHooks);
-    this._builder.buildAfterHooks(protocol, this._afterHooks);
+    if (!this._validate()) { throw new ServiceBuildingError('') }
+    this._builder.buildService(protocol)
+    this._builder.buildHandler(protocol, this._handler)
+    this._builder.buildBeforeHooks(protocol, this._beforeHooks)
+    this._builder.buildAfterHooks(protocol, this._afterHooks)
   }
 
   /**
@@ -145,8 +144,8 @@ class ServiceBuilder {
    * @return {boolean} true if the builder is valid, False otherwise
    */
   _validate () {
-    return this._type !== null && this._handler !== null;
+    return this._type !== null && this._handler !== null
   }
 }
 
-module.exports = ServiceBuilder;
+module.exports = ServiceBuilder

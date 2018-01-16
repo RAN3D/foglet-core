@@ -21,11 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const FogletProtocol = require('./foglet-protocol.js');
-const ServiceBuilder = require('./builders/service-builder.js');
-const InitBuilder = require('./builders/init-builder.js');
+const FogletProtocol = require('./foglet-protocol.js')
+const ServiceBuilder = require('./builders/service-builder.js')
+const InitBuilder = require('./builders/init-builder.js')
 
 /**
  * Create a function that evaluates a tagged template to create a new subclass of {@link FogletProtocol}
@@ -54,26 +54,26 @@ const InitBuilder = require('./builders/init-builder.js');
  */
 function define (protocolName) {
   return function (services, ...callbacks) {
-    let builder;
+    let builder
     const protocolClass = class extends FogletProtocol {
       constructor (foglet, ...args) {
-        super(protocolName, foglet, ...args);
+        super(protocolName, foglet, ...args)
       }
-    };
+    }
     // clean services names before building
     services.map(str => str.trim())
       .filter(str => str.length > 0)
       .forEach((name, index) => {
         if (name === 'init' || name === 'constructor') {
-          builder = new InitBuilder(callbacks[index]);
+          builder = new InitBuilder(callbacks[index])
         } else {
-          builder = new ServiceBuilder(name);
-          callbacks[index](builder);
+          builder = new ServiceBuilder(name)
+          callbacks[index](builder)
         }
-        builder.apply(protocolClass);
-      });
-    return protocolClass;
-  };
+        builder.apply(protocolClass)
+      })
+    return protocolClass
+  }
 }
 
-module.exports = define;
+module.exports = define

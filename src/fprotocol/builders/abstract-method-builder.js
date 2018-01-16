@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const utils = require('../utils.js');
+const utils = require('../utils.js')
 
 /**
  * Apply hooks on a message in reduce fashion.
@@ -34,14 +34,13 @@ const utils = require('../utils.js');
  */
 function reduceHooks (hooks) {
   return msg => {
-    let tmp;
+    let tmp
     return hooks.reduce((prev, hook) => {
-      tmp = hook(prev);
-      if (tmp === undefined || tmp === null)
-        return prev;
-      return tmp;
-    }, msg);
-  };
+      tmp = hook(prev)
+      if (tmp === undefined || tmp === null) { return prev }
+      return tmp
+    }, msg)
+  }
 }
 
 /**
@@ -59,33 +58,33 @@ class AbstractMethodBuilder {
    * @param  {string} serviceName - The name of the service
    */
   constructor (serviceName) {
-    this._serviceName = serviceName;
-    this._camelCasedName = utils.camelCase(this._serviceName);
-    this._capitalizedCamelCase = utils.capitalize(this._camelCasedName);
+    this._serviceName = serviceName
+    this._camelCasedName = utils.camelCase(this._serviceName)
+    this._capitalizedCamelCase = utils.capitalize(this._camelCasedName)
   }
 
   get methodName () {
-    return this._camelCasedName;
+    return this._camelCasedName
   }
 
   get handlerName () {
-    return `_${this._camelCasedName}`;
+    return `_${this._camelCasedName}`
   }
 
   get beforeSendName () {
-    return `_beforeSend${this._capitalizedCamelCase}`;
+    return `_beforeSend${this._capitalizedCamelCase}`
   }
 
   get beforeReceiveName () {
-    return `_beforeReceive${this._capitalizedCamelCase}`;
+    return `_beforeReceive${this._capitalizedCamelCase}`
   }
 
   get afterSendName () {
-    return `_afterSend${this._capitalizedCamelCase}`;
+    return `_afterSend${this._capitalizedCamelCase}`
   }
 
   get afterReceiveName () {
-    return `_afterReceive${this._capitalizedCamelCase}`;
+    return `_afterReceive${this._capitalizedCamelCase}`
   }
 
   /**
@@ -94,7 +93,7 @@ class AbstractMethodBuilder {
    * @return {void}
    */
   buildService (protocol) {
-    throw new Error('A valid Builder must implement a valid buildService method'), protocol;
+    throw new Error('A valid Builder must implement a valid buildService method')
   }
 
   /**
@@ -104,7 +103,7 @@ class AbstractMethodBuilder {
    * @return {void}
    */
   buildHandler (protocol, handler) {
-    protocol.prototype[this.handlerName] = handler;
+    protocol.prototype[this.handlerName] = handler
   }
 
   /**
@@ -114,10 +113,8 @@ class AbstractMethodBuilder {
    * @return {void}
    */
   buildBeforeHooks (protocol, beforeHooks) {
-    if (beforeHooks.send.length > 0)
-      protocol.prototype[this.beforeSendName] = reduceHooks(beforeHooks.send);
-    if (beforeHooks.receive.length > 0)
-      protocol.prototype[this.beforeReceiveName] = reduceHooks(beforeHooks.receive);
+    if (beforeHooks.send.length > 0) { protocol.prototype[this.beforeSendName] = reduceHooks(beforeHooks.send) }
+    if (beforeHooks.receive.length > 0) { protocol.prototype[this.beforeReceiveName] = reduceHooks(beforeHooks.receive) }
   }
 
   /**
@@ -127,11 +124,9 @@ class AbstractMethodBuilder {
    * @return {void}
    */
   buildAfterHooks (protocol, afterHooks) {
-    if (afterHooks.send.length > 0)
-      protocol.prototype[this.afterSendName] = reduceHooks(afterHooks.send);
-    if (afterHooks.receive.length > 0)
-      protocol.prototype[this.afterReceiveName] = reduceHooks(afterHooks.receive);
+    if (afterHooks.send.length > 0) { protocol.prototype[this.afterSendName] = reduceHooks(afterHooks.send) }
+    if (afterHooks.receive.length > 0) { protocol.prototype[this.afterReceiveName] = reduceHooks(afterHooks.receive) }
   }
 }
 
-module.exports = AbstractMethodBuilder;
+module.exports = AbstractMethodBuilder

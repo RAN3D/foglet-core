@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const AbstractMethodBuilder = require('./abstract-method-builder.js');
+const AbstractMethodBuilder = require('./abstract-method-builder.js')
 
 /**
  * A builder specialized for unicast services
@@ -31,7 +31,6 @@ const AbstractMethodBuilder = require('./abstract-method-builder.js');
  * @author Thomas Minier
  */
 class UnicastBuilder extends AbstractMethodBuilder {
-
   /**
    * Build the service method used to send messages.
    * @override
@@ -39,25 +38,23 @@ class UnicastBuilder extends AbstractMethodBuilder {
    * @return {void}
    */
   buildService (protocol) {
-    const method = this.methodName;
-    const beforeSendHook = this.beforeSendName;
-    const afterSendHook = this.afterSendName;
+    const method = this.methodName
+    const beforeSendHook = this.beforeSendName
+    const afterSendHook = this.afterSendName
     protocol.prototype[method] = function (id, payload) {
-      const self = this;
-      if (beforeSendHook in self)
-        payload = self[beforeSendHook].call(self, payload);
+      const self = this
+      if (beforeSendHook in self) { payload = self[beforeSendHook](payload) }
       return new Promise(function (resolve, reject) {
         const msg = {
           protocol: self._name,
           method,
           payload
-        };
-        self._sendUnicast(id, msg, resolve, reject);
-        if (afterSendHook in self)
-          self[afterSendHook].call(self, payload);
-      });
-    };
+        }
+        self._sendUnicast(id, msg, resolve, reject)
+        if (afterSendHook in self) { self[afterSendHook](payload) }
+      })
+    }
   }
 }
 
-module.exports = UnicastBuilder;
+module.exports = UnicastBuilder

@@ -21,11 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const uuid = require('uuid/v4');
-const Writable = require('readable-stream').Writable;
-const messages = require('./messages.js');
+const uuid = require('uuid/v4')
+const Writable = require('readable-stream').Writable
+const messages = require('./messages.js')
 
 /**
  * A StreamRequest enable to stream data to a peer using a push-based API.
@@ -48,10 +48,10 @@ class StreamRequest extends Writable {
   constructor (send) {
     super({
       objectMode: true
-    });
-    this._id = uuid();
-    this._send = send;
-    this._trailers = [];
+    })
+    this._id = uuid()
+    this._send = send
+    this._trailers = []
   }
 
   /**
@@ -62,7 +62,7 @@ class StreamRequest extends Writable {
    * @return {void}
    */
   addTrailer (value) {
-    this._trailers.push(value);
+    this._trailers.push(value)
   }
 
   /**
@@ -72,16 +72,16 @@ class StreamRequest extends Writable {
    * @param {string} error - The error responsible for the stream's destruction
    */
   destroy (error) {
-    this._send(messages.StreamMessageError(this._id, error));
-    super.destroy(error);
+    this._send(messages.StreamMessageError(this._id, error))
+    super.destroy(error)
   }
 
   /**
    * @private
    */
   _write (msg, encoding, callback) {
-    this._send(messages.StreamMessageChunk(this._id, msg));
-    callback();
+    this._send(messages.StreamMessageChunk(this._id, msg))
+    callback()
   }
 
   /**
@@ -89,11 +89,10 @@ class StreamRequest extends Writable {
    * @private
    */
   _final (callback) {
-    if (this._trailers.length > 0)
-      this._send(messages.StreamMessageTrailers(this._id, this._trailers));
-    this._send(messages.StreamMessageEnd(this._id));
-    callback();
+    if (this._trailers.length > 0) { this._send(messages.StreamMessageTrailers(this._id, this._trailers)) }
+    this._send(messages.StreamMessageEnd(this._id))
+    callback()
   }
 }
 
-module.exports = StreamRequest;
+module.exports = StreamRequest

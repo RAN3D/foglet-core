@@ -1,183 +1,194 @@
-'use strict';
-// const assert = require('chai').assert;
-const Foglet = require('../src/foglet.js');
-const utils = require('./utils.js');
+'use strict'
+// const assert = require('assert')
+const Foglet = require('../src/foglet.js')
+const utils = require('./utils.js')
 
 describe('Foglet High-level communication', function () {
-  this.timeout(20000);
+  this.timeout(20000)
 
   it('should send messages to a neighbour using unicast', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
-    const f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2)
+    const f1 = foglets[0]
+    const f2 = foglets[1]
 
     f2.onUnicast((id, message) => {
-      assert.equal(id, f1.outViewID);
-      assert.equal(message, 'hello');
-      utils.clearFoglets(foglets).then(() => done());
-    });
+      assert.equal(id, f1.outViewID)
+      assert.equal(message, 'hello')
+      utils.clearFoglets(foglets).then(() => done())
+    })
 
-    utils.pathConnect(foglets, 2000).then( () => {
+    utils.pathConnect(foglets, 2000).then(() => {
       setTimeout(function () {
-        const peers = f1.getNeighbours();
-        console.log(peers);
-        assert.equal(peers.length, 1);
-        console.log(peers);
-        for(let i = 0; i < peers.length; i++) {
-          f1.sendUnicast(peers[i], 'hello');
+        const peers = f1.getNeighbours()
+        console.log(peers)
+        assert.equal(peers.length, 1)
+        console.log(peers)
+        for (let i = 0; i < peers.length; i++) {
+          f1.sendUnicast(peers[i], 'hello')
         }
-      }, 2000);
-    }).catch(done);
-  });
+      }, 2000)
+    }).catch(done)
+  })
 
   it('should send messages to several neighbours using multicast', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
-    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3)
+    const f1 = foglets[0]
+    const f2 = foglets[1]
+    const f3 = foglets[2]
 
-    let wanted = 0, received = 0;
+    let wanted = 0
+    let received = 0
     function receive (id, message) {
-      received++;
-      assert.equal(id, f1.outViewID);
-      assert.equal(message, 'hello');
-      if(received >= wanted) {
-        utils.clearFoglets(foglets).then(() => done());
+      received++
+      assert.equal(id, f1.outViewID)
+      assert.equal(message, 'hello')
+      if (received >= wanted) {
+        utils.clearFoglets(foglets).then(() => done())
       }
     }
 
-    f2.onUnicast(receive);
-    f3.onUnicast(receive);
+    f2.onUnicast(receive)
+    f3.onUnicast(receive)
 
-    utils.pathConnect(foglets, 2000).then( () => {
+    utils.pathConnect(foglets, 2000).then(() => {
       setTimeout(() => {
-        const peers = f1.getNeighbours();
-        wanted = peers.length;
-        f1.sendMulticast(peers, 'hello');
-      }, 2000);
-    }).catch(done);
-  });
+        const peers = f1.getNeighbours()
+        wanted = peers.length
+        f1.sendMulticast(peers, 'hello')
+      }, 2000)
+    }).catch(done)
+  })
 
   it('should send messages to all peers using broadcast in a network with 2 peers', function (done) {
-    const foglets = utils.buildFog(Foglet, 2);
-    let neighbourID = null;
-    const f1 = foglets[0], f2 = foglets[1];
+    const foglets = utils.buildFog(Foglet, 2)
+    let neighbourID = null
+    const f1 = foglets[0]
+    const f2 = foglets[1]
 
     f2.onBroadcast((id, data) => {
-      assert.equal(id, neighbourID);
-      assert.equal(data, 'hello');
-      utils.clearFoglets(foglets).then(() => done());
-    });
+      assert.equal(id, neighbourID)
+      assert.equal(data, 'hello')
+      utils.clearFoglets(foglets).then(() => done())
+    })
 
     utils.pathConnect(foglets, 2000).then(() => {
-      neighbourID = f1.outViewID;
+      neighbourID = f1.outViewID
       setTimeout(function () {
-        f1.sendBroadcast('hello');
-      }, 2000);
-    }).catch(done);
-  });
+        f1.sendBroadcast('hello')
+      }, 2000)
+    }).catch(done)
+  })
 
   it('should simply send messages to all peers using broadcast in a 3 peers network', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
-    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3)
+    const f1 = foglets[0]
+    const f2 = foglets[1]
+    const f3 = foglets[2]
 
-    let cptA = 0;
-    let cptB = 0;
-    const results = [ '1', '2', '3', '4' ];
-    const totalResult = 8;
+    let cptA = 0
+    let cptB = 0
+    const results = [ '1', '2', '3', '4' ]
+    const totalResult = 8
     const check = utils.doneAfter(totalResult, () => {
-      utils.clearFoglets(foglets).then(() => done());
-    });
+      utils.clearFoglets(foglets).then(() => done())
+    })
 
     utils.pathConnect(foglets, 2000).then(() => {
       f2.onBroadcast((id, message) => {
-        assert.equal(id, f1.outViewID);
-        assert.equal(message, results[cptA]);
-        cptA++;
-        check();
-      });
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptA])
+        cptA++
+        check()
+      })
 
       f3.onBroadcast((id, message) => {
-        assert.equal(id, f1.outViewID);
-        assert.equal(message, results[cptB]);
-        cptB++;
-        check();
-      });
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptB])
+        cptB++
+        check()
+      })
 
       setTimeout(() => {
-        f1.sendBroadcast('1');
-        f1.sendBroadcast('2');
-        f1.sendBroadcast('3');
-        f1.sendBroadcast('4');
-      }, 2000);
-    }).catch(done);
-  });
+        f1.sendBroadcast('1')
+        f1.sendBroadcast('2')
+        f1.sendBroadcast('3')
+        f1.sendBroadcast('4')
+      }, 2000)
+    }).catch(done)
+  })
 
   it('should receive broadcasted classically ordered messages in a 3 peers network (1-2-3-4)', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
-    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3)
+    const f1 = foglets[0]
+    const f2 = foglets[1]
+    const f3 = foglets[2]
 
-    let cptA = 0;
-    let cptB = 0;
-    const results = [ '1', '2', '3', '4' ];
-    const totalResult = 8;
+    let cptA = 0
+    let cptB = 0
+    const results = [ '1', '2', '3', '4' ]
+    const totalResult = 8
     const check = utils.doneAfter(totalResult, () => {
-      utils.clearFoglets(foglets).then(() => done());
-    });
+      utils.clearFoglets(foglets).then(() => done())
+    })
 
     utils.pathConnect(foglets, 2000).then(() => {
       f2.onBroadcast((id, message) => {
-        assert.equal(id, f1.outViewID);
-        assert.equal(message, results[cptA]);
-        cptA++;
-        check();
-      });
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptA])
+        cptA++
+        check()
+      })
 
       f3.onBroadcast((id, message) => {
-        assert.equal(id, f1.outViewID);
-        assert.equal(message, results[cptB]);
-        cptB++;
-        check();
-      });
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptB])
+        cptB++
+        check()
+      })
 
       setTimeout(() => {
-        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
-        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 1});
-        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 2});
-        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 3});
-      }, 2000);
-    }).catch(done);
-  });
+        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1})
+        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 1})
+        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 2})
+        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 3})
+      }, 2000)
+    }).catch(done)
+  })
   it('should receive broadcasted weirdly ordered messages in a 3 peers network (1-3-2-4)', function (done) {
-    const foglets = utils.buildFog(Foglet, 3);
-    const f1 = foglets[0], f2 = foglets[1], f3 = foglets[2];
+    const foglets = utils.buildFog(Foglet, 3)
+    const f1 = foglets[0]
+    const f2 = foglets[1]
+    const f3 = foglets[2]
 
-    let cptA = 0;
-    let cptB = 0;
-    const results = [ '1', '3', '2', '4' ];
-    const totalResult = 8;
+    let cptA = 0
+    let cptB = 0
+    const results = [ '1', '3', '2', '4' ]
+    const totalResult = 8
     const check = utils.doneAfter(totalResult, () => {
-      utils.clearFoglets(foglets).then(() => done());
-    });
+      utils.clearFoglets(foglets).then(() => done())
+    })
 
     utils.pathConnect(foglets, 2000).then(() => {
       f2.onBroadcast((id, message) => {
-        assert.equal(id, f1.outViewID);
-        assert.equal(message, results[cptA]);
-        cptA++;
-        check();
-      });
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptA])
+        cptA++
+        check()
+      })
 
       f3.onBroadcast((id, message) => {
-        assert.equal(id, f1.outViewID);
-        assert.equal(message, results[cptB]);
-        cptB++;
-        check();
-      });
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptB])
+        cptB++
+        check()
+      })
 
       setTimeout(() => {
-        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1});
-        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 3});
-        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 1});
-        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 2});
-      }, 2000);
-    }).catch(done);
-  });
-});
+        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1})
+        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 3})
+        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 1})
+        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 2})
+      }, 2000)
+    }).catch(done)
+  })
+})

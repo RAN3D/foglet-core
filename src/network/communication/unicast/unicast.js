@@ -1,7 +1,7 @@
-'use strict';
+'use strict'
 
-const AbstractUnicast = require('./../abstract/abstract-unicast.js');
-const UnicastDefinition = require('unicast-definition');
+const AbstractUnicast = require('./../abstract/abstract-unicast.js')
+const UnicastDefinition = require('unicast-definition')
 
 /**
  * Unicast represent the base implementation of an unicast protocol for the foglet library.
@@ -15,11 +15,11 @@ class Unicast extends AbstractUnicast {
    * @param  {string} protocol - The name of the unicast protocol
    */
   constructor (source, protocol) {
-    super(source, protocol);
-    this._unicast = new UnicastDefinition(this._source.rps, {pid: this._protocol});
+    super(source, protocol)
+    this._unicast = new UnicastDefinition(this._source.rps, {pid: this._protocol})
     this._unicast.on(this._protocol, (id, message) => {
-      this._receive(id, message);
-    });
+      this._receive(id, message)
+    })
   }
 
   /**
@@ -30,7 +30,7 @@ class Unicast extends AbstractUnicast {
    * @return {Promise} A Promise fulfilled when the message is sent
    */
   send (id, message) {
-    return this._unicast.emit(this._protocol, id, this._source.outviewId, message);
+    return this._unicast.emit(this._protocol, id, this._source.outviewId, message)
   }
 
   /**
@@ -41,8 +41,8 @@ class Unicast extends AbstractUnicast {
    */
   sendMultiple (ids = [], message) {
     return ids.reduce((prev, peerID) => {
-      return prev.then(() => this.send(peerID, message));
-    }, Promise.resolve());
+      return prev.then(() => this.send(peerID, message))
+    }, Promise.resolve())
   }
 
   /**
@@ -52,8 +52,8 @@ class Unicast extends AbstractUnicast {
    * @return {void}
    */
   _receive (id, message) {
-    this.emit('receive', id, message);
+    this.emit('receive', id, message)
   }
 }
 
-module.exports = Unicast;
+module.exports = Unicast

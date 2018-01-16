@@ -21,10 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const AnswerQueue = require('./answer-queue.js');
-const utils = require('./utils.js');
+const AnswerQueue = require('./answer-queue.js')
+const utils = require('./utils.js')
 
 /**
  * FogletProtocol represent an abstract protocol.
@@ -40,12 +40,11 @@ class FogletProtocol {
    * @param  {...*} args - Additional arguments passed down to the `_init` function
    */
   constructor (name, foglet, ...args) {
-    this._name = name;
-    this._foglet = foglet;
-    this._answerQueue = new AnswerQueue();
-    this._initHandlers();
-    if ('_init' in this)
-      this._init.call(this, ...args);
+    this._name = name
+    this._foglet = foglet
+    this._answerQueue = new AnswerQueue()
+    this._initHandlers()
+    if ('_init' in this) { this._init(...args) }
   }
 
   /**
@@ -58,7 +57,7 @@ class FogletProtocol {
    * @return {void}
    */
   _sendUnicast (id, msg, resolve, reject) {
-    this._foglet.sendUnicast(id, this._answerQueue.stamp(msg, resolve, reject));
+    this._foglet.sendUnicast(id, this._answerQueue.stamp(msg, resolve, reject))
   }
 
   /**
@@ -68,7 +67,7 @@ class FogletProtocol {
    * @return {void}
    */
   _sendBroadcast (msg) {
-    this._foglet.sendBroadcast(msg);
+    this._foglet.sendBroadcast(msg)
   }
 
   /**
@@ -78,7 +77,7 @@ class FogletProtocol {
    * @return{void}
    */
   _answerReply (id, msg) {
-    this._answerQueue.resolve(msg.answerID, msg.value);
+    this._answerQueue.resolve(msg.answerID, msg.value)
   }
 
   /**
@@ -88,7 +87,7 @@ class FogletProtocol {
    * @return{void}
    */
   _answerReject (id, msg) {
-    this._answerQueue.reject(msg.answerID, msg.value);
+    this._answerQueue.reject(msg.answerID, msg.value)
   }
 
   /**
@@ -97,8 +96,8 @@ class FogletProtocol {
    * @return {void}
    */
   _initHandlers () {
-    this._foglet.onUnicast((id, msg) => this._handleUnicast(id, msg));
-    this._foglet.onBroadcast((id, msg) => this._handleBroadcast(id, msg));
+    this._foglet.onUnicast((id, msg) => this._handleUnicast(id, msg))
+    this._foglet.onBroadcast((id, msg) => this._handleBroadcast(id, msg))
   }
 
   /**
@@ -109,12 +108,11 @@ class FogletProtocol {
    * @return {void}
    */
   _handleUnicast (senderID, msg) {
-    const handlerName = utils.handlerName(msg.method);
+    const handlerName = utils.handlerName(msg.method)
     if (this._name === msg.protocol && handlerName in this) {
       // apply before hooks
-      const beforeReceive = utils.beforeReceiveName(msg.method);
-      if (beforeReceive in this)
-        msg.payload = this[beforeReceive].call(this, msg.payload);
+      const beforeReceive = utils.beforeReceiveName(msg.method)
+      if (beforeReceive in this) { msg.payload = this[beforeReceive](msg.payload) }
       // do not generate helpers for message emitted through the reply & reject helpers
       if (msg.method !== 'answerReply' || msg.method !== 'answerReject') {
         const reply = value => {
@@ -125,8 +123,8 @@ class FogletProtocol {
               answerID: msg.answerID,
               value
             }
-          });
-        };
+          })
+        }
         const reject = value => {
           this._sendUnicast(senderID, {
             protocol: this._name,
@@ -135,16 +133,15 @@ class FogletProtocol {
               answerID: msg.answerID,
               value
             }
-          });
-        };
-        this[handlerName].call(this, senderID, msg.payload, reply, reject);
+          })
+        }
+        this[handlerName](senderID, msg.payload, reply, reject)
       } else {
-        this[handlerName].call(this, senderID, msg.payload);
+        this[handlerName](senderID, msg.payload)
       }
       // apply after receive hook
-      const afterReceive = utils.afterReceiveName(msg.method);
-      if (afterReceive in this)
-        this[afterReceive].call(this, msg.payload);
+      const afterReceive = utils.afterReceiveName(msg.method)
+      if (afterReceive in this) { this[afterReceive](msg.payload) }
     }
   }
 
@@ -156,20 +153,18 @@ class FogletProtocol {
    * @return {void}
    */
   _handleBroadcast (senderID, msg) {
-    const handlerName = utils.handlerName(msg.method);
+    const handlerName = utils.handlerName(msg.method)
     if (this._name === msg.protocol && handlerName in this) {
       // apply before hooks
-      const beforeReceive = utils.beforeReceiveName(msg.method);
-      if (beforeReceive in this)
-        msg.payload = this[beforeReceive].call(this, msg.payload);
+      const beforeReceive = utils.beforeReceiveName(msg.method)
+      if (beforeReceive in this) { msg.payload = this[beforeReceive](msg.payload) }
       // call handler
-      this[handlerName].call(this, senderID, msg.payload);
+      this[handlerName](senderID, msg.payload)
       // apply after receive hook
-      const afterReceive = utils.afterReceiveName(msg.method);
-      if (afterReceive in this)
-        this[afterReceive].call(this, msg.payload);
+      const afterReceive = utils.afterReceiveName(msg.method)
+      if (afterReceive in this) { this[afterReceive](msg.payload) }
     }
   }
 }
 
-module.exports = FogletProtocol;
+module.exports = FogletProtocol

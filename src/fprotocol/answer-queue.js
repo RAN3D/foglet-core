@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-'use strict';
+'use strict'
 
-const uuid = require('uuid/v4');
+const uuid = require('uuid/v4')
 
 /**
  * An AnswerQueue stamp messages with unique ids and allow peers to answer to service calls
@@ -35,7 +35,7 @@ class AnswerQueue {
    * Constructor
    */
   constructor () {
-    this._waitingAnswers = new Map();
+    this._waitingAnswers = new Map()
   }
 
   /**
@@ -46,9 +46,9 @@ class AnswerQueue {
    * @return {Object} The stamped message
    */
   stamp (message, resolve, reject) {
-    const answerID = uuid();
-    this._waitingAnswers.set(answerID, { resolve, reject });
-    return Object.assign({ answerID }, message);
+    const answerID = uuid()
+    this._waitingAnswers.set(answerID, { resolve, reject })
+    return Object.assign({ answerID }, message)
   }
 
   /**
@@ -59,8 +59,8 @@ class AnswerQueue {
    */
   resolve (answerID, payload) {
     if (this._waitingAnswers.has(answerID)) {
-      this._waitingAnswers.get(answerID).resolve(payload);
-      this._waitingAnswers.delete(answerID);
+      this._waitingAnswers.get(answerID).resolve(payload)
+      this._waitingAnswers.delete(answerID)
     }
   }
 
@@ -72,10 +72,10 @@ class AnswerQueue {
    */
   reject (answerID, payload) {
     if (this._waitingAnswers.has(answerID)) {
-      this._waitingAnswers.get(answerID).reject(payload);
-      this._waitingAnswers.delete(answerID);
+      this._waitingAnswers.get(answerID).reject(payload)
+      this._waitingAnswers.delete(answerID)
     }
   }
 }
 
-module.exports = AnswerQueue;
+module.exports = AnswerQueue
