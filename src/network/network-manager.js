@@ -34,7 +34,7 @@ const Network = require('./network.js')
 const SprayAdapter = require('./rps/sprayAdapter.js')
 
 // debug
-const debug = require('debug')('foglet-core:network-manager')
+const debug = (require('debug'))('foglet-core:network-manager')
 
 /**
  * A configuration object used to build an overlay

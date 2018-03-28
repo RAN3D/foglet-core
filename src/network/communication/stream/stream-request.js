@@ -24,7 +24,7 @@ SOFTWARE.
 'use strict'
 
 const uuid = require('uuid/v4')
-const Writable = require('readable-stream').Writable
+const Writable = (require('readable-stream')).Writable
 const messages = require('./messages.js')
 
 /**

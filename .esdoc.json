@@ -3,6 +3,8 @@
   "destination":"./docs",
   "package": "./package.json",
   "plugins": [
+    {"name": "esdoc-node"},
+    {"name": "esdoc-ecmascript-proposal-plugin", "option": {"all": true}},
     {
       "name": "esdoc-standard-plugin",
       "options": {
@@ -27,7 +29,6 @@
           "globalIndex": true
         }
       }
-    },
-    {"name": "esdoc-node"}
+    }
   ]
 }

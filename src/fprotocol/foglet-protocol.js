@@ -73,6 +73,7 @@ class FogletProtocol {
   /**
    * Handler which resolve answers to messages
    * @private
+   * @param {string} id - Sender's id
    * @param {Object} msg - Answer received
    * @return{void}
    */
@@ -83,6 +84,7 @@ class FogletProtocol {
   /**
    * Handler which reject answers to messages
    * @private
+   * @param {string} id - Sender's id
    * @param {Object} msg - Answer received
    * @return{void}
    */

@@ -25,7 +25,7 @@ SOFTWARE.
 
 const EventEmitter = require('events')
 const io = require('socket.io-client')
-const debug = require('debug')('foglet-core:signaling')
+const debug = (require('debug'))('foglet-core:signaling')
 const lmerge = require('lodash.merge')
 const uuid = require('uuid/v4')
 

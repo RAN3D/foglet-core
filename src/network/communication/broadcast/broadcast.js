@@ -10,7 +10,7 @@ const messages = require('./messages.js')
 
 const uuid = require('uuid/v4')
 const sortedIndexBy = require('lodash.sortedindexby')
-const debug = require('debug')('foglet-core:broadcast')
+const debug = (require('debug'))('foglet-core:broadcast')
 
 /**
  * Format the IDs of messages in string format
