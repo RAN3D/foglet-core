@@ -94,6 +94,18 @@ To be begin with, let's write a simple piece of JS code:
 Then, open the HTML file and look into the developpers console.
 You should see that your foglet has been connected to the RPS.
 
+Or for the fast version:
+```bash
+git clone https://github.com/RAN3D/foglet-core.git
+cd foglet-core
+npm install
+npm run build
+```
+
+* Open tests/example.html in a browser supporting WebRTC and the devConsole
+
+* Try to play with `testunicast()` and `testbroadcast()`
+
 ## Signaling server
 
 In order to run this library, you have to provide the address of a **signaling server** using the `signaling.address` option and a `signaling.room` in order to create a private network. This server will be used to establish the first connection between the new peer and the the network.

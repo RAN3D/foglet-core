@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Foglet-core example</title>
+  </head>
+
+  <body>
+    Please: Open the console!
+  </body>
+
+  <script src='../dist/foglet.bundle.js'></script>
+  <script type='text/javascript'>
+    console.log(foglet)
+
+    let app1, app2
+    app1 = createApp('Foglet1')
+    app2 = createApp('Foglet2')
+
+    app1.connection(app2)
+
+
+
+    function createApp(id) {
+      const fog = new foglet.Foglet({
+        id,
+        verbose: true, // want some logs ? switch to false otherwise
+      })
+      fog.onUnicast((id, message) => {
+        console.log(`${fog.id} received a unicasted message from ${id}: `, message)
+      })
+      fog.onBroadcast((id, message) => {
+        console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
+      })
+      return fog
+    }
+
+    function testunicast() {
+      app1.sendUnicast('Foglet2-I', 'Unicast: Hello world!')
+    }
+
+    function testbroadcast() {
+      app1.sendBroadcast('Broadcast: Hello world!')
+    }
+  </script>
+</html>
