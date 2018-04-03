@@ -110,7 +110,7 @@ class Broadcast extends AbstractBroadcast {
    * @deprecated
    * @param  {[type]} origin             [description]
    * @param  {[type]} causalityAtReceipt [description]
-   * @param  {[type]} messages           [description]
+   * @param  {[type]} elements           [description]
    * @return {[type]}                    [description]
    */
   sendAntiEntropyResponse (origin, causalityAtReceipt, elements) {
