@@ -35,42 +35,44 @@ const NetworkManager = require('./network/network-manager.js')
 const SSH = require('./utils/ssh.js')
 
 // Foglet default options
-const DEFAULT_OPTIONS = {
-  verbose: true, // want some logs ? switch to false otherwise
-  rps: {
-    type: 'spray-wrtc',
-    options: {
-      protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
-      webrtc: { // add WebRTC options
-        trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-        iceServers: [] // define iceServers in non local instance
-      },
-      timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-      delta: 10 * 1000, // spray-wrtc shuffle interval
-      signaling: {
-        address: 'https://signaling.herokuapp.com/',
-        // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
-        room: 'best-room-for-foglet-rps' // room to join
+const DEFAULT_OPTIONS = () => {
+  return {
+    verbose: true, // want some logs ? switch to false otherwise
+    rps: {
+      type: 'spray-wrtc',
+      options: {
+        protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
+        webrtc: { // add WebRTC options
+          trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
+          iceServers: [] // define iceServers in non local instance
+        },
+        timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+        delta: 10 * 1000, // spray-wrtc shuffle interval
+        signaling: {
+          address: 'https://signaling.herokuapp.com/',
+          // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+          room: 'best-room-for-foglet-rps' // room to join
+        }
       }
-    }
-  },
-  overlays: [
-    // {
-    //   class: YourOverlayClass,
-    //   options: {
-    //     delta: 10 * 1000,
-    //     protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
-    //     signaling: {
-    //       address: 'https://signaling.herokuapp.com/',
-    //       // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
-    //       room: 'best-room-for-foglet-overlay' // room to join
-    //     }
-    //   }
-    // }
-  ],
-  ssh: undefined  /* {
-    address: 'http://localhost:4000/'
-  } */
+    },
+    overlays: [
+      // {
+      //   class: YourOverlayClass,
+      //   options: {
+      //     delta: 10 * 1000,
+      //     protocol: 'foglet-example-overlay-latencies', // foglet running on the protocol foglet-example, defined for spray-wrtc
+      //     signaling: {
+      //       address: 'https://signaling.herokuapp.com/',
+      //       // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
+      //       room: 'best-room-for-foglet-overlay' // room to join
+      //     }
+      //   }
+      // }
+    ],
+    ssh: undefined  /* {
+      address: 'http://localhost:4000/'
+    } */
+  }
 }
 
 /**
@@ -148,8 +150,13 @@ class Foglet extends EventEmitter {
   */
   constructor (options = {}) {
     super()
-    this._id = uuid()
-    this._options = lmerge(DEFAULT_OPTIONS, options)
+    this._options = lmerge(DEFAULT_OPTIONS(), options)
+    // set a new id for the foglet
+    if(!this._options.id) this._options.id = uuid()
+    // the the id for the RPS, (using n2n-overlay-wrtc, this is .PEER in options)
+    this._options.rps.options.peer = this._options.id
+    // set the id as class variable for visibility
+    this._id = this._options.id
     this._networkManager = new NetworkManager(this._options)
 
     // SSH Control

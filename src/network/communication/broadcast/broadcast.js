@@ -18,11 +18,12 @@ const debug = (require('debug'))('foglet-core:broadcast')
  * @return {string} The formatted message's id in string format
  */
 function formatID (message) {
-  return `_e=${message.id._e}&_c=${message.id._c}`
+  return `e=${message.id.e}&c=${message.id.c}`
 }
 
 /**
  * Broadcast represent the base implementation of a broadcast protocol for the foglet library.
+ * Based on the CausalBrodacastDefinition Package: see: https://github.com/Chat-Wane/CausalBroadcastDefinition
  * @extends AbstractBroadcast
  * @author Arnaud Grall (Folkvir)
  */
@@ -36,11 +37,11 @@ class Broadcast extends AbstractBroadcast {
     super(source, protocol)
     if (source && protocol) {
       this.options = {
+        id: source._options.peer,
         delta: 1000 * 30
       }
-      this.uid = uuid()
-      this._causality = new VVwE(this.uid)
-      // this._causality.incrementFrom({ _e: this.uid, _c: 0 });
+      // the id is your id, base on the .PEER id in the RPS options
+      this._causality = new VVwE(this.options.id)
       // buffer of received messages
       this._buffer = []
       // buffer of anti-entropy messages (chunkified because of large size)
@@ -64,8 +65,8 @@ class Broadcast extends AbstractBroadcast {
   /**
    * Send a message in broadcast
    * @param  {Object}  message  - The message to send
-   * @param  {Object} [id] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation
-   * @param  {Object} [isReady] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
+   * @param  {Object} [id] {e: <stringId>, c: <Integer>} this uniquely represents the id of the operation
+   * @param  {Object} [isReady] {e: <stringId>, c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
    * @return {boolean}
    */
   send (message, id, isReady = undefined) {
@@ -112,13 +113,13 @@ class Broadcast extends AbstractBroadcast {
    * @param  {[type]} messages           [description]
    * @return {[type]}                    [description]
    */
-  sendAntiEntropyResponse (origin, causalityAtReceipt, messages) {
+  sendAntiEntropyResponse (origin, causalityAtReceipt, elements) {
     let id = uuid()
     // #1 metadata of the antientropy response
-    let sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, causalityAtReceipt, messages.length))
+    let sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, causalityAtReceipt, elements.length))
     let i = 0
     while (sent && i < messages.length) {
-      sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, null, messages.length, messages[i]))
+      sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, null, elements.length, elements[i]))
       ++i
     }
   }
@@ -130,6 +131,9 @@ class Broadcast extends AbstractBroadcast {
    * @return {void}
    */
   _receive (id, message) {
+    // if not present, add the issuer of the message in the message
+    if (!('issuer' in message)) { message.issuer = id }
+
     switch (message.type) {
       case 'MAntiEntropyRequest': {
         debug(id, message)
@@ -158,19 +162,17 @@ class Broadcast extends AbstractBroadcast {
           // #2 only check if the message has not been received yet
             if (!this._shouldStopPropagation(element)) {
               this._causality.incrementFrom(element.id)
-              this.emit('receive', element.payload)
+              this.emit('receive', message.issuer, element.payload)
             }
           }
         // #3 merge causality structures
-          this.causality.merge(this.bufferAntiEntropy.causality)
+          this._causality.merge(this._bufferAntiEntropy.causality)
         }
         break
       }
 
       default: {
         if (!this._shouldStopPropagation(message)) {
-        // if not present, add the issuer of the message in the message
-          if (!('issuer' in message)) { message.issuer = id }
         // #1 register the operation
         // maintain `this._buffer` sorted to search in O(log n)
           const index = sortedIndexBy(this._buffer, message, formatID)
