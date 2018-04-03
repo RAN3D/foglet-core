@@ -152,7 +152,7 @@ class Foglet extends EventEmitter {
     super()
     this._options = lmerge(DEFAULT_OPTIONS(), options)
     // set a new id for the foglet
-    if(!this._options.id) this._options.id = uuid()
+    if (!this._options.id) this._options.id = uuid()
     // the the id for the RPS, (using n2n-overlay-wrtc, this is .PEER in options)
     this._options.rps.options.peer = this._options.id
     // set the id as class variable for visibility
