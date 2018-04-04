@@ -9,7 +9,8 @@
     "all": "npm run build && npm test && npm run esdoc",
     "test": "foglet-scripts test",
     "start": "foglet-scripts start",
-    "build": "foglet-scripts build"
+    "build": "foglet-scripts build",
+    "example": "node tests/examples/server.js"
   },
   "repository": {
     "type": "git",

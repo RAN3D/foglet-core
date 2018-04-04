@@ -59,6 +59,7 @@ To be begin with, let's write a simple piece of JS code:
 
   // let's create a simple application that send message in broadcast
   const fog = new Foglet({
+    id: 'myfogletid', // default we use uuid/v4 generated id
     rps: {
       type: 'spray-wrtc', // we choose Spray as a our RPS
       options: {
@@ -102,9 +103,13 @@ npm install
 npm run build
 ```
 
-* Open tests/example.html in a browser supporting WebRTC and the devConsole
+* Open tests/examples/example.html in a browser supporting WebRTC and the devConsole
 
 * Try to play with `testunicast()` and `testbroadcast()`
+
+or try the signaling example using a signaling server:
+* Just run a simple http server with an embedded signaling server serving the tests/examples/example-signaling.html: `npm run example`
+* open http://localhost:3000
 
 ## Signaling server
 
