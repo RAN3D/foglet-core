@@ -118,7 +118,7 @@ class Broadcast extends AbstractBroadcast {
     // #1 metadata of the antientropy response
     let sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, causalityAtReceipt, elements.length))
     let i = 0
-    while (sent && i < messages.length) {
+    while (sent && i < elements.length) {
       sent = this._unicast.send(origin, messages.MAntiEntropyResponse(id, null, elements.length, elements[i]))
       ++i
     }
