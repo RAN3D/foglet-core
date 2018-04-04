@@ -56,6 +56,7 @@ class Signaling extends EventEmitter {
       room: uuid(),
       timeout: 20000
     }, options)
+    debug('Signaling options: ', this.options)
     this._network = source
     this._source = source.rps
     this._socket = io(this.options.address, {
