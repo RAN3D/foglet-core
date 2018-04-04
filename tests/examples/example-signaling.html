@@ -9,9 +9,11 @@
     Please: Open the console!
   </body>
 
-  <script src='../dist/foglet.bundle.js'></script>
+  <script src='/foglet.bundle.js'></script>
   <script type='text/javascript'>
     console.log(foglet)
+
+    localStorage.debug='foglet-core:*'
 
     let app1, app2
     app1 = createApp('Foglet1')
@@ -19,8 +21,8 @@
     app1.share()
     app2.share()
 
-    app1.connection().then(() => {
-      console.log('App1 connected.')
+    app1.connection().then(() => app2.connection()).then(() => {
+      console.log('Peers connected. Play now with them !')
     })
 
 
@@ -31,15 +33,19 @@
         verbose: true, // want some logs ? switch to false otherwise
         rps: {
           options : {
+            webrtc: {
+              trickle: true
+            },
             signaling: {
-              address: 'http://172.16.9.236:3000/',
+              address: 'http://localhost:3000/',
               room: 'test',
-              origins: '*:*',
-              transports: ['websocket', 'polling', 'flashsocket']
+              origins: '*'
             }
           }
         }
       })
+
+
       fog.onUnicast((id, message) => {
         console.log(`${fog.id} received a unicasted message from ${id}: `, message)
       })

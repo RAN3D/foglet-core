@@ -24,7 +24,7 @@ SOFTWARE.
 'use strict'
 
 const EventEmitter = require('events')
-const io = require('socket.io-client')
+const SocketIo = require('socket.io-client')
 const debug = (require('debug'))('foglet-core:signaling')
 const lmerge = require('lodash.merge')
 const uuid = require('uuid/v4')
@@ -54,12 +54,14 @@ class Signaling extends EventEmitter {
       address: 'http://localhost:3000/',
       origins: '*',
       room: uuid(),
-      timeout: 20000
+      timeout: 20000,
+      io: SocketIo
     }, options)
     debug('Signaling options: ', this.options)
     this._network = source
+    this._id = this._network.id
     this._source = source.rps
-    this._socket = io(this.options.address, {
+    this._socket = this.options.io(this.options.address, {
       autoConnect: false,
       origins: this.options.origins
     })
@@ -175,7 +177,7 @@ class Signaling extends EventEmitter {
   _signalingInit () {
     return offer => {
       debug('Emit a new offer.')
-      this._socket.emit('new', {offer, room: this.options.room})
+      this._socket.emit('new', {id: this.id, tid: uuid(), offer, room: this.options.room})
     }
   }
 }
