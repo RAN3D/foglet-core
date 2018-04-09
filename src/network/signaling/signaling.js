@@ -231,7 +231,6 @@ class Signaling extends EventEmitter {
   _manageConnectionError (error) {
     debug(error)
   }
-
 }
 
 module.exports = Signaling

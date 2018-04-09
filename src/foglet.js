@@ -46,6 +46,7 @@ const DEFAULT_OPTIONS = () => {
           iceServers: [] // define iceServers in non local instance
         },
         timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+        pendingTimeout: 60 * 1000,
         delta: 60 * 1000, // spray-wrtc shuffle interval
         signaling: {
           address: 'https://signaling.herokuapp.com/',
@@ -204,7 +205,7 @@ class Foglet extends EventEmitter {
   * By default, connect the foglet to the base RPS. Use the `name` parameter to select which overlay to connect with.
   * @param {Foglet} [foglet=null] - (optional) Foglet to connect with. Leav to `null` rely on the signaling server.
   * @param {string} [name=null] - (optional) Name of the overlay to connect. Default to the RPS.
-  * @param {number} [timeout=6000] - (optional) Connection timeout. Default to 6.0s
+  * @param {number} [timeout=60000] - (optional) Connection timeout. Default to 6.0s
   * @return {Promise} A Promise fullfilled when the foglet is connected
   * @example
   * const foglet = new Foglet({
@@ -213,18 +214,24 @@ class Foglet extends EventEmitter {
   * foglet.share();
   * foglet.connection().then(console.log).catch(console.err);
   */
-  connection (foglet = null, name = null, timeout = 60000) {
-    if (foglet !== null) {
-      return this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout).then((result) => {
-        this.emit('connect')
-        return Promise.resolve(result)
-      }).catch(e => Promise.reject(e))
-    } else {
-      return this.overlay(name).signaling.connection(foglet, timeout).then((result) => {
-        this.emit('connect')
-        return Promise.resolve(result)
-      }).catch(e => Promise.reject(e))
-    }
+  connection (foglet = null, name = null, timeout = this._options.pendingTimeout) {
+    return new Promise((resolve, reject) => {
+      if (foglet !== null) {
+        this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout).then((result) => {
+          this.emit('connect')
+          resolve(result)
+        }).catch(e => {
+          reject(e)
+        })
+      } else {
+        this.overlay(name).signaling.connection(foglet, timeout).then((result) => {
+          this.emit('connect')
+          resolve(result)
+        }).catch(e => {
+          reject(e)
+        })
+      }
+    })
   }
 
   /**

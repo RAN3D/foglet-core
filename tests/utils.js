@@ -1,8 +1,28 @@
 /* Testing utilities */
 'use strict'
 const uuid = require('uuid/v4')
+// const request = require('request')
+//
+// function getIces (addr) {
+//   return new Promise((resolve, reject) => {
+//     request(addr, function (error, response, body) {
+//       console.log(error, response, body)
+//       response.ice.splice(0, 1)
+//       response.ice.forEach(p => {
+//         if (p.url.indexOf('?transport=tcp') > -1) {
+//           p.url = p.url.replace('?transport=tcp', '')
+//         } else if (p.url.indexOf('?transport=udp') > -1) {
+//           p.url = p.url.replace('?transport=udp', '')
+//         }
+//         p.urls = String(p.url)
+//         delete p.url
+//       })
+//       resolve(response)
+//     })
+//   })
+// }
 
-const buildFog = (Foglet, size, overlays = []) => {
+const buildFog = (Foglet, size, overlays = [], ice = []) => {
   const fog = []
   // creates a random seed for romm & protocol
   const id = uuid()
@@ -14,12 +34,12 @@ const buildFog = (Foglet, size, overlays = []) => {
           protocol: `test-protocol-generated-${id}`,
           webrtc: { // add WebRTC options
             trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-            iceServers: [] // define iceServers in non local instance
+            iceServers: ice // define iceServers in non local instance
           },
           timeout: 30 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
           delta: 30 * 1000, // spray-wrtc shuffle interval
           signaling: {
-            address: 'http://localhost:3000',
+            address: 'http://signaling.herokuapp.com/',
             room: `test-room-generated-${id}`
           }
         }
@@ -34,7 +54,11 @@ const signalingConnect = (peers) => {
   return Promise.all(peers.map(peer => {
     peer.share()
     return peer.connection()
-  }))
+  })).then(() => {
+    return Promise.resolve()
+  }).catch(e => {
+    return Promise.reject(e)
+  })
 }
 
 const clearFoglets = (peers) => {
