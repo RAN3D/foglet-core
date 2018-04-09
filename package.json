@@ -10,7 +10,8 @@
     "test": "foglet-scripts test",
     "start": "foglet-scripts start",
     "build": "foglet-scripts build",
-    "example": "node tests/examples/server.js"
+    "example": "node tests/examples/server.js",
+    "dev": "webpack --config ./webpack.config.js --watch"
   },
   "repository": {
     "type": "git",
@@ -43,7 +44,8 @@
     "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.2.1",
-    "version-vector-with-exceptions": "^0.1.0"
+    "version-vector-with-exceptions": "^0.1.0",
+    "webrtc-adapter": "^6.1.5"
   },
   "devDependencies": {
     "esdoc": "^1.0.3",
@@ -51,8 +53,11 @@
     "esdoc-node": "^1.0.3",
     "esdoc-standard-plugin": "^1.0.0",
     "foglet-scripts": "^0.3.0",
+    "jquery": "^3.3.1",
     "karma-firefox-launcher": "^1.1.0",
-    "snazzy": "^7.1.1"
+    "snazzy": "^7.1.1",
+    "twilio": "^3.14.0",
+    "uglifyjs-webpack-plugin": "^1.2.4"
   },
   "bundledDependencies": [
     "debug",

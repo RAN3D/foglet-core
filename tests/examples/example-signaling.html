@@ -10,49 +10,81 @@
   </body>
 
   <script src='/foglet.bundle.js'></script>
+  <script src='/jquery/jquery.min.js'></script>
   <script type='text/javascript'>
     console.log(foglet)
 
-    localStorage.debug='foglet-core:*'
-
+    localStorage.debug='*,-simple-peer*,-socket.io-parser,-engine.io-client*,-socket.io-client*'
     let app1, app2
-    app1 = createApp('Foglet1')
-    app2 = createApp('Foglet2')
-    app1.share()
-    app2.share()
-
-    app1.connection().then(() => app2.connection()).then(() => {
-      console.log('Peers connected. Play now with them !')
+    createApp().then((a) => {
+      app1 = a
+      app1.share()
+      app1.connection().then(() => {
+        createApp().then(b => {
+          app2 = b
+          app2.share()
+          app2.connection().then(() => {
+            console.log('Peers connected. Play now with them !')
+          }).catch(e => {
+            console.log(e)
+          })
+        }).catch(e => {
+          console.log(e)
+        })
+      }).catch(e => {
+        console.log(e)
+      })
+    }).catch(e => {
+      console.log(e)
     })
 
 
 
     function createApp(id) {
-      const fog = new foglet.Foglet({
-        id,
-        verbose: true, // want some logs ? switch to false otherwise
-        rps: {
-          options : {
-            webrtc: {
-              trickle: true
-            },
-            signaling: {
-              address: 'http://localhost:3000/',
-              room: 'test',
-              origins: '*'
+      return new Promise((resolve, reject) => {
+        $.get( "/ice",).then(data => {
+          data.ice.splice(0, 1)
+          data.ice.forEach(p => {
+            if(p.url.indexOf('?transport=tcp') > -1){
+                p.url = p.url.replace('?transport=tcp', '');
+            } else if(p.url.indexOf('?transport=udp') > -1){
+                p.url = p.url.replace('?transport=udp', '');
             }
-          }
-        }
+            p.urls = String(p.url)
+            delete p.url
+          })
+          console.log(data)
+          const fog = new foglet.Foglet({
+            id,
+            verbose: true, // want some logs ? switch to false otherwise
+            rps: {
+              options : {
+                delta: 30 * 1000,
+                timeout: 10 * 1000,
+                webrtc: {
+                  trickle: true,
+                  iceServers: data.ice
+                },
+                signaling: {
+                  address: document.location.origin,
+                  room: 'test',
+                  origins: '*'
+                }
+              }
+            }
+          })
+          fog.onUnicast((id, message) => {
+            console.log(`${fog.id} received a unicasted message from ${id}: `, message)
+          })
+          fog.onBroadcast((id, message) => {
+            console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
+          })
+          resolve(fog)
+        }).catch((e) => {
+          console.error(e)
+          reject(e)
+        })
       })
-
-
-      fog.onUnicast((id, message) => {
-        console.log(`${fog.id} received a unicasted message from ${id}: `, message)
-      })
-      fog.onBroadcast((id, message) => {
-        console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
-      })
-      return fog
     }
 
     function testunicast() {
@@ -61,6 +93,26 @@
 
     function testbroadcast() {
       app1.sendBroadcast('Broadcast: Hello world!')
+    }
+
+    function list_connections(fog) {
+      let inviewPending, inviewLiving, inviewDying
+      let outviewPending, outviewLiving, outviewDying
+      let inview, outview
+      inview = fog.overlay().network.rps.NI
+      outview = fog.overlay().network.rps.NO
+      inviewPending = inview.pending
+      inviewLiving = inview.living
+      inviewDying = inview.dying
+      console.log('I-Pending size: ', inviewPending.size, inviewPending)
+      console.log('I-Living size: ', inviewLiving.store.size, inviewLiving)
+      console.log('I-Dying size: ', inviewDying.size, inviewDying)
+      outviewPending = outview.pending
+      outviewLiving = outview.living
+      outviewDying = outview.dying
+      console.log('O-Pending size: ', outviewPending.size, outviewPending)
+      console.log('O-Living size: ', outviewLiving.store.size, outviewLiving)
+      console.log('I-Dying size: ', outviewDying.size, outviewDying)
     }
   </script>
 </html>

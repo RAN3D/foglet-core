@@ -26,7 +26,6 @@ SOFTWARE.
 const EventEmitter = require('events')
 const uuid = require('uuid/v4')
 const lmerge = require('lodash.merge')
-// const debug = require('debug')('foglet-core:main');
 
 // NetworkManager
 const NetworkManager = require('./network/network-manager.js')
@@ -47,7 +46,7 @@ const DEFAULT_OPTIONS = () => {
           iceServers: [] // define iceServers in non local instance
         },
         timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-        delta: 10 * 1000, // spray-wrtc shuffle interval
+        delta: 60 * 1000, // spray-wrtc shuffle interval
         signaling: {
           address: 'https://signaling.herokuapp.com/',
           // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
@@ -216,9 +215,16 @@ class Foglet extends EventEmitter {
   */
   connection (foglet = null, name = null, timeout = 60000) {
     if (foglet !== null) {
-      return this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout)
+      return this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout).then((result) => {
+        this.emit('connect')
+        return Promise.resolve(result)
+      }).catch(e => Promise.reject(e))
+    } else {
+      return this.overlay(name).signaling.connection(foglet, timeout).then((result) => {
+        this.emit('connect')
+        return Promise.resolve(result)
+      }).catch(e => Promise.reject(e))
     }
-    return this.overlay(name).signaling.connection(foglet, timeout)
   }
 
   /**
