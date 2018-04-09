@@ -9,12 +9,12 @@
     Please: Open the console!
   </body>
 
-  <script src='/foglet.bundle.js'></script>
+  <script src='/dist/foglet.bundle.min.js'></script>
   <script src='/jquery/jquery.min.js'></script>
   <script type='text/javascript'>
     console.log(foglet)
 
-    localStorage.debug='*,-simple-peer*,-socket.io-parser,-engine.io-client*,-socket.io-client*'
+    localStorage.debug='foglet-core*'
     let app1, app2
     createApp().then((a) => {
       app1 = a
@@ -88,7 +88,7 @@
     }
 
     function testunicast() {
-      app1.sendUnicast('Foglet2-I', 'Unicast: Hello world!')
+      app1.sendUnicast(app2.id+'-I', 'Unicast: Hello world!')
     }
 
     function testbroadcast() {

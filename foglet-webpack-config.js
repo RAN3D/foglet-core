@@ -1,5 +1,3 @@
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
-
 module.exports = {
   entry: './foglet-core.js',
   output: {
@@ -25,8 +23,5 @@ module.exports = {
       }
     ]
   },
-  devtool: 'source-map',
-  plugins: [new UglifyJSPlugin({
-    sourceMap: true
-  })]
+  devtool: 'source-map'
 }

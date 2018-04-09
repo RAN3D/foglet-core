@@ -37,7 +37,7 @@ describe('Overlays', function () {
         options: {
           protocol: 'foglet-test-overlay',
           signaling: {
-            address: 'http://localhost:3000',
+            address: 'http://signaling.herokuapp.com',
             room: 'foglet-test-overlay-room'
           }
         }
@@ -67,7 +67,7 @@ describe('Overlays', function () {
         options: {
           protocol: 'foglet-test-overlay-communication',
           signaling: {
-            address: 'http://localhost:3000',
+            address: 'http://signaling.herokuapp.com',
             room: 'foglet-test-overlay-communication-room'
           }
         }

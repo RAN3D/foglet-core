@@ -6,10 +6,12 @@
   "scripts": {
     "lint": "standard --verbose | snazzy",
     "esdoc": "esdoc",
-    "all": "npm run build && npm test && npm run esdoc",
-    "test": "foglet-scripts test",
+    "all": "npm run build && npm run min && npm test && npm run esdoc",
+    "test": "npm run replace && foglet-scripts test",
+    "replace": "node tests/replacesignaling.js",
     "start": "foglet-scripts start",
     "build": "foglet-scripts build",
+    "min": "webpack --config ./foglet-webpack-config-min.js",
     "example": "node tests/examples/server.js",
     "dev": "webpack --config ./webpack.config.js --watch"
   },
@@ -44,8 +46,7 @@
     "tman-wrtc": "0.0.8",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.2.1",
-    "version-vector-with-exceptions": "^0.1.0",
-    "webrtc-adapter": "^6.1.5"
+    "version-vector-with-exceptions": "^0.1.0"
   },
   "devDependencies": {
     "esdoc": "^1.0.3",
