@@ -55,7 +55,8 @@ class Signaling extends EventEmitter {
       origins: '*',
       room: uuid(),
       timeout: 20000,
-      io: SocketIo
+      io: SocketIo,
+      reconnectionAttempts: 10
     }, options)
     debug('Signaling options: ', this.options)
     this._network = source
@@ -63,7 +64,21 @@ class Signaling extends EventEmitter {
     this._source = source.rps
     this._socket = this.options.io(this.options.address, {
       autoConnect: false,
-      origins: this.options.origins
+      origins: this.options.origins,
+      reconnectionAttempts: this.options.reconnectionAttempts,
+      timeout: this.options.timeout
+    })
+    this._socket.on('connect_timeout', (timeout) => {
+      this._manageTimeout(timeout)
+    })
+    this._socket.on('connect_error', (error) => {
+      this._manageConnectionError(error)
+    })
+    this._socket.on('error', (error) => {
+      this._manageError(error)
+    })
+    this._socket.on('disconnect', (reason) => {
+      this._manageDisconnection(reason)
     })
     this._socket.on('new_spray', (data) => {
       const signalingAccept = offer => {
@@ -180,6 +195,43 @@ class Signaling extends EventEmitter {
       this._socket.emit('new', {id: this.id, tid: uuid(), offer, room: this.options.room})
     }
   }
+
+  /**
+   * Manage when a timeout occures
+   * @param  {Object} timeout Timeout error returned by socket.io
+   * @return {void}
+   */
+  _manageTiemout (timeout) {
+    debug(timeout)
+  }
+
+  /**
+   * Manage when an error occures
+   * @param  {Object} error Error returned by socket.io
+   * @return {void}
+   */
+  _manageError (error) {
+    debug(error)
+  }
+
+  /**
+   * Manage when a disconnection occures
+   * @param  {Object} reason Reason of the disconnection returned by socket.io
+   * @return {void}
+   */
+  _manageDisconnection (reason) {
+    debug(reason)
+  }
+
+  /**
+   * Manage when a connection error occures
+   * @param  {Object} error Reason of the connection error returned by socket.io
+   * @return {void}
+   */
+  _manageConnectionError (error) {
+    debug(error)
+  }
+
 }
 
 module.exports = Signaling
