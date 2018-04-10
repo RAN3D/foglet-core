@@ -37,8 +37,8 @@ describe('Overlays', function () {
         options: {
           protocol: 'foglet-test-overlay',
           signaling: {
-            address: 'http://signaling.herokuapp.com',
-            room: 'foglet-test-overlay-room'
+            room: 'foglet-test-overlay-room',
+            address: 'http://localhost:3000/'
           }
         }
       }
@@ -46,6 +46,7 @@ describe('Overlays', function () {
 
     f1.overlay('test-overlay').communication.onUnicast((id, msg) => {
       assert.equal(msg, 'hello world!')
+      console.log('Got message from: ', id, msg)
       done()
     })
 
@@ -67,7 +68,7 @@ describe('Overlays', function () {
         options: {
           protocol: 'foglet-test-overlay-communication',
           signaling: {
-            address: 'http://signaling.herokuapp.com',
+            address: 'http://localhost:3000/',
             room: 'foglet-test-overlay-communication-room'
           }
         }
@@ -76,6 +77,7 @@ describe('Overlays', function () {
 
     f1.overlay('test-overlay-communication').network.communication.onUnicast((id, msg) => {
       assert.equal(msg, 'hello world!')
+      console.log('Got message from: ', id, msg)
       done()
     })
 

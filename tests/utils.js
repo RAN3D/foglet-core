@@ -105,7 +105,7 @@ const overlayConnect = (index, timeout, ...peers) => {
   return peers.reduce((prev, peer) => {
     return prev.then(() => {
       peer.share(index)
-      return peer.connection(null, index).then((...res) => {
+      return peer.connection(peers[0], index).then((...res) => {
         setTimeout(() => {
           return Promise.resolve(...res)
         }, timeout)
