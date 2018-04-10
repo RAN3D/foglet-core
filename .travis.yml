@@ -1,9 +1,5 @@
 language: node_js
-node_js:
-  - "7"
-  - "8"
-  - "9"
-  - "node"
+node_js: "node"
 
 addons:
   firefox: 'latest'
@@ -15,7 +11,7 @@ notifications:
   email: false
 
 before_install:
-  - npm i -g npm@5.8.0
+  - npm i -g npm@latest
 
 before_script:
   - 'export DISPLAY=:99.0'
