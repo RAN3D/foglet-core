@@ -39,8 +39,9 @@ const buildFog = (Foglet, size, overlays = [], ice = []) => {
           timeout: 30 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
           delta: 30 * 1000, // spray-wrtc shuffle interval
           signaling: {
-            address: 'http://signaling.herokuapp.com/',
-            room: `test-room-generated-${id}`
+            address: 'http://localhost:8000/',
+            room: `test-room-generated-${id}`,
+            origins: '*:*'
           }
         }
       },

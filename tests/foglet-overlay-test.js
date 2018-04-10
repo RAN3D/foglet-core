@@ -51,13 +51,13 @@ describe('Overlays', function () {
     })
 
     utils.overlayConnect('test-overlay', 2000, f1, f2)
-    .then(() => {
-      setTimeout(() => {
-        const neighbours = f2.overlay('test-overlay').network.getNeighbours()
-        assert.equal(neighbours.length, 1)
-        f2.overlay('test-overlay').communication.sendUnicast(neighbours[0], 'hello world!')
-      }, 2000)
-    }).catch(done)
+      .then(() => {
+        setTimeout(() => {
+          const neighbours = f2.overlay('test-overlay').network.getNeighbours()
+          assert.equal(neighbours.length, 1)
+          f2.overlay('test-overlay').communication.sendUnicast(neighbours[0], 'hello world!')
+        }, 2000)
+      }).catch(done)
   })
 
   it('should create a internal communication channel correctly', done => {
@@ -82,12 +82,12 @@ describe('Overlays', function () {
     })
 
     utils.overlayConnect('test-overlay-communication', 2000, f1, f2)
-    .then(() => {
-      setTimeout(() => {
-        const neighbours = f2.overlay('test-overlay-communication').network.getNeighbours()
-        assert.equal(neighbours.length, 1)
-        f2.overlay('test-overlay-communication').network.communication.sendUnicast(neighbours[0], 'hello world!')
-      }, 2000)
-    }).catch(done)
+      .then(() => {
+        setTimeout(() => {
+          const neighbours = f2.overlay('test-overlay-communication').network.getNeighbours()
+          assert.equal(neighbours.length, 1)
+          f2.overlay('test-overlay-communication').network.communication.sendUnicast(neighbours[0], 'hello world!')
+        }, 2000)
+      }).catch(done)
   })
 })

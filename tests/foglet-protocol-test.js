@@ -74,13 +74,13 @@ describe('FogletProtocol', function () {
           assert.equal(peers.length, 1)
           setTimeout(function () {
             p1.get(peers[0], 'Hello')
-            .then(msg => {
-              assert.equal(msg, 'Hello world!')
-              utils.clearFoglets(foglets).then(() => done())
-            })
-            .catch(() => {
-              utils.clearFoglets(foglets).then(() => done())
-            })
+              .then(msg => {
+                assert.equal(msg, 'Hello world!')
+                utils.clearFoglets(foglets).then(() => done())
+              })
+              .catch(() => {
+                utils.clearFoglets(foglets).then(() => done())
+              })
           }, 1000)
         })
       })
@@ -99,13 +99,13 @@ describe('FogletProtocol', function () {
           assert.equal(peers.length, 1)
           setTimeout(function () {
             p1.get(peers[0], 'Hello')
-            .then(msg => {
-              utils.clearFoglets(foglets).then(() => done(new Error('Message should have rejected but instead got reply with ' + msg)))
-            })
-            .catch(msg => {
-              assert.equal(msg, 'Hello world!')
-              utils.clearFoglets(foglets).then(() => done())
-            })
+              .then(msg => {
+                utils.clearFoglets(foglets).then(() => done(new Error('Message should have rejected but instead got reply with ' + msg)))
+              })
+              .catch(msg => {
+                assert.equal(msg, 'Hello world!')
+                utils.clearFoglets(foglets).then(() => done())
+              })
           }, 1000)
         })
       })
@@ -119,18 +119,18 @@ describe('FogletProtocol', function () {
           ${initProtocol}
           get
           ${function (service) {
-            service.is.unicast()
-            service.on.receive(function (id, msg) {
-              if (this._callback) this._callback(id, msg)
-              if (this._done) this._done()
-            })
-            service.before.send(function (msg) {
-              return msg + ' and Thanks for'
-            })
-            service.before.receive(function (msg) {
-              return msg + ' all the Fish'
-            })
-          }}
+    service.is.unicast()
+    service.on.receive(function (id, msg) {
+      if (this._callback) this._callback(id, msg)
+      if (this._done) this._done()
+    })
+    service.before.send(function (msg) {
+      return msg + ' and Thanks for'
+    })
+    service.before.receive(function (msg) {
+      return msg + ' all the Fish'
+    })
+  }}
         `
 
         const foglets = utils.buildFog(Foglet, 2)
@@ -159,17 +159,17 @@ describe('FogletProtocol', function () {
         UnicastHookProtocol = defineProtocol('unicast-protocol-with-hooks')`
           get
           ${function (service) {
-            service.is.unicast()
-            service.on.receive(function () {})
-            service.after.send(function (msg) {
-              assert.equal(msg, 'So Long')
-              check()
-            })
-            service.after.receive(function (msg) {
-              assert.equal(msg, 'So Long')
-              check()
-            })
-          }}
+    service.is.unicast()
+    service.on.receive(function () {})
+    service.after.send(function (msg) {
+      assert.equal(msg, 'So Long')
+      check()
+    })
+    service.after.receive(function (msg) {
+      assert.equal(msg, 'So Long')
+      check()
+    })
+  }}
         `
 
         const foglets = utils.buildFog(Foglet, 2)
@@ -219,18 +219,18 @@ describe('FogletProtocol', function () {
           ${initProtocol}
           get
           ${function (service) {
-            service.is.broadcast()
-            service.on.receive(function (id, msg) {
-              if (this._callback) this._callback(id, msg)
-              if (this._done) this._done()
-            })
-            service.before.send(function (msg) {
-              return msg + ' and Thanks for'
-            })
-            service.before.receive(function (msg) {
-              return msg + ' all the Fish'
-            })
-          }}
+    service.is.broadcast()
+    service.on.receive(function (id, msg) {
+      if (this._callback) this._callback(id, msg)
+      if (this._done) this._done()
+    })
+    service.before.send(function (msg) {
+      return msg + ' and Thanks for'
+    })
+    service.before.receive(function (msg) {
+      return msg + ' all the Fish'
+    })
+  }}
         `
 
         const foglets = utils.buildFog(Foglet, 2)
@@ -259,17 +259,17 @@ describe('FogletProtocol', function () {
         BroadcastHookProtocol = defineProtocol('broadcast-protocol-with-hooks')`
           get
           ${function (service) {
-            service.is.broadcast()
-            service.on.receive(function () {})
-            service.after.send(function (msg) {
-              assert.equal(msg, 'So Long')
-              check()
-            })
-            service.after.receive(function (msg) {
-              assert.equal(msg, 'So Long')
-              check()
-            })
-          }}
+    service.is.broadcast()
+    service.on.receive(function () {})
+    service.after.send(function (msg) {
+      assert.equal(msg, 'So Long')
+      check()
+    })
+    service.after.receive(function (msg) {
+      assert.equal(msg, 'So Long')
+      check()
+    })
+  }}
         `
 
         const foglets = utils.buildFog(Foglet, 2)
