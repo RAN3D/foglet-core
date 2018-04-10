@@ -11,7 +11,10 @@ notifications:
   email: false
 
 before_install:
-  - npm i -g npm@latest
+  - npm i -g npm@next
+
+install:
+  - npm install
 
 before_script:
   - 'export DISPLAY=:99.0'
