@@ -3,14 +3,14 @@ const path = require('path')
 
 function test () {
   return new Promise((resolve, reject) => {
-    const test = spawn('npm', ['run', 'test-bis'])
-    test.stdout.on('data', (data) => {
+    const child = spawn(/^win/.test(process.platform) ? 'npm.cmd' : 'npm', ['run',  'test-bis']);
+    child.stdout.on('data', (data) => {
       console.log(`[TEST]: ${data}`)
     })
-    test.stderr.on('data', (data) => {
+    child.stderr.on('data', (data) => {
       console.log(`[TEST]: ${data}`)
     })
-    test.on('close', (code) => {
+    child.on('close', (code) => {
       console.log(`[TEST] exited with code ${code}`)
       resolve(code)
     })

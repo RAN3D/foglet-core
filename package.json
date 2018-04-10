@@ -61,7 +61,8 @@
     "karma-firefox-launcher": "^1.1.0",
     "snazzy": "^7.1.1",
     "twilio": "^3.14.0",
-    "uglifyjs-webpack-plugin": "^1.2.4"
+    "uglifyjs-webpack-plugin": "^1.2.4",
+    "webpack-cli": "^2.0.14"
   },
   "bundledDependencies": [
     "debug",

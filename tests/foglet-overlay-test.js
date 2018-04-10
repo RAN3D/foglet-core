@@ -38,7 +38,7 @@ describe('Overlays', function () {
           protocol: 'foglet-test-overlay',
           signaling: {
             room: 'foglet-test-overlay-room',
-            address: 'http://localhost:3000/'
+            address: 'http://localhost:8000/'
           }
         }
       }
@@ -68,7 +68,7 @@ describe('Overlays', function () {
         options: {
           protocol: 'foglet-test-overlay-communication',
           signaling: {
-            address: 'http://localhost:3000/',
+            address: 'http://localhost:8000/',
             room: 'foglet-test-overlay-communication-room'
           }
         }
