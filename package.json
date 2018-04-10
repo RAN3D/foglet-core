@@ -43,7 +43,7 @@
     "readable-stream": "^2.3.5",
     "socket.io-client": "^2.1.0",
     "spray-wrtc": "^2.0.x",
-    "tman-wrtc": "0.0.8",
+    "tman-wrtc": "0.1.0",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.2.1",
     "version-vector-with-exceptions": "^0.1.0"
