@@ -1,4 +1,5 @@
 module.exports = {
+  mode: 'development',
   entry: './foglet-core.js',
   output: {
     'path': require('path').resolve(process.cwd(), 'dist'),

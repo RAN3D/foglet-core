@@ -69,7 +69,7 @@ const DEFAULT_OPTIONS = () => {
       //   }
       // }
     ],
-    ssh: undefined  /* {
+    ssh: undefined /* {
       address: 'http://localhost:4000/'
     } */
   }

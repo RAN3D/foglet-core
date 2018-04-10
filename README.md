@@ -109,7 +109,7 @@ npm run build
 
 or try the signaling example using a signaling server:
 * Just run a simple http server with an embedded signaling server serving the tests/examples/example-signaling.html: `npm run example`
-* open http://localhost:3000
+* open http://localhost:8000/signaling
 
 ## Signaling server
 

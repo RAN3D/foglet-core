@@ -15,7 +15,7 @@ describe('[SIGNALING] Direct/Signaling connections', function () {
     }).catch(done)
   })
 
-  it('signaling connection alone, return true when connected (use http://signaling.herokuapp.com/)', function (done) {
+  it('signaling connection alone, return true when connected', function (done) {
     const foglets = utils.buildFog(Foglet, 1, [], [{ url: 'stun:global.stun.twilio.com:3478?transport=udp' }])
     const f1 = foglets[0]
     f1.share()
@@ -28,7 +28,7 @@ describe('[SIGNALING] Direct/Signaling connections', function () {
     })
   })
 
-  it('signaling connection (2 peers network), return true when connected (use http://signaling.herokuapp.com/)', function (done) {
+  it('signaling connection (2 peers network), return true when connected', function (done) {
     const foglets = utils.buildFog(Foglet, 2, [], [{ url: 'stun:global.stun.twilio.com:3478?transport=udp' }])
     const f1 = foglets[0]
     const f2 = foglets[1]

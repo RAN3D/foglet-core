@@ -2,17 +2,31 @@ const path = require('path')
 const FSS = require('foglet-signaling-server')
 const fs = require('fs')
 const Twilio = require('twilio')
+const cors = require('cors')
 const express = require('express')
+const io = require('socket.io')
+const http = require('http')
 
-function run (app, log, host = 'localhost', port = 3000) {
+var corsOptions = {
+  origin: 'http://localhost:8000/',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+function run (app, log, host = 'localhost', port = 8000) {
+  app.use(cors(corsOptions))
   const twilioconfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'twilio_config.json'), 'utf-8'))
   console.log('Host: ', host)
   console.log('Port: ', port)
-
+  app.all((req, res, next) => {
+    console.log(req.url)
+  })
   app.use('/jquery', express.static(path.join(__dirname, '../../node_modules/jquery/dist')))
   app.use('/dist', express.static(path.join(__dirname, '../../dist/')))
 
-  app.get('/', (req, res) => {
+  app.get('/signaling', (req, res) => {
+    res.sendFile(path.join(__dirname, 'example-signaling.html'))
+  })
+  app.get('/direct', (req, res) => {
     res.sendFile(path.join(__dirname, 'example-signaling.html'))
   })
 
@@ -32,7 +46,15 @@ function run (app, log, host = 'localhost', port = 3000) {
     }
   })
 
-  FSS(app, log, host, port)
+  const httpServer = http.Server(app)
+
+  const ioServer = io(httpServer, {
+    origins: 'true'
+  })
+  ioServer.origins((origin, callback) => {
+    callback(null, true)
+  })
+  FSS(app, log, host, port, ioServer, {}, httpServer)
 }
 
 module.exports = run

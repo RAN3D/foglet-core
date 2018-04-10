@@ -145,27 +145,27 @@ class Broadcast extends AbstractBroadcast {
         if (this._bufferAntiEntropy.id !== message.id) {
           this._bufferAntiEntropy = message
         }
-      // #B add the new element to the buffer
+        // #B add the new element to the buffer
         if (message.element) {
           this._bufferAntiEntropy.elements.push(message.element)
         }
-      // #C add causality metadata
+        // #C add causality metadata
         if (message.causality) {
           this._bufferAntiEntropy.causality = message.causality
         }
-      // #D the buffered message is fully arrived, deliver
+        // #D the buffered message is fully arrived, deliver
         if (this._bufferAntiEntropy.elements.length ===
           this._bufferAntiEntropy.nbElements) {
         // #1 considere each message in the response independantly
           for (let i = 0; i < this._bufferAntiEntropy.elements.length; ++i) {
             let element = this._bufferAntiEntropy.elements[i]
-          // #2 only check if the message has not been received yet
+            // #2 only check if the message has not been received yet
             if (!this._shouldStopPropagation(element)) {
               this._causality.incrementFrom(element.id)
               this.emit('receive', message.issuer, element.payload)
             }
           }
-        // #3 merge causality structures
+          // #3 merge causality structures
           this._causality.merge(this._bufferAntiEntropy.causality)
         }
         break
@@ -177,9 +177,9 @@ class Broadcast extends AbstractBroadcast {
         // maintain `this._buffer` sorted to search in O(log n)
           const index = sortedIndexBy(this._buffer, message, formatID)
           this._buffer.splice(index, 0, message)
-        // #2 deliver
+          // #2 deliver
           this._reviewBuffer()
-        // #3 rebroadcast
+          // #3 rebroadcast
           this._sendAll(message)
         }
         break

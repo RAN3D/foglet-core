@@ -5,9 +5,11 @@
   "main": "./foglet-core.js",
   "scripts": {
     "lint": "standard --verbose | snazzy",
+    "fix": "standard --fix",
     "esdoc": "esdoc",
     "all": "npm run build && npm run min && npm test && npm run esdoc",
-    "test": "npm run replace && foglet-scripts test",
+    "test": "node ./tests/test.js",
+    "test-bis": "foglet-scripts test -- --karma ./foglet-karma-config.js",
     "replace": "node tests/replacesignaling.js",
     "start": "foglet-scripts start",
     "build": "foglet-scripts build",
@@ -49,11 +51,12 @@
     "version-vector-with-exceptions": "^0.1.0"
   },
   "devDependencies": {
+    "cors": "^2.8.4",
     "esdoc": "^1.0.3",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-node": "^1.0.3",
     "esdoc-standard-plugin": "^1.0.0",
-    "foglet-scripts": "^0.3.0",
+    "foglet-scripts": "^0.3.x",
     "jquery": "^3.3.1",
     "karma-firefox-launcher": "^1.1.0",
     "snazzy": "^7.1.1",
