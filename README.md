@@ -3,19 +3,21 @@
 <hr/>
 </div>
 
-# foglet-core  [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core) [![npm version](https://badge.fury.io/js/foglet-core.svg)](https://badge.fury.io/js/foglet-core) [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
-Core of the foglet library
+# [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core) [![npm version](https://badge.fury.io/js/foglet-core.svg)](https://badge.fury.io/js/foglet-core) [![NPM](https://nodei.co/npm/foglet-core.png)](https://npmjs.org/package/foglet-core)
+ [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
 
-This project aims to provide a solid core infrastructure for developping **fog computing applications**.
+Easy use of WebRTC Networks with embedded network management and simple communication primitives.
 
-Nowadays, more and more applications interact with a server (private or in the cloud). These interactions cost a lot, especially if you make an application for a huge number of clients.
 
-Fog applications communicate to a direct peer of the network instead of relying on a server to forward data to this peer.
+Communication primitives:
+- Causal Broadcast (with anti entropy not enabled by default)
+- Unicast
+- Multicast
+- Streaming over our Causal Broadcast and Unicast
 
-There is a huge number of applications and a lot of pros and cons of why and how create a Fog application. We are not here to convince you to absolutely use Fog applications.
+We only support Data Channel for the moment.
 
-But foglet-core is made to ease your development in that way.
-So **try it** by your-self and **give us your feedback**, we will be happy to answer to your questions !
+Networks can be created with: **ran3d/n2n-overlay-wrtc**
 
 ## Installation
 
@@ -144,7 +146,7 @@ npm run server
 
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
 * [T. Minier (Callidon)](https://github.com/Callidon)
-* [Chat-Wane](https://github.com/Chat-Wane/)
+* [B. Nédelec (Chat-Wane)](https://github.com/Chat-Wane/)
 
 ## References
 
