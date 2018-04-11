@@ -14,7 +14,7 @@
     "start": "foglet-scripts start",
     "build": "foglet-scripts build",
     "min": "webpack --config ./foglet-webpack-config-min.js",
-    "example": "node tests/examples/server.js",
+    "example": "npm run esdoc && npm run build && npm run min && node tests/examples/server.js",
     "dev": "webpack --config ./webpack.config.js --watch"
   },
   "repository": {

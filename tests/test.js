@@ -3,7 +3,7 @@ const path = require('path')
 
 function test () {
   return new Promise((resolve, reject) => {
-    const child = spawn(/^win/.test(process.platform) ? 'npm.cmd' : 'npm', ['run',  'test-bis']);
+    const child = spawn(/^win/.test(process.platform) ? 'npm.cmd' : 'npm', ['run', 'test-bis'])
     child.stdout.on('data', (data) => {
       console.log(`[TEST]: ${data}`)
     })

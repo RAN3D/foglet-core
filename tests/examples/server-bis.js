@@ -23,6 +23,10 @@ function run (app, log, host = 'localhost', port = 8000) {
   app.use('/jquery', express.static(path.join(__dirname, '../../node_modules/jquery/dist')))
   app.use('/dist', express.static(path.join(__dirname, '../../dist/')))
 
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'))
+  })
+
   app.get('/signaling', (req, res) => {
     res.sendFile(path.join(__dirname, 'example-signaling.html'))
   })

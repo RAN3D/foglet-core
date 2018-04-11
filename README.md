@@ -8,16 +8,18 @@
 
 Easy use of WebRTC Networks with embedded network management and simple communication primitives.
 
-
 Communication primitives:
-- Causal Broadcast (with anti entropy not enabled by default)
-- Unicast
-- Multicast
+- Causal Broadcast (to all peers in your network, with anti entropy not enabled by default)
+- Unicast (to one direct neighbor)
+- Multicast (to one or several direct neighbors)
 - Streaming over our Causal Broadcast and Unicast
+- Multiple communication channel per network
 
 We only support Data Channel for the moment.
 
-Networks can be created with: **ran3d/n2n-overlay-wrtc**
+Network management:
+- An adapter on [ran3d/spray-wrtc](https://github.com/ran3d/spray-wrtc) as Random Peer Sampling Network (keeping log(NetworkSize) peers around you)
+- Overlay Networks or Networks can be created with: [**ran3d/n2n-overlay-wrtc**](https://github.com/ran3d/n2n-overlay-wrtc)
 
 ## Installation
 
@@ -27,7 +29,7 @@ Networks can be created with: **ran3d/n2n-overlay-wrtc**
 npm install --save foglet-core
 ```
 
-The foglet library is distributed as a browserified bundle.
+The foglet library is distributed with its sources and a bundle for an in-browser usage.
 
 ## Buliding fog computing applications
 
@@ -40,7 +42,7 @@ You can also check out [**the documentation online**](https://ran3d.github.io/fo
 
 Creates a new HTML file and insert the **foglet bundle** in it:
 ```html
-<script src="node_modules/foglet-core/dist/foglet.bundle.js" type="text/javascript"></script>
+<script src="node_modules/foglet-core/dist/foglet.bundle.js" type="text/javascript"></script> <!-- or use the minified bundle, foglet.bundle.min.js -->
 ```
 
 Then, foglet library is available in the variable `foglet` :
