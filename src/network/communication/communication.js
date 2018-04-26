@@ -31,6 +31,9 @@ const MiddlewareRegistry = require('../../utils/middleware-registry.js')
 const StreamRequest = require('./stream/stream-request.js')
 const StreamMessage = require('./stream/stream-message.js')
 
+// media
+const MediaStream = require('./media/mediaunicast')
+
 /**
  * Communication is a facade to send messages to peers in a network using unicast or broadcast channels.
  * @author Grall Arnaud (Folkvir)
@@ -40,6 +43,7 @@ class Communication {
     this.network = source
     this.unicast = new Unicast(this.network, protocol)
     this.broadcast = new Broadcast(this.network, protocol)
+    this.unicastmedia = new MediaStream(this.network, protocol)
     // channels used for streaming
     this._unicastStreams = new Unicast(this.network, `${this.protocol}-streams`)
     this._broadcastStreams = new Broadcast(this.network, `${this.protocol}-streams`)
@@ -57,6 +61,14 @@ class Communication {
    */
   use (middleware, priority = 0) {
     this._middlewares.register(middleware, priority)
+  }
+
+  sendUnicastMediaStream(id, media) {
+    return this.unicastmedia.send(id, media)
+  }
+
+  onUnicastMediaStream(callback) {
+    this.unicastmedia.on('receive', callback)
   }
 
   /**

@@ -33,6 +33,9 @@ function run (app, log, host = 'localhost', port = 8000) {
   app.get('/direct', (req, res) => {
     res.sendFile(path.join(__dirname, 'example-signaling.html'))
   })
+  app.get('/mediaunicast', (req, res) => {
+    res.sendFile(path.join(__dirname, 'example-mediaunicast.html'))
+  })
 
   app.get('/ice', function (req, res) {
     console.log('A user want ice from client:')
