@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "build": "foglet-scripts build",
     "min": "webpack --config ./foglet-webpack-config-min.js",
     "example": "npm run esdoc && npm run build && npm run min && node tests/examples/server.js",
-    "dev": "webpack --config ./webpack.config.js --watch"
+    "dev": "webpack --config ./foglet-webpack-config.js --watch"
   },
   "repository": {
     "type": "git",
@@ -45,7 +45,7 @@
     "readable-stream": "^2.3.5",
     "socket.io-client": "^2.1.0",
     "spray-wrtc": "^2.0.x",
-    "tman-wrtc": "0.1.0",
+    "tman-wrtc": "0.1.x",
     "unicast-definition": "^2.0.0",
     "uuid": "^3.2.1",
     "version-vector-with-exceptions": "^0.1.0"
