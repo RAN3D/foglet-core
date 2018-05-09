@@ -127,7 +127,7 @@ class NetworkManager extends EventEmitter {
   /**
    * Construct the RPS by its type and options For the moment(spray-wrtc as default)
    * @private
-   * @param  {string} type    - Type of the RPS (spray-wrtc/fcn-wrtc/...)
+   * @param  {string} type    - Type of the RPS (spray-wrtc/custom/...)
    * @param  {Object} options - Options of the RPS
    * @param  {string} options.protocol - Name of the protocol run by the RPS
    * @param  {Object} options.signaling - Options used to configure the interactions with the signaling server
@@ -136,7 +136,7 @@ class NetworkManager extends EventEmitter {
    * @return {Network} The constructed RPS
    */
   _buildRPS (type, options) {
-    const rpsClass = this._chooseRps(type)
+    const rpsClass = this._chooseRps(type, options)
     const rps = new rpsClass(options)
     return new Network(rps, options.signaling, options.protocol)
   }
@@ -148,11 +148,14 @@ class NetworkManager extends EventEmitter {
    * @param  {string} type - RPS type
    * @return {function} The RPS constructor
    */
-  _chooseRps (type) {
+  _chooseRps (type, options) {
     let rps = null
     switch (type) {
       case 'spray-wrtc':
         rps = SprayAdapter
+        break
+      case 'custom':
+        rps = options.class
         break
       default:
         rps = SprayAdapter
