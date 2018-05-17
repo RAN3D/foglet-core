@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
@@ -42,17 +42,17 @@
     "debug": "^3.1.0",
     "lodash.merge": "^4.6.1",
     "lodash.sortedindexby": "^4.6.0",
-    "readable-stream": "^2.3.5",
+    "readable-stream": "^2.3.6",
     "socket.io-client": "^2.1.0",
     "spray-wrtc": "^2.0.x",
     "tman-wrtc": "0.1.x",
-    "unicast-definition": "^2.0.0",
+    "unicast-definition": "^2.0.1",
     "uuid": "^3.2.1",
     "version-vector-with-exceptions": "^0.1.0"
   },
   "devDependencies": {
     "cors": "^2.8.4",
-    "esdoc": "^1.0.3",
+    "esdoc": "^1.0.4",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-node": "^1.0.3",
     "esdoc-standard-plugin": "^1.0.0",
@@ -60,9 +60,9 @@
     "jquery": "^3.3.1",
     "karma-firefox-launcher": "^1.1.0",
     "snazzy": "^7.1.1",
-    "twilio": "^3.14.0",
-    "uglifyjs-webpack-plugin": "^1.2.4",
-    "webpack-cli": "^2.0.14"
+    "twilio": "^3.15.1",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack-cli": "^2.0.15"
   },
   "bundledDependencies": [
     "debug",
