@@ -32,7 +32,7 @@ const buildFog = (Foglet, size, overlays = [], ice = []) => {
     options.overlays.forEach(overlay => {
       overlay.options.socketClass = SimplePeerMoc
     })
-    fog.push(new Foglet())
+    fog.push(new Foglet(options))
   }
   return fog
 }
