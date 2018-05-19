@@ -30,10 +30,18 @@ const protocol = require('./src/fprotocol/protocol-builder.js')
 const AbstractNetwork = require('./src/network/abstract/abstract-network.js')
 const AbstractOverlay = require('./src/network/abstract/abstract-overlay.js')
 const TManOverlay = require('./src/network/abstract/tman-overlay.js')
+// simple-peer moc
+const SimplePeerMoc = require('./src/utils/simple-peer-moc')
 
 module.exports = {
   Foglet,
   protocol,
+  /*
+   Moc to simulate abstract webrtc connections, to use within a lot of foglets on the same page.
+   It uses a centralized manager to manage connection.
+   Tried with 200 peers on a NodeJs script.
+   */
+  SimplePeerMoc,
   /*
    Externalize Communication Class to enable the creation of a specific communication channel
    inside the creation of a new network:

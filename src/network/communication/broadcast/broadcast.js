@@ -77,7 +77,7 @@ class Broadcast extends AbstractBroadcast {
 
     // #3 send the message to the neighborhood
     this._sendAll(broadcastMessage)
-    return broadcastMessage.isReady
+    return a
   }
 
   /**
@@ -194,8 +194,7 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean} True if the message should not be propagated, False if it should be.
    */
   _shouldStopPropagation (message) {
-    if (this._causality.isLower(message.id)) { return true }
-    return this._findInBuffer(formatID(message)) > -1
+    return this._causality.isLower(message.id) || (this._findInBuffer(formatID(message)) >=0)
   }
 
   /**
@@ -207,7 +206,7 @@ class Broadcast extends AbstractBroadcast {
   _findInBuffer (id) {
     // use a binary search algorithm since `this._buffer` is sorted by IDs
     let minIndex = 0
-    let maxIndex = this.length - 1
+    let maxIndex = this._buffer.length - 1
     let currentIndex, currentElement
 
     while (minIndex <= maxIndex) {

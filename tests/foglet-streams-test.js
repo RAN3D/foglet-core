@@ -4,7 +4,7 @@ const Foglet = require('../src/foglet.js')
 const utils = require('./utils.js')
 
 describe('Foglet streaming communication', function () {
-  this.timeout(20000)
+  this.timeout(30000)
   it('should stream data to a neighbour using unicast', function (done) {
     const foglets = utils.buildFog(Foglet, 2)
     const f1 = foglets[0]
@@ -15,7 +15,7 @@ describe('Foglet streaming communication', function () {
       assert.equal(id, f1.outViewID)
       message.on('data', data => { acc += data })
       message.on('end', () => {
-        assert.equal(acc, 'Hello world!')
+        assert.equal(acc, 'Hello world!Family!')
         utils.clearFoglets(foglets)
         done()
       })
@@ -28,6 +28,7 @@ describe('Foglet streaming communication', function () {
         const stream = f1.streamUnicast(peers[0])
         stream.write('Hello ')
         stream.write('world!')
+        stream.write('Family!')
         stream.end()
       }, 2000)
     }).catch(done)
@@ -43,7 +44,7 @@ describe('Foglet streaming communication', function () {
       message.on('data', () => null)
       message.on('end', () => {
         assert.equal(message.trailers.length, 1)
-        assert.equal(message.trailers[0], 'Hello world!')
+        assert.equal(message.trailers[0], 'Hello world!Family!')
         utils.clearFoglets(foglets)
         done()
       })
@@ -55,7 +56,7 @@ describe('Foglet streaming communication', function () {
         assert.equal(peers.length, 1)
         const stream = f1.streamUnicast(peers[0])
         stream.write('foo')
-        stream.addTrailer('Hello world!')
+        stream.addTrailer('Hello world!Family!')
         stream.end()
       }, 2000)
     }).catch(done)
@@ -100,7 +101,7 @@ describe('Foglet streaming communication', function () {
       assert.equal(id, f1.outViewID)
       message.on('data', data => { acc += data })
       message.on('end', () => {
-        assert.equal(acc, 'Hello world!')
+        assert.equal(acc, 'Hello world!Family!')
         utils.clearFoglets(foglets)
         done()
       })
@@ -111,6 +112,7 @@ describe('Foglet streaming communication', function () {
         const stream = f1.streamBroadcast()
         stream.write('Hello ')
         stream.write('world!')
+        stream.write('Family!')
         stream.end()
       }, 2000)
     }).catch(done)
@@ -132,7 +134,7 @@ describe('Foglet streaming communication', function () {
       assert.equal(id, f1.outViewID)
       message.on('data', data => { accA += data })
       message.on('end', () => {
-        assert.equal(accA, 'Hello world!')
+        assert.equal(accA, 'Hello world!Family!')
         check()
       })
     })
@@ -141,7 +143,7 @@ describe('Foglet streaming communication', function () {
       assert.equal(id, f1.outViewID)
       message.on('data', data => { accB += data })
       message.on('end', () => {
-        assert.equal(accB, 'Hello world!')
+        assert.equal(accB, 'Hello world!Family!')
         check()
       })
     })
@@ -151,6 +153,7 @@ describe('Foglet streaming communication', function () {
         const stream = f1.streamBroadcast()
         stream.write('Hello ')
         stream.write('world!')
+        stream.write('Family!')
         stream.end()
       }, 2000)
     }).catch(done)

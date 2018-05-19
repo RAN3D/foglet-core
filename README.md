@@ -19,6 +19,7 @@ We only support Data Channel for the moment.
 
 Network management:
 - An adapter on [ran3d/spray-wrtc](https://github.com/ran3d/spray-wrtc) as Random Peer Sampling Network (keeping log(NetworkSize) peers around you)
+- An adapter on [Cyclon](https://www.semanticscholar.org/paper/CYCLON%3A-Inexpensive-Membership-Management-for-P2P-Voulgaris-Gavidia/4b79c844bb854c11ab18981591e4d2ea01f29539) as Random Peer Sampling Network (keeping "maxPeers" peers around you)
 - Overlay Networks or Networks can be created with: [**ran3d/n2n-overlay-wrtc**](https://github.com/ran3d/n2n-overlay-wrtc)
 
 ## Installation

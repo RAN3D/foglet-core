@@ -48,6 +48,9 @@ const DEFAULT_OPTIONS = () => {
         timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
         pendingTimeout: 60 * 1000,
         delta: 60 * 1000, // spray-wrtc shuffle interval
+        maxPeers: 5,
+        a: 1, // for spray: a*ln(N) + b, inject a arcs
+        b: 5, // for spray: a*ln(N) + b, inject b arcs
         signaling: {
           address: 'https://signaling.herokuapp.com/',
           // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Foglet-core example</title>
+  </head>
+
+  <body>
+    Please: Open the console!
+  </body>
+
+  <script src='../../dist/foglet.bundle.js'></script>
+  <script type='text/javascript'>
+    console.log(foglet)
+
+    let app1, app2
+    app1 = createApp('Foglet1')
+    app2 = createApp('Foglet2')
+
+    app1.connection(app2)
+
+
+
+    function createApp(id) {
+      const fog = new foglet.Foglet({
+        id,
+        verbose: true, // want some logs ? switch to false otherwise
+      })
+      fog.onUnicast((id, message) => {
+        console.log(`${fog.id} received a unicasted message from ${id}: `, message)
+      })
+      fog.onBroadcast((id, message) => {
+        console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
+      })
+      fog.onStreamUnicast((id, stream) => {
+        stream.on('data', (data) => {
+          console.log('Receiving: ', data)
+        })
+        stream.on('end', () => {
+          console.log('Receiving end of stream.')
+        })
+      })
+      fog.onStreamBroadcast((id, stream) => {
+        stream.on('data', (data) => {
+          console.log('Receiving: ', data)
+        })
+        stream.on('end', () => {
+          console.log('Receiving end of stream.')
+        })
+      })
+      return fog
+    }
+
+    function teststreamunicast() {
+      const stream = app1.streamUnicast(app2.id+'-I')
+      stream.write('lol1')
+      stream.write('lol2')
+      stream.write('lol3')
+      stream.end()
+    }
+
+    function teststreambroadcast() {
+      const stream = app1.streamBroadcast()
+      stream.write('lol1')
+      stream.write('lol2')
+      stream.write('lol3')
+      stream.end()
+    }
+
+    function testunicast() {
+      app1.sendUnicast('Foglet2-I', 'Unicast: Hello world!')
+    }
+
+    function testbroadcast() {
+      app1.sendBroadcast('Broadcast: Hello world!')
+    }
+
+    function print() {
+      console.log(app1.overlay().communication.broadcast)
+      console.log(app2.overlay().communication.broadcast)
+      console.log(app1.overlay().communication._broadcastStreams)
+      console.log(app2.overlay().communication._broadcastStreams)
+    }
+  </script>
+</html>
