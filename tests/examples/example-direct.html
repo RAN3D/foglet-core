@@ -12,15 +12,10 @@
   <script src='../../dist/foglet.bundle.js'></script>
   <script type='text/javascript'>
     console.log(foglet)
-
     let app1, app2
     app1 = createApp('Foglet1')
     app2 = createApp('Foglet2')
-
     app1.connection(app2)
-
-
-
     function createApp(id) {
       const fog = new foglet.Foglet({
         id,

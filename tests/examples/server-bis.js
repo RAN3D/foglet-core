@@ -21,6 +21,7 @@ function run (app, log, host = 'localhost', port = 8000) {
     console.log(req.url)
   })
   app.use('/jquery', express.static(path.join(__dirname, '../../node_modules/jquery/dist')))
+  app.use('/p2p-graph', express.static(path.join(__dirname, '../../node_modules/p2p-graph/')))
   app.use('/dist', express.static(path.join(__dirname, '../../dist/')))
 
   app.get('/', (req, res) => {
@@ -33,11 +34,14 @@ function run (app, log, host = 'localhost', port = 8000) {
   app.get('/direct', (req, res) => {
     res.sendFile(path.join(__dirname, 'example-signaling.html'))
   })
-  app.get('/mediaunicast', (req, res) => {
-    res.sendFile(path.join(__dirname, 'example-mediaunicast.html'))
+  app.get('/media', (req, res) => {
+    res.sendFile(path.join(__dirname, 'example-media.html'))
   })
   app.get('/stream', (req, res) => {
     res.sendFile(path.join(__dirname, 'example-stream.html'))
+  })
+  app.get('/spray', (req, res) => {
+    res.sendFile(path.join(__dirname, 'example-spray.html'))
   })
 
   app.get('/ice', function (req, res) {

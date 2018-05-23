@@ -1,14 +1,37 @@
 const CommunicationProtocol = require('../abstract/communication-protocol')
-const debug = (require('debug'))('foglet-core:mediaunicast')
+const debug = (require('debug'))('foglet-core:media')
+const Broadcast = require('./../broadcast/broadcast.js')
+const Unicast = require('./../unicast/unicast.js')
+const uuid = require('uuid/v4')
 
-class MediaUnicast extends CommunicationProtocol {
+
+class MediaBroadcast extends CommunicationProtocol {
   constructor (source, protocol) {
     super(source, `foglet-media-unicast-protocol-${protocol}`)
     this.options = {
-      retry: 5
+      retry: 1
     }
+    this._activeMedia = new Map()
+
+    // create a datachannel broadcast,
+    this._broadcast = new Broadcast(source, protocol+'-stream-broadcast-internal')
+    this._broadcast.on('receive', (id, message) => {
+      this._receiveBroadcast(id, message)
+    })
+    // create a data channel unicast
+    this._unicast = new Unicast(source, protocol+'-stream-unicast-internal')
+    this._unicast.on('receive', (id, message) => {
+      this._receiveUnicast(id, message)
+    })
+
     this.NI = this._source.rps.NI
     this.NO = this._source.rps.NO
+    this._source.rps.on('open', (peerId) => {
+      this._checkStreamConnect(peerId)
+    })
+    this._source.rps.on('close', (peerId) => {
+      this._checkStreamDisconnect(peerId)
+    })
     this.i = this._source.rps.i
     this.o = this._source.rps.o
     this._source.rps.on('stream', (id, stream) => {
@@ -20,17 +43,54 @@ class MediaUnicast extends CommunicationProtocol {
     return this._source.rps._pid()
   }
 
+  _checkStreamConnect (peerId) {
+    console.log('A new peer is now connected: %s', peerId)
+  }
+
+  _checkStreamDisconnect (peerId) {
+    console.log('A peer is now disconnected: %s', peerId)
+  }
+
+  _receiveUnicast(id, message) {
+    
+  }
+
+  _receiveBroadcast(id, message) {
+
+  }
+
+  /**
+   * Send a message to only one neighbor...
+   * @param {Object} id - The id to send the stream (media) to
+   * @param  {Object}  media  - The stream to send
+   * @return {boolean}
+   */
+  sendUnicast (id, media) {
+    if(!media.id) media.id = uuid()
+    if(!this._activeMedia.has(media.id)) {
+      this._activeMedia.set(media.id, media)
+      this._setListeners(media)
+    }
+    return this._send(id, media, this.options.retry)
+  }
+
   /**
    * Send a message
    * @param {Object} id - The id to send the stream (media) to
    * @param  {Object}  media  - The stream to send
    * @return {boolean}
    */
-  send (id, media) {
+  sendBroadcast (id, media) {
+    console.log(media)
+    if(!media.id) media.id = uuid()
+    if(!this._activeMedia.has(media.id)) {
+      this._activeMedia.set(media.id, media)
+      this._setListeners(media)
+    }
     return this._send(id, media, this.options.retry)
   }
 
-  _send (peerId, media, retry = 0) {
+  _send (peerId, media, retry = this.options.retry) {
     let promise
     // #1 normal behavior
     if (this.i.has(peerId)) {
@@ -102,8 +162,26 @@ class MediaUnicast extends CommunicationProtocol {
    */
   _receive (id, stream) {
     debug('Receive a media stream: ', id, stream)
+    if(!stream.id) stream.id = uuid()
+    if(!this._activeMedia.has(stream.id)) {
+      this._activeMedia.set(stream.id, {peer: id, stream})
+      this._setListeners(stream)
+    }
     this.emit('receive', id, stream)
+  }
+
+  _setListeners(media) {
+    media.onactive = () => {
+      console.log('Media %s is active...', media.id)
+    }
+    media.oninactive = () => {
+      console.log('Media %s is inactive...', media.id)
+      this._sendRequest(media.id)
+    }
+    media.onended = () => {
+      console.log('Media %s is finished...', media.id)
+    }
   }
 }
 
-module.exports = MediaUnicast
+module.exports = MediaBroadcast

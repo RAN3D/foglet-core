@@ -45,7 +45,7 @@ const DEFAULT_OPTIONS = () => {
           trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
           iceServers: [] // define iceServers in non local instance
         },
-        timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+        timeout: 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
         pendingTimeout: 60 * 1000,
         delta: 60 * 1000, // spray-wrtc shuffle interval
         maxPeers: 5,
@@ -134,8 +134,9 @@ class Foglet extends EventEmitter {
   * @constructs Foglet
   * @param {Object} options - Options used to build the Foglet
   * @param {boolean} options.verbose - If True, activate logging
+  * @param {boolean} options.id - Id of the foglet, will identify the peer as ID-I and ID-O in a neighbor view, respectively for Outgoing and ingoing arcs
   * @param {Object} options.rps - Options used to configure the Random Peer Sampling (RPS) network
-  * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray or `fcn-wrtc` for a fully connected network over WebRTC)
+  * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray, `cyclon` for Cyclon or `custom` for a custom network
   * @param {Object} options.rps.options - Options by the type of RPS choosed
   * @param {string} options.rps.options.protocol - Name of the protocol run by the application
   * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see WebRTC docs for more details)

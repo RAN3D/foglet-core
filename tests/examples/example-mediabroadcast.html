@@ -9,6 +9,8 @@
     <p> Please: Open the console!</p>
     <p> Sender: <video id='peer1' width="320" height="240" controls autoplay></video> </p>
     <p> Receiver: <video id='peer2' width="320" height="240" controls></video></p>
+    <p> Receiver: <video id='peer3' width="320" height="240" controls></video></p>
+    <p> Receiver: <video id='peer4' width="320" height="240" controls></video></p>
   </body>
 
   <script src='/dist/foglet.bundle.js'></script>
@@ -18,8 +20,8 @@
     const constraints = {
       video: true
     };
-    localStorage.debug='foglet-core*'
-    let app1, app2
+    localStorage.debug='foglet-core*, spray-wrtc'
+    let app1, app2, app3, app4
     createApp().then((a) => {
       app1 = a
       app1.share()
@@ -28,7 +30,24 @@
           app2 = b
           app2.share()
           app2.connection().then(() => {
-            console.log('Peers connected. Play now with them !')
+            createApp().then((c) => {
+              app3 = c
+              app3.share()
+              app3.connection().then(() => {
+                createApp().then((d) => {
+                  app4 = d
+                  app4.share()
+                  app4.connection().then(() => {
+                    console.log('Peers connected. Play now with them !')
+                    teststream()
+                  }).catch(e => {
+                    console.log(e)
+                  })
+                })
+              }).catch(e => {
+                console.log(e)
+              })
+            })
           }).catch(e => {
             console.log(e)
           })
@@ -63,9 +82,9 @@
             verbose: true, // want some logs ? switch to false otherwise
             rps: {
               options : {
-                delta: 30 * 1000,
-                timeout: 30 * 1000,
-                pendingTimeout: 30 * 1000,
+                delta: 10 * 1000,
+                timeout: 1 * 1000,
+                pendingTimeout: 10 * 1000,
                 webrtc: {
                   trickle: true,
                   iceServers: data.ice
@@ -113,6 +132,26 @@
         }
         video.play() // show the receiver
       })
+      app3.overlay().communication.onUnicastMediaStream((id, mediaStream) => {
+        console.log('Receive in the app the media stream: ', id, mediaStream)
+        const video = document.getElementById('peer3');
+        try {
+          video.srcObject = mediaStream;
+        } catch (error) {
+          video.src = URL.createObjectURL(mediaStream);
+        }
+        video.play() // show the receiver
+      })
+      app4.overlay().communication.onUnicastMediaStream((id, mediaStream) => {
+        console.log('Receive in the app the media stream: ', id, mediaStream)
+        const video = document.getElementById('peer4');
+        try {
+          video.srcObject = mediaStream;
+        } catch (error) {
+          video.src = URL.createObjectURL(mediaStream);
+        }
+        video.play() // show the receiver
+      })
       navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
         console.log(mediaStream)
         const video = document.getElementById('peer1');
@@ -122,7 +161,10 @@
           video.src = URL.createObjectURL(mediaStream);
         }
         video.play() // show the receiver
-        app1.overlay().communication.sendUnicastMediaStream(app2.id+'-I', mediaStream)
+        app1.getNeighbours().forEach((neigh) => {
+          console.log('Sending a media stream to %s', neigh)
+          app1.overlay().communication.sendBroadcastMediaStream(neigh, mediaStream)
+        })
       }).catch(e => {
         console.error(e)
       })

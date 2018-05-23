@@ -61,6 +61,7 @@
     "foglet-signaling-server": "^1.0.0",
     "jquery": "^3.3.1",
     "karma-firefox-launcher": "^1.1.0",
+    "p2p-graph": "^1.2.2",
     "snazzy": "^7.1.1",
     "twilio": "^3.17.0",
     "uglifyjs-webpack-plugin": "^1.2.5",

@@ -32,7 +32,7 @@ const StreamRequest = require('./stream/stream-request.js')
 const StreamMessage = require('./stream/stream-message.js')
 
 // media
-const MediaStream = require('./media/mediaunicast')
+const MediaStream = require('./media/media')
 
 /**
  * Communication is a facade to send messages to peers in a network using unicast or broadcast channels.
@@ -43,7 +43,7 @@ class Communication {
     this.network = source
     this.unicast = new Unicast(this.network, protocol)
     this.broadcast = new Broadcast(this.network, protocol)
-    this.unicastmedia = new MediaStream(this.network, protocol)
+    this.media = new MediaStream(this.network, protocol)
     // channels used for streaming
     this._unicastStreams = new Unicast(this.network, `${protocol}-streams`)
     this._broadcastStreams = new Broadcast(this.network, `${protocol}-streams`)
@@ -63,12 +63,39 @@ class Communication {
     this._middlewares.register(middleware, priority)
   }
 
+  /**
+   * Experimental: send a stream to neighbor.
+   * Its time to live is bounded to the the delta parameter which is the time between all shuffle.
+   * @param  {[type]} id    [description]
+   * @param  {[type]} media [description]
+   * @return {[type]}       [description]
+   */
   sendUnicastMediaStream (id, media) {
-    return this.unicastmedia.send(id, media)
+    console.log('[Warning] experimental function. Allows you to send a stream to a neighbor. But will be closed when a shuffle arrives.')
+    return this.media.sendUnicast(id, media)
   }
 
-  onUnicastMediaStream (callback) {
-    this.unicastmedia.on('receive', callback)
+  /**
+   * Experimental: send a stream to neighbor.
+   * Its time to live is bounded to the the delta parameter which is the time between all shuffle.
+   * @param  {[type]} id    [description]
+   * @param  {[type]} media [description]
+   * @return {[type]}       [description]
+   */
+  sendBroadcastMediaStream (id, media) {
+    console.log('[Warning] experimental function. Allows you to send a stream to all the network.')
+    return this.media.sendBroadcast(id, media)
+  }
+
+  /**
+   * Experimental: receive a stream from a neighbor.
+   * Its time to live is bounded to the the delta parameter which is the time between all shuffle.
+   * @param  {[type]} id    [description]
+   * @param  {[type]} media [description]
+   * @return {[type]}       [description]
+   */
+  onMediaStream (callback) {
+    this.media.on('receive', callback)
   }
 
   /**
