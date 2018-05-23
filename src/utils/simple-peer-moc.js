@@ -52,9 +52,11 @@ class Manager {
   }
 
   destroy (from, to) {
-    debugManager('peer disconnected from/to: ', from, to)
-    from && this.manager.get(from) && this.manager.get(from)._close()
-    to && this.manager.get(to) && this.manager.get(to)._close()
+    if(from && to) {
+      debugManager('peer disconnected from/to: ', from, to)
+      if(this.manager.get(from)) this.manager.get(from)._close()
+      if(this.manager.get(to)) this.manager.get(to)._close()
+    }
   }
 
   send (from, to, msg, retry = 0) {
@@ -139,6 +141,7 @@ module.exports = class SimplePeerAbstract extends EventEmitter {
   }
 
   _error (error) {
+    debugManager(error)
     this.emit('error', error)
   }
 
