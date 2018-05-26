@@ -139,6 +139,7 @@ class Foglet extends EventEmitter {
   * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray, `cyclon` for Cyclon or `custom` for a custom network
   * @param {Object} options.rps.options - Options by the type of RPS choosed
   * @param {string} options.rps.options.protocol - Name of the protocol run by the application
+  * @param {string} options.rps.options.maxPeers - Using Cyclon, fix the max number of peers in the partial view
   * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see WebRTC docs for more details)
   * @param {number} options.rps.options.timeout - RPS timeout before definitively close a WebRTC connection
   * @param {number} options.rps.options.delta - RPS shuffle interval
