@@ -4,7 +4,6 @@ const Broadcast = require('./../broadcast/broadcast.js')
 const Unicast = require('./../unicast/unicast.js')
 const uuid = require('uuid/v4')
 
-
 class MediaBroadcast extends CommunicationProtocol {
   constructor (source, protocol) {
     super(source, `foglet-media-unicast-protocol-${protocol}`)
@@ -14,12 +13,12 @@ class MediaBroadcast extends CommunicationProtocol {
     this._activeMedia = new Map()
 
     // create a datachannel broadcast,
-    this._broadcast = new Broadcast(source, protocol+'-stream-broadcast-internal')
+    this._broadcast = new Broadcast(source, protocol + '-stream-broadcast-internal')
     this._broadcast.on('receive', (id, message) => {
       this._receiveBroadcast(id, message)
     })
     // create a data channel unicast
-    this._unicast = new Unicast(source, protocol+'-stream-unicast-internal')
+    this._unicast = new Unicast(source, protocol + '-stream-unicast-internal')
     this._unicast.on('receive', (id, message) => {
       this._receiveUnicast(id, message)
     })
@@ -44,18 +43,18 @@ class MediaBroadcast extends CommunicationProtocol {
   }
 
   _checkStreamConnect (peerId) {
-    console.log('A new peer is now connected: %s', peerId)
+    // console.log('A new peer is now connected: %s', peerId)
   }
 
   _checkStreamDisconnect (peerId) {
-    console.log('A peer is now disconnected: %s', peerId)
+    // console.log('A peer is now disconnected: %s', peerId)
   }
 
-  _receiveUnicast(id, message) {
-    
+  _receiveUnicast (id, message) {
+
   }
 
-  _receiveBroadcast(id, message) {
+  _receiveBroadcast (id, message) {
 
   }
 
@@ -66,8 +65,8 @@ class MediaBroadcast extends CommunicationProtocol {
    * @return {boolean}
    */
   sendUnicast (id, media) {
-    if(!media.id) media.id = uuid()
-    if(!this._activeMedia.has(media.id)) {
+    if (!media.id) media.id = uuid()
+    if (!this._activeMedia.has(media.id)) {
       this._activeMedia.set(media.id, media)
       this._setListeners(media)
     }
@@ -82,8 +81,8 @@ class MediaBroadcast extends CommunicationProtocol {
    */
   sendBroadcast (id, media) {
     console.log(media)
-    if(!media.id) media.id = uuid()
-    if(!this._activeMedia.has(media.id)) {
+    if (!media.id) media.id = uuid()
+    if (!this._activeMedia.has(media.id)) {
       this._activeMedia.set(media.id, media)
       this._setListeners(media)
     }
@@ -162,15 +161,15 @@ class MediaBroadcast extends CommunicationProtocol {
    */
   _receive (id, stream) {
     debug('Receive a media stream: ', id, stream)
-    if(!stream.id) stream.id = uuid()
-    if(!this._activeMedia.has(stream.id)) {
+    if (!stream.id) stream.id = uuid()
+    if (!this._activeMedia.has(stream.id)) {
       this._activeMedia.set(stream.id, {peer: id, stream})
       this._setListeners(stream)
     }
     this.emit('receive', id, stream)
   }
 
-  _setListeners(media) {
+  _setListeners (media) {
     media.onactive = () => {
       console.log('Media %s is active...', media.id)
     }

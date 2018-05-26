@@ -26,16 +26,21 @@ SOFTWARE.
 const Foglet = require('./src/foglet.js')
 const Communication = require('./src/network/communication/communication.js')
 const protocol = require('./src/fprotocol/protocol-builder.js')
+const Signaling = require('./src/network/signaling/signaling.js')
+// networks
+const Spray = require('./src/network/rps/sprayAdapter.js')
+const Cyclon = require('./src/network/rps/cyclon-adapter')
 // abstracts
 const AbstractNetwork = require('./src/network/abstract/abstract-network.js')
 const AbstractOverlay = require('./src/network/abstract/abstract-overlay.js')
 const TManOverlay = require('./src/network/abstract/tman-overlay.js')
 // simple-peer moc
 const SimplePeerMoc = require('./src/utils/simple-peer-moc')
-
+// Signaling
 module.exports = {
   Foglet,
   protocol,
+  Signaling,
   /*
    Moc to simulate abstract webrtc connections, to use within a lot of foglets on the same page.
    It uses a centralized manager to manage connection.
@@ -48,6 +53,9 @@ module.exports = {
    eg: create your own overlay or rps and use our communication channel for internal communications
    Warning: use a unique protocol
   */
+  networks: {
+    Spray, Cyclon
+  },
   communication: Communication,
   abstract: {
     rps: AbstractNetwork,

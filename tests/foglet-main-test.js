@@ -1,5 +1,4 @@
-'use strict'
-// const assert = require('chai').assert;
+const assert = require('chai').assert
 const Foglet = require('../src/foglet.js')
 const utils = require('./utils.js')
 

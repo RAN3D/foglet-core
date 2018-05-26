@@ -17,14 +17,30 @@
     app1 = createApp('Foglet1')
     app2 = createApp('Foglet2')
 
-    app1.connection(app2)
+    app1.connection(app2).then(() => {
+      teststreamunicast()
+      teststreambroadcast()
+    })
 
 
 
     function createApp(id) {
       const fog = new foglet.Foglet({
-        id,
+        id: 'C-'+id,
         verbose: true, // want some logs ? switch to false otherwise
+        rps: {
+          options : {
+            a: spray_a, b: spray_b,
+            delta: 30 * 1000,
+            timeout: 30 * 1000,
+            pendingTimeout: 30 * 1000,
+            socketClass: foglet.SimplePeerMoc,
+            signaling: {
+              address: document.location.origin,
+              room: 'example-stream'
+            }
+          }
+        }
       })
       fog.onUnicast((id, message) => {
         console.log(`${fog.id} received a unicasted message from ${id}: `, message)

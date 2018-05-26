@@ -10,6 +10,7 @@
   </body>
 
   <script src='../../dist/foglet.bundle.js'></script>
+  <script src='/chart.js/dist/Chart.min.js'></script>
   <script src='/p2p-graph/p2p-graph.min.js'></script>
   <p> Theoretical number of arcs: ~<span id="theoretical"></span> <br/>
     Actual number of duplicates: <span id="actualdup"></span><br/>
@@ -18,33 +19,41 @@
     Average PV size: <span id="pv"></span><br/>
     Actual number of pending entries: <span id="pending"></span></p>
   <div class="graph" width=800 height=600></div>
+  <canvas id="myChart" width="400" height="400"></canvas>
   <script type='text/javascript'>
-    console.log(foglet)
-    localStorage.debug = 'foglet-core:*, spa'
+    localStorage.debug = 'foglet-core:*'
     let graph = new window.P2PGraph('.graph');
     let revertedIndex = new Map();
     const max = 10
-    const spray_a = 1, spray_b = 5
+    const spray_a = 1
+    const spray_b = 5
+    const delta = 10 * 1000
+    const connection = 500
     document.getElementById("theoretical").innerHTML = ""+ (max* (spray_a*Math.log(max) + spray_b));
     let apps = []
     for(let i = 0; i<(max); i++) {
       const fog = createApp(i)
+      fog._source.on('close', (peerId) => {
+        console.log('[%s] A new peer is connected to us: ', fog._id, peerId)
+      })
+      fog._source.on('open', (peerId) => {
+        console.log('[%s] A new peer is connected to us: ', fog._id, peerId)
+      })
       apps.push(fog)
       graph.add({
-          id: fog.id,
+          id: fog._id,
           me: false,
           name: 'C-'+i
       });
-      fog.overlay().network.rps.on('open', (peerId) => {
-        console.log('[%s] Peer id: ', fog.id,  peerId)
-          !graph.hasLink(fog.id, revertedIndex.get(peerId)) &&
-              graph.connect(fog.id, revertedIndex.get(peerId));
+      fog._source.on('open', (peerId) => {
+          !graph.hasLink(fog._id, revertedIndex.get(peerId)) &&
+              graph.connect(fog._id, revertedIndex.get(peerId));
       });
-      fog.overlay().network.rps.on('close', (peerId) => {
-          (!fog.overlay().network.rps.o.has(peerId)) &&
-              graph.disconnect(fog.id, revertedIndex.get(peerId));
+      fog._source.on('close', (peerId) => {
+          (!fog._source.o.has(peerId)) &&
+              graph.disconnect(fog._id, revertedIndex.get(peerId));
       });
-      revertedIndex.set(fog.inViewID, fog.id);
+      revertedIndex.set(fog._network.inviewId, fog._id);
     }
 
     const loaded = []
@@ -55,79 +64,146 @@
           //chosen = loaded.length - 1
           if(loaded.length === 0)  {
             chosen = Math.floor(Math.random() * apps.length)
-            // fog.connection(apps[chosen]).then(() => {
-            //   loaded.push(fog)
-            //   resolve()
-            // }).catch(e => {
-            //   resolve()
-            // })
-            loaded.push(fog)
-            resolve()
-          } else {
-            fog.connection(loaded[chosen]).then(() => {
+            fog.connection().then(() => {
               loaded.push(fog)
               resolve()
             }).catch(e => {
+              console.error(e)
+              resolve()
+            })
+          } else {
+            const average = spray_a * (loaded.reduce((acc, cur) => acc+cur._source.partialView.size, 0) / max) + spray_b
+            const arr = loaded.map( cur => [...cur._source.partialView.values()].reduce((acc, cur) => acc+cur.length - 1, 0))
+            let chosen = arr.indexOf(closest(average, arr))
+            console.log('Average: %f, Chosen: %f', average, chosen, arr)
+            //chosen = Math.floor(Math.random(loaded.length))
+            fog.connection(loaded[chosen]._network).then(() => {
+              loaded.push(fog)
+              resolve()
+            }).catch(e => {
+              console.error(e)
               resolve()
             })
           }
-        }, 1000)
+        }, connection)
       })
-    }), Promise.resolve())
+    }), Promise.resolve()).then(() => {
+      const withoutduplicates = apps.reduce((acc, cur) => acc+cur._source.partialView.size, 0)
+      const numberofduplicates = apps.reduce((acc, cur) => {
+        return acc+[...cur._source.partialView.values()].reduce((acc, cur) => acc+cur.length - 1, 0)
+      }, 0)
+      const pv = apps.reduce((acc, cur) => acc+cur._source.partialView.size, 0)/apps.length
+      document.getElementById("actualdup").innerHTML = ""+ numberofduplicates;
+      document.getElementById("actualwodup").innerHTML = ""+ withoutduplicates;
+      document.getElementById("actualpourcentage").innerHTML = ""+ numberofduplicates / (numberofduplicates+withoutduplicates) * 100 + '%';
+      document.getElementById("pv").innerHTML = ""+ pv + " / "+ (spray_a*Math.log(max) + spray_b);
+      document.getElementById("pending").innerHTML = ""+ apps.reduce((acc, cur) => acc+cur._source.NI.pending.size+cur._source.NO.pending.size, 0);
+      // Any of the following formats may be used
+      addData(myChart, "Round "+r, {x: r, y:numberofduplicates+withoutduplicates})
+      r++
+      setInterval(() => {
+        apps.reduce((acc, fog) => acc.then(() => {
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              fog._source._exchange()
+              resolve()
+            }, delta / (max+1))
+          })
+        }), Promise.resolve()).then(() => {
+          setTimeout(() => {
+            const withoutduplicates = apps.reduce((acc, cur) => acc+cur._source.partialView.size, 0)
+            const numberofduplicates = apps.reduce((acc, cur) => {
+              return acc+[...cur._source.partialView.values()].reduce((acc, cur) => acc+cur.length - 1, 0)
+            }, 0)
+            const pv = apps.reduce((acc, cur) => acc+cur._source.partialView.size, 0)/apps.length
+            document.getElementById("actualdup").innerHTML = ""+ numberofduplicates;
+            document.getElementById("actualwodup").innerHTML = ""+ withoutduplicates;
+            document.getElementById("actualpourcentage").innerHTML = ""+ numberofduplicates / (numberofduplicates+withoutduplicates) * 100 + '%';
+            document.getElementById("pv").innerHTML = ""+ pv + " / "+ (spray_a*Math.log(max) + spray_b);
+            document.getElementById("pending").innerHTML = ""+ apps.reduce((acc, cur) => acc+cur._source.NI.pending.size+cur._source.NO.pending.size, 0);
+            // Any of the following formats may be used
+            addData(myChart, "Round "+r, {x: r, y:numberofduplicates+withoutduplicates})
+            r++
+          }, 0)
+        })
+      }, delta)
+    })
+
+
+    setInterval(() => {
+      const withoutduplicates = apps.reduce((acc, cur) => acc+cur._source.partialView.size, 0)
+      const numberofduplicates = apps.reduce((acc, cur) => {
+        return acc+[...cur._source.partialView.values()].reduce((acc, cur) => acc+cur.length - 1, 0)
+      }, 0)
+      const pv = apps.reduce((acc, cur) => acc+cur._source.partialView.size, 0)/apps.length
+      document.getElementById("actualdup").innerHTML = ""+ numberofduplicates;
+      document.getElementById("actualwodup").innerHTML = ""+ withoutduplicates;
+      document.getElementById("actualpourcentage").innerHTML = ""+ numberofduplicates / (numberofduplicates+withoutduplicates) * 100 + '%';
+      document.getElementById("pv").innerHTML = ""+ pv + " / "+ (spray_a*Math.log(max) + spray_b);
+      document.getElementById("pending").innerHTML = ""+ apps.reduce((acc, cur) => acc+cur._source.NI.pending.size+cur._source.NO.pending.size, 0);
+    }, 2000)
 
 
 
     function createApp(id) {
-      console.log(id)
-      const fog = new foglet.Foglet({
-        id: 'C-'+id,
-        verbose: true, // want some logs ? switch to false otherwise
-        rps: {
-          options : {
-            a: spray_a, b: spray_b,
-            delta: 30 * 1000,
-            timeout: 30 * 1000,
-            pendingTimeout: 30 * 1000,
-            socketClass: foglet.SimplePeerMoc
-          }
-        }
+      const fog = new foglet.networks.Spray({
+        peer: id,
+        a: spray_a, b: spray_b,
+        delta: 3600 * 60 * 1000,
+        timeout: delta,
+        pendingTimeout: delta,
+        socketClass: foglet.SimplePeerMoc
       })
-      fog.onUnicast((id, message) => {
-        console.log(`${fog.id} received a unicasted message from ${id}: `, message)
+      const signaling = new foglet.Signaling(fog, {
+        address: document.location.origin,
+        origins: '*',
+        timeout: 20000,
+        room:'example-spray'
       })
-      fog.onBroadcast((id, message) => {
-        console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
-      })
-      return fog
+      signaling.signaling()
+      return signaling
     }
+    var ctx = document.getElementById("myChart");
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["arcs"],
+            datasets: [{
+                label: '#Arcs',
+                data: []
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
+    let r = 0
 
-    setInterval(() => {
-      const withoutduplicates = apps.reduce((acc, cur) => acc+cur.overlay().network.rps.partialView.size, 0)
-      const numberofduplicates = apps.reduce((acc, cur) => {
-        return acc+[...cur.overlay().network.rps.partialView].reduce((a, c) => {
-          return c[1].length
-        }, 0)
-      }, 0)
-      const pv = apps.reduce((acc, cur) => acc+cur.overlay().network.rps.partialView.size, 0)/apps.length
-      document.getElementById("actualdup").innerHTML = ""+ numberofduplicates;
-      document.getElementById("actualwodup").innerHTML = ""+ withoutduplicates;
-      document.getElementById("actualpourcentage").innerHTML = ""+ numberofduplicates / withoutduplicates * 100 + '%';
-      document.getElementById("pv").innerHTML = ""+ pv + " / "+ (spray_a*Math.log(max) + spray_b);
-      document.getElementById("pending").innerHTML = ""+ apps.reduce((acc, cur) => acc+cur.overlay().network.rps.NI.pending.size+cur.overlay().network.rps.NO.pending.size, 0);
-    }, 2000)
 
-
+    function addData(chart, label, data) {
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.push(data);
+        });
+        chart.update();
+    }
 
     let scramblecount = 0
     let scramble = (delay = 0) => {
         scramblecount++
         for (let i = 0; i < max; ++i) {
             setTimeout ( (nth) => {
-                apps[nth].overlay().network.rps._exchange(); // force exchange
+                apps[nth]._network._exchange(); // force exchange
                 if(i === max-1) {
-                  const average = apps.reduce((acc, cur) => acc+cur.getNeighbours().length, 0) / apps.length
+                  const average = apps.reduce((acc, cur) => acc+cur._source.getPeers().length, 0) / apps.length
                   console.log('Round: %f, averagepv=%f', scramblecount, average)
-                  document.getElementById("pending").innerHTML = ""+ apps.reduce((acc, cur) => acc+cur.overlay().network.rps.NI.pending.size+cur.overlay().network.rps.NO.pending.size, 0);
+                  document.getElementById("pending").innerHTML = ""+ apps.reduce((acc, cur) => acc+cur._source.NI.pending.size+cur._source.NO.pending.size, 0);
                 }
             }, i*delay, i);
         };
@@ -136,5 +212,50 @@
         // }, 10000)
     };
 
+    function closeall() {
+      apps.forEach(c => {
+        c._source.NI.living.store.forEach(ni => {
+          ni.socket.on('close', () => {
+            console.log('From %s to %s is closed', c._source.PEER, ni.peer)
+          })
+        })
+        c._source.NO.living.store.forEach(no => {
+          no.socket.on('close', () => {
+            console.log('From %s to %s is closed', c._source.PEER, no.peer)
+          })
+        })
+      })
+    }
+
+    function closeone(app) {
+      console.log(app._source.getPeers())
+      app._source.NI.living.store.forEach(ni => {
+        ni.socket.destroy()
+      })
+      app._source.NO.living.store.forEach(no => {
+        no.socket.destroy()
+      })
+    }
+
+
+    function neigh() {
+      apps.forEach(c => {
+        console.log(c._source.getPeers())
+      })
+    }
+
+    function closest (num, arr) {
+        var curr = arr[0];
+        var diff = Math.abs (num - curr);
+        for (var val = 0; val < arr.length; val++) {
+            var newdiff = Math.abs (num - arr[val]);
+            if (newdiff < diff) {
+                diff = newdiff;
+                curr = arr[val];
+                console.log(curr)
+            }
+        }
+        return curr;
+    }
   </script>
 </html>

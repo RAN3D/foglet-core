@@ -1,5 +1,4 @@
-'use strict'
-// const assert = require('assert')
+const assert = require('chai').assert
 const Foglet = require('../src/foglet.js')
 const utils = require('./utils.js')
 
@@ -186,8 +185,10 @@ describe('Foglet High-level communication', function () {
       setTimeout(() => {
         const id1 = f1.overlay().communication.sendBroadcast('1')
         const id2 = f1.overlay().communication.sendBroadcast('2', null, {e: id1.e, c: 3})
-        f1.overlay().communication.sendBroadcast('3', null, id1)
-        f1.overlay().communication.sendBroadcast('4', null, id2)
+        setTimeout(() => {
+          f1.overlay().communication.sendBroadcast('3', null, id1)
+          f1.overlay().communication.sendBroadcast('4', null, id2)
+        }, 2000)
       }, 2000)
     }).catch(done)
   })

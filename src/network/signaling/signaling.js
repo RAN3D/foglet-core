@@ -69,12 +69,15 @@ class Signaling extends EventEmitter {
       timeout: this.options.timeout
     })
     this._socket.on('connect_timeout', (timeout) => {
+      this.unsignaling()
       this._manageTimeout(timeout)
     })
     this._socket.on('connect_error', (error) => {
+      this.unsignaling()
       this._manageConnectionError(error)
     })
     this._socket.on('error', (error) => {
+      this.unsignaling()
       this._manageError(error)
     })
     this._socket.on('disconnect', (reason) => {
@@ -83,7 +86,7 @@ class Signaling extends EventEmitter {
     this._socket.on('new_spray', (data) => {
       const signalingAccept = offer => {
         debug('Emit the accepted offer: ', offer)
-        this._socket.emit('accept', { offer, room: this.options.room })
+        this._socket.emit('accept', { id: this._id, offer, room: this.options.room })
       }
       debug('Receive a new offer: ', data)
       this._source.connect(signalingAccept, data)
@@ -107,9 +110,9 @@ class Signaling extends EventEmitter {
       const timeoutID = setTimeout(() => {
         reject(new Error('connection timed out.'))
       }, timeout)
-      const done = () => {
+      const done = (alone = false) => {
         clearTimeout(timeoutID)
-        resolve(true)
+        resolve({connected: true, alone})
       }
       const handleError = error => {
         if (error === 'connected') {
@@ -122,28 +125,27 @@ class Signaling extends EventEmitter {
 
       try {
         if (network) {
-          this._source.join(this.direct(this._source, network)).then(() => {
+          this._source.join(this.direct(this._network.rps, network.rps)).then(() => {
             done()
           }).catch(handleError)
         } else {
           debug('Connecting to the room ' + this.options.room + '...')
-          this._socket.emit('joinRoom', { room: this.options.room })
-
-          this._socket.on('joinedRoom', () => {
+          this._socket.emit('joinRoom', { id: this._id, room: this.options.room })
+          this._socket.on('joinedRoom', (response) => {
+            if (response.connected) {
+              done(true)
+            } else {
+              this._source.join(this._signalingInit()).then(() => {
+                this._socket.emit('connected', { id: this._id, room: this.options.room })
+              }).catch(handleError)
+              this._socket.once('connected', () => {
+                debug('Peer connected.')
+                done()
+              })
+            }
             debug('Connected to the room: ' + this.options.room)
-            this._source.join(this._signalingInit()).then(() => {
-              this._socket.emit('connected', { room: this.options.room })
-            }).catch(handleError)
           })
         }
-        this._socket.once('connected', () => {
-          debug('Peer connected.')
-          done()
-        })
-        // this.once('connected', () => {
-        //   console.log('receive connected');
-        //   resolve(true);
-        // });
       } catch (error) {
         reject(error)
       }
@@ -155,6 +157,7 @@ class Signaling extends EventEmitter {
   * @return {void}
   */
   signaling () {
+    debug('Connection to the signaling server...')
     this._socket.open()
   }
 
@@ -163,6 +166,7 @@ class Signaling extends EventEmitter {
   * @return {void}
   */
   unsignaling () {
+    debug('Disconnection from the signaling server...')
     this._socket.emit('disconnect')
     this._socket.removeAllListeners('connected')
     this._socket.removeAllListeners('joinedRoom')
@@ -190,9 +194,11 @@ class Signaling extends EventEmitter {
    * @return {function} The function used to handle an offer
    */
   _signalingInit () {
+    console.log(this._id)
+    const self = this
     return offer => {
       debug('Emit a new offer.')
-      this._socket.emit('new', {id: this.id, tid: uuid(), offer, room: this.options.room})
+      this._socket.emit('new', {id: self._id, tid: uuid(), offer, room: this.options.room})
     }
   }
 
@@ -201,7 +207,7 @@ class Signaling extends EventEmitter {
    * @param  {Object} timeout Timeout error returned by socket.io
    * @return {void}
    */
-  _manageTiemout (timeout) {
+  _manageTimeout (timeout) {
     debug(timeout)
   }
 

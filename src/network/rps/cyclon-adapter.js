@@ -17,9 +17,6 @@ class CyclonAdapter extends AbstractNetwork {
       },
       origins: '*'
     }, options))
-
-    // make a unique id of this network
-    this.id = this._rps.PEER
   }
 
   /**

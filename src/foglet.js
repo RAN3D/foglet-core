@@ -221,16 +221,16 @@ class Foglet extends EventEmitter {
   connection (foglet = null, name = null, timeout = this._options.pendingTimeout) {
     return new Promise((resolve, reject) => {
       if (foglet !== null) {
-        this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout).then((result) => {
+        this.overlay(name).signaling.connection(foglet.overlay(name).network, timeout).then((result) => {
           this.emit('connect')
-          resolve(result)
+          resolve(result.connected)
         }).catch(e => {
           reject(e)
         })
       } else {
-        this.overlay(name).signaling.connection(foglet, timeout).then((result) => {
+        this.overlay(name).signaling.connection(null, timeout).then((result) => {
           this.emit('connect')
-          resolve(result)
+          resolve(result.connected)
         }).catch(e => {
           reject(e)
         })

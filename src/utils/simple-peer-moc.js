@@ -31,8 +31,7 @@ class Manager {
     }
     this.manager = new Map()
     this._options = {
-      latency: (send) => { setTimeout(send, 10) },
-      retry: 1
+      latency: (send) => { setTimeout(send, 0) }
     }
     debugManager('manager initialized')
   }
@@ -52,29 +51,30 @@ class Manager {
   }
 
   destroy (from, to) {
-    if(from && to) {
-      debugManager('peer disconnected from/to: ', from, to)
-      if(this.manager.get(from)) this.manager.get(from)._close()
-      if(this.manager.get(to)) this.manager.get(to)._close()
+    debugManager('peer disconnected from/to: ', from, to)
+    if (this.manager.get(from)) {
+      this.manager.get(from)._close()
+      this.manager.delete(from)
+    }
+    if (this.manager.get(to)) {
+      this.manager.get(to)._close()
+      this.manager.delete(to)
     }
   }
 
   send (from, to, msg, retry = 0) {
-    this._options.latency(() => {
-      this._send(from, to, msg, retry)
-    })
+    // this._options.latency(() => {
+    this._send(from, to, msg, retry)
+    // })
   }
 
   _send (from, to, msg, retry = 0) {
-    if (retry < this._options.retry) {
-      try {
-        this.manager.get(to).emit('data', msg)
-        this._statistics.message++
-      } catch (e) {
-        this.send(from, to, msg, retry++)
-      }
-    } else {
-      throw new Error('cannot send the message. perhaps your destination is not reachable.')
+    try {
+      if (!this.manager.has(from) || !this.manager.has(to)) throw new Error('need a from and to peer.')
+      this.manager.get(to).emit('data', msg)
+      this._statistics.message++
+    } catch (e) {
+      throw new Error('cannot send the message. perhaps your destination is not reachable.', e)
     }
   }
 }
@@ -91,7 +91,6 @@ module.exports = class SimplePeerAbstract extends EventEmitter {
     this.connected = false
     this.disconnected = false
     this.connectedWith = undefined
-
     this.messageBuffer = []
     debugManager('peer initiated:', this.id, this._options.initiator)
     if (this._options.initiator) {
@@ -101,9 +100,6 @@ module.exports = class SimplePeerAbstract extends EventEmitter {
       })
     }
     this._manager.newPeer(this)
-    this.on('close', () => {
-      this._manager.manager.delete(this.id)
-    })
   }
 
   static get manager () {
@@ -146,6 +142,7 @@ module.exports = class SimplePeerAbstract extends EventEmitter {
   }
 
   _close () {
+    debugManager('[%s] is closed.', this.id)
     this.emit('close')
   }
 
@@ -166,24 +163,29 @@ module.exports = class SimplePeerAbstract extends EventEmitter {
     return newOffer
   }
   _createAccept (offer) {
-    offer.type = 'accept'
-    offer.offer.acceptor = this.id
-    return offer
+    const acceptedOffer = this._createOffer()
+    acceptedOffer.type = 'accept'
+    acceptedOffer.offerId = offer.offerId
+    acceptedOffer.offer.initiator = offer.offer.initiator
+    acceptedOffer.offer.acceptor = this.id
+    return acceptedOffer
   }
 
   _reviewMessageBuffer () {
-    console.log('review buffer...')
+    debugManager('Review the buffer: ', this.messageBuffer.length)
     while (this.connectedWith && this.messageBuffer.length !== 0) {
       this._send(this.messageBuffer.pop())
     }
   }
 
   _send (to = this.connectedWith, data) {
+    if (!to) throw new Error('It must have a destination.')
     this._manager.send(this.id, to, data)
   }
 
   _connect (offer) {
-    this._manager.connect(this.id, offer.offer.acceptor)
+    if (!offer.offer.acceptor) throw new Error('It must have an acceptor')
+    this._manager.connect(offer.offer.initiator, offer.offer.acceptor)
   }
 
   _connectWith (connectedWith) {

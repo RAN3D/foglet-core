@@ -17,8 +17,8 @@ const buildFog = (Foglet, size, overlays = [], ice = []) => {
             trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
             iceServers: ice // define iceServers in non local instance
           },
-          timeout: 30 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-          delta: 30 * 1000, // spray-wrtc shuffle interval
+          timeout: 3600 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+          delta: 3600 * 1000, // spray-wrtc shuffle interval
           socketClass: SimplePeerMoc,
           signaling: {
             address: 'http://localhost:8000/',

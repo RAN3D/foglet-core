@@ -1,5 +1,5 @@
-'use strict'
 /* eslint no-unused-vars: 0 */
+const assert = require('chai').assert
 const Foglet = require('../src/foglet.js')
 const defineProtocol = require('../src/fprotocol/protocol-builder.js')
 const utils = require('./utils.js')

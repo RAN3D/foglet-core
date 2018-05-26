@@ -2,117 +2,111 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Foglet-core example</title>
+    <title>Signaling example</title>
   </head>
 
   <body>
     Please: Open the console!
   </body>
 
-  <script src='/dist/foglet.bundle.min.js'></script>
-  <script src='/jquery/jquery.min.js'></script>
+  <script src='../../dist/foglet.bundle.js'></script>
+  <script src='/p2p-graph/p2p-graph.min.js'></script>
+  <div class="graph" width=1000 height=1000></div>
   <script type='text/javascript'>
     console.log(foglet)
+    localStorage.debug = 'foglet-core:*, spa'
+    let graph = new window.P2PGraph('.graph');
+    let revertedIndex = new Map();
+    const max = 5
+    const spray_a = 1, spray_b = 5
+    let apps = []
+    for(let i = 0; i<(max); i++) {
+      const fog = createApp(i)
+      apps.push(fog)
+      graph.add({
+          id: fog.id,
+          me: false,
+          name: 'C-'+i
+      });
+      fog.overlay().network.rps.on('open', (peerId) => {
+        console.log('[%s] Peer id: ', fog.id,  peerId)
+          !graph.hasLink(fog.id, revertedIndex.get(peerId)) &&
+              graph.connect(fog.id, revertedIndex.get(peerId));
+      });
+      fog.overlay().network.rps.on('close', (peerId) => {
+          (!fog.overlay().network.rps.o.has(peerId)) &&
+              graph.disconnect(fog.id, revertedIndex.get(peerId));
+      });
+      revertedIndex.set(fog.inViewID, fog.id);
+    }
 
-    localStorage.debug='foglet-core*'
-    let app1, app2
-    createApp().then((a) => {
-      app1 = a
-      app1.share()
-      app1.connection().then(() => {
-        createApp().then(b => {
-          app2 = b
-          app2.share()
-          app2.connection().then(() => {
-            console.log('Peers connected. Play now with them !')
-          }).catch(e => {
-            console.log(e)
-          })
-        }).catch(e => {
-          console.log(e)
-        })
-      }).catch(e => {
-        console.log(e)
+    const loaded = []
+    apps.reduce((acc, fog, i) => acc.then(() => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if(i === 0) {
+            const chosen = Math.floor(Math.random() * apps.length)
+            fog.connection().then(() => {
+              loaded.push(fog)
+              resolve()
+            })
+          } else {
+            const chosen = Math.floor(Math.random() * loaded.length)
+            fog.connection().then(() => {
+              loaded.push(fog)
+              resolve()
+            }).catch(e => {
+              loaded.push(fog)
+              resolve()
+            })
+          }
+
+        }, 1000)
       })
-    }).catch(e => {
-      console.log(e)
+    }), Promise.resolve()).then(() => {
+      testunicast()
+      testbroadcast()
     })
 
 
 
     function createApp(id) {
-      return new Promise((resolve, reject) => {
-        $.get( "/ice",).then(data => {
-          data.ice.splice(0, 1)
-          data.ice.forEach(p => {
-            if(p.url.indexOf('?transport=tcp') > -1){
-                p.url = p.url.replace('?transport=tcp', '');
-            } else if(p.url.indexOf('?transport=udp') > -1){
-                p.url = p.url.replace('?transport=udp', '');
+      console.log(id)
+      const fog = new foglet.Foglet({
+        id: 'C-'+id,
+        verbose: true, // want some logs ? switch to false otherwise
+        rps: {
+          options : {
+            a: spray_a, b: spray_b,
+            delta: 30 * 1000,
+            timeout: 30 * 1000,
+            pendingTimeout: 30 * 1000,
+            socketClass: foglet.SimplePeerMoc,
+            signaling: {
+              address: document.location.origin,
+              room: 'example-signaling'
             }
-            p.urls = String(p.url)
-            delete p.url
-          })
-          console.log(data)
-          const fog = new foglet.Foglet({
-            id,
-            verbose: true, // want some logs ? switch to false otherwise
-            rps: {
-              options : {
-                delta: 30 * 1000,
-                timeout: 10 * 1000,
-                webrtc: {
-                  trickle: true,
-                  iceServers: data.ice
-                },
-                signaling: {
-                  address: document.location.origin,
-                  room: 'test',
-                  origins: '*'
-                }
-              }
-            }
-          })
-          fog.onUnicast((id, message) => {
-            console.log(`${fog.id} received a unicasted message from ${id}: `, message)
-          })
-          fog.onBroadcast((id, message) => {
-            console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
-          })
-          resolve(fog)
-        }).catch((e) => {
-          console.error(e)
-          reject(e)
-        })
+          }
+        }
       })
+      fog.onUnicast((id, message) => {
+        console.log(`${fog.id} received a unicasted message from ${id}: `, message)
+      })
+      fog.onBroadcast((id, message) => {
+        console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
+      })
+      fog.share()
+      return fog
     }
 
     function testunicast() {
-      app1.sendUnicast(app2.id+'-I', 'Unicast: Hello world!')
+      apps[0].getNeighbours().forEach(p => {
+        apps[0].sendUnicast(p, 'Unicast: Hello world!')
+      })
     }
 
     function testbroadcast() {
-      app1.sendBroadcast('Broadcast: Hello world!')
-    }
-
-    function list_connections(fog) {
-      let inviewPending, inviewLiving, inviewDying
-      let outviewPending, outviewLiving, outviewDying
-      let inview, outview
-      inview = fog.overlay().network.rps.NI
-      outview = fog.overlay().network.rps.NO
-      inviewPending = inview.pending
-      inviewLiving = inview.living
-      inviewDying = inview.dying
-      console.log('I-Pending size: ', inviewPending.size, inviewPending)
-      console.log('I-Living size: ', inviewLiving.store.size, inviewLiving)
-      console.log('I-Dying size: ', inviewDying.size, inviewDying)
-      outviewPending = outview.pending
-      outviewLiving = outview.living
-      outviewDying = outview.dying
-      console.log('O-Pending size: ', outviewPending.size, outviewPending)
-      console.log('O-Living size: ', outviewLiving.store.size, outviewLiving)
-      console.log('I-Dying size: ', outviewDying.size, outviewDying)
+      apps[0].sendBroadcast('Broadcast from '+apps[0].id+': Hello world!')
     }
   </script>
 </html>

@@ -194,7 +194,7 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean} True if the message should not be propagated, False if it should be.
    */
   _shouldStopPropagation (message) {
-    return this._causality.isLower(message.id) || (this._findInBuffer(formatID(message)) >=0)
+    return this._causality.isLower(message.id) || (this._findInBuffer(formatID(message)) >= 0)
   }
 
   /**
