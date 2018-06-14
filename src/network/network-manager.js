@@ -31,7 +31,8 @@ const lmerge = require('lodash.merge')
 
 // Networks
 const Network = require('./network.js')
-const SprayAdapter = require('./rps/sprayAdapter.js')
+const SprayAdapter = require('./rps/sprayAdapter')
+const CyclonAdapter = require('./rps/cyclon-adapter')
 
 // debug
 const debug = (require('debug'))('foglet-core:network-manager')
@@ -145,7 +146,8 @@ class NetworkManager extends EventEmitter {
    * Get a RPS constructor given its type in string format
    * @private
    * @deprecated As only Spray is available as RPS, there is only one possible choice...
-   * @param  {string} type - RPS type
+   * @param {string} type - RPS type
+   * @param {Object} options - Options to pass to the RPS
    * @return {function} The RPS constructor
    */
   _chooseRps (type, options) {
@@ -153,6 +155,9 @@ class NetworkManager extends EventEmitter {
     switch (type) {
       case 'spray-wrtc':
         rps = SprayAdapter
+        break
+      case 'cyclon':
+        rps = CyclonAdapter
         break
       case 'custom':
         rps = options.class

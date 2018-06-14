@@ -4,11 +4,13 @@
 </div>
 
 # [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core) [![npm version](https://badge.fury.io/js/foglet-core.svg)](https://badge.fury.io/js/foglet-core) [![NPM](https://nodei.co/npm/foglet-core.png)](https://npmjs.org/package/foglet-core)
- [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
+ [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard) [Documentation](https://ran3d.github.io/foglet-core/)
+
+
 
 Easy use of WebRTC Networks with embedded network management and simple communication primitives.
 
-Communication primitives:
+**Communication primitives**:
 - Causal Broadcast (to all peers in your network, with anti entropy not enabled by default)
 - Unicast (to one direct neighbor)
 - Multicast (to one or several direct neighbors)
@@ -16,10 +18,15 @@ Communication primitives:
 - Multiple communication channel per network
 
 We only support Data Channel for the moment.
+- Experimental Media Unicast and Broadcast
 
-Network management:
+**Warning:** unicast media is working only for a period of time defined by the delta parameter in the RPS
+
+**Network management**:
 - An adapter on [ran3d/spray-wrtc](https://github.com/ran3d/spray-wrtc) as Random Peer Sampling Network (keeping log(NetworkSize) peers around you)
+- An adapter on [Cyclon](https://www.semanticscholar.org/paper/CYCLON%3A-Inexpensive-Membership-Management-for-P2P-Voulgaris-Gavidia/4b79c844bb854c11ab18981591e4d2ea01f29539) as Random Peer Sampling Network (keeping "maxPeers" peers around you)
 - Overlay Networks or Networks can be created with: [**ran3d/n2n-overlay-wrtc**](https://github.com/ran3d/n2n-overlay-wrtc)
+- Disable WebRTC for testing purposes (or simulation) by using our Simple-peer moc.
 
 ## Installation
 
@@ -36,7 +43,10 @@ The foglet library is distributed with its sources and a bundle for an in-browse
 [**The foglet cookbook**](https://github.com/RAN3D/foglet-cookbook/) contains tutorials on build complex fog computing application using
 `foglet-core`. (**incoming**)
 
-You can also check out [**the documentation online**](https://ran3d.github.io/foglet-core/)
+You can also check out [**the online  documentation**](https://ran3d.github.io/foglet-core/)
+
+* Coverage: https://ran3d.github.io/foglet-core/coverage/index.html
+* Test reporter: https://ran3d.github.io/foglet-core/tests-reporter/mochawesome.html
 
 ## Getting started
 
@@ -131,17 +141,17 @@ We offer another library which lets you to build/test/run your own application w
 git clone https://github.com/ran3d/foglet-core.git
 npm install
 
-# Build the bundle with foglet-scripts (webpack/karma/babel stack)
+# Build the bundle (webpack stack)
 npm run build
 
 # Lint using [standard](https://standardjs.com/)
 npm run lint
 
-# Lint and Test the lib with foglet-scripts (webpack/karma/babel/standard stack)
+# Mocha, chai stack with a simple-peer-moc for mocking webrtc features
 npm run test
 
-# Run the signaling server
-npm run server
+# Run a server serving examples and a signaling server on http://localhost:8000/
+npm run example
 ```
 
 ## Contributors:
@@ -149,20 +159,3 @@ npm run server
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
 * [T. Minier (Callidon)](https://github.com/Callidon)
 * [B. Nédelec (Chat-Wane)](https://github.com/Chat-Wane/)
-
-## References
-
-**About [spray-wrtc](https://github.com/RAN3D/spray-wrtc)**
-*Author:* [Chat-Wane](https://github.com/Chat-Wane/)
-This project aims to provide a WebRTC implementation of Spray.
-
-Spray is a random peer sampling protocol [1] inspired by both Cyclon [2] and Scamp [3]. It adapts the partial view of each member to the network size using local knowledge only. Therefore, without any configurations, each peer automatically adjust itself to the need of the network.
-*Keywords:* Random peer sampling, adaptive, browser-to-browser communication, WebRTC
-
-[1] M. Jelasity, S. Voulgaris, R. Guerraoui, A.-M. Kermarrec, and M. Van Steen. Gossip-based peer sampling. ACM Transactions on Computer Systems (TOCS), 25(3):8, 2007.
-
-[2] S. Voulgaris, D. Gavidia, and M. van Steen. Cyclon: Inexpensive membership management for unstructured p2p overlays. Journal of Network and Systems Management, 13(2):197–217, 2005.
-
-[3] A. Ganesh, A.-M. Kermarrec, and L. Massoulié. Peer-to-peer membership management for gossip-based protocols. IEEE Transactions on Computers, 52(2):139–149, Feb 2003.
-
-[4] A. Montresor and M. Jelasity. Peersim: A scalable P2P simulator. Proc. of the 9th Int. Conference on Peer-to-Peer (P2P’09), pages 99–100, Seattle, WA, Sept. 2009.

@@ -45,6 +45,7 @@ class TManOverlay extends AbstractNetwork {
     super(options)
     this._manager = networkManager
     this._rps.parent.once('open', () => {
+      console.log('SON connected')
       this._rps._start()
     })
   }

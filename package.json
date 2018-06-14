@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "4.0.6",
+  "version": "5.0.0",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
@@ -9,13 +9,11 @@
     "esdoc": "esdoc",
     "all": "npm run build && npm run min && npm test && npm run esdoc",
     "test": "node ./tests/test.js",
-    "test-bis": "foglet-scripts test -- --karma ./foglet-karma-config.js",
-    "replace": "node tests/replacesignaling.js",
-    "start": "foglet-scripts start",
-    "build": "foglet-scripts build",
-    "min": "webpack --config ./foglet-webpack-config-min.js",
-    "example": "npm run esdoc && npm run build && npm run min && node tests/examples/server.js",
-    "dev": "webpack --config ./webpack.config.js --watch"
+    "test-mocha": "nyc --reporter=html --report-dir=./docs/_coverage mocha tests/*-test.js --exit --timeout 30000 --reporter mochawesome --reporter-options reportDir=./docs/_test-reporter",
+    "build": "webpack --config ./configs/foglet-webpack-config.js",
+    "min": "webpack --config ./configs/foglet-webpack-config-min.js",
+    "example": "npm run build && DEBUG=signaling node tests/examples/server.js",
+    "dev": "webpack --config ./configs/foglet-webpack-config.js --watch"
   },
   "repository": {
     "type": "git",
@@ -39,30 +37,42 @@
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
-    "debug": "^3.1.0",
-    "lodash.merge": "^4.6.1",
-    "lodash.sortedindexby": "^4.6.0",
-    "readable-stream": "^2.3.6",
-    "socket.io-client": "^2.1.0",
+    "debug": "^3.1.x",
+    "lodash.merge": "^4.6.x",
+    "lodash.sortedindexby": "^4.6.x",
+    "media-recorder-stream": "^2.1.1",
+    "mediasource": "^2.2.1",
+    "n2n-overlay-wrtc": "^2.0.x",
+    "socket.io-client": "^2.1.x",
     "spray-wrtc": "^2.0.x",
-    "tman-wrtc": "0.1.0",
-    "unicast-definition": "^2.0.1",
-    "uuid": "^3.2.1",
-    "version-vector-with-exceptions": "^0.1.0"
+    "tman-wrtc": "0.1.x",
+    "unicast-definition": "^2.0.x",
+    "uuid": "^3.2.x",
+    "version-vector-with-exceptions": "^0.1.x"
   },
   "devDependencies": {
+    "babel-preset-env": "^1.7.0",
+    "chai": "^4.1.2",
+    "chart.js": "^2.7.2",
     "cors": "^2.8.4",
-    "esdoc": "^1.0.4",
+    "esdoc": "^1.1.0",
+    "esdoc-custom-theme": "^1.4.2",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-node": "^1.0.3",
+    "esdoc-publish-html-plugin": "^1.1.2",
     "esdoc-standard-plugin": "^1.0.0",
-    "foglet-scripts": "^0.3.x",
+    "foglet-signaling-server": "^1.0.x",
     "jquery": "^3.3.1",
-    "karma-firefox-launcher": "^1.1.0",
+    "mocha": "^5.2.0",
+    "mochawesome": "^3.0.2",
+    "nyc": "^11.8.0",
+    "p2p-graph": "^1.2.2",
     "snazzy": "^7.1.1",
-    "twilio": "^3.15.1",
+    "standard": "^11.0.1",
+    "twilio": "^3.17.0",
     "uglifyjs-webpack-plugin": "^1.2.5",
-    "webpack-cli": "^2.0.15"
+    "webpack": "^4.9.1",
+    "webpack-cli": "^2.1.4"
   },
   "bundledDependencies": [
     "debug",
@@ -74,7 +84,8 @@
     "tman-wrtc",
     "unicast-definition",
     "uuid",
-    "version-vector-with-exceptions"
+    "version-vector-with-exceptions",
+    "n2n-overlay-wrtc"
   ],
   "standard": {
     "globals": [

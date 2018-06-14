@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Direct example</title>
+    <title>Signaling example with overlay</title>
   </head>
 
   <body>
@@ -12,18 +12,48 @@
   <script src='../../dist/foglet.bundle.js'></script>
   <script src='/p2p-graph/p2p-graph.min.js'></script>
   <div class="graph" width=1000 height=1000></div>
+  <div class="graph2" width=1000 height=1000></div>
   <script type='text/javascript'>
+  const FogletAll = foglet
+  const Foglet = FogletAll.Foglet
+  const TManOverlay = FogletAll.abstract.tman
+  const Communication = FogletAll.communication
+    // Very simple TMan based overlay
+    const TestOverlay = class TestOverlay extends TManOverlay {
+      constructor (...args) {
+        super(...args)
+        this.communication = new Communication(this, 'internal-' + this._options.protocol)
+      }
+
+      _startDescriptor () {
+        return { x: 5 }
+      }
+
+      _descriptorTimeout () {
+        return 3 * 60 * 1000
+      }
+
+      _rankPeers (neighbours, descriptorA, descriptorB) {
+        return descriptorA.x <= descriptorB.x
+      }
+    }
     console.log(foglet)
-    localStorage.debug = 'foglet-core:*'
+    localStorage.debug = 'foglet-core:*, spa'
     let graph = new window.P2PGraph('.graph');
+    let graph2 = new window.P2PGraph('.graph2');
     let revertedIndex = new Map();
-    const max = 50
-    const spray_a = 1, spray_b = 0
+    const max = 10
+    const spray_a = 1, spray_b = 5
     let apps = []
     for(let i = 0; i<(max); i++) {
       const fog = createApp(i)
       apps.push(fog)
       graph.add({
+          id: fog.id,
+          me: false,
+          name: 'C-'+i
+      });
+      graph2.add({
           id: fog.id,
           me: false,
           name: 'C-'+i
@@ -36,41 +66,42 @@
           (!fog.overlay().network.rps.o.has(peerId)) &&
               graph.disconnect(fog.id, revertedIndex.get(peerId));
       });
+      fog.overlay('test-overlay').network.rps.on('open', (peerId) => {
+          !graph2.hasLink(fog.id, revertedIndex.get(peerId)) &&
+              graph2.connect(fog.id, revertedIndex.get(peerId));
+      });
+      fog.overlay('test-overlay').network.rps.on('close', (peerId) => {
+          (!fog.overlay('test-overlay').network.rps.o.has(peerId)) &&
+              graph2.disconnect(fog.id, revertedIndex.get(peerId));
+      });
       revertedIndex.set(fog.inViewID, fog.id);
     }
 
     const loaded = []
-    apps.reduce((acc, fog) => acc.then(() => {
+    apps.reduce((acc, fog, i) => acc.then(() => {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
-          let chosen = Math.floor(Math.random() * loaded.length)
-          //chosen = loaded.length - 1
-          if(loaded.length === 0)  {
-            chosen = Math.floor(Math.random() * apps.length)
-            fog.connection(apps[chosen]).then(() => {
+          if(i === 0) {
+            fog.connection(null, 'test-overlay').then(() => {
               loaded.push(fog)
-              resolve()
-            }).catch(e => {
               resolve()
             })
-            loaded.push(fog)
-            resolve()
           } else {
-            fog.connection(loaded[chosen]).then(() => {
+            fog.connection(null, 'test-overlay').then(() => {
               loaded.push(fog)
               resolve()
             }).catch(e => {
+              loaded.push(fog)
               resolve()
             })
           }
+
         }, 1000)
       })
     }), Promise.resolve()).then(() => {
       testunicast()
       testbroadcast()
     })
-
-
 
     function createApp(id) {
       console.log(id)
@@ -83,9 +114,30 @@
             delta: 30 * 1000,
             timeout: 30 * 1000,
             pendingTimeout: 30 * 1000,
-            socketClass: foglet.SimplePeerMoc
+            //socketClass: foglet.SimplePeerMoc,
+            signaling: {
+              address: document.location.origin,
+              room: 'example-overlay-signaling-rps'
+            }
           }
-        }
+        },
+        overlays: [
+          {
+            name: 'test-overlay',
+            class: TestOverlay,
+            options: {
+              delta: 30 * 1000,
+              timeout: 30 * 1000,
+              pendingTimeout: 30 * 1000,
+              //socketClass: foglet.SimplePeerMoc,
+              protocol: 'foglet-test-overlay',
+              signaling: {
+                room: 'example-overlay-signaling-simpletman',
+                address: document.location.origin
+              }
+            }
+          }
+        ]
       })
       fog.onUnicast((id, message) => {
         console.log(`${fog.id} received a unicasted message from ${id}: `, message)
@@ -93,6 +145,8 @@
       fog.onBroadcast((id, message) => {
         console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
       })
+      fog.share()
+      fog.share('test-overlay')
       return fog
     }
 

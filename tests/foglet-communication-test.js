@@ -1,5 +1,4 @@
-'use strict'
-// const assert = require('assert')
+const assert = require('chai').assert
 const Foglet = require('../src/foglet.js')
 const utils = require('./utils.js')
 
@@ -147,10 +146,10 @@ describe('Foglet High-level communication', function () {
       })
 
       setTimeout(() => {
-        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1})
-        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 1})
-        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 2})
-        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 3})
+        const id1 = f1.overlay().communication.sendBroadcast('1')
+        const id2 = f1.overlay().communication.sendBroadcast('2', null, id1)
+        const id3 = f1.overlay().communication.sendBroadcast('3', null, id2)
+        f1.overlay().communication.sendBroadcast('4', null, id3)
       }, 2000)
     }).catch(done)
   })
@@ -184,10 +183,12 @@ describe('Foglet High-level communication', function () {
       })
 
       setTimeout(() => {
-        f1.overlay().communication.sendBroadcast('1', {e: 'testbroadcast', c: 1})
-        f1.overlay().communication.sendBroadcast('2', {e: 'testbroadcast', c: 2}, {e: 'testbroadcast', c: 3})
-        f1.overlay().communication.sendBroadcast('3', {e: 'testbroadcast', c: 3}, {e: 'testbroadcast', c: 1})
-        f1.overlay().communication.sendBroadcast('4', {e: 'testbroadcast', c: 4}, {e: 'testbroadcast', c: 2})
+        const id1 = f1.overlay().communication.sendBroadcast('1')
+        const id2 = f1.overlay().communication.sendBroadcast('2', null, {e: id1.e, c: 3})
+        setTimeout(() => {
+          f1.overlay().communication.sendBroadcast('3', null, id1)
+          f1.overlay().communication.sendBroadcast('4', null, id2)
+        }, 2000)
       }, 2000)
     }).catch(done)
   })

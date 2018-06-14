@@ -1,33 +1,14 @@
 /* Testing utilities */
 'use strict'
 const uuid = require('uuid/v4')
-// const request = require('request')
-//
-// function getIces (addr) {
-//   return new Promise((resolve, reject) => {
-//     request(addr, function (error, response, body) {
-//       console.log(error, response, body)
-//       response.ice.splice(0, 1)
-//       response.ice.forEach(p => {
-//         if (p.url.indexOf('?transport=tcp') > -1) {
-//           p.url = p.url.replace('?transport=tcp', '')
-//         } else if (p.url.indexOf('?transport=udp') > -1) {
-//           p.url = p.url.replace('?transport=udp', '')
-//         }
-//         p.urls = String(p.url)
-//         delete p.url
-//       })
-//       resolve(response)
-//     })
-//   })
-// }
+const SimplePeerMoc = require('./../src/utils/simple-peer-moc')
 
 const buildFog = (Foglet, size, overlays = [], ice = []) => {
   const fog = []
   // creates a random seed for romm & protocol
   const id = uuid()
   for (let i = 0; i < size; i++) {
-    fog.push(new Foglet({
+    const options = {
       rps: {
         type: 'spray-wrtc',
         options: {
@@ -36,8 +17,9 @@ const buildFog = (Foglet, size, overlays = [], ice = []) => {
             trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
             iceServers: ice // define iceServers in non local instance
           },
-          timeout: 30 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
-          delta: 30 * 1000, // spray-wrtc shuffle interval
+          timeout: 3600 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+          delta: 3600 * 1000, // spray-wrtc shuffle interval
+          socketClass: SimplePeerMoc,
           signaling: {
             address: 'http://localhost:8000/',
             room: `test-room-generated-${id}`,
@@ -46,7 +28,11 @@ const buildFog = (Foglet, size, overlays = [], ice = []) => {
         }
       },
       overlays
-    }))
+    }
+    options.overlays.forEach(overlay => {
+      overlay.options.socketClass = SimplePeerMoc
+    })
+    fog.push(new Foglet(options))
   }
   return fog
 }

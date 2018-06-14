@@ -39,6 +39,15 @@ class AbstractNetwork extends EventEmitter {
     super()
     this._rps = this._buildRPS(options)
     this._options = options
+    // make a unique id of this network
+    this._id = this._rps.PEER
+  }
+  /**
+   * Return a unique identifier of the peer
+   * @return {String} The identifier of the peer
+   */
+  get id () {
+    return this._id
   }
 
   /**

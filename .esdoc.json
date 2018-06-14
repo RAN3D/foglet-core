@@ -11,7 +11,7 @@
         "lint": {"enable": true},
         "coverage": {"enable": false},
         "accessor": {
-          "access": ["public", "protected"],
+          "access": ["public"],
           "autoPrivate": true
         },
         "undocumentIdentifier": {"enable": true},
@@ -19,7 +19,7 @@
         "typeInference": {"enable": true},
         "brand": {
           "title": "Foglet-core",
-          "description": "Core Infrastructure for developping fog computing applications",
+          "description": "Easy use of WebRTC Networks with embedded network management and simple communication primitives.",
           "repository": "https://github.com/ran3d/foglet-core",
           "site": "https://github.com/ran3d/foglet-core",
           "author": "https://github.com/ran3d/"
