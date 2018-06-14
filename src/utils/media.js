@@ -100,8 +100,8 @@ class Media extends CommunicationProtocol {
 
   /**
    * Send a MediaStream using our broadcast primitives using Data Channel.
-   * @param {Object} id - The id to send the stream (media) to
-   * @param  {Object}  media  - The stream to send
+   * @param {Object}  media  - The stream to send
+   * @param {Object} options - MediaRecorder options (see MediaRecorder API)
    * @return {boolean}
    */
   sendBroadcast (media, options = {}) {
