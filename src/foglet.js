@@ -27,6 +27,10 @@ const EventEmitter = require('events')
 const uuid = require('uuid/v4')
 const lmerge = require('lodash.merge')
 
+// experimental
+// media
+const MediaStream = require('./utils/media')
+
 // NetworkManager
 const NetworkManager = require('./network/network-manager.js')
 
@@ -43,7 +47,7 @@ const DEFAULT_OPTIONS = () => {
         protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
         webrtc: { // add WebRTC options
           trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-          iceServers: [] // define iceServers in non local instance
+          config: {iceServers: []} // define iceServers in non local instance
         },
         timeout: 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
         pendingTimeout: 60 * 1000,
@@ -103,7 +107,7 @@ const DEFAULT_OPTIONS = () => {
 *       protocol: 'my-awesome-broadcast-application', // the name of the protocol run by our app
 *       webrtc: { // some WebRTC options
 *         trickle: true, // enable trickle
-*         iceServers : [] // define iceServers here if you want to run this code outside localhost
+*         config: {iceServers : []} // define iceServers here if you want to run this code outside localhost
 *       },
 *       signaling: { // configure the signaling server
 *         address: 'http://signaling.herokuapp.com', // put the URL of the signaling server here
@@ -140,7 +144,7 @@ class Foglet extends EventEmitter {
   * @param {Object} options.rps.options - Options by the type of RPS choosed
   * @param {string} options.rps.options.protocol - Name of the protocol run by the application
   * @param {string} options.rps.options.maxPeers - Using Cyclon, fix the max number of peers in the partial view
-  * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see WebRTC docs for more details)
+  * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see SimplePeer @see(https://github.com/feross/simple-peer) WebRTC docs for more details)
   * @param {number} options.rps.options.timeout - RPS timeout before definitively close a WebRTC connection
   * @param {number} options.rps.options.delta - RPS shuffle interval
   * @param {Object} options.rps.options.signaling - Options used to configure the interactions with the signaling server
@@ -263,9 +267,8 @@ class Foglet extends EventEmitter {
 
   /**
    * Select and get an overlay to use for communication using its index.
-   * The RPS is always the first network, at `index = 0`.
-   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
-   * for the first overlay.
+   * The RPS is always provided when no parameter are provided.
+   * Then, overlays are indexed by their name.
    * @param  {string} [name=null] - (optional) Name of the overlay to get. Default to the RPS.
    * @return {Network} Return the network for the given ID.
    * @example
@@ -463,6 +466,18 @@ class Foglet extends EventEmitter {
   }
 
   /**
+   * Create an object media stream with sendUnicast and sendBroadcast methods
+   * @param  {[type]} [overlayname=null] The name of the overlay to use for send messages
+   * @param {Object} [options={}] the options to use for creating the media manager (default chunkSize=128k)
+   * @return {MediaStream}
+   */
+  createMedia (overlayname = null, options = {}) {
+    // experimental media send/receive stream
+    console.warn('[Warning] these methods are experimental.')
+    return new MediaStream(this.overlay(overlayname).network, this.overlay(overlayname).network.protocol, options)
+  }
+
+  /**
   * Get the ID of a random neighbour
   * @return {string|null} The ID of a random neighbour, or `null` if not found
   */
@@ -476,7 +491,7 @@ class Foglet extends EventEmitter {
         const result = peers[random]
         return result
       } catch (e) {
-        console.err(e)
+        console.error(e)
         return null
       }
     }

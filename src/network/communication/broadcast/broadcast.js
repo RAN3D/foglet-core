@@ -59,7 +59,13 @@ class Broadcast extends AbstractBroadcast {
    */
   _sendAll (message) {
     const n = this._source.getNeighbours(Infinity)
-    if (n.length > 0) n.forEach(p => this._unicast.send(p, message).catch(e => debug('Error: It seems there is not a receiver', e)))
+    if (n.length > 0) {
+      n.forEach(p => {
+        this._unicast.send(p, message).catch(e => {
+          debug(e)
+        })
+      })
+    }
   }
 
   /**

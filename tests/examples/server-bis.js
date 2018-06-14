@@ -29,6 +29,10 @@ function run (app, log, host = 'localhost', port = 8000) {
     res.sendFile(path.join(__dirname, 'index.html'))
   })
 
+  app.get('/test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'test-ice.html'))
+  })
+
   app.get('/signaling', (req, res) => {
     res.sendFile(path.join(__dirname, 'example-signaling.html'))
   })
@@ -52,7 +56,7 @@ function run (app, log, host = 'localhost', port = 8000) {
     console.log('A user want ice from client:')
     try {
       var client = Twilio(twilioconfig.api_key, twilioconfig.api_secret, {accountSid: twilioconfig.sid})
-      client.api.account.tokens.create({}).then(token => {
+      client.api.account.tokens.create({ttl: 86400}).then(token => {
         console.log(token.iceServers)
         res.send({ ice: token.iceServers })
       }).catch(error => {

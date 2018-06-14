@@ -159,13 +159,3 @@ npm run example
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
 * [T. Minier (Callidon)](https://github.com/Callidon)
 * [B. Nédelec (Chat-Wane)](https://github.com/Chat-Wane/)
-
-## Todos
-* Migrate the doc already installed `esdoc-custom-theme` to (change the css style cause it is an epileptic theme):
-```{
-  "name": "esdoc-publish-html-plugin",
-  "option": {
-    "template": "./node_modules/esdoc-custom-theme/template"
-  }
-},```
-* Continue to dev media broadcast (currently unicast is working)

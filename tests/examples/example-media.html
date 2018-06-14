@@ -7,10 +7,11 @@
 
   <body>
     <p> Please: Open the console!</p>
-    <p> Sender: <video id='peer1' width="320" height="240" controls autoplay></video> </p>
-    <p> Receiver: <video id='peer2' width="320" height="240" controls></video></p>
-    <p> Receiver: <video id='peer3' width="320" height="240" controls></video></p>
-    <p> Receiver: <video id='peer4' width="320" height="240" controls></video></p>
+    <div id='video' style='display:none'>
+      <button onclick='mediabroadcast()' >Broadcast</button><button onclick='mediaunicast()'>Unicast</button> </hr>
+      <p> Sender: <video id='peer1' width="320" height="240" controls autoplay></video> </p>
+      <p> Receiver: <video id='peer2' width="320" height="240" controls></video></p>
+    </div>
   </body>
 
   <script src='/dist/foglet.bundle.js'></script>
@@ -18,41 +19,36 @@
   <script type='text/javascript'>
     console.log(foglet)
     const constraints = {
-      video: true
+      video: true,
+      audio: true
     };
-    localStorage.debug='foglet-core*'
+    localStorage.debug='foglet-core*, spray-wrtc'
     let app1, app2, app3, app4
+    let app1media, app2media, app3media, app4media
     createApp().then((a) => {
       app1 = a
       app1.share()
       app1.connection().then(() => {
-        createApp().then(b => {
-          app2 = b
-          app2.share()
-          app2.connection().then(() => {
-            createApp().then((c) => {
-              app3 = c
-              app3.share()
-              app3.connection().then(() => {
-                createApp().then((d) => {
-                  app4 = d
-                  app4.share()
-                  app4.connection().then(() => {
-                    console.log('Peers connected. Play now with them !')
-                    teststream()
-                  }).catch(e => {
-                    console.log(e)
-                  })
-                })
-              }).catch(e => {
-                console.log(e)
-              })
-            })
-          }).catch(e => {
-            console.log(e)
-          })
-        }).catch(e => {
-          console.log(e)
+        document.getElementById('video').style.display = 'inline-block'
+        app1media = app1.createMedia(null, {
+          chunkSize: 56 * 1024 // pay attention to the maximum, or it will not work.
+        })
+        app1media.on('receive', (id, media) => {
+          console.log('receive a media from someone: ', id, media)
+          if(!media) {
+            console.log('Receive in the app the media stream for peer2: ', id)
+            const video = document.getElementById('peer2');
+            app1media.getStreamMedia(id, video)
+            video.play()
+          } else {
+            const video = document.getElementById('peer2');
+            try {
+              video.srcObject = media;
+            } catch (error) {
+              video.src = URL.createObjectURL(media);
+            }
+            video.play() // show the receiver
+          }
         })
       }).catch(e => {
         console.log(e)
@@ -66,15 +62,16 @@
     function createApp(id) {
       return new Promise((resolve, reject) => {
         $.get( "/ice",).then(data => {
-          data.ice.splice(0, 1)
+          // data.ice.splice(0, 1)
+          // always add a stun server
           data.ice.forEach(p => {
-            if(p.url.indexOf('?transport=tcp') > -1){
-                p.url = p.url.replace('?transport=tcp', '');
-            } else if(p.url.indexOf('?transport=udp') > -1){
-                p.url = p.url.replace('?transport=udp', '');
-            }
+            // if(p.url.indexOf('?transport=tcp') > -1){
+            //     p.url = p.url.replace('?transport=tcp', '');
+            // } else if(p.url.indexOf('?transport=udp') > -1){
+            //     p.url = p.url.replace('?transport=udp', '');
+            // }
             p.urls = String(p.url)
-            delete p.url
+            // delete p.url
           })
           console.log(data)
           const fog = new foglet.Foglet({
@@ -82,12 +79,12 @@
             verbose: true, // want some logs ? switch to false otherwise
             rps: {
               options : {
-                delta: 10 * 1000,
-                timeout: 1 * 1000,
-                pendingTimeout: 10 * 1000,
+                delta: 60 * 1000,
+                timeout: 60 * 1000,
+                pendingTimeout: 60 * 1000,
                 webrtc: {
                   trickle: true,
-                  iceServers: data.ice
+                  config: {iceServers: data.ice}
                 },
                 signaling: {
                   address: 'http://localhost:8000',
@@ -103,7 +100,9 @@
           fog.onBroadcast((id, message) => {
             console.log(`${fog.id} received a broadcasted message from ${id}: `, message)
           })
-          resolve(fog)
+          setTimeout(() => {
+            resolve(fog)
+          }, 100)
         }).catch((e) => {
           console.error(e)
           reject(e)
@@ -114,44 +113,34 @@
 
 
     function testunicast() {
-      app1.sendUnicast(app2.id+'-I', 'Unicast: Hello world!')
+      app1.sendUnicast(app1.getNeighbours()[0], 'Unicast: Hello world!')
     }
 
     function testbroadcast() {
       app1.sendBroadcast('Broadcast: Hello world!')
     }
 
-    function teststream() {
-      app2.overlay().communication.onMediaStream((id, mediaStream) => {
-        console.log('Receive in the app the media stream: ', id, mediaStream)
-        const video = document.getElementById('peer2');
+    function mediabroadcast() {
+      navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
+        console.log(mediaStream)
+        const video = document.getElementById('peer1');
         try {
           video.srcObject = mediaStream;
         } catch (error) {
           video.src = URL.createObjectURL(mediaStream);
         }
         video.play() // show the receiver
+        app1media.sendBroadcast(mediaStream, {
+          mimeType: 'video/webm; codecs="opus,vp8"', // You MUST set the MIME type
+          interval: 200, // A short interval is recommended to keep buffer sizes low
+          bitsPerSecond: 100 * 1024
+        })
+      }).catch(e => {
+        console.error(e)
       })
-      app3.overlay().communication.onMediaStream((id, mediaStream) => {
-        console.log('Receive in the app the media stream: ', id, mediaStream)
-        const video = document.getElementById('peer3');
-        try {
-          video.srcObject = mediaStream;
-        } catch (error) {
-          video.src = URL.createObjectURL(mediaStream);
-        }
-        video.play() // show the receiver
-      })
-      app4.overlay().communication.onMediaStream((id, mediaStream) => {
-        console.log('Receive in the app the media stream: ', id, mediaStream)
-        const video = document.getElementById('peer4');
-        try {
-          video.srcObject = mediaStream;
-        } catch (error) {
-          video.src = URL.createObjectURL(mediaStream);
-        }
-        video.play() // show the receiver
-      })
+    }
+
+    function mediaunicast() {
       navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
         console.log(mediaStream)
         const video = document.getElementById('peer1');
@@ -162,8 +151,8 @@
         }
         video.play() // show the receiver
         app1.getNeighbours().forEach((neigh) => {
-          console.log('Sending a media stream to %s', neigh)
-          app1.overlay().communication.sendUnicastMediaStream(neigh, mediaStream)
+          console.log('Sending a unicast media stream to %s', neigh)
+          app1media.sendUnicast(neigh, mediaStream)
         })
       }).catch(e => {
         console.error(e)
@@ -179,15 +168,21 @@
       inviewPending = inview.pending
       inviewLiving = inview.living
       inviewDying = inview.dying
-      console.log('I-Pending size: ', inviewPending.size, inviewPending)
+      // console.log('I-Pending size: ', inviewPending.size, inviewPending)
       console.log('I-Living size: ', inviewLiving.store.size, inviewLiving)
-      console.log('I-Dying size: ', inviewDying.size, inviewDying)
+      // console.log('I-Dying size: ', inviewDying.size, inviewDying)
       outviewPending = outview.pending
       outviewLiving = outview.living
       outviewDying = outview.dying
-      console.log('O-Pending size: ', outviewPending.size, outviewPending)
+      // console.log('O-Pending size: ', outviewPending.size, outviewPending)
       console.log('O-Living size: ', outviewLiving.store.size, outviewLiving)
-      console.log('I-Dying size: ', outviewDying.size, outviewDying)
+      // console.log('I-Dying size: ', outviewDying.size, outviewDying)
+      console.log(app1.overlay().network.rps.partialView)
     }
+
+    setInterval(() => {
+      list_connections(app1)
+    }, 10000)
+
   </script>
 </html>
