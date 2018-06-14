@@ -25,8 +25,9 @@ SOFTWARE.
 'use strict'
 
 const SharedObjectProxy = require('./shared-object-proxy.js')
-const specifyOperations = require('./specification.js')
+const { specifyOperations } = require('./specification.js')
 const ConsistencyCriteria = require('./consistency-criteria.js')
+const PipelineConsistency = require('./criterias/pipeline-consistency.js')
 
 /**
  * Connect a Shared object to the network
@@ -73,5 +74,6 @@ function connect (name, foglet, Criteria, localObject) {
 module.exports = {
   ConsistencyCriteria,
   connect,
-  specifyOperations
+  specifyOperations,
+  PC: PipelineConsistency
 }
