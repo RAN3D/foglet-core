@@ -46,6 +46,8 @@ class ConsistencyCriteria {
     // use a dedicated communication channel for this shared object
     this._protocolName = `cods-shared-obj(name:${this._objName};obj:${this._localObject.name};cc:${this.name})`
     this._channel = new Communication(this._foglet.overlay(null), this._protocolName)
+    // call custom setup logic
+    this.setUp(this._channel)
   }
 
   /**
@@ -57,9 +59,28 @@ class ConsistencyCriteria {
   }
 
   /**
-   * Apply a 'query' operation to the shared object
-   * @param  {string} opName    - Name of the operation invoked on the shared object
-   * @param  {[]}     args      - Arguments passed to the operation
+   * Called after instance initlization is completed.
+   * Traditionnaly used to configure reception of network messages.
+   * @abstract
+   * @param  {Communication} communication - A communication channel used to exchange messages with peers
+   * @return {void}
+   * @example
+   * class MyCriteria extends ConsistencyCriteria {
+   *  setUp (communication) {
+   *    communication.onUnicast((id, message) => {
+   *      console.log(`Received an unicast message from ${id}: ${message}`)
+   *    })
+   *  }
+   * }
+   */
+  setUp (communication) {}
+
+  /**
+   * Apply a 'query' operation to the shared object.
+   * By default, call {@link ConsistencyCriteria#localApply}.
+   * @abstract
+   * @param  {string} opName - Name of the operation invoked on the shared object
+   * @param  {Array}  args   - Arguments passed to the operation
    * @return {*} Return value of the operation once invoked with the arguments
    */
   applyQuery (opName, args) {
@@ -68,8 +89,10 @@ class ConsistencyCriteria {
 
   /**
    * Apply an 'update' operation to the shared object
-   * @param  {string} opName    - Name of the operation invoked on the shared object
-   * @param  {[]}     args      - Arguments passed to the operation
+   * By default, call {@link ConsistencyCriteria#localApply}.
+   * @abstract
+   * @param  {string} opName - Name of the operation invoked on the shared object
+   * @param  {Array}  args   - Arguments passed to the operation
    * @return {*} Return value of the operation once invoked with the arguments
    */
   applyUpdate (opName, args) {
@@ -78,12 +101,12 @@ class ConsistencyCriteria {
 
   /**
    * Apply an operation on the local object
-   * @param  {string} operation - Name of the operation invoked
-   * @param  {[]}     args      - Arguments passed to the operation
-   * @return {*} Return value of the operation onece invoked with the arguments
+   * @param  {string} opName - Name of the operation invoked on the shared object
+   * @param  {Array}  args   - Arguments passed to the operation
+   * @return {*} Return value of the operation once invoked with the arguments
    */
-  localApply (operation, args) {
-    const op = Reflect.get(this._localObject, operation, this._localObject)
+  localApply (opName, args) {
+    const op = Reflect.get(this._localObject, opName, this._localObject)
     if (typeof op === 'function') {
       return op(...args)
     }
