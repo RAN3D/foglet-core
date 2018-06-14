@@ -25,18 +25,53 @@ SOFTWARE.
 'use strict'
 
 const SharedObjectProxy = require('./shared-object-proxy.js')
+const specifyOperations = require('./specification.js')
+const ConsistencyCriteria = require('./consistency-criteria.js')
 
 /**
- * [connect description]
+ * Connect a Shared object to the network
  * @author Thomas Minier
- * @param  {string}              name        - Name of shared object
- * @param  {Foglet}              foglet      - Foglet used to access the network
- * @param  {ConsistencyCriteria} Criteria    - Consistency criteria to use
- * @param  {*}                   localObject - Local object to transform into a shared object
+ * @param  {string}   name        - Name of shared object
+ * @param  {Foglet}   foglet      - Foglet used to access the network
+ * @param  {function} Criteria    - Constructor of the consistency criteria to use
+ * @param  {*}        localObject - Local object to transform into a shared object
  * @return {*} The corresponding shared object
+ * @example
+ * 'use strict'
+ *
+ * const { connect, UC, specifyOperations } = require('foglet').cods
+ *
+ * // A Shared register
+ * class Register {
+ *  constructor () {
+ *    this._value = null
+ *  }
+ *
+ *  read () { return this._value }
+ *
+ *  write (x) { this._value = x}
+ * }
+ *
+ * // specificy that 'read' is a 'query' operation
+ * // and 'write' is an 'update' operation
+ * specifyOperations(Register, ['read'], ['write'])
+ *
+ *
+ * // connect the shared object on the network
+ * const foglet = getSomeFoglet()
+ * const r1 = connect('r1', foglet, UC, new Register())
+ *
+ * console.log(r1.read())
+ * r1.write('moo')
+ * console.log(r1.read())
  */
-function connect (name, foglet, criteria, localObject) {
+function connect (name, foglet, Criteria, localObject) {
+  const criteria = new Criteria(name, localObject, foglet)
   return SharedObjectProxy.build(criteria, localObject)
 }
 
-module.exports = connect
+module.exports = {
+  ConsistencyCriteria,
+  connect,
+  specifyOperations
+}

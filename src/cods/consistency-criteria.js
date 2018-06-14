@@ -24,48 +24,56 @@ SOFTWARE.
 
 'use strict'
 
+const Communication = require('../network/communication/communication.js')
+
 /**
  * A ConsistencyCriteria represents an abstract consistency criteria
+ * that controls how operations are applied to a shared object
  * @abstract
  * @author Thomas Minier
  */
 class ConsistencyCriteria {
   /**
    * Constructor
-   * @param {Foglet} foglet - Foglet used to access the network
+   * @param {string}  objName     - The shared object name
+   * @param {*}       localObject - Local copy of the shared object
+   * @param {Foglet}  foglet      - Foglet used to access the network
    */
-  constructor (foglet) {
+  constructor (objName, localObject, foglet) {
+    this._objName = objName
     this._foglet = foglet
+    this._localObject = localObject
+    // use a dedicated communication channel for this shared object
+    this._protocolName = `cods-shared-obj(name:${this._objName};obj:${this._localObject.name};cc:${this.name})`
+    this._channel = new Communication(this._foglet.overlay(null), this._protocolName)
   }
 
   /**
-   * Get the foglet associated with the shared object
-   * @return {Foglet} The foglet associated with the shared object
+   * Get the communication channel used to exchange messages with peers
+   * @return {Communication} A communication channel dedicated to this shared object
    */
-  get foglet () {
-    return this._foglet
+  get communication () {
+    return this._channel
   }
 
   /**
    * Apply a 'query' operation to the shared object
-   * @param  {*} localObject    - Local copy of the shared object
    * @param  {string} opName    - Name of the operation invoked on the shared object
    * @param  {[]}     args      - Arguments passed to the operation
    * @return {*} Return value of the operation once invoked with the arguments
    */
-  applyQuery (localObject, opName, args, type) {
-    throw new Error('A valid ConsistencyCriteria must implements an "applyQuery" method')
+  applyQuery (opName, args) {
+    return this.localApply(opName, args)
   }
 
   /**
    * Apply an 'update' operation to the shared object
-   * @param  {*} localObject    - Local copy of the shared object
    * @param  {string} opName    - Name of the operation invoked on the shared object
    * @param  {[]}     args      - Arguments passed to the operation
    * @return {*} Return value of the operation once invoked with the arguments
    */
-  applyUpdate (localObject, opName, args, type) {
-    throw new Error('A valid ConsistencyCriteria must implements an "applyUpdate" method')
+  applyUpdate (opName, args) {
+    return this.localApply(opName, args)
   }
 
   /**
@@ -74,8 +82,8 @@ class ConsistencyCriteria {
    * @param  {[]}     args      - Arguments passed to the operation
    * @return {*} Return value of the operation onece invoked with the arguments
    */
-  localApply (localObject, operation, args) {
-    localObject[operation].apply(localObject, ...args)
+  localApply (operation, args) {
+    this._localObject[operation].apply(this._localObject, ...args)
   }
 }
 
