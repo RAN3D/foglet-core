@@ -62,7 +62,7 @@ class PipelineConsistency extends ConsistencyCriteria {
 
   applyUpdate (opName, args) {
     const res = this.localApply(opName, args)
-    this.communication().sendBroadcast(pcUpdateMessage(opName, args))
+    this.communication.sendBroadcast(pcUpdateMessage(opName, args))
     return res
   }
 }

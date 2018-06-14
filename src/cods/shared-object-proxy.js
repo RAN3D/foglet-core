@@ -64,15 +64,14 @@ class SharedObjectProxy {
    * @return {function} Property/method to be called
    */
   get (target, propKey, receiver) {
+    const self = this
     if (this._queryOperations.indexOf(propKey) > -1) {
-      console.log('called a query op')
       return function (...args) {
-        return this._criteria.applyQuery(propKey, args)
+        return self._criteria.applyQuery(propKey, args)
       }
     } else if (this._updateOperations.indexOf(propKey) > -1) {
-      console.log('called an update op')
       return function (...args) {
-        return this._criteria.applyUpdate(propKey, args)
+        return self._criteria.applyUpdate(propKey, args)
       }
     }
     return Reflect.get(target, propKey, receiver)

@@ -68,7 +68,7 @@ const PipelineConsistency = require('./criterias/pipeline-consistency.js')
  */
 function connect (name, foglet, Criteria, localObject) {
   const criteria = new Criteria(name, localObject, foglet)
-  return SharedObjectProxy.build(criteria, localObject)
+  return SharedObjectProxy.build(localObject, criteria)
 }
 
 module.exports = {

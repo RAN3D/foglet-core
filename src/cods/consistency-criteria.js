@@ -45,7 +45,7 @@ class ConsistencyCriteria {
     this._localObject = localObject
     // use a dedicated communication channel for this shared object
     this._protocolName = `cods-shared-obj(name:${this._objName};obj:${this._localObject.name};cc:${this.name})`
-    this._channel = new Communication(this._foglet.overlay(null), this._protocolName)
+    this._channel = new Communication(this._foglet.overlay(null)._network, this._protocolName)
     // call custom setup logic
     this.setUp(this._channel)
   }
@@ -106,9 +106,9 @@ class ConsistencyCriteria {
    * @return {*} Return value of the operation once invoked with the arguments
    */
   localApply (opName, args) {
-    const op = Reflect.get(this._localObject, opName, this._localObject)
+    const op = Reflect.get(this._localObject, opName)
     if (typeof op === 'function') {
-      return op(...args)
+      return op.bind(this._localObject)(...args)
     }
     return op
   }
