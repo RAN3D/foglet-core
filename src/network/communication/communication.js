@@ -41,8 +41,8 @@ class Communication {
     this.unicast = new Unicast(this.network, protocol)
     this.broadcast = new Broadcast(this.network, protocol)
     // channels used for streaming
-    this._unicastStreams = new Unicast(this.network, `${this.protocol}-streams`)
-    this._broadcastStreams = new Broadcast(this.network, `${this.protocol}-streams`)
+    this._unicastStreams = new Unicast(this.network, `${protocol}-streams`)
+    this._broadcastStreams = new Broadcast(this.network, `${protocol}-streams`)
     this._activeStreams = new Map()
     this._middlewares = new MiddlewareRegistry()
   }
@@ -124,10 +124,11 @@ class Communication {
   * stream.end();
   */
   streamBroadcast (isReady = undefined) {
-    return new StreamRequest(msg => {
+    return new StreamRequest((msg, id, isReady) => {
       msg.payload = this._middlewares.in(msg.payload)
-      this._broadcastStreams.send(msg, isReady)
-    })
+      // console.log(msg, id, isReady, this._broadcastStreams._causality)
+      return this._broadcastStreams.send(msg, id, isReady)
+    }, isReady)
   }
 
   /**

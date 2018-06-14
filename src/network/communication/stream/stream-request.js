@@ -52,6 +52,7 @@ class StreamRequest extends Writable {
     this._id = uuid()
     this._send = send
     this._trailers = []
+    this._last_id = undefined
   }
 
   /**
@@ -72,7 +73,7 @@ class StreamRequest extends Writable {
    * @param {string} error - The error responsible for the stream's destruction
    */
   destroy (error) {
-    this._send(messages.StreamMessageError(this._id, error))
+    this._last_id = this._send(messages.StreamMessageError(this._id, error), null, this._last_id)
     super.destroy(error)
   }
 
@@ -80,8 +81,9 @@ class StreamRequest extends Writable {
    * @private
    */
   _write (msg, encoding, callback) {
-    this._send(messages.StreamMessageChunk(this._id, msg))
+    this._last_id = this._send(messages.StreamMessageChunk(this._id, msg), null, this._last_id)
     callback()
+    return this._last_id
   }
 
   /**
@@ -89,8 +91,8 @@ class StreamRequest extends Writable {
    * @private
    */
   _final (callback) {
-    if (this._trailers.length > 0) { this._send(messages.StreamMessageTrailers(this._id, this._trailers)) }
-    this._send(messages.StreamMessageEnd(this._id))
+    if (this._trailers.length > 0) { this._last_id = this._send(messages.StreamMessageTrailers(this._id, this._trailers), null, this._last_id) }
+    this._last_id = this._send(messages.StreamMessageEnd(this._id), null, this._last_id)
     callback()
   }
 }

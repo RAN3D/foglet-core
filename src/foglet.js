@@ -27,6 +27,10 @@ const EventEmitter = require('events')
 const uuid = require('uuid/v4')
 const lmerge = require('lodash.merge')
 
+// experimental
+// media
+const MediaStream = require('./utils/media')
+
 // NetworkManager
 const NetworkManager = require('./network/network-manager.js')
 
@@ -43,11 +47,14 @@ const DEFAULT_OPTIONS = () => {
         protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
         webrtc: { // add WebRTC options
           trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-          iceServers: [] // define iceServers in non local instance
+          config: {iceServers: []} // define iceServers in non local instance
         },
-        timeout: 2 * 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+        timeout: 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
         pendingTimeout: 60 * 1000,
         delta: 60 * 1000, // spray-wrtc shuffle interval
+        maxPeers: 5,
+        a: 1, // for spray: a*ln(N) + b, inject a arcs
+        b: 5, // for spray: a*ln(N) + b, inject b arcs
         signaling: {
           address: 'https://signaling.herokuapp.com/',
           // signalingAdress: 'https://signaling.herokuapp.com/', // address of the signaling server
@@ -100,7 +107,7 @@ const DEFAULT_OPTIONS = () => {
 *       protocol: 'my-awesome-broadcast-application', // the name of the protocol run by our app
 *       webrtc: { // some WebRTC options
 *         trickle: true, // enable trickle
-*         iceServers : [] // define iceServers here if you want to run this code outside localhost
+*         config: {iceServers : []} // define iceServers here if you want to run this code outside localhost
 *       },
 *       signaling: { // configure the signaling server
 *         address: 'http://signaling.herokuapp.com', // put the URL of the signaling server here
@@ -131,11 +138,13 @@ class Foglet extends EventEmitter {
   * @constructs Foglet
   * @param {Object} options - Options used to build the Foglet
   * @param {boolean} options.verbose - If True, activate logging
+  * @param {boolean} options.id - Id of the foglet, will identify the peer as ID-I and ID-O in a neighbor view, respectively for Outgoing and ingoing arcs
   * @param {Object} options.rps - Options used to configure the Random Peer Sampling (RPS) network
-  * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray or `fcn-wrtc` for a fully connected network over WebRTC)
+  * @param {string} options.rps.type - The type of RPS (`spray-wrtc` for Spray, `cyclon` for Cyclon or `custom` for a custom network
   * @param {Object} options.rps.options - Options by the type of RPS choosed
   * @param {string} options.rps.options.protocol - Name of the protocol run by the application
-  * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see WebRTC docs for more details)
+  * @param {string} options.rps.options.maxPeers - Using Cyclon, fix the max number of peers in the partial view
+  * @param {Object} options.rps.options.webrtc - WebRTC dedicated options (see SimplePeer @see(https://github.com/feross/simple-peer) WebRTC docs for more details)
   * @param {number} options.rps.options.timeout - RPS timeout before definitively close a WebRTC connection
   * @param {number} options.rps.options.delta - RPS shuffle interval
   * @param {Object} options.rps.options.signaling - Options used to configure the interactions with the signaling server
@@ -217,16 +226,16 @@ class Foglet extends EventEmitter {
   connection (foglet = null, name = null, timeout = this._options.pendingTimeout) {
     return new Promise((resolve, reject) => {
       if (foglet !== null) {
-        this.overlay(name).signaling.connection(foglet.overlay().network.rps, timeout).then((result) => {
+        this.overlay(name).signaling.connection(foglet.overlay(name).network, timeout).then((result) => {
           this.emit('connect')
-          resolve(result)
+          resolve(result.connected)
         }).catch(e => {
           reject(e)
         })
       } else {
-        this.overlay(name).signaling.connection(foglet, timeout).then((result) => {
+        this.overlay(name).signaling.connection(null, timeout).then((result) => {
           this.emit('connect')
-          resolve(result)
+          resolve(result.connected)
         }).catch(e => {
           reject(e)
         })
@@ -258,9 +267,8 @@ class Foglet extends EventEmitter {
 
   /**
    * Select and get an overlay to use for communication using its index.
-   * The RPS is always the first network, at `index = 0`.
-   * Then, overlays are indexed by the order in which they were declared in the options, strating from `index = 1`
-   * for the first overlay.
+   * The RPS is always provided when no parameter are provided.
+   * Then, overlays are indexed by their name.
    * @param  {string} [name=null] - (optional) Name of the overlay to get. Default to the RPS.
    * @return {Network} Return the network for the given ID.
    * @example
@@ -458,6 +466,18 @@ class Foglet extends EventEmitter {
   }
 
   /**
+   * Create an object media stream with sendUnicast and sendBroadcast methods
+   * @param  {[type]} [overlayname=null] The name of the overlay to use for send messages
+   * @param {Object} [options={}] the options to use for creating the media manager (default chunkSize=128k)
+   * @return {MediaStream}
+   */
+  createMedia (overlayname = null, options = {}) {
+    // experimental media send/receive stream
+    console.warn('[Warning] these methods are experimental.')
+    return new MediaStream(this.overlay(overlayname).network, this.overlay(overlayname).network.protocol, options)
+  }
+
+  /**
   * Get the ID of a random neighbour
   * @return {string|null} The ID of a random neighbour, or `null` if not found
   */
@@ -471,7 +491,7 @@ class Foglet extends EventEmitter {
         const result = peers[random]
         return result
       } catch (e) {
-        console.err(e)
+        console.error(e)
         return null
       }
     }

@@ -46,8 +46,17 @@ class Network {
    */
   constructor (network, signaling, protocol) {
     this._network = network
+    this._protocol = protocol
     this._signaling = new Signaling(network, signaling)
     this._communication = new Communication(network, protocol)
+  }
+
+  /**
+   * Get the protocol of the network
+   * @return {[type]} [description]
+   */
+  get protocol () {
+    return this._protocol
   }
 
   /**

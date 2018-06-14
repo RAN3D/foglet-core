@@ -1,5 +1,4 @@
-'use strict'
-// const assert = require('chai').assert;
+const assert = require('chai').assert
 const FogletAll = require('../foglet-core.js')
 const Foglet = FogletAll.Foglet
 const TManOverlay = FogletAll.abstract.tman

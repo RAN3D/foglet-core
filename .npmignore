@@ -53,8 +53,7 @@ deploy_docs.sh
 .editorconfig
 .esdoc.json
 .eslintrc.json
+.nyc_output
 *.yml
 foglet-config.js
-foglet-webpack-config-min.js
-foglet-webpack-config.js
-foglet-karma-config.js
+configs/
