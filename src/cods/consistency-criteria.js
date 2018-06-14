@@ -83,7 +83,11 @@ class ConsistencyCriteria {
    * @return {*} Return value of the operation onece invoked with the arguments
    */
   localApply (operation, args) {
-    this._localObject[operation].apply(this._localObject, ...args)
+    const op = Reflect.get(this._localObject, operation, this._localObject)
+    if (typeof op === 'function') {
+      return op(...args)
+    }
+    return op
   }
 }
 
