@@ -2,22 +2,7 @@ const assert = require('chai').assert
 const Foglet = require('../../src/foglet.js')
 const cods = require('../../src/cods/cods.js')
 const utils = require('../utils.js')
-
-class Register {
-  constructor () {
-    this._value = null
-  }
-
-  read () {
-    return this._value
-  }
-
-  write (v) {
-    this._value = v
-  }
-}
-
-cods.specifyOperations(Register, [], ['write'])
+const { Register } = require('./utils.js')
 
 describe('[FOGLET-CODS] Shared objects - Pipeline consistency', function () {
   this.timeout(20000)
