@@ -4,7 +4,7 @@ const cods = require('../../src/cods/cods.js')
 const utils = require('../utils.js')
 const { Register } = require('./utils.js')
 
-describe('[FOGLET-CODS] Shared objects - Pipeline consistency', function () {
+describe('[FOGLET-CODS] Shared objects - Causal consistency', function () {
   this.timeout(20000)
   it('[FOGLET-CODS] should propagate update between peers', function (done) {
     const foglets = utils.buildFog(Foglet, 2)
@@ -12,8 +12,8 @@ describe('[FOGLET-CODS] Shared objects - Pipeline consistency', function () {
     const f2 = foglets[1]
 
     utils.pathConnect(foglets, 2000).then(() => {
-      const r1a = cods.connect('r1', f1, cods.PC, new Register())
-      const r1b = cods.connect('r1', f2, cods.PC, new Register())
+      const r1a = cods.connect('r1', f1, cods.CC, new Register())
+      const r1b = cods.connect('r1', f2, cods.CC, new Register())
       // nothing has been written yet
       assert.isNull(r1a.read())
       assert.isNull(r1b.read())

@@ -27,7 +27,7 @@ SOFTWARE.
 const SharedObjectProxy = require('./shared-object-proxy.js')
 const { specifyOperations } = require('./specification.js')
 const ConsistencyCriteria = require('./consistency-criteria.js')
-const PipelineConsistency = require('./criterias/pipeline-consistency.js')
+const CausalConsistency = require('./criterias/causal-consistency.js')
 
 /**
  * Connect a Shared object to the network
@@ -75,5 +75,5 @@ module.exports = {
   ConsistencyCriteria,
   connect,
   specifyOperations,
-  PC: PipelineConsistency
+  CC: CausalConsistency
 }

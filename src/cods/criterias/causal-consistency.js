@@ -26,32 +26,32 @@ SOFTWARE.
 
 const ConsistencyCriteria = require('../consistency-criteria.js')
 
-const PC_UPDATE_MSG_TYPE = 'PC_UPDATE_MSG'
+const CC_UPDATE_MSG_TYPE = 'CC_UPDATE_MSG'
 
 /**
- * build an update message for PC
+ * build an update message for CC
  * @param  {string} opName - Name of the operation to apply
  * @param  {Array}  args - Arguments passed to the operation
  * @return {Object} Update message
  */
-function pcUpdateMessage (opName, args) {
+function ccUpdateMessage (opName, args) {
   return {
-    type: PC_UPDATE_MSG_TYPE,
+    type: CC_UPDATE_MSG_TYPE,
     opName,
     args
   }
 }
 
 /**
- * Criteria that implements Pipeline consistency
+ * Criteria that implements Causal consistency
  * @extends ConsistencyCriteria
  * @author Thomas Minier
  */
-class PipelineConsistency extends ConsistencyCriteria {
+class CausalConsistency extends ConsistencyCriteria {
   setUp (communication) {
     communication.onBroadcast((id, message) => {
       switch (message.type) {
-        case PC_UPDATE_MSG_TYPE:
+        case CC_UPDATE_MSG_TYPE:
           this.localApply(message.opName, message.args)
           break
         default:
@@ -62,9 +62,9 @@ class PipelineConsistency extends ConsistencyCriteria {
 
   applyUpdate (opName, args) {
     const res = this.localApply(opName, args)
-    this.communication.sendBroadcast(pcUpdateMessage(opName, args))
+    this.communication.sendBroadcast(ccUpdateMessage(opName, args))
     return res
   }
 }
 
-module.exports = PipelineConsistency
+module.exports = CausalConsistency
