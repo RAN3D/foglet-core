@@ -38,10 +38,10 @@ npm install --save foglet-core
 
 The foglet library is distributed with its sources and a bundle for an in-browser usage.
 
-## Buliding fog computing applications
+## Building foglet applications
 
-[**The foglet cookbook**](https://github.com/RAN3D/foglet-cookbook/) contains tutorials on build complex fog computing application using
-`foglet-core`. (**incoming**)
+[**The foglet manual**](https://foglet.readthedocs.io/en/latest/) contains tutorials on how to build application using
+`foglet-core`. (**Work in progress**)
 
 You can also check out [**the online  documentation**](https://ran3d.github.io/foglet-core/)
 
@@ -57,7 +57,7 @@ Creates a new HTML file and insert the **foglet bundle** in it:
 
 Then, foglet library is available in the variable `foglet` :
 ```javascript
-const FogletClass = foglet.Foglet;
+const Foglet = foglet.Foglet;
 ```
 
 If you do not provide a list of **ice servers**, your example will work in localhost but not on the Web.
