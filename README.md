@@ -1,14 +1,15 @@
-<div style='text-align:center'>
-<img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/collabocats.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'>
-<hr/>
-</div>
+Foglet-core
+===========
 
-# [![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core) [![npm version](https://badge.fury.io/js/foglet-core.svg)](https://badge.fury.io/js/foglet-core) [![NPM](https://nodei.co/npm/foglet-core.png)](https://npmjs.org/package/foglet-core)
- [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard) [Documentation](https://ran3d.github.io/foglet-core/)
+[![Build Status](https://travis-ci.org/RAN3D/foglet-core.svg?branch=master)](https://travis-ci.org/RAN3D/foglet-core) [![npm version](https://badge.fury.io/js/foglet-core.svg)](https://badge.fury.io/js/foglet-core) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Documentation Status](https://readthedocs.org/projects/foglet/badge/?version=latest)](https://foglet.readthedocs.io/en/latest/?badge=latest)
 
-
+[![NPM](https://nodei.co/npm/foglet-core.png)](https://npmjs.org/package/foglet-core)
 
 Easy use of WebRTC Networks with embedded network management and simple communication primitives.
+
+[**Read the documentation**](https://foglet.readthedocs.io/en/latest/) or [**read the API Documentation**](https://ran3d.github.io/foglet-core/)
+
+## Features
 
 **Communication primitives**:
 - Causal Broadcast (to all peers in your network, with anti entropy not enabled by default)
@@ -18,7 +19,7 @@ Easy use of WebRTC Networks with embedded network management and simple communic
 - Multiple communication channel per network
 
 We only support Data Channel for the moment.
-- Experimental Media Unicast and Broadcast
+- *Experimental* Media Unicast and Broadcast
 
 **Warning:** unicast media is working only for a period of time defined by the delta parameter in the RPS
 
@@ -37,16 +38,6 @@ npm install --save foglet-core
 ```
 
 The foglet library is distributed with its sources and a bundle for an in-browser usage.
-
-## Building foglet applications
-
-[**The foglet manual**](https://foglet.readthedocs.io/en/latest/) contains tutorials on how to build application using
-`foglet-core`. (**Work in progress**)
-
-You can also check out [**the online  documentation**](https://ran3d.github.io/foglet-core/)
-
-* Coverage: https://ran3d.github.io/foglet-core/coverage/index.html
-* Test reporter: https://ran3d.github.io/foglet-core/tests-reporter/mochawesome.html
 
 ## Getting started
 
@@ -159,3 +150,8 @@ npm run example
 * [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
 * [T. Minier (Callidon)](https://github.com/Callidon)
 * [B. Nédelec (Chat-Wane)](https://github.com/Chat-Wane/)
+
+<div style='text-align:center'>
+<img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/collabocats.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'>
+<hr/>
+</div>
