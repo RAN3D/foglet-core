@@ -13,7 +13,7 @@ class CyclonAdapter extends AbstractNetwork {
     super(lmerge({
       webrtc: { // add WebRTC options
         trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
-        iceServers: [] // define iceServers in non local instance
+        config: {iceServers: []} // define iceServers in non local instance
       },
       origins: '*'
     }, options))
@@ -26,8 +26,8 @@ class CyclonAdapter extends AbstractNetwork {
    */
   _buildRPS (options) {
     // if webrtc options specified: create object config for Spray
-    const sprayOptions = lmerge({config: options.webrtc}, options)
-    return new Cyclon(sprayOptions)
+    const cyclonOptions = lmerge({config: options.webrtc}, options)
+    return new Cyclon(cyclonOptions)
   }
 
   /**
@@ -47,18 +47,32 @@ class CyclonAdapter extends AbstractNetwork {
   }
 
   /**
-   * Get the IDs of all available neighbours
-   * @param  {integer} limit - Max number of neighbours to look for
-   * @return {string[]} Set of IDs for all available neighbours
+   * Get the IDs of all available neighbours with or without their suffix -I or -O
+   * @param  {Boolean} transform - transform IDs into reachable ids to used for send messages => (peer) => peer-O
+   * @return {String[]} Set of IDs for all available neighbours
    */
-  getNeighbours (limit) {
-    // BUG, sometimes our id is in our partial view.
-    // Tempory fix by removing this element if in results
+  getReachableNeighbours (transform = true) {
+    return this._rps.uniqNeighbours(transform)
+  }
+
+  /**
+   * Get the IDs of all available neighbours with or without their suffix -I or -O
+   * @param  {Integer} limit - Max number of neighbours to look for
+   * @return {String[]} Set of IDs for all available neighbours
+   */
+  getNeighbours (limit = undefined) {
     return this._rps.getPeers(limit)
-    // lremove(result, (elem) => {
-    //   return elem === this.inviewId;
-    // })
-    // return result;
+  }
+
+  /**
+   * Get the IDs of all available neighbours
+   * @return {String[]} Set of IDs for all available neighbours
+   */
+  getArcs () {
+    const arcs = this._rps.neighbours()
+    const i = arcs.inview.map(entry => entry.peer)
+    const o = arcs.inview.map(entry => entry.peer)
+    return i.concat(o)
   }
 }
 

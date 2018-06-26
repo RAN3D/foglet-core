@@ -23,15 +23,15 @@
       audio: true
     };
     localStorage.debug='foglet-core*, spray-wrtc'
-    let app1, app2, app3, app4
-    let app1media, app2media, app3media, app4media
+    let app1
+    let app1media
     createApp().then((a) => {
       app1 = a
       app1.share()
       app1.connection().then(() => {
         document.getElementById('video').style.display = 'inline-block'
         app1media = app1.createMedia(null, {
-          chunkSize: 56 * 1024 // pay attention to the maximum, or it will not work.
+          chunkSize: 16 * 1000 // pay attention to the maximum, or it will not work.
         })
         app1media.on('receive', (id, media) => {
           console.log('receive a media from someone: ', id, media)
@@ -130,10 +130,10 @@
           video.src = URL.createObjectURL(mediaStream);
         }
         video.play() // show the receiver
-        app1media.sendBroadcast(mediaStream, {
+        app1media.sendBroadcastOverDataChannel(mediaStream, {
           mimeType: 'video/webm; codecs="opus,vp8"', // You MUST set the MIME type
           interval: 200, // A short interval is recommended to keep buffer sizes low
-          bitsPerSecond: 100 * 1024
+          bitsPerSecond: 50000
         })
       }).catch(e => {
         console.error(e)

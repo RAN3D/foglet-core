@@ -11,8 +11,8 @@
 
   <script src='../../dist/foglet.bundle.js'></script>
   <script src='/p2p-graph/p2p-graph.min.js'></script>
-  <div class="graph" width=1000 height=1000></div>
-  <div class="graph2" width=1000 height=1000></div>
+  <p> spray-wrtc<div class="graph" width=1000 height=1000></div></p>
+  <p> tman-wrtc<div class="graph2" width=1000 height=1000></div></p>
   <script type='text/javascript'>
   const FogletAll = foglet
   const Foglet = FogletAll.Foglet
@@ -114,7 +114,7 @@
             delta: 30 * 1000,
             timeout: 30 * 1000,
             pendingTimeout: 30 * 1000,
-            //socketClass: foglet.SimplePeerMoc,
+            // socketClass: foglet.SimplePeerMoc,
             signaling: {
               address: document.location.origin,
               room: 'example-overlay-signaling-rps'
@@ -129,7 +129,7 @@
               delta: 30 * 1000,
               timeout: 30 * 1000,
               pendingTimeout: 30 * 1000,
-              //socketClass: foglet.SimplePeerMoc,
+              // socketClass: foglet.SimplePeerMoc,
               protocol: 'foglet-test-overlay',
               signaling: {
                 room: 'example-overlay-signaling-simpletman',

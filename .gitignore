@@ -1,3 +1,6 @@
+# remove lock
+.package-lock.json
+
 #Perso
 docs/
 dist/

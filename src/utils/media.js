@@ -18,6 +18,7 @@ class ReadableFromStream extends Stream.Readable {
     this.source.on('data', (data) => {
       if (this.count === 0) {
         if (!this.parent._activeStream.has(data.id)) {
+          debug('Setting options for %s', data.id, data)
           this.parent._activeStream.set(data.id, {source: this, options: data})
         }
         this.parent.emit('receive', data.id)
@@ -57,8 +58,7 @@ class Media extends CommunicationProtocol {
   constructor (source, protocol, options) {
     super(source, `foglet-media-internal-${protocol}`)
     this.options = {
-      retry: 1,
-      chunkSize: 56 * 1024 // pay attention to the maximum, or it will not work.
+      chunkSize: 16 * 1000 // pay attention to the maximum, or it will not work. see (http://viblast.com/blog/2015/2/5/webrtc-data-channel-message-size/)
     }
     this._activeMedia = new Map()
     this._activeStream = new Map()
@@ -95,7 +95,7 @@ class Media extends CommunicationProtocol {
       this._activeMedia.set(media.id, media)
       this._setListeners(media)
     }
-    return this._send(id, media, this.options.retry)
+    return this._source.rps.stream(id, media)
   }
 
   /**
@@ -104,7 +104,7 @@ class Media extends CommunicationProtocol {
    * @param {Object} options - MediaRecorder options (see MediaRecorder API)
    * @return {boolean}
    */
-  sendBroadcast (media, options = {}) {
+  sendBroadcastOverDataChannel (media, options = {}) {
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/MediaRecorder
     options = lmerge({
       mimeType: 'video/webm; codecs="vp8"', // You MUST set the MIME type
@@ -117,7 +117,13 @@ class Media extends CommunicationProtocol {
       this._activeMedia.set(media.id, media)
       this._setListeners(media)
     }
-    const ms = new MediaRecorderStream(media, options)
+    console.log(media, options)
+    let ms
+    try {
+      ms = new MediaRecorderStream(media, options)
+    } catch (e) {
+      throw new Error('Error when recording the media: ', e)
+    }
     const stream = this._communication.streamBroadcast()
     options.id = media.id
     stream.write(options)
@@ -177,69 +183,6 @@ class Media extends CommunicationProtocol {
     })
     this._activeStream.get(id).source.pipe(writable)
   }
-
-  _send (peerId, media, retry = this.options.retry) {
-    let promise
-    // #1 normal behavior
-    if (this.i.has(peerId)) {
-      promise = this._sendBis(this.pid, peerId, media, retry, this.NI)
-    } else if (this.o.has(peerId)) {
-      promise = this._sendBis(this.pid, peerId, media, retry, this.NO)
-    } else {
-      // #2 last chance behavior
-      promise = new Promise((resolve, reject) => {
-        const _send = (r) => {
-          this._sendBis(this.pid, peerId, media, retry, this.NO).then(() => {
-            resolve()
-          }).catch((e) => {
-            this._sendBis(this.pid, peerId, media, retry, this.NI).then(() => {
-              resolve()
-            }).catch((e) => {
-              if (r < retry) {
-                setTimeout(() => {
-                  _send(r + 1)
-                }, 1000)
-              } else {
-                reject(e)
-              }
-            })
-          })
-        }
-        _send(0)
-      })
-    };
-    return promise
-  }
-
-  _sendBis (protocolId, peerId, media, retry = 0, Neighbor) {
-    return new Promise((resolve, reject) => {
-      // #1 get the proper entry in the tables
-      let entry = null
-      if (Neighbor.living.contains(peerId)) {
-        entry = Neighbor.living.get(peerId)
-      } else if (Neighbor.dying.has(peerId)) {
-        entry = Neighbor.dying.get(peerId) // (TODO) warn: not safe
-      };
-
-      // #2 define the recursive sending function
-      let __send = (r) => {
-        try {
-          entry.socket.addStream(media)
-          debug('[%s][%s] --- MEDIA msg --> %s:%s', protocolId, Neighbor.PEER, peerId, protocolId)
-          resolve()
-        } catch (e) {
-          debug('[%s][%s] -X- MEDIA msg -X> %s:%s', protocolId, Neighbor.PEER, peerId, protocolId)
-          if (r < retry) {
-            setTimeout(() => { __send(r + 1) }, 1000)
-          } else {
-            reject(e)
-          };
-        };
-      }
-      // #3 start to send
-      __send(0)
-    })
-  };
 
   /**
    * Handler executed when a message is recevied

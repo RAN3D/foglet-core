@@ -1,6 +1,6 @@
 {
   "name": "foglet-core",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
@@ -37,18 +37,18 @@
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
-    "debug": "^3.1.x",
-    "lodash.merge": "^4.6.x",
-    "lodash.sortedindexby": "^4.6.x",
+    "debug": "^3.1.0",
+    "lodash.merge": "^4.6.1",
+    "lodash.sortedindexby": "^4.6.0",
     "media-recorder-stream": "^2.1.1",
     "mediasource": "^2.2.1",
-    "n2n-overlay-wrtc": "^2.0.x",
-    "socket.io-client": "^2.1.x",
-    "spray-wrtc": "^2.0.x",
-    "tman-wrtc": "0.1.x",
-    "unicast-definition": "^2.0.x",
-    "uuid": "^3.2.x",
-    "version-vector-with-exceptions": "^0.1.x"
+    "n2n-overlay-wrtc": "^2.0.10",
+    "socket.io-client": "^2.1.1",
+    "spray-wrtc": "^2.0.11",
+    "tman-wrtc": "1.0.0",
+    "unicast-definition": "^2.0.2",
+    "uuid": "^3.3.0",
+    "version-vector-with-exceptions": "^0.1.0"
   },
   "devDependencies": {
     "babel-preset-env": "^1.7.0",
@@ -61,18 +61,18 @@
     "esdoc-node": "^1.0.3",
     "esdoc-publish-html-plugin": "^1.1.2",
     "esdoc-standard-plugin": "^1.0.0",
-    "foglet-signaling-server": "^1.0.x",
+    "foglet-signaling-server": "^1.0.3",
     "jquery": "^3.3.1",
     "mocha": "^5.2.0",
     "mochawesome": "^3.0.2",
-    "nyc": "^11.8.0",
+    "nyc": "^12.0.2",
     "p2p-graph": "^1.2.2",
     "snazzy": "^7.1.1",
     "standard": "^11.0.1",
-    "twilio": "^3.17.0",
-    "uglifyjs-webpack-plugin": "^1.2.5",
-    "webpack": "^4.9.1",
-    "webpack-cli": "^2.1.4"
+    "twilio": "^3.17.4",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.12.1",
+    "webpack-cli": "^3.0.8"
   },
   "bundledDependencies": [
     "debug",

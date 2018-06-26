@@ -498,22 +498,60 @@ class Foglet extends EventEmitter {
   }
 
   /**
-  * Get the IDs of all available neighbours
-  * @param {integer} limit - Max number of neighours to get
-  * @return {string[]} Set of IDs for all available neighbours
+   * Return an array with all arcs Ids (i.e.: all connection availables)
+   * @param  {[type]} [overlayName=undefined] Define the overlay to use
+   * @return {String[]} Array of ids
+   * @example
+   * const foglet = new Foglet();
+   *
+   * // print the IDs of up to five neighbours
+   * console.log(foglet.getArcs());
+   * // will return ['peer1-O', 'peer2-I', 'peer2-O', 'peer3-I'...]
+   */
+  getArcs (overlayName = undefined) {
+    return this.overlay(overlayName = undefined).network.getArcs()
+  }
+
+  /**
+  * Get the IDs of all available neighbours with or without their suffix -I or -O
+  * @param  {Boolean} [transform=true] - enable the transformation of ids eg: 'peer' or 'peer-O'
+  * @param {String} [overlayName=undefined] - Define the overlay to use
+  * @return {String[]} Set of IDs for all available neighbours
   * @example
   * const foglet = new Foglet({
   *   // some options...
   * });
   *
   * // print the IDs of up to five neighbours
-  * console.log(foglet.getNeighbours(5));
-  *
+  * console.log(foglet.getReachableNeighbours());
+  * // will return ['peer1-O', 'peer2-O', 'peer3-O', ...]
   * // print the IDs of all neighbours
-  * console.log(foglet.getNeighbours());
+  * console.log(foglet.getReachableNeighbours(false));
+  * // will return ['peer1', 'peer2', 'peer3', ...]
   */
-  getNeighbours (limit = undefined) {
-    return this.overlay().network.getNeighbours(limit)
+  getReachableNeighbours (transform = true, overlayName = undefined) {
+    return this.overlay(overlayName).network.getReachableNeighbours(transform)
+  }
+
+  /**
+  * Get the IDs of all available neighbours with or without their suffix -I or -O
+  * @param  {Integer} [limit=true] - Max number of neighbours to look for
+  * @param {String} [overlayName=undefined] - Define the overlay to use
+  * @return {String[]} Set of IDs for all available neighbours
+  * @example
+  * const foglet = new Foglet({
+  *   // some options...
+  * });
+  *
+  * // print the IDs of up to five neighbours
+  * console.log(foglet.getNeighbours());
+  * // will return ['peer1-I', 'peer2-I', 'peer3-I', ...]
+  * // print the IDs of all neighbours
+  * console.log(foglet.getNeighbours(Infinity));
+  * // will return ['peer1-I', 'peer1-O', 'peer3-I', ...]
+  */
+  getNeighbours (limit = true, overlayName = undefined) {
+    return this.overlay(overlayName).network.getNeighbours(limit)
   }
 }
 
