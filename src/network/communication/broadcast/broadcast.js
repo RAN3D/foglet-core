@@ -1,6 +1,7 @@
 /*
 This broadcast implementation  is clearly inspired from https://github.com/Chat-Wane/CausalBroadcastDefinition
-This is a causal broadcast customizable, if you want to specifiy
+This is a broadcast customizable, if you want to specifiy
+Ensure single delivery and causality between 2 consecutive messages from a single site
 */
 'use strict'
 
@@ -76,14 +77,34 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean}
    */
   send (message, id, isReady = undefined) {
-    const a = id || this._causality.increment()
-    const broadcastMessage = messages.BroadcastMessage(this._protocol, a, isReady, message)
+    const messageId = id || this._causality.increment()
+    if (messageId.e !== this._causality.local.e) {
+      throw new Error('The id of the identifier need to be equal to: ' + this._causality.local.e)
+    } else if (messageId.c < this._causality.local.v) {
+      throw new Error('Cant send the message because the identifier has a counter lower than our local counter: need to be equal to ' + this._causality.local.v + 1)
+    } else if (messageId.c > this._causality.local.v + 1) {
+      throw new Error('Cant send the message because the identifier has a counter higher than the counter accepted: need to be equal to ' + this._causality.local.v + 1)
+    }
+    let rdy = isReady
+    if (!rdy) {
+      // if the counter is higher than one, it means that we already send messages on the network
+      if (messageId.c > 1) {
+        rdy = {
+          e: messageId.e,
+          c: messageId.c - 1
+        }
+      }
+    }
+    const broadcastMessage = this._createBroadcastMessage(message, messageId, rdy)
     // #2 register the message in the structure
-    this._causality.incrementFrom(a)
-
+    this._causality.incrementFrom(messageId)
     // #3 send the message to the neighborhood
     this._sendAll(broadcastMessage)
-    return a
+    return messageId
+  }
+
+  _createBroadcastMessage (message, id, isReady) {
+    return messages.BroadcastMessage(this._protocol, id, isReady, message)
   }
 
   /**
@@ -179,8 +200,8 @@ class Broadcast extends AbstractBroadcast {
 
       default: {
         if (!this._shouldStopPropagation(message)) {
-        // #1 register the operation
-        // maintain `this._buffer` sorted to search in O(log n)
+          // #1 register the operation
+          // maintain `this._buffer` sorted to search in O(log n)
           const index = sortedIndexBy(this._buffer, message, formatID)
           this._buffer.splice(index, 0, message)
           // #2 deliver

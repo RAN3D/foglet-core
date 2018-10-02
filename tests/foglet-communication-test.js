@@ -192,4 +192,45 @@ describe('Foglet High-level communication', function () {
       }, 2000)
     }).catch(done)
   })
+  it('should receive broadcasted weirdly ordered messages in a 3 peers network (1-3-2-4) (second test)', function (done) {
+    const foglets = utils.buildFog(Foglet, 3)
+    const f1 = foglets[0]
+    const f2 = foglets[1]
+    const f3 = foglets[2]
+
+    let cptA = 0
+    let cptB = 0
+    const results = [ '1', '3', '2', '4' ]
+    const totalResult = 8
+    const check = utils.doneAfter(totalResult, () => {
+      utils.clearFoglets(foglets).then(() => done())
+    })
+
+    utils.pathConnect(foglets, 2000).then(() => {
+      f2.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptA])
+        cptA++
+        check()
+      })
+
+      f3.onBroadcast((id, message) => {
+        assert.equal(id, f1.outViewID)
+        assert.equal(message, results[cptB])
+        cptB++
+        check()
+      })
+
+      setTimeout(() => {
+        const id1 = f1.overlay().communication.broadcast._causality.increment()
+        const id2 = f1.overlay().communication.broadcast._causality.increment()
+        const id3 = f1.overlay().communication.sendBroadcast('3', null, id1)
+        f1.overlay().communication.sendBroadcast('4', null, id2)
+        setTimeout(() => {
+          f1.overlay().communication.broadcast._sendAll(f1.overlay().communication.broadcast._createBroadcastMessage('1', id1, null))
+          f1.overlay().communication.broadcast._sendAll(f1.overlay().communication.broadcast._createBroadcastMessage('2', id2, id3))
+        }, 2000)
+      }, 2000)
+    }).catch(done)
+  })
 })

@@ -42,14 +42,14 @@ const DEFAULT_OPTIONS = () => {
   return {
     verbose: true, // want some logs ? switch to false otherwise
     rps: {
-      type: 'spray-wrtc',
+      type: 'cyclon',
       options: {
         protocol: 'foglet-example-rps', // foglet running on the protocol foglet-example, defined for spray-wrtc
         webrtc: { // add WebRTC options
           trickle: true, // enable trickle (divide offers in multiple small offers sent by pieces)
           config: {iceServers: []} // define iceServers in non local instance
         },
-        timeout: 60 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
+        timeout: 5 * 1000, // spray-wrtc timeout before definitively close a WebRTC connection.
         pendingTimeout: 60 * 1000,
         delta: 60 * 1000, // spray-wrtc shuffle interval
         maxPeers: 5,
@@ -64,6 +64,7 @@ const DEFAULT_OPTIONS = () => {
     },
     overlays: [
       // {
+      //   name: 'yourOverlayName' // required to the network using the overlay function of the foglet instance
       //   class: YourOverlayClass,
       //   options: {
       //     delta: 10 * 1000,
@@ -102,7 +103,7 @@ const DEFAULT_OPTIONS = () => {
 * // let's create a simple application that send message in broadcast
 * const foglet = new Foglet({
 *   rps: {
-*     type: 'spray-wrtc', // we choose Spray as a our RPS
+*     type: 'cyclon', // we choose Spray as a our RPS
 *     options: {
 *       protocol: 'my-awesome-broadcast-application', // the name of the protocol run by our app
 *       webrtc: { // some WebRTC options

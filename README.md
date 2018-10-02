@@ -12,10 +12,10 @@ Easy use of WebRTC Networks with embedded network management and simple communic
 ## Features
 
 **Communication primitives**:
-- Causal Broadcast (to all peers in your network, with anti entropy not enabled by default)
+- Broadcast (to all peers in your network, with an anti-entropy mechanism not enabled by default). We ensure single delivery and a causal relation between 2 consecutive messages from a same site.
 - Unicast (to one direct neighbor)
 - Multicast (to one or several direct neighbors)
-- Streaming over our Causal Broadcast and Unicast
+- Streaming over our Broadcast and Unicast
 - Multiple communication channel per network
 
 We only support Data Channel for the moment.
