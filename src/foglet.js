@@ -550,7 +550,7 @@ class Foglet extends EventEmitter {
   * console.log(foglet.getNeighbours(Infinity));
   * // will return ['peer1-I', 'peer1-O', 'peer3-I', ...]
   */
-  getNeighbours (limit = true, overlayName = undefined) {
+  getNeighbours (limit = undefined, overlayName = undefined) {
     return this.overlay(overlayName).network.getNeighbours(limit)
   }
 }
