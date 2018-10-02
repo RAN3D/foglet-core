@@ -535,7 +535,7 @@ class Foglet extends EventEmitter {
 
   /**
   * Get the IDs of all available neighbours with or without their suffix -I or -O
-  * @param  {Integer} [limit=true] - Max number of neighbours to look for
+  * @param  {Integer} [limit=undefined] - Max number of neighbours to look for
   * @param {String} [overlayName=undefined] - Define the overlay to use
   * @return {String[]} Set of IDs for all available neighbours
   * @example
