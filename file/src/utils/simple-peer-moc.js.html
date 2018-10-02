@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/utils/simple-peer-moc.js | foglet-core</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="Core of the foglet library"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="foglet-core"><meta property="twitter:description" content="Core of the foglet library"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/ran3d/foglet-core"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/foglet.js~Foglet.html">Foglet</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#fprotocol">fprotocol</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/answer-queue.js~AnswerQueue.html">AnswerQueue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/foglet-protocol.js~FogletProtocol.html">FogletProtocol</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-define">define</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#fprotocol-builders">fprotocol/builders</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/abstract-method-builder.js~AbstractMethodBuilder.html">AbstractMethodBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/broadcast-builder.js~BroadcastBuilder.html">BroadcastBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/init-builder.js~InitBuilder.html">InitBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/service-builder.js~ServiceBuilder.html">ServiceBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/unicast-builder.js~UnicastBuilder.html">UnicastBuilder</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network">network</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/network-manager.js~NetworkManager.html">NetworkManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/network.js~Network.html">Network</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-OverlayConfig">OverlayConfig</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-abstract">network/abstract</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/abstract/abstract-network.js~AbstractNetwork.html">AbstractNetwork</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/abstract/abstract-overlay.js~AbstractOverlay.html">AbstractOverlay</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/abstract/tman-overlay.js~TManOverlay.html">TManOverlay</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication">network/communication</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/communication.js~Communication.html">Communication</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-abstract">network/communication/abstract</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/abstract/abstract-broadcast.js~AbstractBroadcast.html">AbstractBroadcast</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/abstract/abstract-unicast.js~AbstractUnicast.html">AbstractUnicast</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/abstract/communication-protocol.js~CommunicationProtocol.html">CommunicationProtocol</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-broadcast">network/communication/broadcast</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/broadcast/broadcast.js~Broadcast.html">Broadcast</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-stream">network/communication/stream</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/stream/stream-message.js~StreamMessage.html">StreamMessage</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/stream/stream-request.js~StreamRequest.html">StreamRequest</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-unicast">network/communication/unicast</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/unicast/unicast.js~Unicast.html">Unicast</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-rps">network/rps</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/cyclon-adapter.js~CyclonAdapter.html">CyclonAdapter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/sprayAdapter.js~SprayAdapter.html">SprayAdapter</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-rps-cyclon">network/rps/cyclon</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/cyclon/cyclon.js~Cyclon.html">Cyclon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/cyclon/partialview.js~PartialView.html">PartialView</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-signaling">network/signaling</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/signaling/signaling.js~Signaling.html">Signaling</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#utils">utils</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/media.js~Media.html">Media</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/middleware-registry.js~MiddlewareRegistry.html">MiddlewareRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/simple-peer-moc.js~SimplePeerAbstract.html">SimplePeerAbstract</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/ssh.js~SshControl.html">SshControl</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/utils/simple-peer-moc.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const EventEmitter = require(&apos;events&apos;)
+const lmerge = require(&apos;lodash.merge&apos;)
+const uniqid = require(&apos;uuid/v4&apos;)
+const debug = require(&apos;debug&apos;)
+const debugManager = debug(&apos;spa&apos;)
+
+const DEFAULT_OPTIONS = () =&gt; {
+  return {
+    id: uniqid(),
+    initiator: false,
+    channelConfig: {},
+    channelName: uniqid(),
+    config: { iceServers: [ { urls: &apos;stun:stun.l.google.com:19302&apos; } ] },
+    constraints: {},
+    offerConstraints: {},
+    answerConstraints: {},
+    reconnectTimer: false,
+    sdpTransform: function (sdp) { return sdp },
+    stream: false,
+    streams: [],
+    trickle: true,
+    wrtc: {}, // RTCPeerConnection/RTCSessionDescription/RTCIceCandidate
+    objectMode: false
+  }
+}
+
+class Manager {
+  constructor () {
+    this._statistics = {
+      message: 0
+    }
+    this.manager = new Map()
+    this._options = {
+      latency: (send) =&gt; { setTimeout(send, 0) }
+    }
+    debugManager(&apos;manager initialized&apos;)
+  }
+  get stats () {
+    return this._statistics
+  }
+
+  newPeer (peer) {
+    debugManager(&apos;new peer added. Size:&apos;, this.manager.size)
+    this.manager.set(peer.id, peer)
+  }
+
+  connect (from, to) {
+    debugManager(&apos;peer connected from/to: &apos;, from, to)
+    this.manager.get(to)._connectWith(from)
+    this.manager.get(from)._connectWith(to)
+  }
+
+  destroy (from, to) {
+    debugManager(&apos;peer disconnected from/to: &apos;, from, to)
+    if (this.manager.get(from)) {
+      this.manager.get(from)._close()
+      this.manager.delete(from)
+    }
+    if (this.manager.get(to)) {
+      this.manager.get(to)._close()
+      this.manager.delete(to)
+    }
+  }
+
+  send (from, to, msg, retry = 0) {
+    // this._options.latency(() =&gt; {
+    this._send(from, to, msg, retry)
+    // })
+  }
+
+  _send (from, to, msg, retry = 0) {
+    try {
+      if (!this.manager.has(from) || !this.manager.has(to)) throw new Error(&apos;need a from and to peer.&apos;)
+      this.manager.get(to).emit(&apos;data&apos;, msg)
+      this._statistics.message++
+    } catch (e) {
+      throw new Error(&apos;cannot send the message. perhaps your destination is not reachable.&apos;, e)
+    }
+  }
+}
+const manager = new Manager()
+
+module.exports = class SimplePeerAbstract extends EventEmitter {
+  constructor (options) {
+    super()
+    this._manager = manager
+    this._options = lmerge(DEFAULT_OPTIONS(), options)
+    this.id = this._options.id
+    this.WEBRTC_SUPPORT = true // yes but this a fake
+    this._isNegotiating = false
+    this.connected = false
+    this.disconnected = false
+    this.connectedWith = undefined
+    this.messageBuffer = []
+    debugManager(&apos;peer initiated:&apos;, this.id, this._options.initiator)
+    if (this._options.initiator) {
+      // workaround to wait for a listener on &apos;signal&apos;
+      process.nextTick(() =&gt; {
+        this._init()
+      })
+    }
+    this._manager.newPeer(this)
+  }
+
+  static get manager () {
+    return manager
+  }
+
+  send (data) {
+    if (!this.connectedWith) {
+      this.messageBuffer.push(data)
+    } else {
+      if (this.messageBuffer.length &gt; 0) {
+        this._reviewMessageBuffer()
+      }
+      if (this.connectedWith) {
+        this._send(this.connectedWith, data)
+      } else {
+        this.messageBuffer.push(data)
+      }
+    }
+  }
+
+  destroy () {
+    this._manager.destroy(this.id, this.connectedWith)
+  }
+
+  signal (data) {
+    if (data.type === &apos;init&apos;) {
+      this._isNegotiating = true
+      debugManager(&apos;offer-init received:&apos;, data)
+      this.emit(&apos;signal&apos;, this._createAccept(data))
+    } else if (data.type === &apos;accept&apos;) {
+      debugManager(&apos;offer-accept received:&apos;, data)
+      this._connect(data)
+    }
+  }
+
+  _error (error) {
+    debugManager(error)
+    this.emit(&apos;error&apos;, error)
+  }
+
+  _close () {
+    debugManager(&apos;[%s] is closed.&apos;, this.id)
+    this.emit(&apos;close&apos;)
+  }
+
+  _init () {
+    this._isNegotiating = true
+    const offer = this._createOffer()
+    this.emit(&apos;signal&apos;, offer)
+  }
+
+  _createOffer () {
+    const newOffer = {
+      offerId: uniqid(),
+      type: &apos;init&apos;,
+      offer: {
+        initiator: this.id
+      }
+    }
+    return newOffer
+  }
+  _createAccept (offer) {
+    const acceptedOffer = this._createOffer()
+    acceptedOffer.type = &apos;accept&apos;
+    acceptedOffer.offerId = offer.offerId
+    acceptedOffer.offer.initiator = offer.offer.initiator
+    acceptedOffer.offer.acceptor = this.id
+    return acceptedOffer
+  }
+
+  _reviewMessageBuffer () {
+    debugManager(&apos;Review the buffer: &apos;, this.messageBuffer.length)
+    while (this.connectedWith &amp;&amp; this.messageBuffer.length !== 0) {
+      this._send(this.messageBuffer.pop())
+    }
+  }
+
+  _send (to = this.connectedWith, data) {
+    if (!to) throw new Error(&apos;It must have a destination.&apos;)
+    this._manager.send(this.id, to, data)
+  }
+
+  _connect (offer) {
+    if (!offer.offer.acceptor) throw new Error(&apos;It must have an acceptor&apos;)
+    this._manager.connect(offer.offer.initiator, offer.offer.acceptor)
+  }
+
+  _connectWith (connectedWith) {
+    this.connected = true
+    this._isNegotiating = false
+    this.connectedWith = connectedWith
+    this.emit(&apos;connect&apos;)
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

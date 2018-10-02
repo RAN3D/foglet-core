@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/fprotocol/answer-queue.js | foglet-core</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="Core of the foglet library"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="foglet-core"><meta property="twitter:description" content="Core of the foglet library"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/ran3d/foglet-core"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/foglet.js~Foglet.html">Foglet</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#fprotocol">fprotocol</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/answer-queue.js~AnswerQueue.html">AnswerQueue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/foglet-protocol.js~FogletProtocol.html">FogletProtocol</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-define">define</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#fprotocol-builders">fprotocol/builders</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/abstract-method-builder.js~AbstractMethodBuilder.html">AbstractMethodBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/broadcast-builder.js~BroadcastBuilder.html">BroadcastBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/init-builder.js~InitBuilder.html">InitBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/service-builder.js~ServiceBuilder.html">ServiceBuilder</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/fprotocol/builders/unicast-builder.js~UnicastBuilder.html">UnicastBuilder</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network">network</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/network-manager.js~NetworkManager.html">NetworkManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/network.js~Network.html">Network</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-OverlayConfig">OverlayConfig</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-abstract">network/abstract</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/abstract/abstract-network.js~AbstractNetwork.html">AbstractNetwork</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/abstract/abstract-overlay.js~AbstractOverlay.html">AbstractOverlay</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/abstract/tman-overlay.js~TManOverlay.html">TManOverlay</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication">network/communication</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/communication.js~Communication.html">Communication</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-abstract">network/communication/abstract</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/abstract/abstract-broadcast.js~AbstractBroadcast.html">AbstractBroadcast</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/abstract/abstract-unicast.js~AbstractUnicast.html">AbstractUnicast</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/abstract/communication-protocol.js~CommunicationProtocol.html">CommunicationProtocol</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-broadcast">network/communication/broadcast</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/broadcast/broadcast.js~Broadcast.html">Broadcast</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-stream">network/communication/stream</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/stream/stream-message.js~StreamMessage.html">StreamMessage</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/stream/stream-request.js~StreamRequest.html">StreamRequest</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-communication-unicast">network/communication/unicast</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/communication/unicast/unicast.js~Unicast.html">Unicast</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-rps">network/rps</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/cyclon-adapter.js~CyclonAdapter.html">CyclonAdapter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/sprayAdapter.js~SprayAdapter.html">SprayAdapter</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-rps-cyclon">network/rps/cyclon</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/cyclon/cyclon.js~Cyclon.html">Cyclon</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/rps/cyclon/partialview.js~PartialView.html">PartialView</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#network-signaling">network/signaling</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/network/signaling/signaling.js~Signaling.html">Signaling</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#utils">utils</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/media.js~Media.html">Media</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/middleware-registry.js~MiddlewareRegistry.html">MiddlewareRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/simple-peer-moc.js~SimplePeerAbstract.html">SimplePeerAbstract</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/ssh.js~SshControl.html">SshControl</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/fprotocol/answer-queue.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/*
+MIT License
+
+Copyright (c) 2016-2017 Grall Arnaud
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+&apos;use strict&apos;
+
+const uuid = require(&apos;uuid/v4&apos;)
+
+/**
+ * An AnswerQueue stamp messages with unique ids and allow peers to answer to service calls
+ * using the `reply` and `reject` helpers.
+ * @author Thomas Minier
+ */
+class AnswerQueue {
+  /**
+   * Constructor
+   */
+  constructor () {
+    this._waitingAnswers = new Map()
+  }
+
+  /**
+   * Stamp a message and connect to a promise resolved with it answer
+   * @param {Object} message - The message to stamp
+   * @param {function} resolve - The function used to resolve the promise when the answer is received
+   * @param {function} reject - The function used to reject the promise when the answer is received
+   * @return {Object} The stamped message
+   */
+  stamp (message, resolve, reject) {
+    const answerID = uuid()
+    this._waitingAnswers.set(answerID, { resolve, reject })
+    return Object.assign({ answerID }, message)
+  }
+
+  /**
+   * Resolve the answer to a message
+   * @param {string} answerID - The id of the answer to resolve
+   * @param {*} payload - The answer&apos;s content
+   * @return {void}
+   */
+  resolve (answerID, payload) {
+    if (this._waitingAnswers.has(answerID)) {
+      this._waitingAnswers.get(answerID).resolve(payload)
+      this._waitingAnswers.delete(answerID)
+    }
+  }
+
+  /**
+   * Resolve an answer by a reject
+   * @param {string} answerID - The id of the answer to reject
+   * @param {*} payload - The answer&apos;s content
+   * @return {void}
+   */
+  reject (answerID, payload) {
+    if (this._waitingAnswers.has(answerID)) {
+      this._waitingAnswers.get(answerID).reject(payload)
+      this._waitingAnswers.delete(answerID)
+    }
+  }
+}
+
+module.exports = AnswerQueue
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
