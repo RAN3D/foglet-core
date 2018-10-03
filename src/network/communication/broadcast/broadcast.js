@@ -38,7 +38,7 @@ class Broadcast extends AbstractBroadcast {
     super(source, protocol)
     if (source && protocol) {
       this.options = {
-        id: source._options.peer,
+        id: source.id,
         delta: 1000 * 30
       }
       // the id is your id, base on the .PEER id in the RPS options
