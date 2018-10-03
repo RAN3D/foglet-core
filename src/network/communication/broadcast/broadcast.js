@@ -76,7 +76,7 @@ class Broadcast extends AbstractBroadcast {
    * @param  {Object} [isReady] {e: <stringId>, c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
    * @return {boolean}
    */
-  send (message, id, isReady = undefined) {
+  send (message, id, isReady = undefined, useIsReady = true) {
     const messageId = id || this._causality.increment()
     if (messageId.e !== this._causality.local.e) {
       throw new Error('The id of the identifier need to be equal to: ' + this._causality.local.e)
@@ -86,7 +86,7 @@ class Broadcast extends AbstractBroadcast {
       throw new Error('Cant send the message because the identifier has a counter higher than the counter accepted: need to be equal to ' + this._causality.local.v + 1)
     }
     let rdy = isReady
-    if (!rdy) {
+    if (useIsReady && !rdy) {
       // if the counter is higher than one, it means that we already send messages on the network
       if (messageId.c > 1) {
         rdy = {
