@@ -26,6 +26,7 @@ SOFTWARE.
 // const debug = require('debug')('foglet-core:communication');
 const Unicast = require('./unicast/unicast.js')
 const Broadcast = require('./broadcast/broadcast.js')
+const BroadcastBrice = require('./broadcastBrice/broadcast.js')
 const MiddlewareRegistry = require('../../utils/middleware-registry.js')
 // streams
 const StreamRequest = require('./stream/stream-request.js')
@@ -40,6 +41,7 @@ class Communication {
     this.network = source
     this.unicast = new Unicast(this.network, protocol)
     this.broadcast = new Broadcast(this.network, protocol)
+    this.broadcastBrice = new BroadcastBrice(this.network, protocol)
     // channels used for streaming
     this._unicastStreams = new Unicast(this.network, `${protocol}-streams`)
     this._broadcastStreams = new Broadcast(this.network, `${protocol}-streams`)
@@ -112,6 +114,17 @@ class Communication {
   }
 
   /**
+  * Send a message to all peers using broadcast, (optionnal: specify uniq message id and the id to wait, see: broadcast.js)
+  * @param  {Object} message - Message to broadcast over the network
+  * @param  {Object} [id] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation
+  * @param  {Object} [isReady] {_e: <stringId>, _c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
+  * @return {Object}  id of the message sent
+  */
+  sendBroadcastBrice (message, id, isReady = undefined) {
+    return this.broadcastBrice.send(this._middlewares.in(message), id, isReady)
+  }
+
+  /**
   * Begin the streaming of a message to all peers (using broadcast)
   * @param  {VersionVector} [isReady=undefined] - Id of the message to wait before this message is received
   * @return {StreamRequest} Stream used to transmit data to all peers
@@ -177,6 +190,15 @@ class Communication {
    */
   onBroadcast (callback) {
     this.broadcast.on('receive', (id, message) => callback(id, this._middlewares.out(message)))
+  }
+
+  /**
+   * Listen on broadcasted messages
+   * @param  {MessageCallback} callback - Callback invoked with the message
+   * @return {void}
+   */
+  onBroadcastBrice (callback) {
+    this.broadcastBrice.on('receive', (id, message) => callback(id, this._middlewares.out(message)))
   }
 
   /**
