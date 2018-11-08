@@ -117,7 +117,7 @@ class Broadcast extends AbstractBroadcast {
     }) == null){
       this.received.push(message)
       this.safeNeighbours.forEach(p => {
-        send(m, p)
+        this.send(m, p)
       });
       this.R_deliver(message)
     }
@@ -126,9 +126,9 @@ class Broadcast extends AbstractBroadcast {
   R_broadcast(m){
     this.received.push(m)
     this.safeNeighbours.forEach(p => {
-      send(m, p)
+      this.send(m, p)
     });
-    R_deliver(m)
+    this.R_deliver(m)
   }
 
   open(q){
@@ -136,12 +136,12 @@ class Broadcast extends AbstractBroadcast {
     if (this.safeNeighbours.length > 0) {
       this.counter = this.counter + 1
       B[q] = []          // We delete the buffered messages for q
-      ping(this.options.id, q, this.counter) // What do we send as p ? 
+      this.ping(this.options.id, q, this.counter) // What do we send as p ? 
     }
   }
 
   receivePing(from, to, id){
-    pong(from, to, id)
+    this.pong(from, to, id)
   }
 
   receivePong(from, to, id){
@@ -149,7 +149,7 @@ class Broadcast extends AbstractBroadcast {
     if(result != null){
       var index = this.bufferedMessages.indexOf(user => user[0] === to)
       this.bufferedMessages[index].forEach(m => {
-        send(m, to)
+        this.send(m, to)
       });
       this.bufferedMessages.splice(index, 1)
       this.safeNeighbours.push(to)
@@ -162,7 +162,7 @@ class Broadcast extends AbstractBroadcast {
   }
 
   PC_broadcast(m){
-    R_broadcast(m)
+    this.R_broadcast(m)
   }
 
   R_deliver(m){
@@ -192,7 +192,7 @@ class Broadcast extends AbstractBroadcast {
   PC_deliver(m){
     this.bufferedMessages.forEach(q =>{
       if(this.bufferedMessages[q].length > maxSize){
-        rety(q)
+        this.rety(q)
       }
     })
   }
@@ -213,9 +213,9 @@ class Broadcast extends AbstractBroadcast {
     if(result != null){
       this.bufferedMessages[index].splice(2,1,this.bufferedMessages[index][1] +1)
       if(this.bufferedMessages[index][1] < this.maxRetry){
-        open(q)
+        this.open(q)
       }else{
-        close(q)
+        this.close(q)
       }
     }
   }
@@ -223,7 +223,7 @@ class Broadcast extends AbstractBroadcast {
   timeout(from, to, id){
     const result = this.nbRetries.find(message => message[0] === id)
     if(result != null){
-      retry(to)
+      this.retry(to)
     }
   }
 }
