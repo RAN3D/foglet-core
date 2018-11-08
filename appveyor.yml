@@ -2,7 +2,6 @@ version: 1.0.{build}
 configuration: Release
 platform: x64
 
-
 # Install scripts. (runs after repo cloning)
 install:
   - choco install firefox
@@ -12,15 +11,16 @@ install:
   - npm --version
   # install modules
   - npm install
-  - ps: mkdir dist
+  - ps: mkdir bin
   - cmd: dir
 
 before_test:
 
-
 test_script:
-  - npm run build
+  - npm run build:debug
+  - npm run build:prod
   - npm run test
+  - npm run doc:build
 
 # Don't actually build.
 build: off

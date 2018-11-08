@@ -1,0 +1,78 @@
+{
+  "src": [
+        "./lib/**/*.js",
+        "./README.md"
+    ],
+    "dest": "./docs/",
+    "assets": {},
+    "clean": true,
+    "app": {
+      "title": "foglet-core",
+      "entrance": "content:readme",
+      "base": "/",
+      "server": "static"
+    },
+    "markdown": {
+      "gfm": true,
+      "sanitize": false,
+      "xhtml": true
+    },
+    "template": {
+        "path": "zebra",
+        "options": {
+            "title": {
+                "label": "foglet-core",
+                "href": "?content=readme"
+            },
+            "sidebar": {
+                "enabled": true,
+                "outline": "tree",
+                "collapsed": false,
+                "toolbar": true,
+                "itemsFolded": false,
+                "itemsOverflow": "crop",
+                "badges": true,
+                "search": true,
+                "animations": true
+            },
+            "symbols": {
+                "autoLink": true,
+                "params": "list",
+                "enums": "list",
+                "props": "list",
+                "meta": false
+            },
+            "contentView": {
+                "bookmarks": true
+            },
+            "navbar": {
+                "enabled": true,
+                "dark": false,
+                "animations": true,
+                "menu": [
+                    {
+                        "label": "Docs",
+                        "iconClass": "fas fa-book",
+                        "href": "?api"
+                    },
+                    {
+                        "label": "Download",
+                        "iconClass": "fas fa-cloud-download-alt",
+                        "items": [
+                            {
+                                "label": "Latest Version",
+                                "href": "https://github.com/RAN3D/foglet-core/archive/master.zip"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "GitHub",
+                        "iconClass": "fab fa-github",
+                        "href": "https://github.com/RAN3D/foglet-core",
+                        "target": "_blank"
+                    }
+                ]
+            }
+        }
+    }
+}
