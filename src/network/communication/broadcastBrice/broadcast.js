@@ -30,16 +30,6 @@ function formatID (message) {
  */
 class Broadcast extends AbstractBroadcast {
   
-  var received = []          // set of received messages
-  var safeNeighbours = []    // Q
-  var bufferedMessages = []  // B
-  var messagesId = []        // I
-  var nbRetries = []         // R
-  var counter = []           // counter
-
-  var maxSize = Number.MAX_SAFE_INTEGER
-  var maxRetry = Number.MAX_SAFE_INTEGER
-
   /**
    * Constructor
    * @param  {AbstractNetwork} source - The source RPS/overlay
@@ -67,8 +57,16 @@ class Broadcast extends AbstractBroadcast {
 
       // the id is your id, base on the .PEER id in the RPS options
       this._causality = new VVwE(this.options.id)
-      // buffer of received messages
-      this._buffer = []
+
+      this.received = []          // map of messages received
+      this.safeNeighbours = []    // Q
+      this.bufferedMessages = []  // B
+      this.messagesId = []        // I
+      this.nbRetries = []         // R
+      this.counter                // counter
+
+      this.maxSize = Number.MAX_SAFE_INTEGER
+      this.maxRetry = Number.MAX_SAFE_INTEGER
     } else {
       return new Error('Not enough parameters', 'fbroadcast.js')
     }
@@ -81,6 +79,7 @@ class Broadcast extends AbstractBroadcast {
    * @return {void}
    */
   _sendAll (message) {
+    //send to safe neighbours
     const n = this._source.getNeighbours()
     // please select all distinct ids
     if (n.length > 0) {
@@ -113,20 +112,20 @@ class Broadcast extends AbstractBroadcast {
    */
   _receive (id, message) {
     this.emit('receive', id, message)
-    if(received.find(function(element) {
+    if(this.received.find(function(element) {
       return element == message
     }) == null){
-      received.push(message)
-      safeNeighbours.forEach(p => {
+      this.received.push(message)
+      this.safeNeighbours.forEach(p => {
         send(m, p)
       });
-      R_deliver(m)
+      this.R_deliver(message)
     }
   }
 
   R_broadcast(m){
-    received.push(m)
-    safeNeighbours.forEach(p => {
+    this.received.push(m)
+    this.safeNeighbours.forEach(p => {
       send(m, p)
     });
     R_deliver(m)
@@ -134,10 +133,10 @@ class Broadcast extends AbstractBroadcast {
 
   open(q){
   
-    if (safeNeighbours.length > 0) {
-      counter = counter + 1
+    if (this.safeNeighbours.length > 0) {
+      this.counter = this.counter + 1
       B[q] = []          // We delete the buffered messages for q
-      ping(, q, counter) // What do we send as p ? 
+      ping(this.options.id, q, this.counter) // What do we send as p ? 
     }
   }
 
@@ -146,20 +145,20 @@ class Broadcast extends AbstractBroadcast {
   }
 
   receivePong(from, to, id){
-    const result = bufferedMessages.find(user => user[0] === to)
+    const result = this.bufferedMessages.find(user => user[0] === to)
     if(result != null){
-      var index = bufferedMessages.indexOf(user => user[0] === to)
-      bufferedMessages[index].forEach(m => {
+      var index = this.bufferedMessages.indexOf(user => user[0] === to)
+      this.bufferedMessages[index].forEach(m => {
         send(m, to)
       });
-      bufferedMessages.splice(index, 1)
-      safeNeighbours.push(to)
+      this.bufferedMessages.splice(index, 1)
+      this.safeNeighbours.push(to)
     }
   }
 
   close(q){
-    var index = bufferedMessages.indexOf(user => user[0] === q)
-    bufferedMessages.splice(index, 1)
+    var index = this.bufferedMessages.indexOf(user => user[0] === q)
+    this.bufferedMessages.splice(index, 1)
   }
 
   PC_broadcast(m){
@@ -167,38 +166,66 @@ class Broadcast extends AbstractBroadcast {
   }
 
   R_deliver(m){
-    bufferedMessages.forEach(q =>{
-      bufferedMessages[q].push(m)
+    this.bufferedMessages.forEach(q =>{
+      this.bufferedMessages[q].push(m)
     })
-    PC_deliver(m)
+    this.PC_deliver(m)
   }
 
   ping(from, to, id){
-    const result = nbRetries.find(user => user[0] === from)
+    const result = this.nbRetries.find(user => user[0] === from)
     if (result != null){
-      var index = nbRetries.indexOf(user => user[0] === from)
-      nbRetries[index].splice(2,1, 0)
+      var index = this.nbRetries.indexOf(user => user[0] === from)
+      this.nbRetries[index].splice(2, 1, 0)
     }
-    var index = messageId.indexOf(message => message[0] === id)
-    messageId[index].splice(2,1,to)
+    var index = this.messageId.indexOf(message => message[0] === id)
+    this.messageId[index].splice(2, 1, to)
   }
 
   receiveAck(from, to, id){
-    messageId
+    var index = this.messageId.indexOf(message => message[0] === id)
+    this.messageId.splice(index, 1)
+    var index = this.nbRetries.indexOf(message => message[0] === to)
+    this.nbRetries.splice(index, 1)
   }
 
   PC_deliver(m){
-    bufferedMessages.forEach(q =>{
-      if(bufferMessage.get(q).length > maxSize){
+    this.bufferedMessages.forEach(q =>{
+      if(this.bufferedMessages[q].length > maxSize){
         rety(q)
       }
     })
   }
 
   close(q){
-    bufferMessage.delete(q)
+    var index = this.bufferedMessage.indexOf(user => user[0] === q)
+    this.bufferMessage.slice(index, 1)
+    var index = this.messageId.indexOf(message => message[0] === q)
+    this.messageId.slice(index, 1)
+    var index = this.nbRetries.indexOf(message => message[0] === q)
+    this.nbRetries.splice(index, 1)
   }
 
+  retry(q){
+    var index = this.messageId.indexOf(message => message[0] === q)
+    this.messageId.slice(index, 1)
+    var index = this.bufferedMessages.indexOf(user => user[0] === q)
+    if(result != null){
+      this.bufferedMessages[index].splice(2,1,this.bufferedMessages[index][1] +1)
+      if(this.bufferedMessages[index][1] < this.maxRetry){
+        open(q)
+      }else{
+        close(q)
+      }
+    }
+  }
+
+  timeout(from, to, id){
+    const result = this.nbRetries.find(message => message[0] === id)
+    if(result != null){
+      retry(to)
+    }
+  }
 }
 
 module.exports = Broadcast
