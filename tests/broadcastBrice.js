@@ -10,7 +10,7 @@ function create(id) {
 		rps: {
 			options: {
 				maxPeers: 2,
-				delta: 5000 * 1000,
+				delta: 5000 * 1000,	
 				// simple-peer moc
 				socketClass: require('../foglet-core.js').SimplePeerMoc
 			}

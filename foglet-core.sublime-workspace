@@ -1,1 +1,870 @@
-{}
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"message",
+				"messageId\tany"
+			],
+			[
+				"m",
+				"m\tany"
+			],
+			[
+				"_",
+				"_close"
+			],
+			[
+				"ret",
+				"retries"
+			],
+			[
+				"messa",
+				"messageId"
+			],
+			[
+				"q",
+				"q"
+			],
+			[
+				"to",
+				"to"
+			],
+			[
+				"buffer",
+				"bufferMessage"
+			],
+			[
+				"for",
+				"forEach"
+			],
+			[
+				"list",
+				"liste_taches_desc"
+			],
+			[
+				"liste_ta",
+				"liste_taches_desc"
+			],
+			[
+				"liste",
+				"liste_taches_asc"
+			],
+			[
+				"min",
+				"min_diff"
+			],
+			[
+				"temp",
+				"temps_LSA"
+			],
+			[
+				"get",
+				"get_max_machine"
+			],
+			[
+				"tempsT",
+				"tempsTachesRand"
+			],
+			[
+				"temps",
+				"temps_LSA"
+			],
+			[
+				"instance",
+				"instance_number"
+			],
+			[
+				"mode",
+				"mode_instance"
+			],
+			[
+				"fichier",
+				"fichier_sortie"
+			],
+			[
+				"el",
+				"elapsed_seconds"
+			],
+			[
+				"tache",
+				"taches_par_machines"
+			],
+			[
+				"tempsTa",
+				"tempsTaches"
+			],
+			[
+				"bor",
+				"borne_inf_max"
+			],
+			[
+				"borne_inf",
+				"borne_inf_moy"
+			],
+			[
+				"saisie",
+				"saisie_aleatoire"
+			],
+			[
+				"tempsTaches",
+				"tempsTachesRand"
+			],
+			[
+				"nb",
+				"nbTaches"
+			],
+			[
+				"tabRes",
+				"tabRes1"
+			],
+			[
+				"nombre",
+				"nombretest"
+			],
+			[
+				"FROM",
+				"FROM"
+			],
+			[
+				"str",
+				"strBeg"
+			],
+			[
+				"pos",
+				"posPoint2"
+			],
+			[
+				"strike",
+				"strikeType"
+			],
+			[
+				"date",
+				"dateBeg"
+			],
+			[
+				"compt",
+				"comptTuple"
+			],
+			[
+				"inser",
+				"insertTable"
+			],
+			[
+				"i",
+				"i"
+			],
+			[
+				"nbLieux",
+				"nbLieux"
+			],
+			[
+				"nbL",
+				"nbLieuxCircPow"
+			],
+			[
+				"tmp",
+				"tmp"
+			],
+			[
+				"NBlIEUX",
+				"nbLieuxCircPow"
+			],
+			[
+				"struc",
+				"Structure"
+			],
+			[
+				"set",
+				"set"
+			],
+			[
+				"tsp",
+				"tsphelper"
+			],
+			[
+				"li",
+				"lieuxPow"
+			],
+			[
+				"nbC",
+				"nbCirc"
+			],
+			[
+				"nbLieu",
+				"nbLieuxDansCirc"
+			],
+			[
+				"nbLi",
+				"nbLieuxDansCirc"
+			],
+			[
+				"calcul",
+				"calculTailleParcours"
+			],
+			[
+				"crono",
+				"crono_ms"
+			],
+			[
+				"nbContr",
+				"nbContr"
+			],
+			[
+				"num",
+				"numeroC"
+			],
+			[
+				"nom",
+				"nomContr"
+			],
+			[
+				"Equies",
+				"EquipesAdverses"
+			],
+			[
+				"j",
+				"j"
+			],
+			[
+				"va",
+				"valeurs"
+			],
+			[
+				"nb_jou",
+				"nb_joueur"
+			],
+			[
+				"id",
+				"idJou"
+			],
+			[
+				"equi",
+				"equipe_non_complete"
+			],
+			[
+				"Paris",
+				"Paris"
+			],
+			[
+				"Equip",
+				"EquipesAdverses"
+			],
+			[
+				"Joueurs",
+				"Joueurs"
+			],
+			[
+				"Par",
+				"Parcours"
+			],
+			[
+				"commen",
+				"commentaire"
+			],
+			[
+				"noteMo",
+				"noteMoy2"
+			],
+			[
+				"dens",
+				"densiteH_"
+			],
+			[
+				"a_vehicule",
+				"a_vehicule_inv"
+			],
+			[
+				"a_arme",
+				"a_arme_inv"
+			],
+			[
+				"prendr",
+				"prendre_objet"
+			],
+			[
+				"Etat",
+				"Etat_Humain"
+			],
+			[
+				"ve",
+				"vectPtrCel"
+			],
+			[
+				"Etat_Pourchase",
+				"Etat_Pourchasse"
+			],
+			[
+				"E",
+				"Etat_Explore"
+			],
+			[
+				"vectP",
+				"vectPtrCel"
+			],
+			[
+				"densie",
+				"densiteH"
+			],
+			[
+				"densite",
+				"densiteH"
+			],
+			[
+				"Humain",
+				"Humain"
+			],
+			[
+				"get_li",
+				"get_liste_zombie"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "/*\nThis broadcast implementation  is clearly inspired from https://github.com/Chat-Wane/CausalBroadcastDefinition\nThis is a broadcast customizable, if you want to specifiy\nEnsure single delivery and causality between 2 consecutive messages from a single site\n*/\n'use strict'\n\nconst AbstractBroadcast = require('./../abstract/abstract-broadcast.js')\nconst VVwE = require('version-vector-with-exceptions') // Version-Vector With Exceptions\nconst messages = require('./messages.js')\n\nconst uuid = require('uuid/v4')\nconst sortedIndexBy = require('lodash.sortedindexby')\nconst debug = (require('debug'))('foglet-core:broadcast')\n\n/**\n * Format the IDs of messages in string format\n * @param  {Obbject} message - The message to format\n * @return {string} The formatted message's id in string format\n */\nfunction formatID (message) {\n  return `e=${message.id.e}&c=${message.id.c}`\n}\n\n/**\n * Broadcast represent the base implementation of a broadcast protocol for the foglet library.\n * Based on the CausalBrodacastDefinition Package: see: https://github.com/Chat-Wane/CausalBroadcastDefinition\n * @extends AbstractBroadcast\n * @author Arnaud Grall (Folkvir)\n */\nclass Broadcast extends AbstractBroadcast {\n  \n  var received = []          // set of received messages\n  var safeNeighbours = []    // Q\n  var bufferedMessages = []  // B\n  var messagesId = []        // I\n  var nbRetries = []         // R\n  var counter = []           // counter\n\n  var maxSize = Number.MAX_SAFE_INTEGER\n  var maxRetry = Number.MAX_SAFE_INTEGER\n\n  /**\n   * Constructor\n   * @param  {AbstractNetwork} source - The source RPS/overlay\n   * @param  {string} protocol - The name of the broadcast protocol\n   */\n  constructor (source, protocol) {\n    super(source, protocol)\n    if (source && protocol) {\n      this.options = {\n        id: source.id,\n        delta: 1000 * 30\n      }\n      // Connexions inview et outview donc ne récupérer que les outview\n      this._source.rps.on('open', (id) => {\n        if(this._source.getNeighbours().includes(id)) {\n          console.log('[%s] open', this.options.id, id)\n        }\n      })\n      const self = this\n\n      // Connexions inview et outview donc ne récupérer que les outview\n      this._source.rps.on('close', (id) => {\n        console.log('close', id)\n      })\n\n      // the id is your id, base on the .PEER id in the RPS options\n      this._causality = new VVwE(this.options.id)\n      // buffer of received messages\n      this._buffer = []\n    } else {\n      return new Error('Not enough parameters', 'fbroadcast.js')\n    }\n  }\n\n  /**\n   * Send a message to all neighbours\n   * @private\n   * @param  {Object} message - The message to send\n   * @return {void}\n   */\n  _sendAll (message) {\n    const n = this._source.getNeighbours()\n    // please select all distinct ids\n    if (n.length > 0) {\n      n.forEach(p => {\n        this._unicast.send(p, message).catch(e => {\n          debug(e)\n        })\n      })\n    }\n  }\n\n  /**\n   * Send a message in broadcast\n   * @param  {Object}  message  - The message to send\n   * @param  {Object} [id] {e: <stringId>, c: <Integer>} this uniquely represents the id of the operation\n   * @param  {Object} [isReady] {e: <stringId>, c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message\n   * @return {boolean}\n   */\n  send (message, id) {\n    console.log('i send my beautiful message: ', this.options.id, message)\n    this._receive(this.options.id, message)\n    this._sendAll(message)\n  }\n\n  /**\n   * Handler executed when a message is recevied\n   * @param  {string} id  - Message issuer's ID\n   * @param  {Object} message - The message received\n   * @return {void}\n   */\n  _receive (id, message) {\n    this.emit('receive', id, message)\n    if(received.find(function(element) {\n      return element == message\n    }) == null){\n      received.push(message)\n      safeNeighbours.forEach(p => {\n        send(m, p)\n      });\n      R_deliver(m)\n    }\n  }\n\n  R_broadcast(m){\n    received.push(m)\n    safeNeighbours.forEach(p => {\n      send(m, p)\n    });\n    R_deliver(m)\n  }\n\n  open(q){\n  \n    if (safeNeighbours.length > 0) {\n      counter = counter + 1\n      B[q] = []          // We delete the buffered messages for q\n      ping(, q, counter) // What do we send as p ? \n    }\n  }\n\n  receivePing(from, to, id){\n    pong(from, to, id)\n  }\n\n  receivePong(from, to, id){\n    const result = bufferedMessages.find(user => user[0] === to)\n    if(result != null){\n      var index = bufferedMessages.indexOf(user => user[0] === to)\n      bufferedMessages[index].forEach(m => {\n        send(m, to)\n      });\n      bufferedMessages.splice(index, 1)\n      safeNeighbours.push(to)\n    }\n  }\n\n  close(q){\n    var index = bufferedMessages.indexOf(user => user[0] === q)\n    bufferedMessages.splice(index, 1)\n  }\n\n  PC_broadcast(m){\n    R_broadcast(m)\n  }\n\n  R_deliver(m){\n    bufferedMessages.forEach(q =>{\n      bufferedMessages[q].push(m)\n    })\n    PC_deliver(m)\n  }\n\n  ping(from, to, id){\n    const result = nbRetries.find(user => user[0] === from)\n    if (result != null){\n      var index = nbRetries.indexOf(user => user[0] === from)\n      nbRetries[index].splice(2,1, 0)\n    }\n    var index = messageId.indexOf(message => message[0] === id)\n    messageId[index].splice(2,1,to)\n  }\n\n  receiveAck(from, to, id){\n    messageId\n  }\n\n  PC_deliver(m){\n    bufferedMessages.forEach(q =>{\n      if(bufferMessage.get(q).length > maxSize){\n        rety(q)\n      }\n    })\n  }\n\n  close(q){\n    bufferMessage.delete(q)\n  }\n\n  retry(q){\n\n  }\n\n  timeout(from, to, id){\n    \n  }\n\n}\n\nmodule.exports = Broadcast\n",
+			"file": "src/network/communication/broadcastBrice/broadcast.js",
+			"file_size": 5546,
+			"file_write_time": 131860677342960988,
+			"settings":
+			{
+				"buffer_size": 5595,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/network/communication/broadcastBrice/messages.js",
+			"settings":
+			{
+				"buffer_size": 1605,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/network/communication/broadcastBrice/broadcastNoVector.js",
+			"settings":
+			{
+				"buffer_size": 8273,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "tests/broadcastBrice.js",
+			"settings":
+			{
+				"buffer_size": 1088,
+				"encoding": "UTF-8",
+				"line_ending": "Unix",
+				"name": "const Foglet = require('../src/foglet.js')"
+			}
+		},
+		{
+			"file": "src/foglet.js",
+			"settings":
+			{
+				"buffer_size": 20396,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/network/rps/cyclon/cyclon.js",
+			"settings":
+			{
+				"buffer_size": 12594,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"Term",
+				"Terminal View: Open Bash Terminal"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/ivan/Cours/CapstoneProject/foglet-core",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/abstract",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/broadcast",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/broadcastBrice",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/rps",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/rps/cyclon"
+	],
+	"file_history":
+	[
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/broadcast/broadcastNoVector.js",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/communication.js",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/broadcast/messages.js",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/network.js",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/foglet.js",
+		"/home/ivan/Cours/CapstoneProject/Questions",
+		"/home/ivan/Cours/Middleware/Middleware/changement.diff",
+		"/home/ivan/Cours/Middleware/Branche/changement.diff",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/broadcast/broadcast.js",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/tests/examples/example-direct.html",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/communication/abstract/communication-protocol.js",
+		"/home/ivan/Cours/CapstoneProject/foglet-core/src/network/rps/sprayAdapter.js",
+		"/home/ivan/Cours/Capstone/foglet-core/src/network/communication/broadcast/broadcastNoVector.js",
+		"/home/ivan/Cours/Capstone/foglet-template/lib/main.js",
+		"/home/ivan/Cours/Capstone/foglet-core/src/network/communication/communication.js",
+		"/home/ivan/Cours/Capstone/Questions",
+		"/home/ivan/Cours/Capstone/foglet-core/src/network/communication/abstract/abstract-broadcast.js",
+		"/home/ivan/Cours/Capstone/foglet-core/src/network/communication/abstract/abstract-unicast.js",
+		"/home/ivan/Cours/Capstone/foglet-core/src/network/communication/abstract/communication-protocol.js",
+		"/home/ivan/Cours/Capstone/foglet-core/src/network/communication/stream/messages.js",
+		"/home/ivan/Cours/Capstone/foglet-core/src/network/communication/stream/stream-message.js",
+		"/home/ivan/Cours/Capstone/foglet-template/examples/main.js",
+		"/home/ivan/Cours/Capstone/foglet-core/appveyor.yml",
+		"/media/ivan/Files/Cours/Capstone/foglet-core/src/network/communication/abstract/communication-protocol.js",
+		"/media/ivan/Files/Cours/Capstone/foglet-core/src/network/communication/abstract/abstract-broadcast.js",
+		"/media/ivan/Files/Cours/Capstone/foglet-core/src/network/communication/broadcast/broadcast.js",
+		"/media/ivan/Files/Cours/Capstone/foglet-core/src/network/communication/broadcast/messages.js",
+		"/home/ivan/Bureau/LPHN_project-master/P_resultats.txt",
+		"/home/ivan/Bureau/LPHN_project-master/J_Dromigny_nul.jl",
+		"/home/ivan/Bureau/LPHN_project-master/R_Dromigny.R",
+		"/home/ivan/Bureau/LPHN_project-master/P_etude.py",
+		"/home/ivan/workspace/tinytwitt/war/index.html",
+		"/home/ivan/workspace/tinytwitt/war/script.js",
+		"/home/ivan/Cours/M1/C&A/ExempleInstance.txt",
+		"/home/ivan/Cours/M1/C&A/Exercice1.txt",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/ExempleInstance.txt",
+		"/home/ivan/Bureau/Nouvel an",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/test.txt",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/1000:2000:20:2:500",
+		"/home/ivan/Cours/M1/LPHN/projet_lphn/J_Dromigny.jl",
+		"/home/ivan/Cours/M1/LPHN/projet_lphn/P_Dromigny.py",
+		"/home/ivan/Cours/M1/LPHN/projet_lphn/R_Dromigny.R",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/Instance.txt",
+		"/home/ivan/Téléchargements/NouvelAn.txt",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/t.txt",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/MinMakespan.cpp",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/ResultatPourGraphes.txt",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/resultat.txt",
+		"/home/ivan/Téléchargements/Preuves.txt",
+		"/home/ivan/Bureau/dia_rotate.py",
+		"/home/ivan/Cours/M1/Machine Learning/iris_tree.py",
+		"/home/ivan/Bureau/BEGGGINNNN.txt",
+		"/home/ivan/Bureau/AnglaisExo.txt",
+		"/home/ivan/Téléchargements/Algo (1)",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/Rapport/ResultatPourGraphes.txt",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/README.md",
+		"/home/ivan/Cours/M1/C-A/C-A_projet/Programme/MinMakespan.cpp",
+		"/home/ivan/Bureau/miniature-pancake-master/Application.java",
+		"/home/ivan/Bureau/miniature-pancake-master/ClasseUnion.java",
+		"/home/ivan/Bureau/miniature-pancake-master/FenetreMenu.java",
+		"/home/ivan/Bureau/miniature-pancake-master/Indice.java",
+		"/home/ivan/Bureau/miniature-pancake-master/FenetreJeu.java",
+		"/home/ivan/Bureau/miniature-pancake-master/Cellule.java",
+		"/home/ivan/Bureau/miniature-pancake-master/Grille.java",
+		"/media/ivan/Files/Cours/GDP/alma-m2-2018/README.md",
+		"/media/ivan/Files/Cours/Capstone/foglet-core/src/network/communication/communication.js",
+		"/media/ivan/Files/Cours/Capstone/foglet-template/lib/main.js",
+		"/media/ivan/Files/Cours/Capstone/foglet-core/src/foglet.js",
+		"/media/ivan/Files/Cours/Capstone/foglet-template/examples/main.js",
+		"/media/ivan/Files/Cours/Capstone/foglet-template/tests/template-test.js",
+		"/home/ivan/Documents/mods/Q7.clt",
+		"/home/ivan/Documents/mods/test.clt",
+		"/home/ivan/Documents/mods/Q1.clt",
+		"/home/ivan/Documents/mods/Q2.clt",
+		"/home/ivan/Documents/mods/Q3.clt",
+		"/home/ivan/Documents/mods/Q4.clt",
+		"/home/ivan/Documents/mods/Q5.clt",
+		"/home/ivan/Documents/mods/Q6.clt",
+		"/home/ivan/Cours/Middleware/Middleware/src/main/java/com/alma/pay2bid/server/Server.java",
+		"/home/ivan/Cours/Middleware/pay2bid/src/main/java/com/alma/pay2bid/server/Server.java",
+		"/home/ivan/Cours/Middleware/Gringott/db.json",
+		"/home/ivan/Téléchargements/german.data",
+		"/home/ivan/Application/rapidminer-studio/README.md",
+		"/home/ivan/Documents/mods/Capstone",
+		"/home/ivan/workspace/Tes/src/projetwcd/TinytwittEndpoint.java",
+		"/home/ivan/workspace/tinytwitt/src/projetwcd/TinytwittEndpoint.java",
+		"/home/ivan/Cours/M1/LPHN/Julia/TD.jl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/OtherSet2/data2.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/OtherSet1/data1.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Requetes/requetes.sparql",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Construct/construct.sparql",
+		"/home/ivan/Cours/M1/WebSem/projet_web/VoID/VoID.txt",
+		"/home/ivan/Cours/M1/WebSem/projet_web/VoID/VoID.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/VoID/void.txt",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/OtherSet1/createOtherSet1.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Data/project.ttl",
+		"/home/ivan/Cours/M1/WebSem/Projet/VoID/VoID.ttl",
+		"/home/ivan/Application/Fuseki/run/configuration/create.ttl",
+		"/home/ivan/Cours/M1/LPHN/projet_lphn/Robbes.jl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/OtherSet2/createOtherSet2.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Inference/create.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Inference/model.rules",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Inference/model.ttl",
+		"/home/ivan/Cours/M1/git.txt",
+		"/home/ivan/Application/Fuseki/run/databases/inference/model.ttl",
+		"/home/ivan/Cours/M1/WebSem/Projet/Construct/construct.sparql",
+		"/home/ivan/Cours/M1/WebSem/Projet/Data/project.ttl",
+		"/home/ivan/Bureau/WebSemantic-master/VoID/descDataset.txt",
+		"/home/ivan/Bureau/WebSemantic-master/linked_data/data_budget_v2_clem_yvan.ttl",
+		"/home/ivan/Application/Fuseki/run/configuration/OtherSet2.ttl",
+		"/home/ivan/Application/Fuseki/run/configuration/OtherSet1.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/model2.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/model2.rules",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/data2.ttl",
+		"/home/ivan/Cours/M1/WebSem/projet_web/Other_Dataset/data1.ttl",
+		"/home/ivan/Application/Fuseki/run/configuration/inference.ttl",
+		"/home/ivan/Bureau/WebSemantic-master/linked_data/construct_v2_clem_yvan.sparql",
+		"/home/ivan/Cours/M1/WebSem/Projet/Data/model.ttl",
+		"/home/ivan/Application/Fuseki/run/databases/inference/model.rules",
+		"/home/ivan/Bureau/WebSemantic-master/Inference/nosRegles.rules",
+		"/home/ivan/Bureau/WebSemantic-master/Inference/model.ttl",
+		"/home/ivan/Bureau/WebSemantic-master/Inference/inference.ttl",
+		"/home/ivan/Cours/M1/WebSem/Projet/Requetes/requetes.sparql",
+		"/home/ivan/Cours/M1/LPHN/Python/Exo1.py",
+		"/home/ivan/Application/Fuseki/run/databases/inference/project.ttl",
+		"/home/ivan/Cours/M1/WebSem/Projet/Other_Dataset/Data_set1/data_budget_v2_clem_yvan.ttl",
+		"/home/ivan/Cours/M1/WebSem/Projet/Other_Dataset/Data_set2/data_clem_finale.ttl",
+		"/home/ivan/Cours/M1/WebSem/Projet/Data/project.csv"
+	],
+	"find":
+	{
+		"height": 22.0
+	},
+	"find_in_files":
+	{
+		"height": 90.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"getN",
+			"nameClient",
+			"server",
+			"serveur"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "src/network/communication/broadcastBrice/broadcast.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5595,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5559,
+								5559
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"word_separators": "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
+						},
+						"translation.x": 0.0,
+						"translation.y": 2213.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/network/communication/broadcastBrice/messages.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1605,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1218,
+								1218
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/network/communication/broadcastBrice/broadcastNoVector.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8273,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1911.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "tests/broadcastBrice.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1088,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								159,
+								159
+							]
+						],
+						"settings":
+						{
+							"auto_name": "const Foglet = require('../src/foglet.js')",
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"word_separators": "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/foglet.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 20396,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1573,
+								1573
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 156.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/network/rps/cyclon/cyclon.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 12594,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1417,
+								1417
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"word_separators": "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 22.0
+	},
+	"input":
+	{
+		"height": 34.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "foglet-core.sublime-project",
+	"replace":
+	{
+		"height": 40.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 242.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

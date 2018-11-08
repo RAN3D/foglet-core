@@ -29,6 +29,17 @@ function formatID (message) {
  * @author Arnaud Grall (Folkvir)
  */
 class Broadcast extends AbstractBroadcast {
+  
+  var received = []          // set of received messages
+  var safeNeighbours = []    // Q
+  var bufferedMessages = []  // B
+  var messagesId = []        // I
+  var nbRetries = []         // R
+  var counter = []           // counter
+
+  var maxSize = Number.MAX_SAFE_INTEGER
+  var maxRetry = Number.MAX_SAFE_INTEGER
+
   /**
    * Constructor
    * @param  {AbstractNetwork} source - The source RPS/overlay
@@ -94,8 +105,6 @@ class Broadcast extends AbstractBroadcast {
     this._sendAll(message)
   }
 
-
-
   /**
    * Handler executed when a message is recevied
    * @param  {string} id  - Message issuer's ID
@@ -104,7 +113,92 @@ class Broadcast extends AbstractBroadcast {
    */
   _receive (id, message) {
     this.emit('receive', id, message)
+    if(received.find(function(element) {
+      return element == message
+    }) == null){
+      received.push(message)
+      safeNeighbours.forEach(p => {
+        send(m, p)
+      });
+      R_deliver(m)
+    }
   }
+
+  R_broadcast(m){
+    received.push(m)
+    safeNeighbours.forEach(p => {
+      send(m, p)
+    });
+    R_deliver(m)
+  }
+
+  open(q){
+  
+    if (safeNeighbours.length > 0) {
+      counter = counter + 1
+      B[q] = []          // We delete the buffered messages for q
+      ping(, q, counter) // What do we send as p ? 
+    }
+  }
+
+  receivePing(from, to, id){
+    pong(from, to, id)
+  }
+
+  receivePong(from, to, id){
+    const result = bufferedMessages.find(user => user[0] === to)
+    if(result != null){
+      var index = bufferedMessages.indexOf(user => user[0] === to)
+      bufferedMessages[index].forEach(m => {
+        send(m, to)
+      });
+      bufferedMessages.splice(index, 1)
+      safeNeighbours.push(to)
+    }
+  }
+
+  close(q){
+    var index = bufferedMessages.indexOf(user => user[0] === q)
+    bufferedMessages.splice(index, 1)
+  }
+
+  PC_broadcast(m){
+    R_broadcast(m)
+  }
+
+  R_deliver(m){
+    bufferedMessages.forEach(q =>{
+      bufferedMessages[q].push(m)
+    })
+    PC_deliver(m)
+  }
+
+  ping(from, to, id){
+    const result = nbRetries.find(user => user[0] === from)
+    if (result != null){
+      var index = nbRetries.indexOf(user => user[0] === from)
+      nbRetries[index].splice(2,1, 0)
+    }
+    var index = messageId.indexOf(message => message[0] === id)
+    messageId[index].splice(2,1,to)
+  }
+
+  receiveAck(from, to, id){
+    messageId
+  }
+
+  PC_deliver(m){
+    bufferedMessages.forEach(q =>{
+      if(bufferMessage.get(q).length > maxSize){
+        rety(q)
+      }
+    })
+  }
+
+  close(q){
+    bufferMessage.delete(q)
+  }
+
 }
 
 module.exports = Broadcast
