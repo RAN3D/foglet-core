@@ -14,7 +14,7 @@
     "doc:build": "docma -c configs/docma.json",
     "doc:dev": "docma -c configs/docma-local.json",
     "doc:serve": "docma serve ./docs",
-    "mocha": "mocha tests/**/*-test.js --exit",
+    "mocha": "mocha tests/**/*-test.js --exit -- --no-warnings",
     "all": "npm run build:debug && npm run build:prod && npm run doc:build && npm test"
   },
   "repository": {
@@ -37,7 +37,9 @@
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
     "debug": "^4.1.0",
-    "lodash.merge": "^4.6.1"
+    "lodash.merge": "^4.6.1",
+    "short-uuid": "^3.0.1",
+    "spray-wrtc": "git+https://github.com/ran3d/spray-wrtc.git"
   },
   "devDependencies": {
     "docma": "^2.1.0",
