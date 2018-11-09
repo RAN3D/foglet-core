@@ -64,6 +64,7 @@ class Broadcast extends AbstractBroadcast {
       this.messagesId = []        // I
       this.nbRetries = []         // R
       this.counter                // counter
+      this.causalBuffer = new causalBuffer()
 
       this.maxSize = Number.MAX_SAFE_INTEGER
       this.maxRetry = Number.MAX_SAFE_INTEGER
@@ -98,9 +99,10 @@ class Broadcast extends AbstractBroadcast {
    * @param  {Object} [isReady] {e: <stringId>, c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
    * @return {boolean}
    */
-  send (message, id) {
+  send (id, message) {
     console.log('i send my beautiful message: ', this.options.id, message)
-    this._receive(this.options.id, message)
+    // TODO : Add the id in the message
+    this._receive(message, this.options.id)
     this._sendAll(message)
   }
 
@@ -112,15 +114,30 @@ class Broadcast extends AbstractBroadcast {
    */
   _receive (id, message) {
     this.emit('receive', id, message)
-    if(this.received.find(function(element) {
-      return element == message
-    }) == null){
-      this.received.push(message)
-      this.safeNeighbours.forEach(p => {
-        this.send(m, p)
-      });
-      this.R_deliver(message)
+    var index = this.received.indexOf(map => map[0] === id)
+    if(index == -1){
+      this.received.push([id, 0])
+      index = this.received.indexOf(map => map[0] === id)
+    } 
+    if (message.counter - this.received[index][1] == 1){
+      this.received[index].splice(1, 1, message.counter)
+    } else{
+      index = this.causalBuffer.indexOf(map => map[0] === id)
+      if(index == -1){
+        this.causalBuffer.addUser(id)
+        index = this.causalBuffer.indexOf(map => map[0] === id)
+      }      
+      this.causalBuffer.addMessage(id, message)
     }
+
+    if(this.causalBuffer[index].length > 1){
+      // TODO what do we do exactly with the message so ?
+    }
+
+    // TODO : to verify not sure it's correct
+    this.safeNeighbours.forEach(p => {
+      this.send(p, m)
+    });
   }
 
   R_broadcast(m){
@@ -145,12 +162,11 @@ class Broadcast extends AbstractBroadcast {
   }
 
   receivePong(from, to, id){
-    const result = this.bufferedMessages.find(user => user[0] === to)
-    if(result != null){
-      var index = this.bufferedMessages.indexOf(user => user[0] === to)
-      this.bufferedMessages[index].forEach(m => {
-        this.send(m, to)
-      });
+    var index = this.bufferedMessages.indexOf(user => user[0] === to)
+    if(index != -1){
+      for(var i = 1; i < this.bufferedMessages[index].length; i++){
+        this.send(to, this.bufferedMessages[index][i])
+      }
       this.bufferedMessages.splice(index, 1)
       this.safeNeighbours.push(to)
     }
