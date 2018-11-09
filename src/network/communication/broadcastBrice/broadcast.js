@@ -58,12 +58,13 @@ class Broadcast extends AbstractBroadcast {
       // the id is your id, base on the .PEER id in the RPS options
       this._causality = new VVwE(this.options.id)
 
-      this.received = []          // map of messages received
-      this.safeNeighbours = []    // Q
-      this.bufferedMessages = []  // B
-      this.messagesId = []        // I
-      this.nbRetries = []         // R
-      this.counter                // counter
+      this.received = []                          // map of messages received
+      this.safeNeighbours = []                    // Q
+      this.messagesBuffer = new messagesBuffer()  // B
+      this.messagesId = []                        // I
+      this.nbRetries = []                         // R
+      this.pingCounter = 0                        // counter
+      this.causalCounter = 0
       this.causalBuffer = new causalBuffer()
 
       this.maxSize = Number.MAX_SAFE_INTEGER
@@ -131,16 +132,16 @@ class Broadcast extends AbstractBroadcast {
     }
 
     if(this.causalBuffer[index].length > 1){
-      // TODO what do we do exactly with the message so ?
+      // TODO : what do we do exactly with the message ?
     }
 
-    // TODO : to verify not sure it's correct
-    this.safeNeighbours.forEach(p => {
-      this.send(p, m)
+    this.safeNeighbours.forEach(neighbour => {
+      this.send(neighbour.id, m)
     });
   }
 
-  R_broadcast(m){
+  // TODO : not sure this is correct
+  R_broadcast(message){
     this.received.push(m)
     this.safeNeighbours.forEach(p => {
       this.send(m, p)
@@ -149,32 +150,32 @@ class Broadcast extends AbstractBroadcast {
   }
 
   open(q){
-  
     if (this.safeNeighbours.length > 0) {
-      this.counter = this.counter + 1
-      B[q] = []          // We delete the buffered messages for q
-      this.ping(this.options.id, q, this.counter) // What do we send as p ? 
+      this.pingCounter = this.pingCounter + 1
+      messagesBuffer.addUser(q)                   
+      this.ping(this.options.id, q, this.pingCounter)
     }
   }
 
+  // TODO : not sure this is correct
   receivePing(from, to, id){
     this.pong(from, to, id)
   }
 
   receivePong(from, to, id){
-    var index = this.bufferedMessages.indexOf(user => user[0] === to)
+    var index = this.messagesBuffer.indexOf(user => user[0] === to)
     if(index != -1){
-      for(var i = 1; i < this.bufferedMessages[index].length; i++){
-        this.send(to, this.bufferedMessages[index][i])
+      for(var i = 1; i < this.messagesBuffer[index].length; i++){
+        this.send(to, this.messagesBuffer[index][i])
       }
-      this.bufferedMessages.splice(index, 1)
+      this.messagesBuffer.splice(index, 1)
       this.safeNeighbours.push(to)
     }
   }
 
   close(q){
-    var index = this.bufferedMessages.indexOf(user => user[0] === q)
-    this.bufferedMessages.splice(index, 1)
+    var index = this.messagesBuffer.indexOf(user => user[0] === q)
+    this.messagesBuffer.splice(index, 1)
   }
 
   PC_broadcast(m){
@@ -182,8 +183,8 @@ class Broadcast extends AbstractBroadcast {
   }
 
   R_deliver(m){
-    this.bufferedMessages.forEach(q =>{
-      this.bufferedMessages[q].push(m)
+    this.messagesBuffer.forEach(q =>{
+      this.messagesBuffer[q].push(m)
     })
     this.PC_deliver(m)
   }
@@ -206,8 +207,8 @@ class Broadcast extends AbstractBroadcast {
   }
 
   PC_deliver(m){
-    this.bufferedMessages.forEach(q =>{
-      if(this.bufferedMessages[q].length > maxSize){
+    this.messagesBuffer.forEach(q =>{
+      if(this.messagesBuffer[q].length > maxSize){
         this.rety(q)
       }
     })
@@ -225,10 +226,10 @@ class Broadcast extends AbstractBroadcast {
   retry(q){
     var index = this.messageId.indexOf(message => message[0] === q)
     this.messageId.slice(index, 1)
-    var index = this.bufferedMessages.indexOf(user => user[0] === q)
+    var index = this.messagesBuffer.indexOf(user => user[0] === q)
     if(result != null){
-      this.bufferedMessages[index].splice(2,1,this.bufferedMessages[index][1] +1)
-      if(this.bufferedMessages[index][1] < this.maxRetry){
+      this.messagesBuffer[index].splice(2,1,this.messagesBuffer[index][1] +1)
+      if(this.messagesBuffer[index][1] < this.maxRetry){
         this.open(q)
       }else{
         this.close(q)
