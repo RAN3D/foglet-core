@@ -13,8 +13,6 @@ Easy use of WebRTC Networks with embedded network management and simple communic
 npm install --save foglet-core
 ```
 
-
-
 ## Example
 
 ```javascript
@@ -75,12 +73,20 @@ core.network('mynetworkname').addModule('mymodulename', MyModuleClass, MyModuleO
 core.network('mynetworkname').module('mymodulename')
 ```
 
-## Signaling Server + STUN + TURN
+## Tests
 
-We provide an implementation of a basic signaling server (available in https://github.com/ran3d/n2n-wrtc) and a stun/server
-in order to provide ices.
-Ices are provided through a server implemented in node (https://github.com/Atlantis-Software/node-turn)
+Before everything run the signaling server, either in node or docker. (your choice)
 
+```bash
+# Docker
+cd ./tests/signaling-server
+docker build -t signaling .
+docker run -d -p 5000:5000 --name signaling -e "PORT=5000" -e "HOST=localhost" signaling
+# Or using just Nodejs
+npm run signaling
+```
+
+Then: `npm test`
 
 ## Contributors:
 

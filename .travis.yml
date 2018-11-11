@@ -1,21 +1,20 @@
 sudo: required
 services:
-  - docker
+- docker
 language: node_js
 node_js: node
-
 script:
-  - cd ./tests/signaling-server/
-  - docker build -t signaling .
-  - docker run -d -p 5000:5000 --name signaling -e "PORT=5000" -e "HOST=localhost" signaling
-  - cd ../../
-  - npm run build:debug
-  - npm run build:prod
-  - npm run test
-  - npm run doc:build
-  - docker kill signaling
-  - docker rm signaling
-  - docker rmi signaling
+- cd ./tests/signaling-server/
+- docker build -t signaling .
+- docker run -d -p 5000:5000 --name signaling -e "PORT=5000" -e "HOST=localhost" signaling
+- cd ../../
+- npm run build:debug
+- npm run build:prod
+- npm run test
+- npm run doc:build
+- docker kill signaling
+- docker rm signaling
+- docker rmi signaling
 
 # deploy:
 #   provider: npm
@@ -35,3 +34,10 @@ script:
 #   local_dir: docs
 #   on:
 #     branch: master
+
+deploy:
+  provider: heroku
+  local_dir: tests/signaling-server
+  app: signaling-v2
+  api_key:
+    secure: AIzLfnMm5ey7NfeeXXKNNIRogYgfN9A8L9tNfeAYauRwOR64Dw89uAEWGH04SIIsXUVn8HjX0eL0DZBvBuyWrTqgD/M02qVt2QG6eCCDGAgY/Z3SjdOi19PKEDBvJ3lq3FHirsSzsDuhzqisPN7iHN04xm24ztUHsxqu0SV2MFjTIaSF8ZW7+MnlYJiLo8v+nRyzlcANG1gL4cJzLEChbxbp9YUBNDKYh4lS1NxbcVCI/d8TAm5315FW1/yUSn6Eh37zm1+CxZK+FVCX4SlrjfL4Y/0pf06Xp97Vplhg5CbBAF6r2kv33p9YfTQ46Df7GUNppYqh1Tm4sTB0LUwZqWbxp1d0f6o9EzZxW2AzJpX4zl4Uu/fZ4NpKstIHIjPPFYJ2+bl7XyPWd+3ULW0GwnvM+4LZOytq3N1lzHx05reQ9+m3EhlnpphCoUpyJAWDqHWozOIPziuzCn9riBAKjRf0ONeHK86ysBUFobZmFndt1B8g221yW7nFY6ls9RV2NEg/xsrecIHWKmczKWbHKyvnYDbMx9hwuzsQet3CWGHwCNFKhm/+ya7Nh2iE+OylxPOi0oBpqq+5iHyE7IOOYQSPDMC06mG8nlle0YNF2/9T9/Yhm67h/YoTm7k6K61gJFIGn7PzYTeSk7vH2z2SiwlCJCt9bcO1xS3gS7gsH2w=

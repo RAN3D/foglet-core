@@ -1,5 +1,5 @@
 # remove lock
-.package-lock.json
+tests/signaling-server/package-lock.json
 
 #Perso
 docs/
