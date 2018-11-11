@@ -9,8 +9,12 @@ describe('Core', function () {
   it('Core default function create a default configuration', () => {
     const core = new Core()
     const s1 = core.default({
-      n2n: {id: 's1'},
-      socket: {moc: true}
+      n2n: {
+        id: 's1'
+      },
+      socket: {
+        moc: true
+      }
     }) // construct a spray network by default
     s1.default() // add a unicast module based on events
     assert.strictEqual(s1.name, 'spray-wrtc')
@@ -23,12 +27,20 @@ describe('Core', function () {
   it('2-peers network, unicast module', async () => {
     const core = new Core()
     const s1 = core.default({
-      n2n: {id: 's1'},
-      socket: {moc: true}
+      n2n: {
+        id: 's1'
+      },
+      socket: {
+        moc: true
+      }
     }).default() // construct a spray network and add a unicast module based on events
     const s2 = core.default({
-      n2n: {id: 's2'},
-      socket: {moc: true}
+      n2n: {
+        id: 's2'
+      },
+      socket: {
+        moc: true
+      }
     }).default() // construct a spray network and add a unicast module based on events
     await s1.connect(s2)
     return new Promise((resolve, reject) => {
@@ -54,12 +66,20 @@ describe('Core', function () {
   it('2-peers network, getNeighbours function', async () => {
     const core = new Core()
     const s1 = core.default({
-      n2n: {id: 's1'},
-      socket: {moc: true}
+      n2n: {
+        id: 's1'
+      },
+      socket: {
+        moc: true
+      }
     }).default() // construct a spray network and add a unicast module based on events
     const s2 = core.default({
-      n2n: {id: 's2'},
-      socket: {moc: true}
+      n2n: {
+        id: 's2'
+      },
+      socket: {
+        moc: true
+      }
     }).default() // construct a spray network and add a unicast module based on events
     await s1.connect(s2)
     // at least

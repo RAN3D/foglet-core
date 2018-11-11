@@ -7,147 +7,84 @@ Foglet-core
 
 Easy use of WebRTC Networks with embedded network management and simple communication primitives.
 
-[**Read the documentation**](https://foglet.readthedocs.io/en/latest/) or [**read the API Documentation**](https://ran3d.github.io/foglet-core/)
+## Install
 
-## Features
-
-**Communication primitives**:
-- Broadcast (to all peers in your network, with an anti-entropy mechanism not enabled by default). We ensure single delivery and a causal relation between 2 consecutive messages from a same site.
-- Unicast (to one direct neighbor)
-- Multicast (to one or several direct neighbors)
-- Streaming over our Broadcast and Unicast
-- Multiple communication channel per network
-
-We only support Data Channel for the moment.
-- *Experimental* Media Unicast and Broadcast
-
-**Warning:** unicast media is working only for a period of time defined by the delta parameter in the RPS
-
-**Network management**:
-- An adapter on [ran3d/spray-wrtc](https://github.com/ran3d/spray-wrtc) as Random Peer Sampling Network (keeping log(NetworkSize) peers around you)
-- An adapter on [Cyclon](https://www.semanticscholar.org/paper/CYCLON%3A-Inexpensive-Membership-Management-for-P2P-Voulgaris-Gavidia/4b79c844bb854c11ab18981591e4d2ea01f29539) as Random Peer Sampling Network (keeping "maxPeers" peers around you)
-- Overlay Networks or Networks can be created with: [**ran3d/n2n-overlay-wrtc**](https://github.com/ran3d/n2n-overlay-wrtc)
-- Disable WebRTC for testing purposes (or simulation) by using our Simple-peer moc.
-
-## Installation
-
-**Prerequisite**: [a browser compatible with WebRTC](http://caniuse.com/#feat=rtcpeerconnection)
-
-```bash
+```
 npm install --save foglet-core
 ```
 
-The foglet library is distributed with its sources and a bundle for an in-browser usage.
 
-## Getting started
 
-Creates a new HTML file and insert the **foglet bundle** in it:
-```html
-<script src="node_modules/foglet-core/dist/foglet.bundle.js" type="text/javascript"></script> <!-- or use the minified bundle, foglet.bundle.min.js -->
-```
+## Example
 
-Then, foglet library is available in the variable `foglet` :
 ```javascript
-const Foglet = foglet.Foglet;
+const Core = require('foglet-core').core
+
+// Initialize a foglet with as id peer1 with a Spray Network and a Unicast module
+const foglet1 = new Core()
+const f1 = foglet1.default({
+  n2n: {
+    id: 'peer1'
+  }
+}).default()
+// Initialize a foglet with as id peer2 with a Spray Network and a Unicast module
+const foglet2 = new Core()
+const f2 = foglet2.default({
+  n2n: {
+    id: 'peer2'
+  }
+}).default()
+
+// Get unicast module
+const f1unicast = f1.module('unicast')
+const f2unicast = f2.module('unicast')
+// listen on incoming message on the channel 'mychannel'
+f1unicast.on('mychannel', (id, message) => {
+  console.log('[%s] Receive a message from %s: ', f1.id, id, message) // should see 'meow'
+})
+// listen on incoming message on the channel 'mychannel'
+f2unicast.on('mychannel', (id, message) => {
+  console.log('[%s] Receive a message from %s: ', f2.id, id, message) // should see 'reply'
+  f2unicast.send('mychannel', id, 'reply') // reply to the sender the message 'reply'
+})
+// send a message on the channel 'mychannel'
+f1unicast.send('mychannel', 'peer2', 'meow')
+
+// get networks from the core
+// Create a core
+const core = new Core()
+// Initialize default networks and modules
+const networkOptions = {}
+const moduleOptions = {}
+core.default(networkOptions).default(moduleOptions)
+// get a Map of all available networks
+core.networks() // return a Map of available networks
+// get the network with the name 'spray-wrtc'
+core.network('spray-wrtc')
+// add a new network
+const AbstractNetwork = require('foglet-core').abstract.network
+const MyNetworkClass = class extends AbstractNetwork {}
+const n = core.addNetwork('mynetworkname', MyNetworkClass, MyClassOptions)
+// initialize default module for this new network
+n.default() // here at least unicast => n.module('unicast')
+// add a new module on a network
+const AbstractModule = require('foglet-core').abstract.module
+const MyModuleClass = class extends AbstractModule {}
+core.network('mynetworkname').addModule('mymodulename', MyModuleClass, MyModuleOptions)
+// get a module on specified network
+core.network('mynetworkname').module('mymodulename')
 ```
 
-If you do not provide a list of **ice servers**, your example will work in localhost but not on the Web.
+## Signaling Server + STUN + TURN
 
-To be begin with, let's write a simple piece of JS code:
-```html
-<script type="text/javascript">
-  'use strict';
+We provide an implementation of a basic signaling server (available in https://github.com/ran3d/n2n-wrtc) and a stun/server
+in order to provide ices.
+Ices are provided through a server implemented in node (https://github.com/Atlantis-Software/node-turn)
 
-  localStorage.debug = 'foglet-core:*';
-
-  const Foglet = foglet.Foglet;
-
-  // let's create a simple application that send message in broadcast
-  const fog = new Foglet({
-    id: 'myfogletid', // default we use uuid/v4 generated id
-    rps: {
-      type: 'spray-wrtc', // we choose Spray as a our RPS
-      options: {
-        protocol: 'my-awesome-broadcast-application', // the name of the protocol run by our app
-        webrtc: { // some WebRTC options
-          trickle: true, // enable trickle
-          iceServers : [] // define iceServers here if you want to run this code outside localhost
-        },
-        signaling: { // configure the signaling server
-          address: 'http://signaling.herokuapp.com', // put the URL of the signaling server here
-          room: 'my-awesome-broadcast-application' // the name of the room for the peers of our application
-        }
-      }
-    }
-  });
-
-  // connect the foglet to the signaling server
-  fog.share();
-
-  // Connect the foglet to our network
-  fog.connection().then(() => {
-    // listen for broadcast messages
-    fog.onBroadcast((id, message) => {
-      console.log('The peer', id, 'just sent me by broadcast:', message);
-    });
-
-    // send a message in broadcast
-    fog.sendBroadcast('Hello World !');
-  });
-</script>
-```
-
-Then, open the HTML file and look into the developpers console.
-You should see that your foglet has been connected to the RPS.
-
-Or for the fast version:
-```bash
-git clone https://github.com/RAN3D/foglet-core.git
-cd foglet-core
-npm install
-npm run build
-```
-
-* Open tests/examples/example.html in a browser supporting WebRTC and the devConsole
-
-* Try to play with `testunicast()` and `testbroadcast()`
-
-or try the signaling example using a signaling server:
-* Just run a simple http server with an embedded signaling server serving the tests/examples/example-signaling.html: `npm run example`
-* open http://localhost:8000/signaling
-
-## Signaling server
-
-In order to run this library, you have to provide the address of a **signaling server** using the `signaling.address` option and a `signaling.room` in order to create a private network. This server will be used to establish the first connection between the new peer and the the network.
-
-This server must be compatible with the foglet library.
-The library [foglet-signaling-server](https://github.com/folkvir/foglet-signaling-server) provides an example implementation of such signaling server.
-
-## Developpment
-
-We offer another library which lets you to build/test/run your own application with a signaling server: https://github.com/ran3d/foglet-scripts.git
-
-```bash
-# Clone and install
-git clone https://github.com/ran3d/foglet-core.git
-npm install
-
-# Build the bundle (webpack stack)
-npm run build
-
-# Lint using [standard](https://standardjs.com/)
-npm run lint
-
-# Mocha, chai stack with a simple-peer-moc for mocking webrtc features
-npm run test
-
-# Run a server serving examples and a signaling server on http://localhost:8000/
-npm run example
-```
 
 ## Contributors:
 
-* [A. Grall (Folkvir)](https://github.com/folkvir) **Author**
+* [A. Grall (Folkvir)](https://github.com/folkvir)
 * [T. Minier (Callidon)](https://github.com/Callidon)
 * [B. Nédelec (Chat-Wane)](https://github.com/Chat-Wane/)
 

@@ -1,0 +1,18 @@
+{
+  "name": "signaling-server",
+  "version": "1.0.0",
+  "description": "Signaling server with ices, stun and turn server available",
+  "main": "api.js",
+  "scripts": {
+    "pm2": "pm2 start",
+    "stun": "node stunturn.js",
+    "api": "node api.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "n2n-wrtc": "git+https://github.com/ran3d/n2n-wrtc.git",
+    "node-turn": "0.0.4",
+    "twilio": "^3.23.2"
+  }
+}
