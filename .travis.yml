@@ -21,7 +21,7 @@ node_js: node
 #   skip-cleanup: true
 #   github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
 #   keep-history: true
-#   local_dir: docs
+#   local-dir: docs
 #   on:
 #     branch: master
 
@@ -38,10 +38,14 @@ script:
 - docker rm signaling
 - docker rmi signaling
 
+before_deploy:
+  - cd tests/signaling-server
 deploy:
   provider: heroku
   api_key: $HEROKU_AUTH_TOKEN
   app: signaling-v2
-  local_dir: tests/signaling-server
   on:
     branch: foglet-rework
+after_deploy:
+  - echo "Deploy signaling-server to heroku finished. Return to root dir"
+  - cd ../..
