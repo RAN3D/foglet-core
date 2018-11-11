@@ -1,8 +1,30 @@
 sudo: required
+
 services:
 - docker
+
 language: node_js
 node_js: node
+
+# deploy:
+#   provider: npm
+#   email: folkvir@outlook.fr
+#   api_key: $NPM
+#   on:
+#     tags: true
+#     repo: RAN3D/foglet-core
+# notifications:
+#   email: false
+#
+# deploy:
+#   provider: pages
+#   skip-cleanup: true
+#   github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+#   keep-history: true
+#   local_dir: docs
+#   on:
+#     branch: master
+
 script:
 - cd ./tests/signaling-server/
 - docker build -t signaling .
@@ -15,10 +37,11 @@ script:
 - docker kill signaling
 - docker rm signaling
 - docker rmi signaling
+
 deploy:
   provider: heroku
-  api_key:
-    secure: OfNMkDtABmWugTMk4/zXkTC5vbn/uROB9TpDjTqFBPJkrRe6wqmZB/jCC53h0NS3ekttTn/JvZPAyZnZxBHDBDcJteRhagvE9S7ZV4+JeQ2oPvI8vOnBv3/+iLyfHcozFBWChfixBDBADRVKGHHyTX19RT4aAOsQnPOkSaUk8v0YPmBW5e0UIAgkH4vs6JM7unon63YqRk9p+2U0FgfEfWAW7hv97z+9rNm0fEKr7u4cEatsBeV02Zhr1QjUDg9kRuY2pz4kmIjgf86SCXXG91dcSlLQygoNnDZeTLfO43vRJOFs1kAWkyPbcuX9pUWmML4KfcjKz4ySKGsmGFyvD3Cq5avz1jJVYu4q2Pea7PBr8xF5jxAxJr9FOCSFRxsy2F1zztcUgVHlqX5u88DlLH9HpZSzQNN2dlnT1VIzBVZxad2ggkuvmKUP7paj9MKkP+kcsmJptbYw9mKxmy7JHmek8+f+ywPyyEP0QTZiOul/xkaHAB0s8sO+azr9lmbNR5bf7pRCpuZfACKNTNALVk7xuI8rd0SAkrHaz8gIk1BZzG/d5yPYQrrOz771qBE6gcEv7JoHaesFond9y1HI47eMZBBoj9qacT2ThclUBQPB/orRjfhBMOhQB/sYmjPH4Gqm0iId8kspuGiCXL8nrKwhae+cW6W9NzfGYvrDKfs=
+  api_key: $HEROKU_AUTH_TOKEN
   app: signaling-v2
+  local_dir: tests/signaling-server
   on:
     branch: foglet-rework

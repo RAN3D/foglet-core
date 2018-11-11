@@ -103,8 +103,11 @@ Then: `npm test`
 ### Developments Notes (For us only)
 
 ```bash
-# tried: generate the heroku api_key for signaling-v2, did not work
-travis encrypt $(heroku authorizations:create) --add deploy.api_key --pro
-# tried: ...
-travis setup heroku
+# step 1, setup heroku deploy
+travis setup heroku # dont work
+# step 2, tried: generate the heroku api_key for signaling-v2, for travis.com (--pro or --com)
+travis encrypt $(heroku authorizations:create) --add deploy.api_key --pro # dont work
+# step 3, tried: generate the heroku api_key for signaling-v2, for travis.org (--org)
+travis encrypt $(heroku authorizations:create) --add deploy.api_key --org # dont work
+# step 4, generate an auth from heroku, and add $HEROKU_AUTH_TOKEN in travis.yml
 ```
