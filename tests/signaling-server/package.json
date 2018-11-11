@@ -13,9 +13,7 @@
   "dependencies": {
     "n2n-wrtc": "git+https://github.com/ran3d/n2n-wrtc.git",
     "node-turn": "0.0.4",
-    "twilio": "^3.23.2"
-  },
-  "devDependencies": {
+    "twilio": "^3.23.2",
     "pm2": "^3.2.2"
   }
 }
