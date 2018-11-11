@@ -1,11 +1,20 @@
+sudo: required
+services:
+  - docker
 language: node_js
 node_js: node
 
 script:
+  - cd ./tests/signaling-server/
+  - docker build -t signaling .
+  - docker run -d -p 5000:5000 --name signaling -e "PORT=5000" -e "HOST=localhost" signaling
   - npm run build:debug
   - npm run build:prod
   - npm run test
   - npm run doc:build
+  - docker kill signaling
+  - docker rm signaling
+  - docker rmi signaling
 
 # deploy:
 #   provider: npm
