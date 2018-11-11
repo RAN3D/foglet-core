@@ -1,1 +1,1 @@
-web: HOST=signaling-v2.herokuapp.com PORT=$PORT npm run pm2
+web: HOST=signaling-v2.herokuapp.com PORT=$PORT npm run api
