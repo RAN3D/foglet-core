@@ -15,26 +15,6 @@ script:
 - docker kill signaling
 - docker rm signaling
 - docker rmi signaling
-
-# deploy:
-#   provider: npm
-#   email: folkvir@outlook.fr
-#   api_key: $NPM
-#   on:
-#     tags: true
-#     repo: RAN3D/foglet-core
-# notifications:
-#   email: false
-#
-# deploy:
-#   provider: pages
-#   skip-cleanup: true
-#   github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
-#   keep-history: true
-#   local_dir: docs
-#   on:
-#     branch: master
-
 deploy:
   provider: heroku
   local_dir: tests/signaling-server
@@ -42,4 +22,4 @@ deploy:
   on:
     branch: foglet-rework
   api_key:
-    secure: AIzLfnMm5ey7NfeeXXKNNIRogYgfN9A8L9tNfeAYauRwOR64Dw89uAEWGH04SIIsXUVn8HjX0eL0DZBvBuyWrTqgD/M02qVt2QG6eCCDGAgY/Z3SjdOi19PKEDBvJ3lq3FHirsSzsDuhzqisPN7iHN04xm24ztUHsxqu0SV2MFjTIaSF8ZW7+MnlYJiLo8v+nRyzlcANG1gL4cJzLEChbxbp9YUBNDKYh4lS1NxbcVCI/d8TAm5315FW1/yUSn6Eh37zm1+CxZK+FVCX4SlrjfL4Y/0pf06Xp97Vplhg5CbBAF6r2kv33p9YfTQ46Df7GUNppYqh1Tm4sTB0LUwZqWbxp1d0f6o9EzZxW2AzJpX4zl4Uu/fZ4NpKstIHIjPPFYJ2+bl7XyPWd+3ULW0GwnvM+4LZOytq3N1lzHx05reQ9+m3EhlnpphCoUpyJAWDqHWozOIPziuzCn9riBAKjRf0ONeHK86ysBUFobZmFndt1B8g221yW7nFY6ls9RV2NEg/xsrecIHWKmczKWbHKyvnYDbMx9hwuzsQet3CWGHwCNFKhm/+ya7Nh2iE+OylxPOi0oBpqq+5iHyE7IOOYQSPDMC06mG8nlle0YNF2/9T9/Yhm67h/YoTm7k6K61gJFIGn7PzYTeSk7vH2z2SiwlCJCt9bcO1xS3gS7gsH2w=
+    secure: XerJspmeWOK4wKZf0Yf7UbRGgvp+84BKVACGRNuZ7uSxBzFjlTSVCYGY6p85cAY8Pzr5RhuMSWSk+JK4i2iMT29dZH36IhOI9vj4C53Y8CwBe4r2FbTesJvmgdOWwweqe7EGDakDaX+6y2mk8RRnhecw1EZ21kQgmvAAxpkGpdK4Ldm4AspWYv5KVcf65ttM6Ac3IbJnI2cXbl0wmXGezgkNh9CoHInxj4NYAHrwjP1lJQuGF0kjEx06ow2OF+86KK1itWKak8CsRkEdLSUeOuGt+I1B/Xdf913BQDw+CRLSTHoGNLW0ey+7pfmEYXEtWriM2lHCl9NU/cVYm1TG1UYuSdoKG8RlwGIJjd5WM6vaqLmQ0UQ8TdACHn0lwT9dWdncoCH3DEYTbg4gLy3ZF3Uw6kczvSyeyD6sd+wn5PZlSI2eKgnf1P2Gk53fvEjxXKSwSzJs4sUV79BH4T09rGxcSTuwWsfTFxDg1fwm2PP7OOxvKXukce4IlnKuZiD3D2KFnYJzb6r5QjLd4tpvUIziv9XDuPT7ciaz+Yn+9RKnDrj5hHajjacdaecrUanedURSh1H/gq54yI0D+4CTLdmJrG9h39KV/XAvK29VvtQmkQofFB2+nzvr2fWZ2gbZYTMnjfx4zDp/kPozlt3MUznVjyC0j6WgFQOnPQ5jC1Q=
