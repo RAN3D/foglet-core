@@ -98,3 +98,13 @@ Then: `npm test`
 <img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/collabocats.jpg" width="200" style='text-align:center'><img src="https://octodex.github.com/images/socialite.jpg" width="200" style='text-align:center'>
 <hr/>
 </div>
+
+
+### Developments Notes (For us only)
+
+```bash
+# tried: generate the heroku api_key for signaling-v2, did not work
+travis encrypt $(heroku authorizations:create) --add deploy.api_key --pro
+# tried: ...
+travis setup heroku
+```
