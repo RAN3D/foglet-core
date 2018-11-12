@@ -3,8 +3,9 @@ const Core = require('../lib/').core
 describe('Using the signaling service', function () {
   this.timeout(5000)
   it('2-peers network, signaling connection and unicast module', async () => {
-    const core = new Core()
-    const s1 = core.default({
+    const core1 = new Core()
+    const core2 = new Core()
+    const s1 = core1.default({
       n2n: {
         id: 's1'
       },
@@ -17,7 +18,7 @@ describe('Using the signaling service', function () {
         moc: true
       }
     }).default() // construct a spray network and add a unicast module based on events
-    const s2 = core.default({
+    const s2 = core2.default({
       n2n: {
         id: 's2'
       },

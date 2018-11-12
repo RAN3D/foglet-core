@@ -25,8 +25,8 @@ describe('Core', function () {
     assert.strictEqual(s1Unicast.network.name, 'spray-wrtc')
   })
   it('2-peers network, unicast module', async () => {
-    const core = new Core()
-    const s1 = core.default({
+    const core1 = new Core()
+    const s1 = core1.default({
       n2n: {
         id: 's1'
       },
@@ -34,7 +34,8 @@ describe('Core', function () {
         moc: true
       }
     }).default() // construct a spray network and add a unicast module based on events
-    const s2 = core.default({
+    const core2 = new Core()
+    const s2 = core2.default({
       n2n: {
         id: 's2'
       },
@@ -64,8 +65,8 @@ describe('Core', function () {
     })
   })
   it('2-peers network, getNeighbours function', async () => {
-    const core = new Core()
-    const s1 = core.default({
+    const core1 = new Core()
+    const s1 = core1.default({
       n2n: {
         id: 's1'
       },
@@ -73,7 +74,8 @@ describe('Core', function () {
         moc: true
       }
     }).default() // construct a spray network and add a unicast module based on events
-    const s2 = core.default({
+    const core2 = new Core()
+    const s2 = core2.default({
       n2n: {
         id: 's2'
       },

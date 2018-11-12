@@ -4,6 +4,10 @@ tests/signaling-server/package-lock.json
 #Perso
 docs/
 dist/
+bin/debug/*.bundle.*
+bin/production/*.bundle.*
+bin/plugin-list.json
+
 
 # Logs
 logs
