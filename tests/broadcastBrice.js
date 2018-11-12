@@ -25,13 +25,25 @@ b.overlay().communication.onBroadcastBrice((id, message) => {
 	console.log('b receive: ', id, message)
 })
 
+c.overlay().communication.onBroadcastBrice((id, message) => {
+	console.log('c receive: ', id, message)
+})
+
+b.connection(c)
+
 a.connection(b).then(() => {
 	console.log('%s is connected to %s', a.id, b.id)
 	console.log(a.getNeighbours())
 	console.log(b.getNeighbours())
 
+	for(var i = 0; i < 15; ++i){
+		a.overlay().communication.sendBroadcastBrice('toto ' + i, a.id)
+	}
+
 	a.overlay().communication.sendBroadcastBrice('toto', a.id)
-	//b.overlay().communication.sendBroadcastBrice('titi')
+	/*b.overlay().communication.sendBroadcastBrice('titi', b.id)
+	a.overlay().communication.sendBroadcastBrice('tutu', a.id)
+	a.overlay().communication.sendBroadcastBrice('tata', a.id)*/
 })
 
 

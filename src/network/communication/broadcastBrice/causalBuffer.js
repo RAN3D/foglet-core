@@ -19,6 +19,8 @@ class causalBuffer{
 		var index = this.buffer.indexOf(map => map[0] === id)
 		if(index != -1){
 			this.buffer[index].push(message)
+		} else {
+			this.buffer.push([id, message])
 		}
 		this.sort(id)
 	}
@@ -46,6 +48,10 @@ class causalBuffer{
 			this.buffer.push(tmp)
 			this.buffer.reverse()
 		}
+	}
+
+	findIndex(id){
+		return this.buffer.findIndex(map => map[0] === id)
 	}
 }
 

@@ -67,7 +67,7 @@ class Broadcast extends AbstractBroadcast {
       this.messagesId = []                        // I
       this.nbRetries = []                         // R
       this.pingCounter = 0                        // counter
-      this.causalCounter = 0
+      this.causalCounter = 1
       this.cBuffer = new causalBuffer()
 
       this.maxSize = Number.MAX_SAFE_INTEGER
@@ -105,8 +105,10 @@ class Broadcast extends AbstractBroadcast {
    */
   send (id, message) {
     console.log('i send my beautiful message: ', this.options.id, message)
-    this._receive(this.options.id, message)
-    this._sendAll(message)
+    var newMessage = {counter: this.causalCounter, message: message}
+    this.causalCounter++
+    this._receive(this.options.id, newMessage)
+    this._sendAll(newMessage)
   }
 
   /**
@@ -127,31 +129,39 @@ class Broadcast extends AbstractBroadcast {
 
     if (message.counter - this.received[index][1] == 1){
       this.received[index].splice(1, 1, message.counter)
+      this.safeNeighbours.forEach(neighbour => {
+        this.R_deliver(message)
+      }); 
     } else{
-      index = this.cBuffer.findIndex(map => map[0] === id)
-      if(index == -1){
-        this.cBuffer.addUser(id)
-        index = this.cBuffer.findIndex(map => map[0] === id)
-      }      
+      console.error("yayayayay")
       this.cBuffer.addMessage(id, message)
     }
-
-    if(this.cBuffer[index].length > 1){
-      // TODO : what do we do exactly with the message ?
+    
+    index = this.cBuffer.findIndex(id)
+    if(index != -1 && this.cBuffer[index].length > 1){
+      var again = false
+      do{
+        for(var i = 1; i < this.cBuffer[index].length; ++i){
+          if (this.cBuffer[index][i].counter - this.received[index][1] == 1){
+            this.received[index].splice(1, 1, this.cBuffer[index][i].counter)
+            this.safeNeighbours.forEach(neighbour => {
+              this.R_deliver(message)
+            });
+            again = true 
+          }
+        }
+      }while(again)
+      if(this.cBuffer[index].length == 0){this.cBuffer.removeUser(id)}
     }
-
-    this.safeNeighbours.forEach(neighbour => {
-      this.send(neighbour.id, m)
-    });
   }
 
   // TODO : not sure this is correct
   R_broadcast(message){
-    this.received.push(m)
+    this.received.push(message)
     this.safeNeighbours.forEach(p => {
-      this.send(m, p)
+      this.send(message, p)
     });
-    this.R_deliver(m)
+    this.R_deliver(message)
   }
 
   open(q){
@@ -237,7 +247,7 @@ class Broadcast extends AbstractBroadcast {
     }
     var index = this.mBuffer.findIndex(user => user[0] === q)
     if(result != -1){
-      this.mBuffer[index].splice(2, 1, this.mBuffer[index][1] +1)
+      this.mBuffer[index].splice(1, 1, this.mBuffer[index][1] +1)
       if(this.mBuffer[index][1] <= this.maxRetry){
         this.open(q)
       }else{
