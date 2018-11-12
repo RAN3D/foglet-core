@@ -1,0 +1,9 @@
+<script src='../bin/debug/core.bundle.js'></script>
+<script src='../bin/debug/modules.bundle.js'></script>
+<script src='../bin/debug/networks.bundle.js'></script>
+<script>
+const libs = ["foglet.core", "foglet.modules", "foglet.networks"]
+libs.forEach(lib => {
+  console.log(window[lib])
+})
+</script>

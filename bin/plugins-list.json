@@ -1,0 +1,24 @@
+{
+	"plugins": "./lib/plugins/index.js",
+	"modules": "./lib/plugins/modules/index.js",
+	"streams": "./lib/plugins/modules/streams/index.js",
+	"unicast": "./lib/plugins/modules/unicast/index.js",
+	"cyclon": "./lib/plugins/networks/cyclon/index.js",
+	"full-mesh": "./lib/plugins/networks/full-mesh/index.js",
+	"networks": "./lib/plugins/networks/index.js",
+	"spray": "./lib/plugins/networks/spray/index.js",
+	"tman": "./lib/plugins/networks/tman/index.js",
+	"core": "./lib/index.js",
+	"list": [
+		"plugins",
+		"modules",
+		"streams",
+		"unicast",
+		"cyclon",
+		"full-mesh",
+		"networks",
+		"spray",
+		"tman",
+		"core"
+	]
+}

@@ -5,7 +5,8 @@ const webpackconfig = require('./webpack-config')
 const config = lmerge(webpackconfig, {
   mode: 'production',
   output: {
-    'filename': 'foglet-core.bundle.min.js'
+    'filename': '[name].bundle.min.js',
+    'path': require('path').resolve(process.cwd(), './bin/production')
   },
   optimization: {
     minimizer: [new UglifyJSPlugin({
