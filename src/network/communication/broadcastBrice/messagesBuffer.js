@@ -3,11 +3,7 @@ class messagesBuffer{
 	constructor(){
 		this.buffer = []
 	}
-
-	constructor(id){
-		this.buffer = [[id]]
-	}
-
+	
 	addUser(id){
 		var index = this.buffer.indexOf(map => map[0] === id)
 		if(index != -1){
@@ -40,3 +36,5 @@ class messagesBuffer{
 		}
 	}
 }
+
+module.exports = messagesBuffer

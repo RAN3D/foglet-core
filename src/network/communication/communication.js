@@ -121,7 +121,7 @@ class Communication {
   * @return {Object}  id of the message sent
   */
   sendBroadcastBrice (message, id, isReady = undefined) {
-    return this.broadcastBrice.send(this._middlewares.in(message), id, isReady)
+    return this.broadcastBrice.send(id, this._middlewares.in(message), isReady)
   }
 
   /**

@@ -4,10 +4,6 @@ class causalBuffer{
 		this.buffer = []
 	}
 
-	constructor(id){
-		this.buffer = [[id]]
-	}
-
 	addUser(id){
 		this.buffer.push([id])
 	}
@@ -52,3 +48,5 @@ class causalBuffer{
 		}
 	}
 }
+
+module.exports = causalBuffer

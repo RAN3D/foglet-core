@@ -30,8 +30,8 @@ a.connection(b).then(() => {
 	console.log(a.getNeighbours())
 	console.log(b.getNeighbours())
 
-	a.overlay().communication.sendBroadcastBrice('toto')
-	b.overlay().communication.sendBroadcastBrice('titi')
+	a.overlay().communication.sendBroadcastBrice('toto', a.id)
+	//b.overlay().communication.sendBroadcastBrice('titi')
 })
 
 

@@ -13,6 +13,9 @@ const uuid = require('uuid/v4')
 const sortedIndexBy = require('lodash.sortedindexby')
 const debug = (require('debug'))('foglet-core:broadcast')
 
+const messagesBuffer = require('./messagesBuffer.js')
+const causalBuffer = require('./causalBuffer.js')
+
 /**
  * Format the IDs of messages in string format
  * @param  {Obbject} message - The message to format
@@ -60,12 +63,12 @@ class Broadcast extends AbstractBroadcast {
 
       this.received = []                          // map of messages received
       this.safeNeighbours = []                    // Q
-      this.messagesBuffer = new messagesBuffer()  // B
+      this.mBuffer = new messagesBuffer()  // B
       this.messagesId = []                        // I
       this.nbRetries = []                         // R
       this.pingCounter = 0                        // counter
       this.causalCounter = 0
-      this.causalBuffer = new causalBuffer()
+      this.cBuffer = new causalBuffer()
 
       this.maxSize = Number.MAX_SAFE_INTEGER
       this.maxRetry = Number.MAX_SAFE_INTEGER
@@ -102,8 +105,7 @@ class Broadcast extends AbstractBroadcast {
    */
   send (id, message) {
     console.log('i send my beautiful message: ', this.options.id, message)
-    // TODO : Add the id in the message
-    this._receive(message, this.options.id)
+    this._receive(this.options.id, message)
     this._sendAll(message)
   }
 
@@ -115,23 +117,26 @@ class Broadcast extends AbstractBroadcast {
    */
   _receive (id, message) {
     this.emit('receive', id, message)
-    var index = this.received.indexOf(map => map[0] === id)
+
+    var index = this.received.findIndex(map => map[0] === id)
+
     if(index == -1){
       this.received.push([id, 0])
-      index = this.received.indexOf(map => map[0] === id)
+      index = this.received.findIndex(map => map[0] === id)
     } 
+
     if (message.counter - this.received[index][1] == 1){
       this.received[index].splice(1, 1, message.counter)
     } else{
-      index = this.causalBuffer.indexOf(map => map[0] === id)
+      index = this.cBuffer.findIndex(map => map[0] === id)
       if(index == -1){
-        this.causalBuffer.addUser(id)
-        index = this.causalBuffer.indexOf(map => map[0] === id)
+        this.cBuffer.addUser(id)
+        index = this.cBuffer.findIndex(map => map[0] === id)
       }      
-      this.causalBuffer.addMessage(id, message)
+      this.cBuffer.addMessage(id, message)
     }
 
-    if(this.causalBuffer[index].length > 1){
+    if(this.cBuffer[index].length > 1){
       // TODO : what do we do exactly with the message ?
     }
 
@@ -152,7 +157,7 @@ class Broadcast extends AbstractBroadcast {
   open(q){
     if (this.safeNeighbours.length > 0) {
       this.pingCounter = this.pingCounter + 1
-      messagesBuffer.addUser(q)                   
+      mBuffer.addUser(q)                   
       this.ping(this.options.id, q, this.pingCounter)
     }
   }
@@ -163,73 +168,77 @@ class Broadcast extends AbstractBroadcast {
   }
 
   receivePong(from, to, id){
-    var index = this.messagesBuffer.indexOf(user => user[0] === to)
+    var index = this.mBuffer.findIndex(user => user[0] === to)
     if(index != -1){
-      for(var i = 1; i < this.messagesBuffer[index].length; i++){
-        this.send(to, this.messagesBuffer[index][i])
+      for(var i = 1; i < this.mBuffer[index].length; i++){
+        this.send(to, this.mBuffer[index][i])
       }
-      this.messagesBuffer.splice(index, 1)
+      this.mBuffer.splice(index, 1)
       this.safeNeighbours.push(to)
     }
   }
 
   close(q){
-    var index = this.messagesBuffer.indexOf(user => user[0] === q)
-    this.messagesBuffer.splice(index, 1)
-  }
-
-  PC_broadcast(m){
-    this.R_broadcast(m)
-  }
-
-  R_deliver(m){
-    this.messagesBuffer.forEach(q =>{
-      this.messagesBuffer[q].push(m)
-    })
-    this.PC_deliver(m)
-  }
-
-  ping(from, to, id){
-    const result = this.nbRetries.find(user => user[0] === from)
-    if (result != null){
-      var index = this.nbRetries.indexOf(user => user[0] === from)
-      this.nbRetries[index].splice(2, 1, 0)
+    var index = this.mBuffer.findIndex(user => user[0] === q)
+    if(index != -1){
+      this.mBuffer.splice(index, 1)
     }
-    var index = this.messageId.indexOf(message => message[0] === id)
-    this.messageId[index].splice(2, 1, to)
-  }
 
-  receiveAck(from, to, id){
-    var index = this.messageId.indexOf(message => message[0] === id)
-    this.messageId.splice(index, 1)
-    var index = this.nbRetries.indexOf(message => message[0] === to)
+    for(var i = 0; i < messageId.length; ++i){
+      if(this.messageId[i][1] === q){
+        this.messageId.splice(i, 1)
+      }
+    }
+    var index = this.nbRetries.findIndex(user => user[0] === q)
     this.nbRetries.splice(index, 1)
   }
 
-  PC_deliver(m){
-    this.messagesBuffer.forEach(q =>{
-      if(this.messagesBuffer[q].length > maxSize){
-        this.rety(q)
+  PC_broadcast(message){
+    this.R_broadcast(message)
+  }
+
+  R_deliver(message){
+    this.mBuffer.forEach(user =>{
+      this.mBuffer.addMessage(user, message)
+    })
+    this.PC_deliver(message)
+  }
+
+  ping(from, to, id){
+    var result = this.nbRetries.findIndex(user => user[0] === from)
+    if (result == -1){
+      this.nbRetries.push([from, 0])
+    }
+    var index = this.messageId.findIndex(message => message[0] === id)
+    this.messageId.push([id, to])
+  }
+
+  receiveAck(from, to, id){
+    var index = this.messageId.findIndex(message => message[0] === id)
+    this.messageId.splice(index, 1)
+    var index = this.nbRetries.findIndex(user => user[0] === to)
+    this.nbRetries.splice(index, 1)
+  }
+
+  PC_deliver(message){
+    this.mBuffer.forEach(user =>{
+      if(this.mBuffer[user].length > maxSize){
+        this.retry(user)
       }
     })
   }
 
-  close(q){
-    var index = this.bufferedMessage.indexOf(user => user[0] === q)
-    this.bufferMessage.slice(index, 1)
-    var index = this.messageId.indexOf(message => message[0] === q)
-    this.messageId.slice(index, 1)
-    var index = this.nbRetries.indexOf(message => message[0] === q)
-    this.nbRetries.splice(index, 1)
-  }
-
   retry(q){
-    var index = this.messageId.indexOf(message => message[0] === q)
-    this.messageId.slice(index, 1)
-    var index = this.messagesBuffer.indexOf(user => user[0] === q)
-    if(result != null){
-      this.messagesBuffer[index].splice(2,1,this.messagesBuffer[index][1] +1)
-      if(this.messagesBuffer[index][1] < this.maxRetry){
+    
+    for(var i = 0; i < messageId.length; ++i){
+      if(this.messageId[i][1] === q){
+        this.messageId.splice(i, 1)
+      }
+    }
+    var index = this.mBuffer.findIndex(user => user[0] === q)
+    if(result != -1){
+      this.mBuffer[index].splice(2, 1, this.mBuffer[index][1] +1)
+      if(this.mBuffer[index][1] <= this.maxRetry){
         this.open(q)
       }else{
         this.close(q)
@@ -238,8 +247,8 @@ class Broadcast extends AbstractBroadcast {
   }
 
   timeout(from, to, id){
-    const result = this.nbRetries.find(message => message[0] === id)
-    if(result != null){
+    var index = this.messageId.findIndex(message => message[0] === id)
+    if(index != -1){
       this.retry(to)
     }
   }
