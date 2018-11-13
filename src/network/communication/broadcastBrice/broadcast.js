@@ -144,6 +144,8 @@ class Broadcast extends AbstractBroadcast {
     }
     
     index = this.cBuffer.findIndex(id)
+
+    
     if(index != -1 && this.cBuffer[index].length > 1){
       var again = false
       do{
