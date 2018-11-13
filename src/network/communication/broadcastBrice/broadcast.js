@@ -63,7 +63,7 @@ class Broadcast extends AbstractBroadcast {
 
       this.received = []                          // map of messages received
       this.safeNeighbours = []                    // Q
-      this.mBuffer = new messagesBuffer()  // B
+      this.mBuffer = new messagesBuffer()     // B
       this.messagesId = []                        // I
       this.nbRetries = []                         // R
       this.pingCounter = 0                        // counter
@@ -104,11 +104,19 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean}
    */
   send (id, message) {
-    console.log('i send my beautiful message: ', this.options.id, message)
-    var newMessage = {counter: this.causalCounter, message: message}
+    console.log('i send my beautiful message: ', id, message)
+    var newMessage = {counter: this.causalCounter, message: message, issuer: id}
     this.causalCounter++
-    this._receive(this.options.id, newMessage)
-    this._sendAll(newMessage)
+
+    var index = this.received.findIndex(map => map[0] === id)
+
+    if(index == -1){
+      this.received.push([id, 0])
+      index = this.received.findIndex(map => map[0] === id)
+    } 
+
+    this.received[index].splice(1, 1, this.causalCounter)
+    this.PC_broadcast(newMessage)
   }
 
   /**
@@ -120,20 +128,18 @@ class Broadcast extends AbstractBroadcast {
   _receive (id, message) {
     this.emit('receive', id, message)
 
-    var index = this.received.findIndex(map => map[0] === id)
+    var index = this.received.findIndex(map => map[0] === message.issuer)
 
     if(index == -1){
-      this.received.push([id, 0])
-      index = this.received.findIndex(map => map[0] === id)
+      this.received.push([message.issuer, 0])
+      index = this.received.findIndex(map => map[0] === message.issuer)
     } 
 
     if (message.counter - this.received[index][1] == 1){
       this.received[index].splice(1, 1, message.counter)
-      this.safeNeighbours.forEach(neighbour => {
-        this.R_deliver(message)
-      }); 
-    } else{
-      console.error("yayayayay")
+      this._sendAll(message)
+      this.R_deliver(message)
+    } else {
       this.cBuffer.addMessage(id, message)
     }
     
@@ -141,35 +147,48 @@ class Broadcast extends AbstractBroadcast {
     if(index != -1 && this.cBuffer[index].length > 1){
       var again = false
       do{
+        again = false
         for(var i = 1; i < this.cBuffer[index].length; ++i){
           if (this.cBuffer[index][i].counter - this.received[index][1] == 1){
             this.received[index].splice(1, 1, this.cBuffer[index][i].counter)
-            this.safeNeighbours.forEach(neighbour => {
-              this.R_deliver(message)
-            });
+            this._sendAll(message)
+            this.R_deliver(message)
             again = true 
           }
         }
       }while(again)
+
       if(this.cBuffer[index].length == 0){this.cBuffer.removeUser(id)}
     }
   }
 
-  // TODO : not sure this is correct
+  PC_broadcast(message){
+    this.R_broadcast(message)
+  }
+
   R_broadcast(message){
-    this.received.push(message)
-    this.safeNeighbours.forEach(p => {
-      this.send(message, p)
-    });
+    this._sendAll(message)
     this.R_deliver(message)
   }
 
-  open(q){
-    if (this.safeNeighbours.length > 0) {
-      this.pingCounter = this.pingCounter + 1
-      mBuffer.addUser(q)                   
-      this.ping(this.options.id, q, this.pingCounter)
+  PC_deliver(message){
+    for(var i = 0; i < this.mBuffer.length; ++i){
+      if(this.mBuffer[i].length > maxSize){
+        this.retry(this.mBuffer[i])
+      }
     }
+  }
+
+  R_deliver(message){
+    this.mBuffer.addMessage(message)
+    this.PC_deliver(message)
+  }
+
+  receiveAck(from, to, id){
+    var index = this.messageId.findIndex(message => message[0] === id)
+    this.messageId.splice(index, 1)
+    var index = this.nbRetries.findIndex(user => user[0] === to)
+    this.nbRetries.splice(index, 1)
   }
 
   // TODO : not sure this is correct
@@ -184,7 +203,15 @@ class Broadcast extends AbstractBroadcast {
         this.send(to, this.mBuffer[index][i])
       }
       this.mBuffer.splice(index, 1)
-      this.safeNeighbours.push(to)
+      this._source.getNeighbours().push(to)
+    }
+  }
+
+  open(q){
+    if (this._source.getNeighbours().length > 0) {
+      this.pingCounter = this.pingCounter + 1
+      mBuffer.addUser(q)                   
+      this.ping(this.options.id, q, this.pingCounter)
     }
   }
 
@@ -203,17 +230,6 @@ class Broadcast extends AbstractBroadcast {
     this.nbRetries.splice(index, 1)
   }
 
-  PC_broadcast(message){
-    this.R_broadcast(message)
-  }
-
-  R_deliver(message){
-    this.mBuffer.forEach(user =>{
-      this.mBuffer.addMessage(user, message)
-    })
-    this.PC_deliver(message)
-  }
-
   ping(from, to, id){
     var result = this.nbRetries.findIndex(user => user[0] === from)
     if (result == -1){
@@ -221,25 +237,10 @@ class Broadcast extends AbstractBroadcast {
     }
     var index = this.messageId.findIndex(message => message[0] === id)
     this.messageId.push([id, to])
-  }
-
-  receiveAck(from, to, id){
-    var index = this.messageId.findIndex(message => message[0] === id)
-    this.messageId.splice(index, 1)
-    var index = this.nbRetries.findIndex(user => user[0] === to)
-    this.nbRetries.splice(index, 1)
-  }
-
-  PC_deliver(message){
-    this.mBuffer.forEach(user =>{
-      if(this.mBuffer[user].length > maxSize){
-        this.retry(user)
-      }
-    })
+    console.error("ping send")
   }
 
   retry(q){
-    
     for(var i = 0; i < messageId.length; ++i){
       if(this.messageId[i][1] === q){
         this.messageId.splice(i, 1)
