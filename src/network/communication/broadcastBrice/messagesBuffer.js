@@ -3,7 +3,7 @@ class messagesBuffer{
 	constructor(){
 		this.buffer = []
 	}
-	
+
 	addUser(id){
 		var index = this.buffer.findIndex(map => map[0] === id)
 		if(index != -1){
@@ -42,8 +42,24 @@ class messagesBuffer{
 		}
 	}
 
+	getUser(indexUser){
+		return this.buffer[indexUser][0]
+	}
+
+	getMessage(indexUser, indexMessage){
+		return this.buffer[indexUser][indexMessage]
+	}
+
+	findIndex(id){
+		return this.buffer.findIndex(map => map[0] === id)
+	}
+
 	length(){
 		return this.buffer.length
+	}
+
+	length(index){
+		return this.buffer[index].length
 	}
 
 
