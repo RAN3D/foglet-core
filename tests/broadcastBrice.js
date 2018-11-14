@@ -8,7 +8,7 @@ function create(id) {
 		id,
 		rps: {
 			options: {
-				maxPeers: 4,
+				maxPeers: 3,
 				delta: 10 * 1000,
 				// simple-peer moc
 				socketClass: require('../foglet-core.js').SimplePeerMoc
