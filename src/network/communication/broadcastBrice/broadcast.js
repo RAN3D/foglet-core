@@ -107,10 +107,13 @@ class Broadcast extends AbstractBroadcast {
    * @return {boolean}
    */
   send (id, message) {
+    // This is just use to show the neighbours of an user
     if(message == 'neighbours'){
       console.log(id + ' neighbours  : ' + this.safeNeighbours)
+    // Use to send a real message to antoher user
     }else{
       console.log('i send my beautiful message: ', id, message)
+      // We modify the message to add the causal counter and the id of the issuer in it
       var newMessage = {counter: this.causalCounter, message: message, issuer: id}
       this.causalCounter++
 
@@ -120,12 +123,20 @@ class Broadcast extends AbstractBroadcast {
         this.received.push([id, 0])
         index = this.received.findIndex(map => map[0] === id)
       }
-
+      // We update the causal counter for the sender
       this.received[index].splice(1, 1, this.causalCounter)
+
       this.PC_broadcast(newMessage)
     }
   }
 
+  /**
+   * Use to send a simple message with unicast to another user
+   * @private
+   * @param  {Object} to - The user who will receive the message
+   * @param  {Object} message - The message to send
+   * @return {void}
+   */
   sendTo(to, message){
     this._unicast.send(to, message).catch(e => {
       debug(e)
@@ -141,6 +152,7 @@ class Broadcast extends AbstractBroadcast {
   _receive (id, message) {
     this.emit('receive', id, message)
 
+    // We check if the message received is a ping
     if(message.ping != undefined){
 
       var index = this.options.id.search('-I') +2
@@ -151,19 +163,21 @@ class Broadcast extends AbstractBroadcast {
         this.receivedPing.push([message.issuer, 0])
         index = this.receivedPing.findIndex(user => user[0] === message.issuer)
       }
-
+      // We check if we already received this ping
       if(message.ping > this.receivedPing[index][1]){
         this.receivedPing[index].splice(1, 1, message.ping)
-        
+        // If the ping is destinated to the current user we use the fonction receivePing
         if(message.receiver == thisId){
           this.receivePing(message.issuer, message.receiver, message.ping)
+        // Else we send it to all of our safe neighbours
         } else{
           this._sendAll(message)
         }
       }
-
+    // We check if the message received is a pong
     }else if(message.pong != undefined){
       this.receivePong(message.issuer, message.receiver, message.pong)
+    // Else it's a normal message
     }else{
       console.log(this.options.id + ' : ' + id + ' send me this : ' + message.message + ' from ' + message.issuer)
 
@@ -173,17 +187,18 @@ class Broadcast extends AbstractBroadcast {
         this.received.push([message.issuer, 0])
         index = this.received.findIndex(map => map[0] === message.issuer)
       }
-
+      // If this message is received in the causal order we deliver it to our safe neighbours
       if (message.counter - this.received[index][1] == 1){
         this.received[index].splice(1, 1, message.counter)
         this._sendAll(message)
         this.R_deliver(message)
+      // Else we put it in a buffer
       } else {
         this.cBuffer.addMessage(id, message)
       }
 
       index = this.cBuffer.findIndex(id)
-
+      // If there is messages in the buffer we check them and deliver them if they are in the order of our causal order
       if(index != -1 && this.cBuffer[index].length > 1){
         var again = false
         do{
@@ -232,21 +247,47 @@ class Broadcast extends AbstractBroadcast {
     this.nbRetries.splice(index, 1)
   }
 
+  /**
+   * Use to notify the user when he receive a ping
+   * @private
+   * @param  {Object} from - The user who sent the ping
+   * @param  {Object} to - The user who's receiving the ping
+   * @param  {int} counter - The counter of the ping
+   * @return {void}
+   */
   receivePing(from, to, counter){
     this.pong(to, from, counter)
   }
 
+  /**
+   * Use to notify the user when he receive a pong
+   * @private
+   * @param  {Object} from - The user who sent the ping
+   * @param  {Object} to - The user who's receiving the ping
+   * @param  {int} counter - The counter of the ping
+   * @return {void}
+   */
   receivePong(from, to, counter){
     var index = this.mBuffer.findIndex(from)
     if(index != -1){
       for(var i = 1; i < this.mBuffer.length(index); ++i){
         this.sendTo(to, this.mBuffer.getMessage(index, i))
       }
+
       this.mBuffer.removeUser(from)
       this.safeNeighbours.push(from)
     }
   }
 
+
+  /**
+   * Use to send a ping to another user
+   * @private
+   * @param  {Object} from - The user who's sending the ping
+   * @param  {Object} to - The user who will receive the ping
+   * @param  {int} counter - The counter of the ping
+   * @return {void}
+   */
   ping(from, to, counter){
     var result = this.nbRetries.findIndex(user => user[0] === to)
     if (result == -1){
@@ -259,11 +300,25 @@ class Broadcast extends AbstractBroadcast {
     this._sendAll(message)
   }
 
+  /**
+   * Use to send a pong to another user
+   * @private
+   * @param  {Object} from - The user who's sending the pong
+   * @param  {Object} to - The user who will receive the pong
+   * @param  {int} counter - The counter of the ping
+   * @return {void}
+   */
   pong(from, to, counter){
     var message = {issuer: from, receiver: to, pong: counter}
     this.sendTo(to, message)
   }
 
+  /**
+   * Use to open a safe connection with another user
+   * @private
+   * @param  {Object} q - The user with who the connection will be open
+   * @return {void}
+   */
   open(q){
     if(this.safeNeighbours.length == 0){
       this.safeNeighbours.push(q)
@@ -276,6 +331,13 @@ class Broadcast extends AbstractBroadcast {
     }
   }
 
+
+  /**
+   * Use to close a safe connection with another user
+   * @private
+   * @param  {Object} q - The user with who the connection will be close
+   * @return {void}
+   */
   close(q){
 
     if(this.safeNeighbours.length > 1){

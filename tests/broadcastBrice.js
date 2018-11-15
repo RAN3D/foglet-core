@@ -44,7 +44,7 @@ for(var l = 0; l < nbUsers; ++l ){
 }
 */
 
-//sendMessage('toto', 0, 6)
+sendMessage('toto', 0, 6)
 
 function neighbours(user, time) {
 	return new Promise((resolve, reject) =>{
