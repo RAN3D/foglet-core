@@ -108,14 +108,18 @@ class Broadcast extends AbstractBroadcast {
    */
   send (id, message) {
     if(message == 'neighbours'){
+      //print process and his safeNeighbours
       console.log(id + ' neighbours  : ' + this.safeNeighbours)
     }else{
+      //print the message we will send
       console.log('i send my beautiful message: ', id, message)
       var newMessage = {counter: this.causalCounter, message: message, issuer: id}
       this.causalCounter++
 
+      //Search if the message we will send was already saw
       var index = this.received.findIndex(map => map[0] === id)
 
+      //If we never saw this message we add him
       if(index == -1){
         this.received.push([id, 0])
         index = this.received.findIndex(map => map[0] === id)
@@ -141,17 +145,20 @@ class Broadcast extends AbstractBroadcast {
   _receive (id, message) {
     this.emit('receive', id, message)
 
+    // if the message recieve is a ping and not a typical message
     if(message.ping != undefined){
 
       var index = this.options.id.search('-I') +2
       var thisId = this.options.id.substring(0, index)
 
+      //Search if we already saw a ping from the issuer
       var index = this.receivedPing.findIndex(user => user[0] === message.issuer)
       if(index == -1){
         this.receivedPing.push([message.issuer, 0])
         index = this.receivedPing.findIndex(user => user[0] === message.issuer)
       }
 
+      // Current ping is more recent than the one we saw
       if(message.ping > this.receivedPing[index][1]){
         this.receivedPing[index].splice(1, 1, message.ping)
         
@@ -162,9 +169,11 @@ class Broadcast extends AbstractBroadcast {
         }
       }
 
+      //if it's a pong and not a typical message
     }else if(message.pong != undefined){
       this.receivePong(message.issuer, message.receiver, message.pong)
     }else{
+
       console.log(this.options.id + ' : ' + id + ' send me this : ' + message.message + ' from ' + message.issuer)
 
       var index = this.received.findIndex(map => map[0] === message.issuer)
@@ -174,6 +183,7 @@ class Broadcast extends AbstractBroadcast {
         index = this.received.findIndex(map => map[0] === message.issuer)
       }
 
+      //Check the message's counter and compare to the one we have (causal ?)
       if (message.counter - this.received[index][1] == 1){
         this.received[index].splice(1, 1, message.counter)
         this._sendAll(message)
