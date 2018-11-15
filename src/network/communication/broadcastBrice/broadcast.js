@@ -112,7 +112,29 @@ class Broadcast extends AbstractBroadcast {
       //print process and his safeNeighbours
       console.log(id + ' neighbours  : ' + this.safeNeighbours)
     // Use to send a real message to antoher user
-    }else{
+  }else if(message == 'differe'){
+    //print the message we will send
+    console.log('i send my beautiful message: ', id, message)
+    // We modify the message to add the causal counter and the id of the issuer in it
+    var newMessage = {counter: this.causalCounter, message: message, issuer: id}
+    this.causalCounter++
+
+    //Search if the message we will send was already saw
+    var index = this.received.findIndex(map => map[0] === id)
+
+    //If we never receive a message from this user we had it to our array
+    if(index == -1){
+      this.received.push([id, 0])
+      index = this.received.findIndex(map => map[0] === id)
+    }
+
+    // We update the causal counter
+    this.received[index].splice(1, 1, this.causalCounter)
+
+    setTimeout(() =>{
+      this.PC_broadcast(newMessage)
+    }, 5000)
+  }else{
       //print the message we will send
       console.log('i send my beautiful message: ', id, message)
       // We modify the message to add the causal counter and the id of the issuer in it
@@ -180,49 +202,49 @@ class Broadcast extends AbstractBroadcast {
           this._sendAll(message)
         }
       }
-
       // If it's a pong and not a typical message
     }else if(message.pong != undefined){
       this.receivePong(message.issuer, message.receiver, message.pong)
     // Else it's a normal message
     }else{
 
-      console.log(this.options.id + ' : ' + id + ' send me this : ' + message.message + ' from ' + message.issuer)
+      console.log(this.options.id + ' : ' + id + ' send me this : ' + message.message + ' from ' + message.issuer + ' causal counter : ' + message.counter)
 
-      var index = this.received.findIndex(map => map[0] === message.issuer)
+      var indexI = this.received.findIndex(map => map[0] === message.issuer)
 
-      if(index == -1){
+      if(indexI == -1){
         this.received.push([message.issuer, 0])
-        index = this.received.findIndex(map => map[0] === message.issuer)
+        indexI = this.received.findIndex(map => map[0] === message.issuer)
       }
 
       // If this message is received in the causal order we deliver it to our safe neighbours
-      if (message.counter - this.received[index][1] == 1){
-        this.received[index].splice(1, 1, message.counter)
+      if (message.counter - this.received[indexI][1] == 1){
+        this.received[indexI].splice(1, 1, message.counter)
         this._sendAll(message)
         this.R_deliver(message)
       // Else we put it in a buffer
-      } else {
-        this.cBuffer.addMessage(id, message)
+      } else if((message.counter - this.received[indexI][1]) > 1){
+        this.cBuffer.addMessage(message.issuer, message)
       }
 
-      index = this.cBuffer.findIndex(id)
+      var indexB = this.cBuffer.findIndex(message.issuer)
+
       // If there is messages in the buffer we check them and deliver them if they are in the order of our causal order
-      if(index != -1 && this.cBuffer[index].length > 1){
+      if(indexB != -1 && this.cBuffer.length(indexB) > 1){
         var again = false
         do{
           again = false
-          for(var i = 1; i < this.cBuffer[index].length; ++i){
-            if (this.cBuffer[index][i].counter - this.received[index][1] == 1){
-              this.received[index].splice(1, 1, this.cBuffer[index][i].counter)
-              this._sendAll(message)
-              this.R_deliver(message)
+          for(var i = 1; i < this.cBuffer.length(indexB); i++){
+            if (this.cBuffer.getMessage(indexB, i).counter - this.received[indexI][1] == 1){
+              this.received[indexI].splice(1, 1, this.cBuffer.getMessage(indexB, i).counter)
+              this._sendAll(this.cBuffer.getMessage(indexB, i))
+              this.R_deliver(this.cBuffer.getMessage(indexB, i))
               again = true
             }
           }
         }while(again)
 
-        if(this.cBuffer[index].length == 0){this.cBuffer.removeUser(id)}
+        if(this.cBuffer.length(indexB) == 0){this.cBuffer.removeUser(id)}
       }
     }
   }

@@ -43,8 +43,16 @@ for(var l = 0; l < nbUsers; ++l ){
 	sendMessage('toto' + l, l, 6)
 }
 */
+setTimeout(() => {
+		users[0].overlay().communication.sendBroadcastBrice('differe', users[0].id)
+		users[0].overlay().communication.sendBroadcastBrice('tata', users[0].id)
+}, 6000)
 
-sendMessage('toto', 0, 6)
+
+setTimeout(() => {
+		users[0].overlay().communication.sendBroadcastBrice('differe2', users[0].id)
+}, 15000)
+//sendMessage('toto', 0, 6)
 
 function neighbours(user, time) {
 	return new Promise((resolve, reject) =>{

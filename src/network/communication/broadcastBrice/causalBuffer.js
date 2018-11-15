@@ -18,11 +18,14 @@ class causalBuffer{
 	addMessage(id, message){
 		var index = this.buffer.findIndex(map => map[0] === id)
 		if(index != -1){
-			this.buffer[index].push(message)
+			if(this.buffer[index].findIndex(m => m === message) == -1){
+				this.buffer[index].push(message)
+			}
 		} else {
 			this.buffer.push([id, message])
 		}
-		this.sort(id)
+		// NOT WORKING
+		//this.sort(id)
 	}
 
 	removeMessage(id, message){
@@ -33,7 +36,8 @@ class causalBuffer{
 				this.buffer[indexI].splice(indexM, 1)
 			}
 		}
-		this.sort(id)
+		// NOT WORKING EITHER
+		//this.sort(id)
 	}
 
 	sort(id){
@@ -50,8 +54,24 @@ class causalBuffer{
 		}
 	}
 
+	getUser(indexUser){
+		return this.buffer[indexUser][0]
+	}
+
+	getMessage(indexUser, indexMessage){
+		return this.buffer[indexUser][indexMessage]
+	}
+
 	findIndex(id){
 		return this.buffer.findIndex(map => map[0] === id)
+	}
+
+	length(){
+		return this.buffer.length
+	}
+
+	length(index){
+		return this.buffer[index].length
 	}
 }
 
