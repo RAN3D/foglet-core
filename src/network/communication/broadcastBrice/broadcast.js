@@ -57,7 +57,7 @@ class Broadcast extends AbstractBroadcast {
       // Connexions inview et outview donc ne récupérer que les outview
       this._source.rps.on('close', (id) => {
         console.log('[%s] close', this.options.id, id)
-        this.close(id)
+        this.closeConnection(id)
       })
 
       // the id is your id, base on the .PEER id in the RPS options
@@ -66,15 +66,19 @@ class Broadcast extends AbstractBroadcast {
       this.received = []                          // map of messages received
       this.safeNeighbours = []                    // Q
       this.mBuffer = new messagesBuffer()         // B
-      this.messagesId = []                        // I
+      this.pingPongCounter = []                   // I Use to check the pong id (counter) with the buffer id (counter)
       this.nbRetries = []                         // R
       this.pingCounter = 1                        // counter
       this.causalCounter = 1
       this.cBuffer = new causalBuffer()
       this.receivedPing = []
 
-      this.maxSize = Number.MAX_SAFE_INTEGER
-      this.maxRetry = Number.MAX_SAFE_INTEGER
+      this.timeout = 120 * 1000                   // The timer use for the timeout function
+
+      // Number of messages in the buffer when trying to make a new safe connection
+      this.maxSize = 2
+      // Number of retry when trying to make a new safe connection
+      this.maxRetry = 3
     } else {
       return new Error('Not enough parameters', 'fbroadcast.js')
     }
@@ -106,35 +110,60 @@ class Broadcast extends AbstractBroadcast {
    * @param  {Object} [isReady] {e: <stringId>, c: <Integer>} this uniquely represents the id of the operation that we must wait before delivering the message
    * @return {boolean}
    */
-  send (id, message) {
+   send (id, message) {
+
+    //Following conditions are only use for tests and debug
     // This is just use to show the neighbours of an user
     if(message == 'neighbours'){
       //print process and his safeNeighbours
       console.log(id + ' neighbours  : ' + this.safeNeighbours)
     // Use to send a real message to antoher user
-  }else if(message == 'differe'){
-    //print the message we will send
-    console.log('i send my beautiful message: ', id, message)
-    // We modify the message to add the causal counter and the id of the issuer in it
-    var newMessage = {counter: this.causalCounter, message: message, issuer: id}
-    this.causalCounter++
+    }else if(message.message == 'differe'){
+      //print the message we will send
 
-    //Search if the message we will send was already saw
-    var index = this.received.findIndex(map => map[0] === id)
+      // We modify the message to add the causal counter and the id of the issuer in it
+      var newMessage = {counter: this.causalCounter, message: message, issuer: id}
+      this.causalCounter++
 
-    //If we never receive a message from this user we had it to our array
-    if(index == -1){
-      this.received.push([id, 0])
-      index = this.received.findIndex(map => map[0] === id)
-    }
+      //Search if the message we will send was already saw
+      var index = this.received.findIndex(map => map[0] === id)
 
-    // We update the causal counter
-    this.received[index].splice(1, 1, this.causalCounter)
+      //If we never receive a message from this user we had it to our array
+      if(index == -1){
+        this.received.push([id, 0])
+        index = this.received.findIndex(map => map[0] === id)
+      }
 
-    setTimeout(() =>{
-      this.PC_broadcast(newMessage)
-    }, 5000)
-  }else{
+      // We update the causal counter
+      this.received[index].splice(1, 1, this.causalCounter)
+
+      setTimeout(() =>{
+        console.log('i send my beautiful message: ', id, message)
+        this.PC_broadcast(newMessage)
+      }, message.time)
+
+    }else if(message.message == 'open'){
+      console.log("open connection on our own because cyclon is strange : " + this.options.id + " with " + message.id)
+      this.open(message.id + '-I')
+
+    }else if(message.message == 'open with time'){
+      console.log("open connection on our own because cyclon is strange : " + this.options.id + " with " + message.id + ' but with delay')
+      this.openTime(message.id + '-I')
+
+    }else if(message.message == 'disconnect'){
+      this.closeConnection(message.id + '-I')
+
+    }else if(message.message == 'disconnect all'){
+      this.safeNeighbours.splice(0, this.safeNeighbours.length)
+
+    }else if(message.message == 'buffer'){
+      console.log(this.mBuffer)
+
+    }else if(message.message == 'clear'){
+      this.mBuffer.clear()
+
+    // Use to send a real message to antoher user aka the normal condition
+    }else{
       //print the message we will send
       console.log('i send my beautiful message: ', id, message)
       // We modify the message to add the causal counter and the id of the issuer in it
@@ -182,7 +211,7 @@ class Broadcast extends AbstractBroadcast {
     // if the message recieve is a ping and not a typical message
     if(message.ping != undefined){
 
-      var index = this.options.id.search('-I') +2
+      var index = this.options.id.search('-I') + 2
       var thisId = this.options.id.substring(0, index)
 
       //Search if we already saw a ping from the issuer
@@ -196,7 +225,15 @@ class Broadcast extends AbstractBroadcast {
         this.receivedPing[index].splice(1, 1, message.ping)
         // If the ping is destinated to the current user we use the fonction receivePing
         if(message.receiver == thisId){
-          this.receivePing(message.issuer, message.receiver, message.ping)
+
+          // Use this for test
+          if(message.message == 'wait'){
+            this.receivePingTime(message.issuer, message.receiver, message.ping)
+
+          // Normal behavior
+          }else{
+            this.receivePing(message.issuer, message.receiver, message.ping)
+          }
         // Else we send it to all of our safe neighbours
         } else{
           this._sendAll(message)
@@ -219,9 +256,18 @@ class Broadcast extends AbstractBroadcast {
 
       // If this message is received in the causal order we deliver it to our safe neighbours
       if (message.counter - this.received[indexI][1] == 1){
-        this.received[indexI].splice(1, 1, message.counter)
-        this._sendAll(message)
-        this.R_deliver(message)
+        //This is used for test
+        if(message.message.wait != undefined){
+          this.received[indexI].splice(1, 1, message.counter)
+          this._sendAll(message)
+          this.R_deliverTime(message)
+
+        // This is the normal behavior
+        }else{
+          this.received[indexI].splice(1, 1, message.counter)
+          this._sendAll(message)
+          this.R_deliver(message)
+        }
       // Else we put it in a buffer
       } else if((message.counter - this.received[indexI][1]) > 1){
         this.cBuffer.addMessage(message.issuer, message)
@@ -259,24 +305,18 @@ class Broadcast extends AbstractBroadcast {
   }
 
   R_deliver(message){
-    this.mBuffer.addMessage(message)
+    this.mBuffer.addMessageAll(message)
     this.PC_deliver(message)
   }
 
   PC_deliver(message){
-    for(var i = 0; i < this.mBuffer.length; ++i){
-      if(this.mBuffer.length(i) > maxSize){
+    for(var i = 0; i < this.mBuffer.getLength(); ++i){
+      if(this.mBuffer.getLengthIndex(i) - 1 > this.maxSize){
         this.retry(this.mBuffer.getUser(i))
       }
     }
   }
 
-  receiveAck(from, to, id){
-    var index = this.messagesId.findIndex(message => message[0] === id)
-    this.messagesId.splice(index, 1)
-    var index = this.nbRetries.findIndex(user => user[0] === to)
-    this.nbRetries.splice(index, 1)
-  }
 
   /**
   * Use to notify the user when he receive a ping
@@ -293,20 +333,40 @@ class Broadcast extends AbstractBroadcast {
   /**
   * Use to notify the user when he receive a pong
   * @private
-  * @param  {Object} from - The user who sent the ping
-  * @param  {Object} to - The user who's receiving the ping
-  * @param  {int} counter - The counter of the ping
+  * @param  {Object} from - The user who sent the pong
+  * @param  {Object} to - The user who's receiving the pong
+  * @param  {int} counter - The counter of the pong
   * @return {void}
   */
   receivePong(from, to, counter){
-    var index = this.mBuffer.findIndex(from)
-    if(index != -1){
-      for(var i = 1; i < this.mBuffer.length(index); ++i){
-        this.sendTo(to, this.mBuffer.getMessage(index, i))
+    var isGood = false;
+
+    for(var i = 0; i < this.pingPongCounter.length; ++i){
+      if(this.pingPongCounter[i][1] == from){
+        if(counter == this.pingPongCounter[i][0]){
+          isGood = true
+          break
+        }
+      }
+    }
+
+    if(isGood){
+      this.safeNeighbours.push(from)
+
+      var index = this.mBuffer.findIndex(from)
+
+      if(index != -1){
+        for(var i = 1; i < this.mBuffer.getLengthIndex(index); ++i){
+          this.sendTo(from, this.mBuffer.getMessage(index, i))
+        }
+        this.mBuffer.removeUser(from)
       }
 
-      this.mBuffer.removeUser(from)
-      this.safeNeighbours.push(from)
+      var index = this.pingPongCounter.findIndex(message => message[0] === counter)
+      this.pingPongCounter.splice(index, 1)
+
+      var index = this.nbRetries.findIndex(user => user[0] === to)
+      this.nbRetries.splice(index, 1)
     }
   }
 
@@ -323,8 +383,8 @@ class Broadcast extends AbstractBroadcast {
     if (result == -1){
       this.nbRetries.push([to, 0])
     }
-    var index = this.messagesId.findIndex(message => message[0] === counter)
-    this.messagesId.push([counter, to])
+
+    this.pingPongCounter.push([counter, to])
     var message = {issuer: from, receiver: to, ping: counter}
 
     this._sendAll(message)
@@ -363,7 +423,7 @@ class Broadcast extends AbstractBroadcast {
 
 
   /**
-   * Use to close a safe connection with another user
+   * Use to clean the arrays when the safe connection has failed
    * @private
    * @param  {Object} q - The user with who the connection will be close
    * @return {void}
@@ -373,15 +433,26 @@ class Broadcast extends AbstractBroadcast {
     if(this.safeNeighbours.length > 1){
       this.mBuffer.removeUser(q)
 
-      for(var i = 0; i < this.messagesId.length; ++i){
-        if(this.messagesId[i][1] === q){
-          this.messagesId.splice(i, 1)
+      for(var i = 0; i < this.pingPongCounter.length; ++i){
+        if(this.pingPongCounter[i][1] === q){
+          this.pingPongCounter.splice(i, 1)
         }
       }
       var index = this.nbRetries.findIndex(user => user[0] === q)
       if(index != -1){
         this.nbRetries.splice(index, 1)
       }
+    }
+  }
+
+  /**
+   * Use to close a safe connection with another user
+   * @private
+   * @param  {Object} q - The user with who the connection will be close
+   * @return {void}
+   */
+  closeConnection(q){
+    if(this.safeNeighbours.length > 1){
       var index = this.safeNeighbours.findIndex(user => user === q)
       if(index != -1){
         this.safeNeighbours.splice(index, 1)
@@ -390,11 +461,12 @@ class Broadcast extends AbstractBroadcast {
   }
 
   retry(q){
-    for(var i = 0; i < this.messagesId.length; ++i){
-      if(this.messagesId[i][1] === q){
-        this.messagesId.splice(i, 1)
+    for(var i = 0; i < this.pingPongCounter.length; ++i){
+      if(this.pingPongCounter[i][1] === q){
+        this.pingPongCounter.splice(i, 1)
       }
     }
+
     var index = this.nbRetries.findIndex(user => user[0] === q)
     if(index != -1){
       this.nbRetries[index].splice(1, 1, this.nbRetries[index][1] + 1)
@@ -406,10 +478,91 @@ class Broadcast extends AbstractBroadcast {
     }
   }
 
-  timeout(from, to, id){
-    var index = this.messagesId.findIndex(message => message[0] === id)
+  /**
+   * Use to retry to send a ping to make a safe connection
+   * @private
+   * @param  {Object} from - The user who's sending the ping
+   * @param  {Object} to - The user who will receive the ping
+   * @param  {int} counter - The counter of the ping
+   * @return {void}
+   */
+  timeout(from, to, counter){
+    var index = this.pingPongCounter.findIndex(message => message[0] === counter)
     if(index != -1){
       this.retry(to)
+    }
+  }
+
+  //******************************* Testing functions *******************************//
+
+  openTime(q){
+    if(this.safeNeighbours.length == 0){
+      this.safeNeighbours.push(q)
+    } else if (this.safeNeighbours.findIndex(user => user === q) == -1) {
+      this.pingCounter = this.pingCounter + 1
+      this.mBuffer.addUser(q)
+      var index = this.options.id.search('-I') +2
+      var thisId = this.options.id.substring(0, index)
+      this.pingTime(thisId, q, this.pingCounter)
+    }
+  }
+
+  // Use for testing
+  pingTime(from, to, counter){
+    var result = this.nbRetries.findIndex(user => user[0] === to)
+    if (result == -1){
+      this.nbRetries.push([to, 0])
+    }
+
+    this.pingPongCounter.push([counter, to])
+    var message = {issuer: from, receiver: to, ping: counter, message : 'wait'}
+
+    this._sendAll(message)
+  }
+
+  receivePingTime(from, to, counter){
+    setTimeout(() => {
+      this.pong(to, from, counter)
+    }, 6 * 1000)
+  }
+
+  PC_broadcastTime(message){
+      this.R_broadcastTime(message)
+  }
+
+  R_broadcastTime(message){
+    this._sendAll(message)
+    this.R_deliverTime(message)
+  }
+
+  R_deliverTime(message){
+    this.mBuffer.addMessageAll(message)
+    this.PC_deliverTime(message)
+  }
+
+  PC_deliverTime(message){
+    for(var i = 0; i < this.mBuffer.getLength(); ++i){
+      if(this.mBuffer.getLengthIndex(i) - 1 > this.maxSize){
+        this.retryTime(this.mBuffer.getUser(i))
+      }
+    }
+  }
+
+  retryTime(q){
+    for(var i = 0; i < this.pingPongCounter.length; ++i){
+      if(this.pingPongCounter[i][1] === q){
+        this.pingPongCounter.splice(i, 1)
+      }
+    }
+
+    var index = this.nbRetries.findIndex(user => user[0] === q)
+    if(index != -1){
+      this.nbRetries[index].splice(1, 1, this.nbRetries[index][1] + 1)
+      if(this.nbRetries[index][1] <= this.maxRetry){
+        this.openTime(q)
+      }else{
+        this.close(q)
+      }
     }
   }
 }

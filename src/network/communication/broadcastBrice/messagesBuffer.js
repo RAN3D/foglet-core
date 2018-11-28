@@ -26,7 +26,7 @@ class messagesBuffer{
 		}
 	}
 
-	addMessage(message){
+	addMessageAll(message){
 		for(var i = 0; i < this.buffer.length; ++i){
 			this.buffer[i].push(message)
 		}
@@ -54,12 +54,20 @@ class messagesBuffer{
 		return this.buffer.findIndex(map => map[0] === id)
 	}
 
-	length(){
+	getLength(){
 		return this.buffer.length
 	}
 
-	length(index){
-		return this.buffer[index].length
+	getLengthIndex(index){
+		if(this.buffer[index] != undefined){
+			return this.buffer[index].length
+		} else {
+			return -1
+		}
+	}
+
+	clear(){
+		this.buffer = []
 	}
 
 

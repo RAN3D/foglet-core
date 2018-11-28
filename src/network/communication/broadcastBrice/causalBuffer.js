@@ -25,7 +25,7 @@ class causalBuffer{
 			this.buffer.push([id, message])
 		}
 		// NOT WORKING
-		//this.sort(id)
+		this.sort(id)
 	}
 
 	removeMessage(id, message){
@@ -37,7 +37,7 @@ class causalBuffer{
 			}
 		}
 		// NOT WORKING EITHER
-		//this.sort(id)
+		this.sort(id)
 	}
 
 	sort(id){
@@ -45,12 +45,12 @@ class causalBuffer{
 		if(index != -1){
 			var tmp = this.buffer[index][0]
 			this.buffer[index].splice(0,1)
-			this.buffer.sort(function(a,b){
+			this.buffer[index].sort(function(a,b){
 				return a.counter - b.counter
 			})
-			this.buffer.reverse()
-			this.buffer.push(tmp)
-			this.buffer.reverse()
+			this.buffer[index].reverse()
+			this.buffer[index].push(tmp)
+			this.buffer[index].reverse()
 		}
 	}
 
