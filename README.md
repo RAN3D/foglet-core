@@ -1,3 +1,6 @@
+**DONT USE THIS VERSION**
+
+
 Foglet-core
 ===========
 
