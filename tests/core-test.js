@@ -1,5 +1,7 @@
 const assert = require('assert')
 const Core = require('../lib/').core
+console.log(Core)
+
 describe('Core', function () {
   this.timeout(5000)
   it('return the version of the package.json', () => {

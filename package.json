@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "scripts": {
     "signaling": "node ./tests/signaling-server/api.js",
-    "test": "npm run mocha",
+    "test": "mocha tests/*-test.js !tests/signaling-test.js --exit -- --no-warnings",
     "lint": "standard --verbose \"./lib/**/*.js\" \"./tests/**/*.js\" | snazzy",
     "fix": "standard --fix --verbose \"./lib/**/*.js\" \"./tests/**/*.js\" | snazzy",
     "build:dev": "webpack --watch --mode development --config ./configs/webpack-config.js",
@@ -14,7 +14,6 @@
     "doc:build": "docma -c configs/docma.json",
     "doc:dev": "docma -c configs/docma-local.json",
     "doc:serve": "docma serve ./docs",
-    "mocha": "mocha tests/**/*-test.js --exit -- --no-warnings",
     "all": "npm run build:debug && npm run build:prod && npm run doc:build && npm test"
   },
   "repository": {
@@ -37,10 +36,13 @@
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "dependencies": {
     "debug": "^4.1.0",
+    "esm": "^3.0.84",
     "lodash.merge": "^4.6.1",
     "n2n-wrtc": "git+https://github.com/ran3d/n2n-wrtc.git",
     "short-uuid": "^3.0.1",
-    "spray-wrtc": "git+https://github.com/ran3d/spray-wrtc.git"
+    "sorted-array-type": "^1.2.1",
+    "spray-wrtc": "git+https://github.com/ran3d/spray-wrtc.git",
+    "version-vector-with-exceptions": "^0.1.0"
   },
   "devDependencies": {
     "docma": "^2.1.0",
