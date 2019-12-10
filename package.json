@@ -1,97 +1,34 @@
 {
   "name": "foglet-core",
-  "version": "5.1.2",
+  "version": "6.0.0",
   "description": "Core of the foglet library",
   "main": "./foglet-core.js",
   "scripts": {
     "lint": "standard --verbose | snazzy",
-    "fix": "standard --fix",
-    "esdoc": "esdoc",
-    "all": "npm run build && npm run min && npm test && npm run esdoc",
-    "test": "node ./tests/test.js",
-    "test-mocha": "nyc --reporter=html --report-dir=./docs/_coverage mocha tests/*-test.js --exit --timeout 30000 --reporter mochawesome --reporter-options reportDir=./docs/_test-reporter",
-    "build": "webpack --config ./configs/foglet-webpack-config.js",
-    "min": "webpack --config ./configs/foglet-webpack-config-min.js",
-    "example": "npm run build && DEBUG=signaling node tests/examples/server.js",
-    "dev": "webpack --config ./configs/foglet-webpack-config.js --watch"
+    "fix": "standard --fix"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ran3d/foglet-core.git"
   },
   "keywords": [
+    "p2p",
     "foglet",
-    "spray-wrtc",
     "browser-to-browser",
-    "webRTC",
-    "foglet computing"
+    "webrtc",
+    "datachannel"
   ],
   "author": "Folkvir",
-  "contributors": [
-    "Chat Wane (https://github.com/Chat-Wane)",
-    "Thomas Minier (https://github.com/Callidon)"
-  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ran3d/foglet-core/issues"
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
-  "dependencies": {
-    "debug": "^3.1.0",
-    "lodash.merge": "^4.6.1",
-    "lodash.sortedindexby": "^4.6.0",
-    "media-recorder-stream": "^2.1.1",
-    "mediasource": "^2.2.1",
-    "n2n-overlay-wrtc": "^2.0.10",
-    "socket.io-client": "^2.1.1",
-    "spray-wrtc": "^2.0.11",
-    "tman-wrtc": "1.0.0",
-    "unicast-definition": "^2.0.2",
-    "uuid": "^3.3.0",
-    "version-vector-with-exceptions": "^0.1.0"
-  },
   "devDependencies": {
-    "babel-preset-env": "^1.7.0",
-    "chai": "^4.1.2",
-    "chart.js": "^2.7.2",
-    "cors": "^2.8.4",
-    "esdoc": "^1.1.0",
-    "esdoc-custom-theme": "^1.4.2",
-    "esdoc-ecmascript-proposal-plugin": "^1.0.0",
-    "esdoc-node": "^1.0.3",
-    "esdoc-publish-html-plugin": "^1.1.2",
-    "esdoc-standard-plugin": "^1.0.0",
-    "foglet-signaling-server": "^1.0.3",
-    "jquery": "^3.3.1",
-    "mocha": "^5.2.0",
-    "mochawesome": "^3.0.2",
-    "nyc": "^12.0.2",
-    "p2p-graph": "^1.2.2",
-    "snazzy": "^7.1.1",
-    "standard": "^11.0.1",
-    "twilio": "^3.17.4",
-    "uglifyjs-webpack-plugin": "^1.2.7",
-    "webpack": "^4.12.1",
-    "webpack-cli": "^3.0.8"
+    "snazzy": "^8.0.0",
+    "standard": "^14.3.1"
   },
-  "bundledDependencies": [
-    "debug",
-    "lodash.merge",
-    "lodash.sortedindexby",
-    "readable-stream",
-    "socket.io-client",
-    "spray-wrtc",
-    "tman-wrtc",
-    "unicast-definition",
-    "uuid",
-    "version-vector-with-exceptions",
-    "n2n-overlay-wrtc"
-  ],
-  "standard": {
-    "globals": [
-      "describe",
-      "it",
-      "assert"
-    ]
+  "dependencies": {
+    "uuid": "^3.3.3"
   }
 }

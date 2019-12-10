@@ -4,15 +4,5 @@ node_js: node
 script:
   - npm test
 
-after_success:
-  - bash deploy_doc.sh
-
-deploy:
-  provider: npm
-  email: folkvir@outlook.fr
-  api_key: $NPM
-  on:
-    tags: true
-    repo: RAN3D/foglet-core
 notifications:
   email: false
