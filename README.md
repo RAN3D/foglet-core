@@ -23,13 +23,9 @@ npm install --save foglet-core
 ## Usage
 
 ```js
-const Core = require('foglet-core')
-const a = new Core({
-  id: 'peer:a'
-})
-const b = new Core({
-  id: 'peer:b'
-})
+const { Core } = require('foglet-core')
+const a = new Core('peer:b')
+const b = new Core('peer:b')
 
 async function main () {
   await a.connect(b.id)
