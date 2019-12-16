@@ -22,7 +22,7 @@ for (let i = 0; i < max; i++) {
 
 async function main () {
   return peers.reduce((acc, cur) => acc.then(async () => {
-    console.log('connecting: ', cur.id, cur)
+    console.log('connecting: ', cur.id)
     return cur.join()
   }), Promise.resolve())
 }
