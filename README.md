@@ -17,7 +17,15 @@ For details see (todo: github wiki)
 ## Installation
 
 ```bash
-npm install --save foglet-core
+yarn add foglet-core
+```
+or 
+```bash
+git clone https://github.com/folkvir/foglet-core.git
+cd foglet-core/
+yarn install
+# if you are a user of npm do: 
+npm install -g yarn && yarn install
 ```
 
 ## Usage
@@ -48,16 +56,3 @@ main().then(() => {
   process.exit(1)
 })
 ```
-
-## Main composition of `foglet-core`
-
-## Library Todo list
-- [x] Peers' interface
-- [x] Peers' Manager interface
-- [ ] Networks' interface
-- [ ] Networks' Manager interface
-- [ ] Module interface
--
-
-## Documentation todo list
-- [ ] at the end, do the documentation using the github wiki
