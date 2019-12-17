@@ -5,7 +5,8 @@
   "main": "./foglet-core.js",
   "scripts": {
     "lint": "standard --verbose | snazzy",
-    "fix": "standard --fix"
+    "fix": "standard --fix",
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -25,10 +26,17 @@
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "devDependencies": {
+    "ava": "^2.4.0",
     "snazzy": "^8.0.0",
     "standard": "*"
   },
   "dependencies": {
     "uuid": "^3.3.3"
+  },
+  "ava": {
+    "files": [
+      "tests/*-test.js"
+    ],
+    "verbose": true
   }
 }
