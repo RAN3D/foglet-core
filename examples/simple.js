@@ -15,7 +15,7 @@ function createPeer (id) {
   return peer
 }
 
-const max = 50
+const max = 100
 for (let i = 0; i < max; i++) {
   createPeer('peer:' + i)
 }
