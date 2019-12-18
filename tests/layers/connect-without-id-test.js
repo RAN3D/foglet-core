@@ -1,7 +1,8 @@
+/* eslint no-unused-vars: off */
 import test from 'ava'
 const { LocalLayer } = require('../../foglet-core').Layers
 const { Options, Peer } = require('../../foglet-core')
-test('(LocalLayer) connect', async t => {
+test('(LocalLayer) connections without id specified (first connections for 3 peers)', async t => {
   function createLayer (id) {
     const options = Options()
     const peer = new Peer(id, options)
