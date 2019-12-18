@@ -1,4 +1,6 @@
 module.exports = {
+  Options: require('./lib/options'),
+  Peer: require('./lib/peer'),
   Core: require('./lib/core'),
   Networks: require('./lib/networks'),
   Manager: require('./lib/manager'),
