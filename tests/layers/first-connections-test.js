@@ -12,10 +12,10 @@ test('(LocalLayer) connections without id specified (first connections for 3 pee
   const b = createLayer('B')
   const c = createLayer('C')
 
-  const peer = await a.connect()
+  const peer = await a.join()
   t.assert(peer === undefined)
-  const peer2 = await b.connect()
+  const peer2 = await b.join()
   t.assert(peer2 === 'A')
-  const peer3 = await c.connect()
+  const peer3 = await c.join()
   t.assert([a.id, b.id].includes(peer3))
 })

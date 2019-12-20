@@ -16,7 +16,7 @@ test('(full-connected x2) all peers should have 99 neighbours on both networks',
     return peer
   }
 
-  const max = 4
+  const max = 2
   for (let i = 0; i < max; i++) {
     createPeer('peer:' + i)
   }
