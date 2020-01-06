@@ -31,7 +31,8 @@ test('(full-connected x2) all peers should have 99 neighbours on both networks',
   return main().then(async () => {
     return new Promise((resolve, reject) => {
       peers.forEach(peer => {
-        console.log('%s', peer.id, peer.manager.view.get())
+        console.log('manager-view:%s', peer.id, peer.manager.view.get())
+        console.log('network-view:%s', peer.id, peer.manager.networks[0].view.visit())
         // t.assert(peer.manager.view.get().length === max - 1)
         // peer.manager.view.get().forEach(entry => {
         //   t.assert(entry[1].length === 1)

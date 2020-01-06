@@ -11,6 +11,7 @@ install:
   - npm --version
   # install modules
   - npm install -g yarn
+  - yarn --version
   - yarn install
 
 test_script:

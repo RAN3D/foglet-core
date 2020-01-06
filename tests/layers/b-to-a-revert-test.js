@@ -13,12 +13,12 @@ test('(LocalLayer) A => B then B to A', async t => {
   const protocol = 'test-2'
   // first create B
   const b = createLayer('B', protocol)
-  const peer = await b.join()
+  const peer = await b.connect()
   t.assert(peer === undefined)
 
   // A to B
   const a = createLayer('A', protocol)
-  const peer2 = await a.join(undefined, { by: 'B' })
+  const peer2 = await a.connect(undefined, { by: 'B' })
   t.assert(peer2 === 'B')
   t.assert(a.has('B'))
 
@@ -31,7 +31,7 @@ test('(LocalLayer) A => B then B to A', async t => {
         resolve()
       }
     })
-    a.join('B', { by: 'B' }).then((p) => {
+    a.connect('B', { by: 'B' }).then((p) => {
       t.assert(p === undefined)
       t.assert(b.has('A'))
       resolved[1] = true
