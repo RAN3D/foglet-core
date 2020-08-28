@@ -1,4 +1,4 @@
-import test from 'ava'
+const test = require('ava')
 const { Core } = require('../../foglet-core')
 const { FullConnected } = require('../../foglet-core').Networks
 const { LocalLayer } = require('../../foglet-core').Layers

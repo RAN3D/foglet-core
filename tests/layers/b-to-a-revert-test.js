@@ -1,5 +1,5 @@
 /* eslint no-unused-vars: off */
-import test from 'ava'
+const test = require('ava')
 const { LocalLayer } = require('../../foglet-core').Layers
 const { Options, Peer } = require('../../foglet-core')
 

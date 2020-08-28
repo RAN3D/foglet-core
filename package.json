@@ -26,12 +26,12 @@
   },
   "homepage": "https://github.com/ran3d/foglet-core#readme",
   "devDependencies": {
-    "ava": "^2.4.0",
+    "ava": "^3.12.1",
     "snazzy": "^8.0.0",
     "standard": "*"
   },
   "dependencies": {
-    "uuid": "^3.3.3"
+    "uuid": "^8.3.0"
   },
   "ava": {
     "files": [
