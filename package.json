@@ -35,7 +35,8 @@
   },
   "ava": {
     "files": [
-      "tests/layers/*-test.js"
+      "tests/layers/*-test.js",
+      "tests/networks/*-test.js"
     ],
     "verbose": true
   }
