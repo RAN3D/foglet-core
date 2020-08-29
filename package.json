@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "standard --verbose | snazzy",
     "fix": "standard --fix",
-    "test": "yarn test:layers",
+    "test": "ava",
     "test:layers": "ava tests/layers/*-test.js",
     "test:networks": "ava tests/networks/*-test.js"
   },
